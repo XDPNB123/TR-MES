@@ -14,9 +14,11 @@ const { captchaCountDown, captchaDisable, setCountDown } =
   useCaptchaCountDown();
 
 // 页面渲染完成时，获取 Cookie，填充登陆输入框
-onMounted(function () {
-  tel.value = useCookie("tel").value?.toString() as string;
-  password.value = useCookie("password")?.value as string;
+// useCookie 会自动转换类型，如果 cookie 中储存的是数字，那么 useCookie.value 获取的值也是数字类型，需要手动转换成字符串类型
+
+onMounted(async function () {
+  tel.value = useCookie("tel").value?.toString();
+  password.value = useCookie("password").value?.toString();
 });
 
 // 正在选择的登陆 tab
@@ -54,9 +56,9 @@ const telRule = ref<any[]>([
 
 // 密码校验规则
 const passwordRule = ref<any[]>([
-  (v: any) => !!v || "密码不能为空",
-  (v: any) => /^[a-zA-Z0-9]*$/.test(v) || "密码只能包含数字和字母",
-  (v: any) => (v && v.length <= 20) || "密码长度不能超过20位",
+  (v) => !!v || "密码不能为空",
+  (v) => /^[a-zA-Z0-9]*$/.test(v) || "密码只能包含数字和字母",
+  (v) => (v && v.length <= 20) || "密码长度不能超过20位",
 ]);
 
 // 密码登陆
@@ -103,7 +105,7 @@ async function getCaptcha() {
     return setSnackbar("black", "请确认手机号无误，再点击获取验证码");
 
   // 验证码倒计时
-  setCountDown(3000);
+  setCountDown(300);
 
   // 发送获取验证码请求
   const data: any = await useHttp("/Account/A02GenerateSMSCode", "post", {

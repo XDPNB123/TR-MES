@@ -1,8 +1,10 @@
 // 注意：如果函数使用 default 导出，则使用文件名来调用默认导出的函数；如果函数没有使用 default 导出，则可以直接使用【函数名】调用函数
 export default async function useHttp(
   api: string,
+  // 参数可选，如果不传递，则为 undefined
   requestMethod?: any,
-  requestBody?: any
+  requestBody?: any,
+  requestParams?: any
 ) {
   // 获取基本请求地址
   const baseUrl = useRuntimeConfig().public.apiBase;
@@ -10,10 +12,13 @@ export default async function useHttp(
   const token = useCookie("token");
   // 响应的的结果
   let result: any = null;
+
   // 发送请求
-  await useFetch(baseUrl + api, {
-    method: requestMethod ?? "POST",
+  // 由于 useFetch 必须使用在 setup 环境中，所以改用 $fetch
+  await $fetch(baseUrl + api, {
+    method: requestMethod,
     body: requestBody,
+    params: requestParams,
     headers: {
       Authorization: token.value ? `Bearer ${token.value}` : "",
     },
