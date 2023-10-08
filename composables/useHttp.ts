@@ -14,7 +14,7 @@ export default async function useHttp(
   let result: any = null;
 
   // 发送请求
-  await useFetch(baseUrl + api, {
+  await $fetch(baseUrl + api, {
     method: requestMethod ?? "POST",
     body: requestBody,
     params: requestParams,
