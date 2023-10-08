@@ -77,7 +77,7 @@ function exit() {
               </template>
             </v-list-item>
 
-            <v-list-item to="changePage/auth/FAQ">
+            <v-list-item to="/auth/FAQ">
               <template #prepend>
                 <v-icon class="mr-3" size="small">
                   fa-solid fa-circle-question
@@ -201,7 +201,9 @@ function exit() {
     </v-app-bar>
 
     <v-main>
-      <slot></slot>
+      <keep-alive>
+        <slot></slot>
+      </keep-alive>
     </v-main>
   </v-app>
 </template>

@@ -1,6 +1,7 @@
 // 注意：如果函数使用 default 导出，则使用文件名来调用默认导出的函数；如果函数没有使用 default 导出，则可以直接使用【函数名】调用函数
 export default async function useHttp(
   api: string,
+  // 参数可选，如果不传递，则为 undefined
   requestMethod?: any,
   requestBody?: any,
   requestParams?: any
@@ -13,10 +14,10 @@ export default async function useHttp(
   let result: any = null;
 
   // 发送请求
-  await $fetch(baseUrl + api, {
-    method: requestMethod,
-    params: requestParams,
+  await useFetch(baseUrl + api, {
+    method: requestMethod ?? "POST",
     body: requestBody,
+    params: requestParams,
     headers: {
       Authorization: token.value ? `Bearer ${token.value}` : "",
     },
