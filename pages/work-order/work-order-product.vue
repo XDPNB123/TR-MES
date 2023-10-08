@@ -833,6 +833,7 @@ let tablePageCount = computed(() => {
 });
 
 //工序模块
+//拖拽功能
 let processDialog = ref(false);
 let chips = ref<any[]>([]);
 let droppedChips = ref<any[]>([]);
@@ -853,51 +854,65 @@ function removeChip(index: number) {
   const removedChip = droppedChips.value.splice(index, 1)[0];
   chips.value.push(removedChip);
 }
+
+let innerTableSelectData = ref<any[]>([]);
+
+// 发请求获取完整的选中的数据
+// 判断工序是否一致
+// 如果一致，则将选中的数据暂时保存
+// 打开对话框，将选中数据的工序显示左边，其他工序过滤到右边
+// 点击保存，将左侧的工序拼接后，赋值给每一个暂存的对象
+// 将对象数组作为参数调用更新接口重新获取数据
+
 //批量工序维护
 async function batchWork(workorder_hid: any) {
-  //给chips赋值
-  const data: any = await useHttp(
-    "/MesWorkProcess/M09GetProcedureData",
-    "get",
-    undefined,
-    {
-      SortedBy: null,
-      PageIndex: 1,
-      SortType: 0,
-      procedure_name: "",
-      procedure_id: "",
-      PageSize: 5,
-    }
-  );
-  chips.value = data.data;
+  //判断是否选择数据
   if (selected.value.length === 0) {
     alert("请选择需要工序维护的产料");
     return;
   }
-  //遍历selected数组的索引，根据索引去查找到对应数据
 
-  const items = await getWorkOrderDetail(workorder_hid);
-  console.log(items.value);
-  selected.value.forEach((index) => {
-    const item = items.value[index];
-    console.log(item);
-  });
-  //判断是否存在初始工序不一致
-  let isSameWorkingProcedure = selected.value.every((index, _, arr) => {
-    const item = operatingTicketDetail.value[index - 1];
-    const firstItem = operatingTicketDetail.value[arr[0] - 1];
-    return item.procedure === firstItem.procedure;
-  });
+  //获取到当前选择的数据
+  let selectedData = await getWorkOrderDetail(workorder_hid);
+  innerTableSelectData.value = selectedData.filter((item) =>
+    innerTableSelectData.value.includes(item.id)
+  );
 
-  if (isSameWorkingProcedure) {
-    let selectedProcedures = selected.value.map((index) => {
-      const item = operatingTicketDetail.value[index - 1];
-      return item.procedure;
-    });
-
+  
+  //判断选择的数据他们的工序是否一致
+  let isSameProcedure = innerTableSelectData.value.every(
+    (item, index, array) => {
+      return item.procedure === array[0].procedure;
+    }
+  );
+  if (isSameProcedure) {
+    // 所有选中的数据都有相同的工序属性
+    const data: any = await useHttp(
+      "/MesWorkProcess/M09GetProcedureData",
+      "get",
+      undefined,
+      {
+        SortedBy: "id",
+        PageIndex: 1,
+        SortType: 0,
+        procedure_name: "",
+        procedure_id: "",
+        PageSize: 5,
+      }
+    );
+    chips.value = data.data;
+    //过滤出已选工序和未选工序
+    const workorderHids = procedure.split(",");
+    droppedChips.value = chips.value.filter((chip) =>
+      workorderHids.includes(chip.procedure_name)
+    );
+    chips.value = chips.value.filter(
+      (chip) => !workorderHids.includes(chip.procedure_name)
+    );
     processDialog.value = true;
   } else {
-    alert("所选的明细存在工序不一样的，请检查重新选择");
+    alert("您选择的数据的初始工序属性并不一致，请检查后重新选择");
+    return;
   }
 }
 //工序维护
@@ -907,7 +922,7 @@ async function showProcessDialog(procedure: string) {
     "get",
     undefined,
     {
-      SortedBy: null,
+      SortedBy: "id",
       PageIndex: 1,
       SortType: 0,
       procedure_name: "",
@@ -915,7 +930,6 @@ async function showProcessDialog(procedure: string) {
       PageSize: 5,
     }
   );
-  console.log(data);
   chips.value = data.data;
   //过滤出已选工序和未选工序
   const workorderHids = procedure.split(",");
@@ -934,18 +948,24 @@ async function saveTicket() {
     alert("请你至少选择一个工序");
     return;
   }
-  operatingTicketDetail.value.procedure = droppedChips.value
-    .map((chip) => chip.procedure_name)
-    .join(",");
+  //将选择的工序数组拼接成字符串
+  innerTableSelectData.value.forEach((item) => {
+    item.procedure = droppedChips.value.join(",");
+  });
 
-  const data: any = await useHttp(
+  await useHttp(
     "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
     "put",
-    [operatingTicketDetail.value]
+    innerTableSelectData.value
   );
+
   details.value[operatingTicketDetail.value.workorder_hid] =
     await getWorkOrderDetail(operatingTicketDetail.value.workorder_hid);
   processDialog.value = false;
+
+  // operatingTicketDetail.value.procedure = droppedChips.value
+  //   .map((chip) => chip.procedure_name)
+  //   .join(",");
 }
 // 搜索过滤
 function filterTableData() {
@@ -1010,6 +1030,7 @@ async function getWorkOrder() {
   tempTableData.value = newData;
   tableData.value = newData;
 }
+//将工单数据的日期进行截取，保留年月份
 function formatDate(data: any) {
   data.forEach((item, index) => {
     item.start_date = item.start_date.substring(0, 10);
@@ -1049,6 +1070,7 @@ async function getWorkOrderDetail(workorder_hid: string) {
   );
   return formatDateDetail(data.data.pageList);
 }
+//将工单明细数据的日期进行截取，保留年月份
 function formatDateDetail(data: any) {
   data.forEach((item, index) => {
     item.estimated_delivery_date = item.estimated_delivery_date.substring(
@@ -1173,7 +1195,6 @@ function handleBlueprintClick(item: any) {
 }
 //bom清单维护
 function handleBomClick(item: any) {
-  console.log(item.BOMList); // 输出BOM清单
   router.push({ path: "/ticketDetails/bom-maintenance" });
 }
 </script>
