@@ -165,7 +165,7 @@ function exit() {
               >
               </v-list-item>
 
-              <v-list-item
+              <!-- <v-list-item
                 class="mt-1"
                 rounded="lg"
                 active-class="list-item-active"
@@ -173,7 +173,7 @@ function exit() {
                 prepend-icon="fa-solid fa-list-ol"
                 title="工单明细"
               >
-              </v-list-item>
+              </v-list-item> -->
 
               <v-list-item
                 class="mt-1"
@@ -181,7 +181,7 @@ function exit() {
                 active-class="list-item-active"
                 to="/work-order/process-maintenance"
                 prepend-icon="fa-solid fa-screwdriver-wrench"
-                title="工序维护"
+                title="常用工序"
               >
               </v-list-item>
 

@@ -2,7 +2,8 @@
 export default async function useHttp(
   api: string,
   requestMethod?: any,
-  requestBody?: any
+  requestBody?: any,
+  requestParams?: any
 ) {
   // 获取基本请求地址
   const baseUrl = useRuntimeConfig().public.apiBase;
@@ -10,9 +11,11 @@ export default async function useHttp(
   const token = useCookie("token");
   // 响应的的结果
   let result: any = null;
+
   // 发送请求
-  await useFetch(baseUrl + api, {
-    method: requestMethod ?? "POST",
+  await $fetch(baseUrl + api, {
+    method: requestMethod,
+    params: requestParams,
     body: requestBody,
     headers: {
       Authorization: token.value ? `Bearer ${token.value}` : "",

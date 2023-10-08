@@ -15,8 +15,8 @@ const { captchaCountDown, captchaDisable, setCountDown } =
 
 // 页面渲染完成时，获取 Cookie，填充登陆输入框
 onMounted(function () {
-  tel.value = useCookie("tel").value?.toString() as string;
-  password.value = useCookie("password")?.value as string;
+  tel.value = useCookie("tel").value?.toString();
+  password.value = useCookie("password").value?.toString();
 });
 
 // 正在选择的登陆 tab
@@ -62,7 +62,7 @@ const passwordRule = ref<any[]>([
 // 密码登陆
 async function passwordLogin() {
   // 表单校验不成功则直接返回
-  if (!passwordFormValid.value) return;
+  // if (!passwordFormValid.value) return;
 
   // 密码加密
   const md5Password = useMd5(password.value);
@@ -103,7 +103,7 @@ async function getCaptcha() {
     return setSnackbar("black", "请确认手机号无误，再点击获取验证码");
 
   // 验证码倒计时
-  setCountDown(3000);
+  setCountDown(300);
 
   // 发送获取验证码请求
   const data: any = await useHttp("/Account/A02GenerateSMSCode", "post", {
