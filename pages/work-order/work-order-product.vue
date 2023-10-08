@@ -874,11 +874,12 @@ async function batchWork(workorder_hid: any) {
 
   //获取到当前选择的数据
   let selectedData = await getWorkOrderDetail(workorder_hid);
+  console.log(selectedData);
   innerTableSelectData.value = selectedData.filter((item) =>
-    innerTableSelectData.value.includes(item.id)
+    selected.value.includes(item.id)
   );
 
-  
+  console.log(innerTableSelectData.value);
   //判断选择的数据他们的工序是否一致
   let isSameProcedure = innerTableSelectData.value.every(
     (item, index, array) => {
@@ -902,7 +903,7 @@ async function batchWork(workorder_hid: any) {
     );
     chips.value = data.data;
     //过滤出已选工序和未选工序
-    const workorderHids = procedure.split(",");
+    const workorderHids = innerTableSelectData.value[0].procedure.split(",");
     droppedChips.value = chips.value.filter((chip) =>
       workorderHids.includes(chip.procedure_name)
     );
@@ -948,9 +949,12 @@ async function saveTicket() {
     alert("请你至少选择一个工序");
     return;
   }
-  //将选择的工序数组拼接成字符串
+
+  // 将选择的工序数组拼接成字符串
   innerTableSelectData.value.forEach((item) => {
-    item.procedure = droppedChips.value.join(",");
+    item.procedure = droppedChips.value
+      .map((item) => item.procedure_name)
+      .join(",");
   });
 
   await useHttp(
@@ -959,13 +963,11 @@ async function saveTicket() {
     innerTableSelectData.value
   );
 
-  details.value[operatingTicketDetail.value.workorder_hid] =
-    await getWorkOrderDetail(operatingTicketDetail.value.workorder_hid);
-  processDialog.value = false;
+  console.log(innerTableSelectData.value);
+  details.value[innerTableSelectData.value[0].workorder_hid] =
+    await getWorkOrderDetail(innerTableSelectData.value[0].workorder_hid);
 
-  // operatingTicketDetail.value.procedure = droppedChips.value
-  //   .map((chip) => chip.procedure_name)
-  //   .join(",");
+  processDialog.value = false;
 }
 // 搜索过滤
 function filterTableData() {
