@@ -67,7 +67,6 @@
         <v-divider></v-divider>
         <!-- 工单表头表格 -->
         <v-data-table
-          :expanded.sync="expanded"
           v-model:page="tablePage"
           expand-on-click
           :headers="tableHeaders"
