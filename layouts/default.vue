@@ -164,17 +164,15 @@ function exit() {
                 title="生产工单"
               >
               </v-list-item>
-
-              <!-- <v-list-item
+              <v-list-item
                 class="mt-1"
                 rounded="lg"
                 active-class="list-item-active"
-                to="/work-order/work-order-detail"
+                to="/work-order/work-produce-recode"
                 prepend-icon="fa-solid fa-list-ol"
-                title="工单明细"
+                title="工单排产"
               >
-              </v-list-item> -->
-
+              </v-list-item>
               <v-list-item
                 class="mt-1"
                 rounded="lg"
