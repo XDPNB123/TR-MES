@@ -626,7 +626,7 @@
 </template>
 
 <script setup lang="ts">
-let expandedRows = ref([1]);
+let expandedRows = ref([]);
 // 用于刷新视图的 key
 let key = ref<number>(0);
 
@@ -1117,11 +1117,7 @@ function resetAddDialog() {
 }
 // 新增工单
 async function addTicket() {
-  const data: any = await useHttp(
-    "/MesWorkOrder/M02AddWorkOrder",
-    "post",
-    operatingTicket.value
-  );
+  await useHttp("/MesWorkOrder/M02AddWorkOrder", "post", operatingTicket.value);
   getWorkOrder();
   addDialog.value = false;
 }

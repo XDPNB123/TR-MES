@@ -107,10 +107,11 @@
             v-model="operateProcess.procedure_description"
             label="工序说明"
           ></v-text-field>
-          <v-text-field
-            v-model="operateProcess.defaul_outsource"
+          <v-select
             label="是否委外"
-          ></v-text-field>
+            :items="['Y', 'N']"
+            v-model="operateProcess.defaul_outsource"
+          ></v-select>
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -146,10 +147,11 @@
             v-model="operateProcess.procedure_description"
             label="工序说明"
           ></v-text-field>
-          <v-text-field
-            v-model="operateProcess.defaul_outsource"
+          <v-select
             label="是否委外"
-          ></v-text-field>
+            :items="['Y', 'N']"
+            v-model="operateProcess.defaul_outsource"
+          ></v-select>
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -270,8 +272,7 @@ let tableHeaders = ref<any[]>([
     filterable: false,
   },
 ]);
-//全部数据
-let tempTableData = ref<any[]>([]);
+
 //表格显示数据
 let tableData = ref<any[]>([]);
 // 表格有多少页
@@ -299,29 +300,31 @@ async function getWorkOrder() {
     }
   );
 
-  tempTableData.value = data.data;
   tableData.value = data.data;
 }
 // 搜索过滤
-function filterTableData() {
-  tableData.value = [...tempTableData.value];
-
-  if (searchProcessNumber)
-    tableData.value = tableData.value.filter((item) =>
-      item.procedure_id.includes(searchProcessNumber.value)
-    );
-
-  if (searchProcessName)
-    tableData.value = tableData.value.filter((item) =>
-      item.procedure_name.includes(searchProcessName.value)
-    );
+async function filterTableData() {
+  const data: any = await useHttp(
+    "/MesWorkProcess/M09GetProcedureData",
+    "get",
+    undefined,
+    {
+      SortedBy: "id",
+      PageIndex: 1,
+      SortType: 0,
+      procedure_name: searchProcessName.value,
+      procedure_id: searchProcessNumber.value,
+      PageSize: 20,
+    }
+  );
+  tableData.value = data.data;
 }
 
 // 重置搜索
 function resetFilter() {
   searchProcessName.value = "";
   searchProcessNumber.value = "";
-  tableData.value = [...tempTableData.value];
+  getWorkOrder();
 }
 // 新增工序前重置对话框
 // 新增工单前重置新增对话框
@@ -331,7 +334,7 @@ function resetAddDialog() {
     procedure_id: "",
     procedure_name: "",
     procedure_description: "",
-    defaul_outsource: "",
+    defaul_outsource: "N",
   };
   addDialog.value = true;
 }
