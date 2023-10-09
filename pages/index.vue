@@ -31,7 +31,7 @@ function goToLogin() {
     </client-only>
 
     <div class="title text-h1 text-blue text-center font-weight-bold">
-      同日 MES 系统
+      同日数字化工厂系统
     </div>
 
     <div class="btn-container">
