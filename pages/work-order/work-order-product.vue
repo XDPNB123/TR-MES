@@ -74,6 +74,7 @@
           :items-per-page="tablePerPage"
           style="white-space: nowrap"
           @click:row="showTicketDetail"
+          :expanded.sync="expandedRows"
         >
           <template v-slot:item.id="{ index }">
             {{ index + 1 }}
@@ -163,7 +164,8 @@
                           fa-solid fa-trash
                         </v-icon>
                       </template>
-                      <template v-slot:item.procedure="{ item }">
+                      <!-- 工序维护 -->
+                      <!-- <template v-slot:item.procedure="{ item }">
                         <span
                           @click="
                             operatingTicketDetail = { ...item.raw };
@@ -171,7 +173,7 @@
                           "
                           >{{ item.raw.procedure }}</span
                         >
-                      </template>
+                      </template> -->
                       <template v-slot:item.BOMList="{ item }">
                         <span @click="handleBomClick(item.raw)">{{
                           item.raw.BOMList
@@ -624,8 +626,8 @@
 </template>
 
 <script setup lang="ts">
+let expandedRows = ref([1]);
 // 用于刷新视图的 key
-
 let key = ref<number>(0);
 
 //创建一个键值对数组，存储工单明细
@@ -1004,8 +1006,16 @@ function resetFilter() {
   tableDataDetail.value = [...tempTableDataDetail.value];
 }
 
-onMounted(() => {
-  getWorkOrder();
+onMounted(async () => {
+  await getWorkOrder();
+  // const rowToExpand = tableData.value.find(
+  //   (row) => row.workorder_hid === "workorder001"
+  // );
+  // if (rowToExpand) {
+  //   // 如果找到了，将这一行的标识添加到 expandedRows 数组中
+  //   expandedRows.value.push(rowToExpand.id); // 假设每行数据有唯一的 id 属性
+  //   console.log(rowToExpand.id);
+  // }
 });
 //获取工单数据
 async function getWorkOrder() {
