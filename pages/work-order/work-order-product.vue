@@ -1,207 +1,215 @@
 <template>
-  <v-card>
-    <v-row class="ma-2">
-      <v-col cols="6">
-        <v-text-field
-          label="工单编号"
-          variant="outlined"
-          density="compact"
-          v-model="searchTicketNumber"
-          hide-details
-        ></v-text-field>
-      </v-col>
+  <v-row class="ma-2">
+    <!-- 左边表头表 -->
+    <v-col cols="6">
+      <v-card class="h-100">
+        <v-toolbar class="text-h6 pl-6">工单</v-toolbar>
+        <v-row class="ma-2">
+          <v-col cols="6">
+            <v-text-field
+              label="工单编号"
+              variant="outlined"
+              density="compact"
+              v-model="searchTicketNumber"
+              hide-details
+            ></v-text-field>
+          </v-col>
 
-      <v-col cols="6">
-        <v-text-field
-          label="工单类型"
-          variant="outlined"
-          density="compact"
-          v-model="searchTicketType"
-          hide-details
-        ></v-text-field>
-      </v-col>
+          <v-col cols="6">
+            <v-text-field
+              label="工单类型"
+              variant="outlined"
+              density="compact"
+              v-model="searchTicketType"
+              hide-details
+            ></v-text-field>
+          </v-col>
 
-      <v-col cols="6">
-        <v-text-field
-          label="项目号"
-          variant="outlined"
-          density="compact"
-          v-model="searchProjectNumber"
-          hide-details
-        ></v-text-field>
-      </v-col>
+          <v-col cols="12">
+            <v-btn
+              color="black"
+              class="mr-2"
+              size="large"
+              @click="filterTableData()"
+              >查询</v-btn
+            >
+            <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
+              重置
+            </v-btn>
+            <v-btn
+              color="green"
+              class="mr-2"
+              size="large"
+              @click="resetAddDialog()"
+            >
+              新增
+            </v-btn>
+            <v-btn color="blue" class="mr-2" size="large">导出</v-btn>
+          </v-col>
 
-      <v-col cols="6">
-        <v-text-field
-          label="产出料"
-          variant="outlined"
-          density="compact"
-          v-model="searchOutputs"
-          hide-details
-        ></v-text-field>
-      </v-col>
-
-      <v-col cols="12">
-        <v-btn
-          color="black"
-          class="mr-2"
-          size="large"
-          @click="filterTableData()"
-          >查询</v-btn
-        >
-        <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
-          重置
-        </v-btn>
-        <v-btn
-          color="green"
-          class="mr-2"
-          size="large"
-          @click="resetAddDialog()"
-        >
-          新增
-        </v-btn>
-        <v-btn color="blue" class="mr-2" size="large">导出</v-btn>
-      </v-col>
-
-      <v-col cols="12">
-        <v-divider></v-divider>
-        <!-- 工单表头表格 -->
-        <v-data-table
-          v-model:page="tablePage"
-          expand-on-click
-          :headers="tableHeaders"
-          :items="tableData"
-          :items-per-page="tablePerPage"
-          style="white-space: nowrap"
-          @click:row="showTicketDetail"
-          :expanded.sync="expandedRows"
-        >
-          <template v-slot:item.id="{ index }">
-            {{ index + 1 }}
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <!-- <v-icon color="orange" size="small" class="mr-3" @click.stop="">
+          <v-col cols="12">
+            <v-divider></v-divider>
+            <!-- 工单表头表格 -->
+            <v-data-table
+              v-model:page="tablePage"
+              :headers="tableHeaders"
+              :items="tableData"
+              :items-per-page="tablePerPage"
+              style="white-space: nowrap"
+              @click:row="showTicketDetail"
+            >
+              <template v-slot:item.id="{ index }">
+                {{ index + 1 }}
+              </template>
+              <template v-slot:item.actions="{ item }">
+                <!-- <v-icon color="orange" size="small" class="mr-3" @click.stop="">
               fa-solid fa-eye
             </v-icon> -->
 
-            <v-icon
-              color="blue"
-              size="small"
-              class="mr-3"
-              @click.stop="
-                operatingTicket = { ...item.raw };
-                editDialog = true;
-              "
+                <v-icon
+                  color="blue"
+                  size="small"
+                  class="mr-3"
+                  @click.stop="
+                    operatingTicket = { ...item.raw };
+                    editDialog = true;
+                  "
+                >
+                  fa-solid fa-pen
+                </v-icon>
+
+                <v-icon
+                  color="red"
+                  size="small"
+                  @click.stop="
+                    operatingTicket = { ...item.raw };
+                    deleteDialog = true;
+                  "
+                >
+                  fa-solid fa-trash
+                </v-icon>
+              </template>
+
+              <template v-slot:bottom>
+                <div class="text-center pt-2">
+                  <v-pagination
+                    v-model="tablePage"
+                    :length="tablePageCount"
+                  ></v-pagination>
+                </div>
+              </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
+      </v-card>
+    </v-col>
+    <!-- 右边明细表 -->
+    <v-col cols="6">
+      <v-card class="h-100">
+        <v-toolbar class="text-h6 pl-6">工单{{ detailName }}明细</v-toolbar>
+        <v-row class="ma-2">
+          <v-col cols="6">
+            <v-text-field
+              label="项目号"
+              variant="outlined"
+              density="compact"
+              v-model="searchProjectNumber"
+              hide-details
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              label="产出料"
+              variant="outlined"
+              density="compact"
+              v-model="searchOutputs"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-btn
+              color="black"
+              class="mr-2"
+              size="large"
+              @click="filterTableData()"
+              >查询</v-btn
             >
-              fa-solid fa-pen
-            </v-icon>
-
-            <v-icon
-              color="red"
-              size="small"
-              @click.stop="
-                operatingTicket = { ...item.raw };
-                deleteDialog = true;
-              "
+            <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
+              重置
+            </v-btn>
+            <v-btn
+              color="green"
+              class="mr-2"
+              size="large"
+              @click="resetAddDetailDialog()"
+              >新增明细</v-btn
             >
-              fa-solid fa-trash
-            </v-icon>
-          </template>
-          <!-- 内嵌明细 -->
-          <template v-slot:expanded-row="{ columns, item }">
-            <tr>
-              <td :colspan="columns.length">
-                <v-row class="mt-2 row-container">
-                  <v-col cols="12">
-                    <v-btn
-                      color="green"
-                      class="mr-2"
-                      size="large"
-                      @click="resetAddDetailDialog(item.raw.workorder_hid)"
-                      >新增明细</v-btn
-                    >
+            <v-btn @click="batchWork()" class="mr-2 bg-primary" size="large"
+              >批量工序维护</v-btn
+            >
+          </v-col>
 
-                    <v-btn
-                      @click="batchWork(item.raw.workorder_hid)"
-                      class="mr-2 bg-primary"
-                      size="large"
-                      >批量工序维护</v-btn
-                    >
-                  </v-col>
-                  <v-col cols="12" class="mb-3">
-                    <!-- 内置明细表格 -->
-                    <v-data-table
-                      v-model:page="tablePage"
-                      :items-per-page="-1"
-                      v-model="selected"
-                      show-select
-                      :key="key"
-                      :headers="headers"
-                      :items="details[item.raw.workorder_hid]"
-                      class="elevation-12 font-size"
-                    >
-                      <template v-slot:item.actions="{ item }">
-                        <v-icon
-                          color="blue"
-                          size="small"
-                          class="mr-3"
-                          @click="
-                            operatingTicketDetail = { ...item.raw };
-                            editDetailDialog = true;
-                          "
-                        >
-                          fa-solid fa-pen
-                        </v-icon>
+          <v-col cols="12">
+            <v-divider></v-divider>
+            <v-data-table
+              v-model:page="tablePage"
+              :items-per-page="tablePerPage"
+              v-model="selected"
+              show-select
+              :key="key"
+              :headers="headers"
+              :items="tableDataDetail"
+              class="font-size"
+            >
+              <template v-slot:item.actions="{ item }">
+                <v-icon
+                  color="blue"
+                  size="small"
+                  class="mr-3"
+                  @click="
+                    operatingTicketDetail = { ...item.raw };
+                    editDetailDialog = true;
+                  "
+                >
+                  fa-solid fa-pen
+                </v-icon>
 
-                        <v-icon
-                          color="red"
-                          size="small"
-                          @click="
-                            operatingTicketDetail = { ...item.raw };
-                            deleteDetailDialog = true;
-                          "
-                        >
-                          fa-solid fa-trash
-                        </v-icon>
-                      </template>
-                      <!-- 工序维护 -->
-                      <!-- <template v-slot:item.procedure="{ item }">
-                        <span
-                          @click="
-                            operatingTicketDetail = { ...item.raw };
-                            showProcessDialog(item.raw.procedure);
-                          "
-                          >{{ item.raw.procedure }}</span
-                        >
-                      </template> -->
-                      <template v-slot:item.BOMList="{ item }">
-                        <span @click="handleBomClick(item.raw)">{{
-                          item.raw.BOMList
-                        }}</span>
-                      </template>
-                      <template v-slot:item.blueprint_id="{ item }">
-                        <span @click="handleBlueprintClick(item.raw)">{{
-                          item.raw.blueprint_id
-                        }}</span>
-                      </template>
-                      <template v-slot:bottom></template>
-                    </v-data-table>
-                  </v-col>
-                </v-row>
-              </td>
-            </tr>
-          </template>
-          <template v-slot:bottom>
-            <div class="text-center pt-2">
-              <v-pagination
-                v-model="tablePage"
-                :length="tablePageCount"
-              ></v-pagination>
-            </div>
-          </template>
-        </v-data-table>
-      </v-col>
-    </v-row>
+                <v-icon
+                  color="red"
+                  size="small"
+                  @click="
+                    operatingTicketDetail = { ...item.raw };
+                    deleteDetailDialog = true;
+                  "
+                >
+                  fa-solid fa-trash
+                </v-icon>
+              </template>
+
+              <template v-slot:item.BOMList="{ item }">
+                <span @click="handleBomClick(item.raw)">{{
+                  item.raw.BOMList
+                }}</span>
+              </template>
+              <template v-slot:item.blueprint_id="{ item }">
+                <span @click="handleBlueprintClick(item.raw)">{{
+                  item.raw.blueprint_id
+                }}</span>
+              </template>
+              <template v-slot:bottom>
+                <div class="text-center pt-2">
+                  <v-pagination
+                    v-model="tablePage"
+                    :length="tablePageCount"
+                  ></v-pagination>
+                </div>
+              </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
+      </v-card>
+    </v-col>
     <!-- 新增工单表头 -->
     <v-dialog v-model="addDialog" min-width="400px" width="560px">
       <v-card>
@@ -279,10 +287,6 @@
           </v-btn>
         </v-toolbar>
         <v-card-text class="mt-4">
-          <v-text-field
-            v-model="operatingTicket.workorder_hid"
-            label="工单编号"
-          ></v-text-field>
           <v-select
             label="工单类型"
             :items="['装配', '机加工']"
@@ -385,6 +389,11 @@
             v-model="operatingTicketDetail.mcode"
             label="产出料"
           ></v-text-field>
+          <v-select
+            label="工单编号"
+            :items="workorderId"
+            v-model="operatingTicketDetail.workorder_hid"
+          ></v-select>
           <v-text-field
             v-model="operatingTicketDetail.estimated_delivery_date"
             type="date"
@@ -622,11 +631,11 @@
         </div>
       </v-card>
     </v-dialog>
-  </v-card>
+  </v-row>
 </template>
 
 <script setup lang="ts">
-let expandedRows = ref([]);
+let detailName = ref("");
 // 用于刷新视图的 key
 let key = ref<number>(0);
 
@@ -712,6 +721,8 @@ let keyToDetailChinese = ref<any>({
   actual_delivery_date: "实际交付时间",
 });
 let getDetailChineseKey = (key: any) => keyToDetailChinese.value[key] || key;
+//存储工单数据的所有工单编号
+let workorderId = ref<any[]>([]);
 // 工单表头
 let tableHeaders = ref<any[]>([
   {
@@ -792,21 +803,17 @@ let tableHeaders = ref<any[]>([
     filterable: false,
   },
 ]);
-
-// 工单表
-let tempTableData = ref<any[]>([]);
-
 // 展示的工单表格数据
 let tableData = ref<any[]>([]);
 
 //工单明细表头
 let headers = ref<any[]>([
   { title: "产出料", align: "start", key: "mcode" },
-  { title: "交付时间", align: "start", key: "estimated_delivery_date" },
-  { title: "实际交付时间", align: "start", key: "actual_delivery_date" },
+  { title: "工序", align: "start", key: "procedure" },
   { title: "图纸号", align: "start", key: "blueprint_id" },
   { title: "BOM清单", align: "center", key: "bomdata" },
-  { title: "工序", align: "start", key: "procedure" },
+  { title: "交付时间", align: "start", key: "estimated_delivery_date" },
+  { title: "实际交付时间", align: "start", key: "actual_delivery_date" },
   { title: "工单明细编号", align: "start", key: "workorder_did" },
   { title: "项目号", align: "start", key: "project_code" },
   { title: "标准工时", align: "start", key: "standard_time" },
@@ -823,8 +830,6 @@ let headers = ref<any[]>([
     filterable: false,
   },
 ]);
-//工单明细全部数据
-let tempTableDataDetail = ref<any[]>([]);
 
 //工单明细表格展示的数据
 let tableDataDetail = ref<any[]>([]);
@@ -867,7 +872,7 @@ let innerTableSelectData = ref<any[]>([]);
 // 将对象数组作为参数调用更新接口重新获取数据
 
 //批量工序维护
-async function batchWork(workorder_hid: any) {
+async function batchWork() {
   //判断是否选择数据
   if (selected.value.length === 0) {
     alert("请选择需要工序维护的产料");
@@ -875,13 +880,35 @@ async function batchWork(workorder_hid: any) {
   }
 
   //获取到当前选择的数据
-  let selectedData = await getWorkOrderDetail(workorder_hid);
-  console.log(selectedData);
+  const data: any = await useHttp(
+    "/MesWorkOrderDetail/M05WorkOrderDetails",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 30,
+      SortType: 0,
+      SortedBy: "id",
+      workorder_did: "",
+      workorder_hid: "",
+      blueprint_id: "",
+      mcode: "",
+      planned_quantity: "",
+      unit: "",
+      procedure: "",
+      project_code: "",
+      reported_quantity: "",
+      estimated_delivery_date: "",
+      actual_delivery_date: "",
+      actual_time: "",
+      standard_time: "",
+    }
+  );
+  let selectedData = data.data.pageList;
   innerTableSelectData.value = selectedData.filter((item) =>
     selected.value.includes(item.id)
   );
 
-  console.log(innerTableSelectData.value);
   //判断选择的数据他们的工序是否一致
   let isSameProcedure = innerTableSelectData.value.every(
     (item, index, array) => {
@@ -966,35 +993,56 @@ async function saveTicket() {
     innerTableSelectData.value
   );
 
-  console.log(innerTableSelectData.value);
-  details.value[innerTableSelectData.value[0].workorder_hid] =
-    await getWorkOrderDetail(innerTableSelectData.value[0].workorder_hid);
-
+  getWorkOrderDetail("");
   processDialog.value = false;
 }
 // 搜索过滤
-function filterTableData() {
-  tableData.value = [...tempTableData.value];
-  tableDataDetail.value = [...tempTableDataDetail.value];
-  if (searchTicketNumber)
-    tableData.value = tableData.value.filter((item) =>
-      item.workorder_hid.includes(searchTicketNumber.value)
-    );
-
-  if (searchTicketType)
-    tableData.value = tableData.value.filter((item) =>
-      item.workorder_type.includes(searchTicketType.value)
-    );
-
-  if (searchProjectNumber)
-    tableDataDetail.value = tableDataDetail.value.filter((item) =>
-      item.project_code.includes(searchProjectNumber.value)
-    );
-
-  if (searchOutputs)
-    tableDataDetail.value = tableDataDetail.value.filter((item) =>
-      item.mcode.includes(searchOutputs.value)
-    );
+async function filterTableData() {
+  const workData: any = await useHttp(
+    "/MesWorkOrder/M01GetWorkOrderList",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 20,
+      SortType: 0,
+      SortedBy: "id",
+      workorder_hid: searchTicketNumber.value,
+      status: "",
+      start_date: null,
+      planned_quantity: null,
+      product_id: null,
+      planned_completion_time: null,
+      workorder_type: searchTicketType.value,
+      finish_date: null,
+    }
+  );
+  tableData.value = formatDate(workData.data.pageList);
+  const workDataDetail: any = await useHttp(
+    "/MesWorkOrderDetail/M05WorkOrderDetails",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 30,
+      SortType: 0,
+      SortedBy: "id",
+      workorder_did: "",
+      workorder_hid: "",
+      blueprint_id: "",
+      mcode: searchOutputs.value,
+      planned_quantity: "",
+      unit: "",
+      procedure: "",
+      project_code: searchProjectNumber.value,
+      reported_quantity: "",
+      estimated_delivery_date: "",
+      actual_delivery_date: "",
+      actual_time: "",
+      standard_time: "",
+    }
+  );
+  tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
 }
 
 // 重置搜索
@@ -1003,20 +1051,14 @@ function resetFilter() {
   searchTicketNumber.value = "";
   searchOutputs.value = "";
   searchTicketType.value = "";
+  detailName.value = "";
   getWorkOrder();
-  tableDataDetail.value = [...tempTableDataDetail.value];
+  getWorkOrderDetail("");
 }
 
 onMounted(async () => {
-  await getWorkOrder();
-  // const rowToExpand = tableData.value.find(
-  //   (row) => row.workorder_hid === "workorder001"
-  // );
-  // if (rowToExpand) {
-  //   // 如果找到了，将这一行的标识添加到 expandedRows 数组中
-  //   expandedRows.value.push(rowToExpand.id); // 假设每行数据有唯一的 id 属性
-  //   console.log(rowToExpand.id);
-  // }
+  getWorkOrder();
+  getWorkOrderDetail("");
 });
 //获取工单数据
 async function getWorkOrder() {
@@ -1039,9 +1081,8 @@ async function getWorkOrder() {
       finish_date: null,
     }
   );
-  const newData = formatDate(data.data.pageList);
-  tempTableData.value = newData;
-  tableData.value = newData;
+  tableData.value = formatDate(data.data.pageList);
+  workorderId.value = data.data.pageList.map((item) => item.workorder_hid);
 }
 //将工单数据的日期进行截取，保留年月份
 function formatDate(data: any) {
@@ -1082,7 +1123,7 @@ async function getWorkOrderDetail(workorder_hid: string) {
       standard_time: "",
     }
   );
-  return formatDateDetail(data.data.pageList);
+  tableDataDetail.value = formatDateDetail(data.data.pageList);
 }
 
 //将工单明细数据的日期进行截取，保留年月份
@@ -1098,9 +1139,8 @@ function formatDateDetail(data: any) {
 }
 //点击表单显示表单明细
 async function showTicketDetail(item: any, obj: any) {
-  details.value[obj.item.raw.workorder_hid] = await getWorkOrderDetail(
-    obj.item.raw.workorder_hid
-  );
+  getWorkOrderDetail(obj.item.raw.workorder_hid);
+  detailName.value = obj.item.raw.workorder_hid;
 }
 
 // 新增工单前重置新增对话框
@@ -1135,7 +1175,7 @@ function resetAddDetailDialog(workorder_hid: any) {
     reported_quantity: "",
     unit: "",
     workorder_did: "",
-    workorder_hid: workorder_hid,
+    workorder_hid: "",
     actual_delivery_date: null,
   };
   addDetailDialog.value = true;
@@ -1149,8 +1189,7 @@ async function addTicketDetail() {
     "post",
     [operatingTicketDetail.value]
   );
-  details.value[operatingTicketDetail.value.workorder_hid] =
-    await getWorkOrderDetail(operatingTicketDetail.value.workorder_hid);
+  getWorkOrderDetail("");
   addDetailDialog.value = false;
 }
 // 修改工单
@@ -1171,8 +1210,7 @@ async function editTicketDetail() {
     "put",
     [operatingTicketDetail.value]
   );
-  details.value[operatingTicketDetail.value.workorder_hid] =
-    await getWorkOrderDetail(operatingTicketDetail.value.workorder_hid);
+  getWorkOrderDetail("");
   editDetailDialog.value = false;
 }
 
@@ -1198,8 +1236,7 @@ async function deleteTicketDetail() {
     undefined,
     { workorderdetail_ids: [operatingTicketDetail.value.id] }
   );
-  details.value[operatingTicketDetail.value.workorder_hid] =
-    await getWorkOrderDetail(operatingTicketDetail.value.workorder_hid);
+  getWorkOrderDetail("");
   deleteDetailDialog.value = false;
 }
 
@@ -1217,7 +1254,6 @@ function handleBomClick(item: any) {
   font-size: small;
   white-space: nowrap;
   width: 100%;
-  color: #1831d6;
 }
 .row-container {
   background-color: rgb(174, 182, 182);

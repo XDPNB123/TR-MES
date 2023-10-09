@@ -252,7 +252,7 @@ async function filterTableData() {
       material_id: "",
       material_name: searchMaterialName.value,
       PageIndex: "1",
-      PageSize: "10",
+      PageSize: "20",
       SortedBy: "id",
       SortType: 0,
     }
@@ -275,7 +275,7 @@ async function getBomList() {
       material_id: "",
       material_name: "",
       PageIndex: "1",
-      PageSize: "10",
+      PageSize: "20",
       SortedBy: "id",
       SortType: 0,
     }
