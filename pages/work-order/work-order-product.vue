@@ -187,9 +187,9 @@
                 </v-icon>
               </template>
 
-              <template v-slot:item.BOMList="{ item }">
+              <template v-slot:item.bomdata="{ item }">
                 <span @click="handleBomClick(item.raw)">{{
-                  item.raw.BOMList
+                  item.raw.bomdata
                 }}</span>
               </template>
               <template v-slot:item.blueprint_id="{ item }">
@@ -1043,6 +1043,7 @@ async function filterTableData() {
     }
   );
   tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
+  detailName.value = "";
 }
 
 // 重置搜索
@@ -1246,7 +1247,7 @@ function handleBlueprintClick(item: any) {
 }
 //bom清单维护
 function handleBomClick(item: any) {
-  router.push({ path: "/ticketDetails/bom-maintenance" });
+  router.push({ path: "/work-order/bom-list" });
 }
 </script>
 <style scoped>
