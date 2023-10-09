@@ -67,6 +67,7 @@
         <v-divider></v-divider>
         <!-- 工单表头表格 -->
         <v-data-table
+          :expanded.sync="expanded"
           v-model:page="tablePage"
           expand-on-click
           :headers="tableHeaders"
@@ -918,6 +919,7 @@ async function batchWork(workorder_hid: any) {
     return;
   }
 }
+
 //工序维护
 async function showProcessDialog(procedure: string) {
   const data: any = await useHttp(
@@ -1054,6 +1056,7 @@ function formatDate(data: any) {
   });
   return data;
 }
+
 //获取工单明细数据
 async function getWorkOrderDetail(workorder_hid: string) {
   const data: any = await useHttp(
@@ -1082,6 +1085,7 @@ async function getWorkOrderDetail(workorder_hid: string) {
   );
   return formatDateDetail(data.data.pageList);
 }
+
 //将工单明细数据的日期进行截取，保留年月份
 function formatDateDetail(data: any) {
   data.forEach((item, index) => {
@@ -1142,6 +1146,7 @@ function resetAddDetailDialog(workorder_hid: any) {
   addDetailDialog.value = true;
   getWorkOrder();
 }
+
 //新增工单明细行
 async function addTicketDetail() {
   const data: any = await useHttp(
@@ -1163,6 +1168,7 @@ async function editTicket() {
   getWorkOrder();
   editDialog.value = false;
 }
+
 //修改工单明细行
 async function editTicketDetail() {
   const data: any = await useHttp(
@@ -1174,6 +1180,7 @@ async function editTicketDetail() {
     await getWorkOrderDetail(operatingTicketDetail.value.workorder_hid);
   editDetailDialog.value = false;
 }
+
 // 删除工单
 async function deleteTicket() {
   const data: any = await useHttp(
