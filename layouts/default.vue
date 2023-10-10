@@ -15,7 +15,7 @@ const allNavigation = ref<any[]>([
       {
         name: "主看板",
         path: "/dashboard/main-dashboard",
-        icon: "fa-solid fa-chart-line",
+        icon: "fa-solid fa-boxes-stacked",
       },
     ],
   },
@@ -43,6 +43,18 @@ const allNavigation = ref<any[]>([
         name: "BOM清单",
         path: "/work-order/bom-list",
         icon: "fa-solid fa-list",
+      },
+    ],
+  },
+  {
+    title: "WMS仓储管理",
+    path: "/wms",
+    icon: "fa-solid fa-chart-column",
+    children: [
+      {
+        name: "仓库主页",
+        path: "/wms/home",
+        icon: "fa-solid fa-gauge",
       },
     ],
   },
