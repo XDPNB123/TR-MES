@@ -635,6 +635,23 @@
 </template>
 
 <script setup lang="ts">
+// 搜索引擎优化
+useSeoMeta({
+  // 该页面的标题
+  title: "生产工单",
+  // 社交媒体分享该页面时显示的标题
+  ogTitle: "生产工单",
+  // 该页面的描述
+  description: "同日 MES 系统，生产工单",
+  // 社交媒体分享该页面时显示的描述
+  ogDescription: "同日 MES 系统，生产工单",
+  // 社交媒体分享该页面时显示的图片
+  ogImage: "/同日图标.png",
+});
+// 不采用布局
+definePageMeta({
+  keepalive: true,
+});
 let detailName = ref("");
 // 用于刷新视图的 key
 let key = ref<number>(0);
