@@ -199,9 +199,7 @@ function exit() {
     </v-app-bar>
 
     <v-main>
-      <keep-alive>
-        <slot></slot>
-      </keep-alive>
+      <slot></slot>
     </v-main>
   </v-app>
 </template>

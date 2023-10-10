@@ -1,3 +1,733 @@
+<script setup lang="ts">
+// 搜索引擎优化
+useSeoMeta({
+  // 该页面的标题
+  title: "生产工单",
+  // 社交媒体分享该页面时显示的标题
+  ogTitle: "生产工单",
+  // 该页面的描述
+  description: "同日 MES 系统，生产工单",
+  // 社交媒体分享该页面时显示的描述
+  ogDescription: "同日 MES 系统，生产工单",
+  // 社交媒体分享该页面时显示的图片
+  ogImage: "/同日图标.png",
+});
+// 页面缓存
+definePageMeta({
+  keepalive: true,
+});
+
+//工单表头的状态
+let workStatus = ref([
+  "新建未审核",
+  "已审核待排产",
+  "已排产生产中",
+  "正常完工",
+  "异常暂停",
+  "异常取消",
+  "强制关闭",
+]);
+//工单明细的状态
+let workDetailStatus = ref([
+  "新建待分配",
+  "已分配生产中",
+  "正常完工",
+  "异常暂停",
+  "异常取消",
+  "强制关闭",
+]);
+let detailName = ref("");
+// 用于刷新视图的 key
+let key = ref<number>(0);
+//
+let products = ref(["aaa", "bbb", "ccc"]);
+//多选产品编号
+let selectProducts = ref([]);
+//创建一个键值对数组，存储工单明细
+let details = ref<any>({});
+// 路由
+const router = useRouter();
+let selected = ref<any[]>([]);
+// 工单新增、修改、删除对话框
+let addDialog = ref(false);
+let editDialog = ref(false);
+let deleteDialog = ref(false);
+let addDetailDialog = ref(false);
+let deleteDetailDialog = ref(false);
+let editDetailDialog = ref(false);
+let productDialog = ref(false);
+// 工单搜索
+let searchTicketNumber = ref<string>("");
+let searchProjectNumber = ref<string>("");
+let startDate = ref("");
+let endDate = ref("");
+let startDateDetail = ref("");
+let endDateDetail = ref("");
+let searchTicketType = ref<string>("");
+let searchOutputs = ref<string>("");
+
+// 表格初始页
+let tablePage = ref<number>(1);
+// 表格每页条数
+let tablePerPage = ref<number>(10);
+// 正在操作的工单
+let operatingTicket = ref<any>({
+  workorder_hid: "",
+  workorder_type: "",
+  planned_completion_time: "",
+  unit: "",
+  planned_quantity: "",
+  product_id: "",
+  start_date: "",
+  finish_date: "",
+  status: "",
+});
+
+let keyToChinese = ref<any>({
+  id: "序号",
+  workorder_hid: "工单编号",
+  workorder_type: "工单类型",
+  unit: "单位",
+  planned_quantity: "计划数量",
+  product_id: "产品编号",
+  start_date: "开始日期",
+  finish_date: "完成日期",
+  planned_completion_time: "计划完成时间",
+  status: "工单状态",
+});
+let getChineseKey = (key: any) => keyToChinese.value[key] || key;
+//正在操作的工单明细
+let operatingTicketDetail = ref<any>({
+  mcode: "",
+  estimated_delivery_date: "",
+  blueprint_id: "",
+  project_code: "",
+  standard_time: "",
+  actual_time: "",
+  procedure: "",
+  planned_quantity: "",
+  reported_quantity: "",
+  unit: "",
+  workorder_did: "",
+  workorder_hid: "",
+  actual_delivery_date: "",
+});
+let keyToDetailChinese = ref<any>({
+  mcode: "产出料",
+  estimated_delivery_date: "预计交付时间",
+  blueprint_id: "图纸号",
+  bomdata: "BOM清单",
+  procedure: "工序",
+  project_code: "项目号",
+  standard_time: "标准工时",
+  actual_time: "实际工时",
+  planned_quantity: "计划数量",
+  reported_quantity: "实际报工数量",
+  unit: "单位",
+  status: "状态",
+  workorder_did: "工单明细编号",
+  workorder_hid: "工单编号",
+  actual_delivery_date: "实际交付时间",
+});
+let getDetailChineseKey = (key: any) => keyToDetailChinese.value[key] || key;
+
+let sortBy = ["start_date"];
+let sortDesc = [true];
+//工单表头通过开始日期进行降序排列
+let sortedData = computed(() => {
+  return tableData.value.slice().sort((a, b) => {
+    if (sortDesc[0]) {
+      return new Date(b[sortBy[0]]) - new Date(a[sortBy[0]]);
+    } else {
+      return new Date(a[sortBy[0]]) - new Date(b[sortBy[0]]);
+    }
+  });
+});
+// 展示的工单表格数据
+let tableData = ref<any[]>([]);
+// 工单表头
+let tableHeaders = ref<any[]>([
+  {
+    title: "序号",
+    key: "id",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工单编号",
+    key: "workorder_hid",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "产品编号",
+    key: "product_id",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工单类型",
+    key: "workorder_type",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "计划数量",
+    key: "planned_quantity",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "单位",
+    key: "unit",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "开始日期",
+    key: "start_date",
+    align: "center",
+    sortable: true,
+    filterable: true,
+  },
+  {
+    title: "完成日期",
+    key: "finish_date",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "计划完成时间",
+    key: "planned_completion_time",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工单状态",
+    key: "status",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "操作",
+    key: "actions",
+    align: "center",
+    sortable: false,
+    filterable: false,
+  },
+]);
+
+let sortByDetail = ["estimated_delivery_date"];
+let sortDescDetail = [true];
+//通过预计交付日期对工单明细进行升序排列
+let sortedDataDetail = computed(() => {
+  return tableDataDetail.value.slice().sort((a, b) => {
+    if (sortDesc[0]) {
+      return new Date(a[sortByDetail[0]]) - new Date(b[sortByDetail[0]]);
+    } else {
+      return new Date(b[sortByDetail[0]]) - new Date(a[sortByDetail[0]]);
+    }
+  });
+});
+//工单明细表头
+let headers = ref<any[]>([
+  { title: "产出料", align: "start", key: "mcode" },
+  { title: "工序", align: "start", key: "procedure" },
+  { title: "图纸号", align: "start", key: "blueprint_id" },
+  { title: "BOM清单", align: "center", key: "bomdata" },
+  { title: "预计交付日期", align: "start", key: "estimated_delivery_date" },
+  { title: "实际交付日期", align: "start", key: "actual_delivery_date" },
+  { title: "工单明细编号", align: "start", key: "workorder_did" },
+  { title: "项目号", align: "start", key: "project_code" },
+  { title: "标准工时", align: "start", key: "standard_time" },
+  { title: "实际工时", align: "start", key: "actual_time" },
+  { title: "计划数量", align: "start", key: "planned_quantity" },
+  { title: "实际报工数量", align: "start", key: "reported_quantity" },
+  { title: "单位", align: "start", key: "unit" },
+  { title: "状态", align: "start", key: "status" },
+  {
+    title: "操作",
+    key: "actions",
+    align: "center",
+    sortable: false,
+    filterable: false,
+  },
+]);
+
+//工单明细表格展示的数据
+let tableDataDetail = ref<any[]>([]);
+
+// 表格有多少页
+let tablePageCount = computed(() => {
+  return Math.ceil(tableData.value.length / tablePerPage.value);
+});
+
+//工序模块
+//实现拖拽功能的方法
+let processDialog = ref(false);
+let chips = ref<any[]>([]);
+let droppedChips = ref<any[]>([]);
+let draggedChip = ref(null);
+function dragStart(chip: any) {
+  draggedChip.value = chip;
+}
+function dragEnd() {
+  draggedChip.value = null;
+}
+function drop() {
+  if (draggedChip.value) {
+    droppedChips.value.push(draggedChip.value);
+    chips.value = chips.value.filter((chip) => chip !== draggedChip.value);
+  }
+}
+function removeChip(index: number) {
+  const removedChip = droppedChips.value.splice(index, 1)[0];
+  chips.value.push(removedChip);
+}
+//用来存储选择的的数据
+let innerTableSelectData = ref<any[]>([]);
+// 发请求获取完整的选中的数据
+// 判断工序是否一致
+// 如果一致，则将选中的数据暂时保存
+// 打开对话框，将选中数据的工序显示左边，其他工序过滤到右边
+// 点击保存，将左侧的工序拼接后，赋值给每一个暂存的对象
+// 将对象数组作为参数调用更新接口重新获取数据
+//批量工序维护
+async function batchWork() {
+  //判断是否选择数据
+  if (selected.value.length === 0) {
+    alert("请选择需要工序维护的产料");
+    return;
+  }
+
+  //获取到当前选择的数据
+  const data: any = await useHttp(
+    "/MesWorkOrderDetail/M05WorkOrderDetails",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 30,
+      SortType: 0,
+      SortedBy: "id",
+      workorder_did: "",
+      workorder_hid: "",
+      blueprint_id: "",
+      mcode: "",
+      planned_quantity: "",
+      unit: "",
+      procedure: "",
+      project_code: "",
+      reported_quantity: "",
+      estimated_delivery_date: "",
+      actual_delivery_date: "",
+      actual_time: "",
+      standard_time: "",
+    }
+  );
+  let selectedData = data.data.pageList;
+  innerTableSelectData.value = selectedData.filter((item) =>
+    selected.value.includes(item.id)
+  );
+
+  //判断选择的数据他们的工序是否一致
+  let isSameProcedure = innerTableSelectData.value.every(
+    (item, index, array) => {
+      return item.procedure === array[0].procedure;
+    }
+  );
+  if (isSameProcedure) {
+    // 所有选中的数据都有相同的工序属性
+    const data: any = await useHttp(
+      "/MesWorkProcess/M09GetProcedureData",
+      "get",
+      undefined,
+      {
+        SortedBy: "id",
+        PageIndex: 1,
+        SortType: 0,
+        procedure_name: "",
+        procedure_id: "",
+        PageSize: 5,
+      }
+    );
+    chips.value = data.data;
+    //过滤出已选工序和未选工序
+    const workorderHids = innerTableSelectData.value[0].procedure.split(",");
+    droppedChips.value = chips.value.filter((chip) =>
+      workorderHids.includes(chip.procedure_name)
+    );
+    chips.value = chips.value.filter(
+      (chip) => !workorderHids.includes(chip.procedure_name)
+    );
+    processDialog.value = true;
+  } else {
+    alert("您选择的数据的初始工序属性并不一致，请检查后重新选择");
+    return;
+  }
+}
+
+//工序维护
+async function showProcessDialog(procedure: string) {
+  const data: any = await useHttp(
+    "/MesWorkProcess/M09GetProcedureData",
+    "get",
+    undefined,
+    {
+      SortedBy: "id",
+      PageIndex: 1,
+      SortType: 0,
+      procedure_name: "",
+      procedure_id: "",
+      PageSize: 5,
+    }
+  );
+  chips.value = data.data;
+  //过滤出已选工序和未选工序
+  const workorderHids = procedure.split(",");
+  droppedChips.value = chips.value.filter((chip) =>
+    workorderHids.includes(chip.procedure_name)
+  );
+  chips.value = chips.value.filter(
+    (chip) => !workorderHids.includes(chip.procedure_name)
+  );
+  processDialog.value = true;
+}
+
+//保存工序
+async function saveTicket() {
+  if (droppedChips.value.length === 0) {
+    alert("请你至少选择一个工序");
+    return;
+  }
+  // 将选择的工序数组拼接成字符串
+  innerTableSelectData.value.forEach((item) => {
+    item.procedure = droppedChips.value
+      .map((item) => item.procedure_name)
+      .join(",");
+  });
+  await useHttp(
+    "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
+    "put",
+    innerTableSelectData.value
+  );
+  getWorkOrderDetail("");
+  processDialog.value = false;
+}
+// 工单表头搜索过滤
+async function filterTableData() {
+  const workData: any = await useHttp(
+    "/MesWorkOrder/M01GetWorkOrderList",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 20,
+      SortType: 0,
+      SortedBy: "id",
+      workorder_hid: searchTicketNumber.value,
+      status: "",
+      start_date: null,
+      planned_quantity: null,
+      product_id: null,
+      planned_completion_time: null,
+      workorder_type: searchTicketType.value,
+      finish_date: null,
+    }
+  );
+  tableData.value = formatDate(workData.data.pageList);
+
+  // 确保日期已经选择
+  // 确保日期已经选择
+  if (startDate.value === "" || endDate.value === "") {
+    return;
+  }
+  // 转换日期为时间戳进行比较
+  const startTimestamp = new Date(startDate.value).getTime();
+  const endTimestamp = new Date(endDate.value).getTime();
+
+  // 过滤表数据
+  tableData.value = tableData.value.filter((item) => {
+    const itemTimestamp = new Date(item.start_date).getTime();
+    return itemTimestamp >= startTimestamp && itemTimestamp <= endTimestamp;
+  });
+}
+
+// 工单表头重置搜索
+function resetFilter() {
+  searchTicketType.value = "";
+  searchTicketNumber.value = "";
+  startDate.value = "";
+  endDate.value = "";
+  getWorkOrder();
+}
+//工单明细搜素
+async function filterTableDataDetail() {
+  const workDataDetail: any = await useHttp(
+    "/MesWorkOrderDetail/M05WorkOrderDetails",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 30,
+      SortType: 0,
+      SortedBy: "id",
+      workorder_did: "",
+      workorder_hid: "",
+      blueprint_id: "",
+      mcode: searchOutputs.value,
+      planned_quantity: "",
+      unit: "",
+      procedure: "",
+      project_code: searchProjectNumber.value,
+      reported_quantity: "",
+      estimated_delivery_date: "",
+      actual_delivery_date: "",
+      actual_time: "",
+      standard_time: "",
+    }
+  );
+  tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
+  // 确保日期已经选择
+  // 确保日期已经选择
+  if (startDateDetail.value === "" || endDateDetail.value === "") {
+    return;
+  }
+  // 转换日期为时间戳进行比较
+  const startTimestamp = new Date(startDateDetail.value).getTime();
+  const endTimestamp = new Date(endDateDetail.value).getTime();
+
+  // 过滤表数据
+  tableDataDetail.value = tableDataDetail.value.filter((item) => {
+    const itemTimestamp = new Date(item.estimated_delivery_date).getTime();
+    return itemTimestamp >= startTimestamp && itemTimestamp <= endTimestamp;
+  });
+}
+
+//重置工单明细的搜素
+function resetFilterDetail() {
+  searchOutputs.value = "";
+  searchProjectNumber.value = "";
+  startDateDetail.value = "";
+  endDateDetail.value = "";
+  detailName.value = "";
+  getWorkOrderDetail("");
+}
+//页面加载时获取数据
+onMounted(async () => {
+  getWorkOrder();
+  getWorkOrderDetail("");
+});
+//存储工单数据的所有工单编号
+let workorderId = ref<any[]>([]);
+//获取工单数据
+async function getWorkOrder() {
+  const data: any = await useHttp(
+    "/MesWorkOrder/M01GetWorkOrderList",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 20,
+      SortType: 0,
+      SortedBy: "id",
+      workorder_hid: "",
+      status: "",
+      start_date: null,
+      planned_quantity: null,
+      product_id: null,
+      planned_completion_time: null,
+      workorder_type: "",
+      finish_date: null,
+    }
+  );
+  tableData.value = formatDate(data.data.pageList);
+  workorderId.value = data.data.pageList.map((item) => item.workorder_hid);
+}
+//将工单数据的日期进行截取，保留年月份
+function formatDate(data: any) {
+  data.forEach((item, index) => {
+    item.start_date = item.start_date.substring(0, 10);
+    item.finish_date = item.finish_date.substring(0, 10);
+    item.planned_completion_time = item.planned_completion_time.substring(
+      0,
+      10
+    );
+  });
+  return data;
+}
+
+//获取工单明细数据
+async function getWorkOrderDetail(workorder_hid: string) {
+  const data: any = await useHttp(
+    "/MesWorkOrderDetail/M05WorkOrderDetails",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 30,
+      SortType: 0,
+      SortedBy: "id",
+      workorder_did: "",
+      workorder_hid: workorder_hid,
+      blueprint_id: "",
+      mcode: "",
+      planned_quantity: "",
+      unit: "",
+      procedure: "",
+      project_code: "",
+      reported_quantity: "",
+      estimated_delivery_date: "",
+      actual_delivery_date: "",
+      actual_time: "",
+      standard_time: "",
+    }
+  );
+  tableDataDetail.value = formatDateDetail(data.data.pageList);
+}
+
+//将工单明细数据的日期进行截取，保留年月份
+function formatDateDetail(data: any) {
+  data.forEach((item, index) => {
+    item.estimated_delivery_date = item.estimated_delivery_date.substring(
+      0,
+      10
+    );
+    item.actual_delivery_date = item.actual_delivery_date.substring(0, 10);
+  });
+  return data;
+}
+//点击表单显示表单明细
+async function showTicketDetail(item: any, obj: any) {
+  getWorkOrderDetail(obj.item.raw.workorder_hid);
+  detailName.value = obj.item.raw.workorder_hid;
+}
+
+// 新增工单前重置新增对话框
+function resetAddDialog() {
+  operatingTicket.value = {
+    workorder_hid: "",
+    workorder_type: "",
+    product_id: "",
+    start_date: "",
+    finish_date: "",
+    status: "新建未审核",
+  };
+  addDialog.value = true;
+}
+// 新增工单
+async function addTicket() {
+  await useHttp("/MesWorkOrder/M02AddWorkOrder", "post", operatingTicket.value);
+  getWorkOrder();
+  addDialog.value = false;
+}
+// 新增工单明细前重置新增对话框
+function resetAddDetailDialog(workorder_hid: any) {
+  operatingTicketDetail.value = {
+    mcode: "",
+    estimated_delivery_date: "",
+    blueprint_id: "",
+    project_code: "",
+    standard_time: "",
+    actual_time: "",
+    procedure: "123",
+    planned_quantity: "",
+    reported_quantity: "",
+    unit: "",
+    workorder_did: "",
+    workorder_hid: "",
+    actual_delivery_date: null,
+  };
+  addDetailDialog.value = true;
+  getWorkOrder();
+}
+
+//新增工单明细行
+async function addTicketDetail() {
+  const data: any = await useHttp(
+    "/MesWorkOrderDetail/M06AddWorkOrderDetails",
+    "post",
+    [operatingTicketDetail.value]
+  );
+  getWorkOrderDetail("");
+  addDetailDialog.value = false;
+}
+// 修改工单
+async function editTicket() {
+  const data: any = await useHttp(
+    "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
+    "put",
+    operatingTicket.value
+  );
+  getWorkOrder();
+  editDialog.value = false;
+}
+
+//修改工单明细行
+async function editTicketDetail() {
+  const data: any = await useHttp(
+    "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
+    "put",
+    [operatingTicketDetail.value]
+  );
+  getWorkOrderDetail("");
+  editDetailDialog.value = false;
+}
+
+// 删除工单
+async function deleteTicket() {
+  const data: any = await useHttp(
+    "/MesWorkOrder/M04DeleteWorkOrder",
+    "delete",
+    undefined,
+    {
+      workorder_ids: [operatingTicket.value.id],
+    }
+  );
+  getWorkOrder();
+  deleteDialog.value = false;
+}
+
+// 删除工单明细行
+async function deleteTicketDetail() {
+  const data: any = await useHttp(
+    "/MesWorkOrderDetail/M08DeleteWorkOrderDetails",
+    "delete",
+    undefined,
+    { workorderdetail_ids: [operatingTicketDetail.value.id] }
+  );
+  getWorkOrderDetail("");
+  deleteDetailDialog.value = false;
+}
+
+//查看图纸
+function handleBlueprintClick(item: any) {
+  console.log(item.blueprint_id); // 查看图纸
+}
+//bom清单维护
+function handleBomClick(item: any) {
+  router.push({
+    path: "/work-order/bom-list",
+    query: { workorder_did: item.workorder_did },
+  });
+}
+//选择产品编号
+function saveProduct() {
+  let productString = selectProducts.value.join(",");
+  operatingTicket.value.product_id = productString;
+  productDialog.value = false;
+}
+</script>
+
 <template>
   <v-row class="ma-2">
     <!-- 左边表头表 -->
@@ -25,6 +755,29 @@
             ></v-text-field>
           </v-col>
 
+          <v-col cols="6">
+            <v-text-field
+              label="最早开始日期"
+              type="date"
+              variant="outlined"
+              density="compact"
+              v-model="startDate"
+              hide-details
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field
+              label="最晚开始日期"
+              type="date"
+              variant="outlined"
+              density="compact"
+              v-model="endDate"
+              hide-details
+            >
+            </v-text-field>
+          </v-col>
+
           <v-col cols="12">
             <v-btn
               color="black"
@@ -34,7 +787,7 @@
               >查询</v-btn
             >
             <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
-              重置
+              重置查询
             </v-btn>
             <v-btn
               color="green"
@@ -53,7 +806,10 @@
             <v-data-table
               v-model:page="tablePage"
               :headers="tableHeaders"
-              :items="tableData"
+              :items="sortedData"
+              :sort-by.sync="sortBy"
+              :sort-desc.sync="sortDesc"
+              multi-sort
               :items-per-page="tablePerPage"
               style="white-space: nowrap"
               @click:row="showTicketDetail"
@@ -127,16 +883,43 @@
               hide-details
             ></v-text-field>
           </v-col>
-          <v-col cols="12">
+          <v-col cols="6">
+            <v-text-field
+              label="最早交付容器"
+              type="date"
+              variant="outlined"
+              density="compact"
+              v-model="startDateDetail"
+              hide-details
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field
+              label="最晚交付日期"
+              type="date"
+              variant="outlined"
+              density="compact"
+              v-model="endDateDetail"
+              hide-details
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="10">
             <v-btn
               color="black"
               class="mr-2"
               size="large"
-              @click="filterTableData()"
+              @click="filterTableDataDetail()"
               >查询</v-btn
             >
-            <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
-              重置
+            <v-btn
+              color="red"
+              class="mr-2"
+              size="large"
+              @click="resetFilterDetail()"
+            >
+              重置查询
             </v-btn>
             <v-btn
               color="green"
@@ -149,6 +932,15 @@
               >批量工序维护</v-btn
             >
           </v-col>
+          <v-col cols="2">
+            <v-select
+              class="mr-1"
+              variant="outlined"
+              label="每页最大数"
+              :items="[10, 20, 30, 40]"
+              v-model="tablePerPage"
+            ></v-select>
+          </v-col>
 
           <v-col cols="12">
             <v-divider></v-divider>
@@ -156,10 +948,13 @@
               v-model:page="tablePage"
               :items-per-page="tablePerPage"
               v-model="selected"
+              :sort-by.sync="sortByDetail"
+              :sort-desc.sync="sortDescDetail"
+              multi-sort
               show-select
               :key="key"
               :headers="headers"
-              :items="tableDataDetail"
+              :items="sortedDataDetail"
               class="font-size"
             >
               <template v-slot:item.actions="{ item }">
@@ -226,15 +1021,18 @@
             v-model="operatingTicket.workorder_hid"
             label="工单编号"
           ></v-text-field>
+
+          <v-text-field
+            v-model="operatingTicket.product_id"
+            label="产品编号"
+            append-inner-icon="fa-regular fa-circle-check"
+            @click:append-inner="productDialog = true"
+          ></v-text-field>
           <v-select
             label="工单类型"
             :items="['装配', '机加工']"
             v-model="operatingTicket.workorder_type"
           ></v-select>
-          <v-text-field
-            v-model="operatingTicket.product_id"
-            label="产品编号"
-          ></v-text-field>
           <v-text-field
             v-model="operatingTicket.planned_quantity"
             label="计划数量"
@@ -260,10 +1058,11 @@
             type="date"
             v-model="operatingTicket.planned_completion_time"
           ></v-text-field>
-          <v-text-field
-            v-model="operatingTicket.status"
+          <v-select
             label="工单状态"
-          ></v-text-field>
+            :items="workStatus"
+            v-model="operatingTicket.status"
+          ></v-select>
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -427,6 +1226,11 @@
             label="单位"
             :items="['个', '件', '套', '组', '盒', '对', '台']"
             v-model="operatingTicketDetail.unit"
+          ></v-select>
+          <v-select
+            label="工单明细状态"
+            :items="workDetailStatus"
+            v-model="operatingTicketDetail.status"
           ></v-select>
         </v-card-text>
 
@@ -631,645 +1435,38 @@
         </div>
       </v-card>
     </v-dialog>
+    <!-- 产品编号类型 -->
+    <v-dialog v-model="productDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 产品编号 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="productDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-row>
+          <v-col cols="3" v-for="(product, index) in products" :key="index">
+            <v-checkbox
+              v-model="selectProducts"
+              :label="product"
+              :value="product"
+            ></v-checkbox>
+          </v-col>
+        </v-row>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn color="blue" size="large" class="mr-2" @click="saveProduct()">
+            确定
+          </v-btn>
+          <v-btn color="grey" size="large" @click="productDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
   </v-row>
 </template>
 
-<script setup lang="ts">
-// 搜索引擎优化
-useSeoMeta({
-  // 该页面的标题
-  title: "生产工单",
-  // 社交媒体分享该页面时显示的标题
-  ogTitle: "生产工单",
-  // 该页面的描述
-  description: "同日 MES 系统，生产工单",
-  // 社交媒体分享该页面时显示的描述
-  ogDescription: "同日 MES 系统，生产工单",
-  // 社交媒体分享该页面时显示的图片
-  ogImage: "/同日图标.png",
-});
-// 不采用布局
-definePageMeta({
-  keepalive: true,
-});
-let detailName = ref("");
-// 用于刷新视图的 key
-let key = ref<number>(0);
-
-//创建一个键值对数组，存储工单明细
-let details = ref<any>({});
-// 路由
-const router = useRouter();
-let selected = ref<any[]>([]);
-// 工单新增、修改、删除对话框
-let addDialog = ref(false);
-let editDialog = ref(false);
-let deleteDialog = ref(false);
-let addDetailDialog = ref(false);
-let deleteDetailDialog = ref(false);
-let editDetailDialog = ref(false);
-
-// 工单搜索
-let searchTicketNumber = ref<string>("");
-let searchProjectNumber = ref<string>("");
-let searchTicketType = ref<string>("");
-let searchOutputs = ref<string>("");
-// 表格初始页
-let tablePage = ref<number>(1);
-// 表格每页条数
-let tablePerPage = ref<number>(10);
-// 正在操作的工单
-let operatingTicket = ref<any>({
-  workorder_hid: "",
-  workorder_type: "",
-  planned_completion_time: "",
-  unit: "",
-  planned_quantity: "",
-  product_id: "",
-  start_date: "",
-  finish_date: "",
-  status: "",
-});
-
-let keyToChinese = ref<any>({
-  id: "序号",
-  workorder_hid: "工单编号",
-  workorder_type: "工单类型",
-  unit: "单位",
-  planned_quantity: "计划数量",
-  product_id: "产品编号",
-  start_date: "开始日期",
-  finish_date: "完成日期",
-  planned_completion_time: "计划完成时间",
-  status: "工单状态",
-});
-let getChineseKey = (key: any) => keyToChinese.value[key] || key;
-//正在操作的工单明细
-let operatingTicketDetail = ref<any>({
-  mcode: "",
-  estimated_delivery_date: "",
-  blueprint_id: "",
-  project_code: "",
-  standard_time: "",
-  actual_time: "",
-  procedure: "",
-  planned_quantity: "",
-  reported_quantity: "",
-  unit: "",
-  workorder_did: "",
-  workorder_hid: "",
-  actual_delivery_date: "",
-});
-let keyToDetailChinese = ref<any>({
-  mcode: "产出料",
-  estimated_delivery_date: "预计交付时间",
-  blueprint_id: "图纸号",
-  bomdata: "BOM清单",
-  procedure: "工序",
-  project_code: "项目号",
-  standard_time: "标准工时",
-  actual_time: "实际工时",
-  planned_quantity: "计划数量",
-  reported_quantity: "实际报工数量",
-  unit: "单位",
-  status: "状态",
-  workorder_did: "工单明细编号",
-  workorder_hid: "工单编号",
-  actual_delivery_date: "实际交付时间",
-});
-let getDetailChineseKey = (key: any) => keyToDetailChinese.value[key] || key;
-//存储工单数据的所有工单编号
-let workorderId = ref<any[]>([]);
-// 工单表头
-let tableHeaders = ref<any[]>([
-  {
-    title: "序号",
-    key: "id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工单编号",
-    key: "workorder_hid",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "产品编号",
-    key: "product_id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工单类型",
-    key: "workorder_type",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "计划数量",
-    key: "planned_quantity",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "单位",
-    key: "unit",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "开始日期",
-    key: "start_date",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "完成日期",
-    key: "finish_date",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "计划完成时间",
-    key: "planned_completion_time",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工单状态",
-    key: "status",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "操作",
-    key: "actions",
-    align: "center",
-    sortable: false,
-    filterable: false,
-  },
-]);
-// 展示的工单表格数据
-let tableData = ref<any[]>([]);
-
-//工单明细表头
-let headers = ref<any[]>([
-  { title: "产出料", align: "start", key: "mcode" },
-  { title: "工序", align: "start", key: "procedure" },
-  { title: "图纸号", align: "start", key: "blueprint_id" },
-  { title: "BOM清单", align: "center", key: "bomdata" },
-  { title: "交付时间", align: "start", key: "estimated_delivery_date" },
-  { title: "实际交付时间", align: "start", key: "actual_delivery_date" },
-  { title: "工单明细编号", align: "start", key: "workorder_did" },
-  { title: "项目号", align: "start", key: "project_code" },
-  { title: "标准工时", align: "start", key: "standard_time" },
-  { title: "实际工时", align: "start", key: "actual_time" },
-  { title: "计划数量", align: "start", key: "planned_quantity" },
-  { title: "实际报工数量", align: "start", key: "reported_quantity" },
-  { title: "单位", align: "start", key: "unit" },
-  { title: "状态", align: "start", key: "status" },
-  {
-    title: "操作",
-    key: "actions",
-    align: "center",
-    sortable: false,
-    filterable: false,
-  },
-]);
-
-//工单明细表格展示的数据
-let tableDataDetail = ref<any[]>([]);
-
-// 表格有多少页
-let tablePageCount = computed(() => {
-  return Math.ceil(tableData.value.length / tablePerPage.value);
-});
-
-//工序模块
-//拖拽功能
-let processDialog = ref(false);
-let chips = ref<any[]>([]);
-let droppedChips = ref<any[]>([]);
-let draggedChip = ref(null);
-function dragStart(chip: any) {
-  draggedChip.value = chip;
-}
-function dragEnd() {
-  draggedChip.value = null;
-}
-function drop() {
-  if (draggedChip.value) {
-    droppedChips.value.push(draggedChip.value);
-    chips.value = chips.value.filter((chip) => chip !== draggedChip.value);
-  }
-}
-function removeChip(index: number) {
-  const removedChip = droppedChips.value.splice(index, 1)[0];
-  chips.value.push(removedChip);
-}
-
-let innerTableSelectData = ref<any[]>([]);
-
-// 发请求获取完整的选中的数据
-// 判断工序是否一致
-// 如果一致，则将选中的数据暂时保存
-// 打开对话框，将选中数据的工序显示左边，其他工序过滤到右边
-// 点击保存，将左侧的工序拼接后，赋值给每一个暂存的对象
-// 将对象数组作为参数调用更新接口重新获取数据
-
-//批量工序维护
-async function batchWork() {
-  //判断是否选择数据
-  if (selected.value.length === 0) {
-    alert("请选择需要工序维护的产料");
-    return;
-  }
-
-  //获取到当前选择的数据
-  const data: any = await useHttp(
-    "/MesWorkOrderDetail/M05WorkOrderDetails",
-    "get",
-    undefined,
-    {
-      PageIndex: 1,
-      PageSize: 30,
-      SortType: 0,
-      SortedBy: "id",
-      workorder_did: "",
-      workorder_hid: "",
-      blueprint_id: "",
-      mcode: "",
-      planned_quantity: "",
-      unit: "",
-      procedure: "",
-      project_code: "",
-      reported_quantity: "",
-      estimated_delivery_date: "",
-      actual_delivery_date: "",
-      actual_time: "",
-      standard_time: "",
-    }
-  );
-  let selectedData = data.data.pageList;
-  innerTableSelectData.value = selectedData.filter((item) =>
-    selected.value.includes(item.id)
-  );
-
-  //判断选择的数据他们的工序是否一致
-  let isSameProcedure = innerTableSelectData.value.every(
-    (item, index, array) => {
-      return item.procedure === array[0].procedure;
-    }
-  );
-  if (isSameProcedure) {
-    // 所有选中的数据都有相同的工序属性
-    const data: any = await useHttp(
-      "/MesWorkProcess/M09GetProcedureData",
-      "get",
-      undefined,
-      {
-        SortedBy: "id",
-        PageIndex: 1,
-        SortType: 0,
-        procedure_name: "",
-        procedure_id: "",
-        PageSize: 5,
-      }
-    );
-    chips.value = data.data;
-    //过滤出已选工序和未选工序
-    const workorderHids = innerTableSelectData.value[0].procedure.split(",");
-    droppedChips.value = chips.value.filter((chip) =>
-      workorderHids.includes(chip.procedure_name)
-    );
-    chips.value = chips.value.filter(
-      (chip) => !workorderHids.includes(chip.procedure_name)
-    );
-    processDialog.value = true;
-  } else {
-    alert("您选择的数据的初始工序属性并不一致，请检查后重新选择");
-    return;
-  }
-}
-
-//工序维护
-async function showProcessDialog(procedure: string) {
-  const data: any = await useHttp(
-    "/MesWorkProcess/M09GetProcedureData",
-    "get",
-    undefined,
-    {
-      SortedBy: "id",
-      PageIndex: 1,
-      SortType: 0,
-      procedure_name: "",
-      procedure_id: "",
-      PageSize: 5,
-    }
-  );
-  chips.value = data.data;
-  //过滤出已选工序和未选工序
-  const workorderHids = procedure.split(",");
-  droppedChips.value = chips.value.filter((chip) =>
-    workorderHids.includes(chip.procedure_name)
-  );
-  chips.value = chips.value.filter(
-    (chip) => !workorderHids.includes(chip.procedure_name)
-  );
-  processDialog.value = true;
-}
-
-//保存工序
-async function saveTicket() {
-  if (droppedChips.value.length === 0) {
-    alert("请你至少选择一个工序");
-    return;
-  }
-
-  // 将选择的工序数组拼接成字符串
-  innerTableSelectData.value.forEach((item) => {
-    item.procedure = droppedChips.value
-      .map((item) => item.procedure_name)
-      .join(",");
-  });
-
-  await useHttp(
-    "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
-    "put",
-    innerTableSelectData.value
-  );
-
-  getWorkOrderDetail("");
-  processDialog.value = false;
-}
-// 搜索过滤
-async function filterTableData() {
-  const workData: any = await useHttp(
-    "/MesWorkOrder/M01GetWorkOrderList",
-    "get",
-    undefined,
-    {
-      PageIndex: 1,
-      PageSize: 20,
-      SortType: 0,
-      SortedBy: "id",
-      workorder_hid: searchTicketNumber.value,
-      status: "",
-      start_date: null,
-      planned_quantity: null,
-      product_id: null,
-      planned_completion_time: null,
-      workorder_type: searchTicketType.value,
-      finish_date: null,
-    }
-  );
-  tableData.value = formatDate(workData.data.pageList);
-  const workDataDetail: any = await useHttp(
-    "/MesWorkOrderDetail/M05WorkOrderDetails",
-    "get",
-    undefined,
-    {
-      PageIndex: 1,
-      PageSize: 30,
-      SortType: 0,
-      SortedBy: "id",
-      workorder_did: "",
-      workorder_hid: "",
-      blueprint_id: "",
-      mcode: searchOutputs.value,
-      planned_quantity: "",
-      unit: "",
-      procedure: "",
-      project_code: searchProjectNumber.value,
-      reported_quantity: "",
-      estimated_delivery_date: "",
-      actual_delivery_date: "",
-      actual_time: "",
-      standard_time: "",
-    }
-  );
-  tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
-  detailName.value = "";
-}
-
-// 重置搜索
-function resetFilter() {
-  searchProjectNumber.value = "";
-  searchTicketNumber.value = "";
-  searchOutputs.value = "";
-  searchTicketType.value = "";
-  detailName.value = "";
-  getWorkOrder();
-  getWorkOrderDetail("");
-}
-
-onMounted(async () => {
-  getWorkOrder();
-  getWorkOrderDetail("");
-});
-//获取工单数据
-async function getWorkOrder() {
-  const data: any = await useHttp(
-    "/MesWorkOrder/M01GetWorkOrderList",
-    "get",
-    undefined,
-    {
-      PageIndex: 1,
-      PageSize: 20,
-      SortType: 0,
-      SortedBy: "id",
-      workorder_hid: "",
-      status: "",
-      start_date: null,
-      planned_quantity: null,
-      product_id: null,
-      planned_completion_time: null,
-      workorder_type: "",
-      finish_date: null,
-    }
-  );
-  tableData.value = formatDate(data.data.pageList);
-  workorderId.value = data.data.pageList.map((item) => item.workorder_hid);
-}
-//将工单数据的日期进行截取，保留年月份
-function formatDate(data: any) {
-  data.forEach((item, index) => {
-    item.start_date = item.start_date.substring(0, 10);
-    item.finish_date = item.finish_date.substring(0, 10);
-    item.planned_completion_time = item.planned_completion_time.substring(
-      0,
-      10
-    );
-  });
-  return data;
-}
-
-//获取工单明细数据
-async function getWorkOrderDetail(workorder_hid: string) {
-  const data: any = await useHttp(
-    "/MesWorkOrderDetail/M05WorkOrderDetails",
-    "get",
-    undefined,
-    {
-      PageIndex: 1,
-      PageSize: 30,
-      SortType: 0,
-      SortedBy: "id",
-      workorder_did: "",
-      workorder_hid: workorder_hid,
-      blueprint_id: "",
-      mcode: "",
-      planned_quantity: "",
-      unit: "",
-      procedure: "",
-      project_code: "",
-      reported_quantity: "",
-      estimated_delivery_date: "",
-      actual_delivery_date: "",
-      actual_time: "",
-      standard_time: "",
-    }
-  );
-  tableDataDetail.value = formatDateDetail(data.data.pageList);
-}
-
-//将工单明细数据的日期进行截取，保留年月份
-function formatDateDetail(data: any) {
-  data.forEach((item, index) => {
-    item.estimated_delivery_date = item.estimated_delivery_date.substring(
-      0,
-      10
-    );
-    item.actual_delivery_date = item.actual_delivery_date.substring(0, 10);
-  });
-  return data;
-}
-//点击表单显示表单明细
-async function showTicketDetail(item: any, obj: any) {
-  getWorkOrderDetail(obj.item.raw.workorder_hid);
-  detailName.value = obj.item.raw.workorder_hid;
-}
-
-// 新增工单前重置新增对话框
-function resetAddDialog() {
-  operatingTicket.value = {
-    workorder_hid: "",
-    workorder_type: "",
-    product_id: "",
-    start_date: "",
-    finish_date: "",
-    status: "",
-  };
-  addDialog.value = true;
-}
-// 新增工单
-async function addTicket() {
-  await useHttp("/MesWorkOrder/M02AddWorkOrder", "post", operatingTicket.value);
-  getWorkOrder();
-  addDialog.value = false;
-}
-// 新增工单明细前重置新增对话框
-function resetAddDetailDialog(workorder_hid: any) {
-  operatingTicketDetail.value = {
-    mcode: "",
-    estimated_delivery_date: "",
-    blueprint_id: "",
-    project_code: "",
-    standard_time: "",
-    actual_time: "",
-    procedure: "123",
-    planned_quantity: "",
-    reported_quantity: "",
-    unit: "",
-    workorder_did: "",
-    workorder_hid: "",
-    actual_delivery_date: null,
-  };
-  addDetailDialog.value = true;
-  getWorkOrder();
-}
-
-//新增工单明细行
-async function addTicketDetail() {
-  const data: any = await useHttp(
-    "/MesWorkOrderDetail/M06AddWorkOrderDetails",
-    "post",
-    [operatingTicketDetail.value]
-  );
-  getWorkOrderDetail("");
-  addDetailDialog.value = false;
-}
-// 修改工单
-async function editTicket() {
-  const data: any = await useHttp(
-    "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
-    "put",
-    operatingTicket.value
-  );
-  getWorkOrder();
-  editDialog.value = false;
-}
-
-//修改工单明细行
-async function editTicketDetail() {
-  const data: any = await useHttp(
-    "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
-    "put",
-    [operatingTicketDetail.value]
-  );
-  getWorkOrderDetail("");
-  editDetailDialog.value = false;
-}
-
-// 删除工单
-async function deleteTicket() {
-  const data: any = await useHttp(
-    "/MesWorkOrder/M04DeleteWorkOrder",
-    "delete",
-    undefined,
-    {
-      workorder_ids: [operatingTicket.value.id],
-    }
-  );
-  getWorkOrder();
-  deleteDialog.value = false;
-}
-
-// 删除工单明细行
-async function deleteTicketDetail() {
-  const data: any = await useHttp(
-    "/MesWorkOrderDetail/M08DeleteWorkOrderDetails",
-    "delete",
-    undefined,
-    { workorderdetail_ids: [operatingTicketDetail.value.id] }
-  );
-  getWorkOrderDetail("");
-  deleteDetailDialog.value = false;
-}
-
-//查看图纸
-function handleBlueprintClick(item: any) {
-  console.log(item.blueprint_id); // 查看图纸
-}
-//bom清单维护
-function handleBomClick(item: any) {
-  router.push({
-    path: "/work-order/bom-list",
-    query: { workorder_did: item.workorder_did },
-  });
-}
-</script>
 <style scoped>
 .font-size {
   font-size: small;
