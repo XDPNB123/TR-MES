@@ -5,6 +5,96 @@ const router = useRouter();
 // 使用 cookie
 const name = useCookie("name");
 
+// 此处定义所有导航
+const allNavigation = ref<any[]>([
+  {
+    title: "看板",
+    path: "/dashboard",
+    icon: "fa-solid fa-chart-column",
+    children: [
+      {
+        name: "主看板",
+        path: "/dashboard/main-dashboard",
+        icon: "fa-solid fa-chart-line",
+      },
+    ],
+  },
+  {
+    title: "工单",
+    path: "/work-order",
+    icon: "fa-solid fa-table-list",
+    children: [
+      {
+        name: "生产工单",
+        path: "/work-order/work-order-product",
+        icon: "fa-solid fa-table-list",
+      },
+      {
+        name: "工单排产",
+        path: "/work-order/work-produce-recode",
+        icon: "fa-solid fa-list-ol",
+      },
+      {
+        name: "常用工序",
+        path: "/work-order/process-maintenance",
+        icon: "fa-solid fa-screwdriver-wrench",
+      },
+      {
+        name: "BOM清单",
+        path: "/work-order/bom-list",
+        icon: "fa-solid fa-list",
+      },
+    ],
+  },
+]);
+
+// tabs 类型
+type tabType = {
+  name: string;
+  path: string;
+};
+
+// 选中的 tab
+let selectTab = ref<string>("");
+
+// 正在显示的所有 tab
+let tabs = ref<tabType[]>([]);
+
+// 添加 tab
+function addTab(tab: tabType) {
+  // 新的 tab 是否在 tabs 中已经存在，存在则不添加
+  if (tabs.value.findIndex((item) => item.name === tab.name) < 0)
+    tabs.value.push(tab);
+  // 更新选中的 tab
+  selectTab.value = tab.name;
+}
+
+// 移除 tab
+function removeTab(tab: tabType) {
+  // 获取要删除的 tab 的索引
+  const tabIndex = tabs.value.indexOf(tab);
+  // 从 tabs 中删除该 tab
+  tabs.value.splice(tabIndex, 1);
+
+  // 如果删除的 tab 为选中的 tab
+  if (tab.name === selectTab.value) {
+    // 如果删除该 tab 后，tabs 长度大于 0
+    if (tabs.value.length > 0) {
+      // 如果删除的 tab 为最后一个，则需要更新选中的 tab 为前一个 tab，且跳转到前一个 tab
+      if (tabIndex === tabs.value.length) {
+        selectTab.value = tabs.value[tabIndex - 1].name;
+        router.push({ path: tabs.value[tabIndex - 1].path });
+        return;
+      }
+      // 如果删除的 tab 不为最后一个，则需要更新选中的 tab 为后一个 tab，且跳转到后一个 tab
+      selectTab.value = tabs.value[tabIndex].name;
+      router.push({ path: tabs.value[tabIndex].path });
+    }
+    // 如果删除该 tab 后，tabs 长度等于 0，则不需要做任何操作
+  }
+  // 如果删除的 tab 不为选中的 tab，则不需要做任何操作
+}
+
 // 切换全屏模式
 function changeFullScreen() {
   if (!document.fullscreenElement) {
@@ -104,20 +194,25 @@ function exit() {
         <div class="w-100">
           <v-divider></v-divider>
 
-          <v-menu open-on-hover>
+          <v-menu
+            open-on-hover
+            v-for="(item, index) in allNavigation"
+            :key="index"
+          >
             <template v-slot:activator="{ props }">
               <v-btn
+                class="mr-6"
                 size="x-large"
                 :color="
-                  router.currentRoute.value.fullPath.startsWith('/dashboard')
+                  router.currentRoute.value.fullPath.startsWith(item.path)
                     ? 'blue-darken-3'
                     : undefined
                 "
                 variant="flat"
                 v-bind="props"
               >
-                <v-icon>fa-solid fa-chart-column</v-icon>
-                <div class="mx-6">看板</div>
+                <v-icon>{{ item.icon }}</v-icon>
+                <div class="mx-6">{{ item.title }}</div>
                 <v-icon>fa-solid fa-angle-down</v-icon>
               </v-btn>
             </template>
@@ -127,73 +222,42 @@ function exit() {
               <v-list-item
                 rounded="lg"
                 active-class="list-item-active"
-                to="/dashboard/main-dashboard"
-                prepend-icon="fa-solid fa-chart-line"
-                title="主看板"
-              >
-              </v-list-item>
-            </v-list>
-          </v-menu>
-
-          <v-menu open-on-hover>
-            <template v-slot:activator="{ props }">
-              <v-btn
-                class="mx-6"
-                size="x-large"
-                :color="
-                  router.currentRoute.value.fullPath.startsWith('/work-order')
-                    ? 'blue-darken-3'
-                    : undefined
+                v-for="(item_, index_) in item.children"
+                :key="index_"
+                :to="item_.path"
+                :prepend-icon="item_.icon"
+                :title="item_.name"
+                @click="
+                  addTab({
+                    name: item_.name,
+                    path: item_.path,
+                  })
                 "
-                variant="flat"
-                v-bind="props"
-              >
-                <v-icon>fa-solid fa-table-list</v-icon>
-                <div class="mx-6">工单</div>
-                <v-icon>fa-solid fa-angle-down</v-icon>
-              </v-btn>
-            </template>
-
-            <v-list rounded="lg" class="pa-3">
-              <!-- 当 url 匹配到 to 时，就会触发 active-class -->
-              <v-list-item
-                rounded="lg"
-                active-class="list-item-active"
-                to="/work-order/work-order-product"
-                prepend-icon="fa-solid fa-table-list"
-                title="生产工单"
-              >
-              </v-list-item>
-              <v-list-item
-                class="mt-1"
-                rounded="lg"
-                active-class="list-item-active"
-                to="/work-order/work-produce-recode"
-                prepend-icon="fa-solid fa-list-ol"
-                title="工单排产"
-              >
-              </v-list-item>
-              <v-list-item
-                class="mt-1"
-                rounded="lg"
-                active-class="list-item-active"
-                to="/work-order/process-maintenance"
-                prepend-icon="fa-solid fa-screwdriver-wrench"
-                title="常用工序"
-              >
-              </v-list-item>
-
-              <v-list-item
-                class="mt-1"
-                rounded="lg"
-                active-class="list-item-active"
-                to="/work-order/bom-list"
-                prepend-icon="fa-solid fa-list"
-                title="BOM清单"
               >
               </v-list-item>
             </v-list>
           </v-menu>
+
+          <v-btn-toggle
+            divided
+            :border="true"
+            density="compact"
+            color="blue-darken-3"
+            v-model="selectTab"
+          >
+            <v-btn
+              v-for="(item, index) in tabs"
+              :key="index"
+              :value="item.name"
+              @click="router.push({ path: item.path })"
+            >
+              <span class="hidden-sm-and-down">{{ item.name }}</span>
+
+              <v-icon end @click.stop="removeTab(item)">
+                fa-solid fa-xmark
+              </v-icon>
+            </v-btn>
+          </v-btn-toggle>
         </div>
       </template>
     </v-app-bar>
@@ -208,5 +272,8 @@ function exit() {
 .list-item-active {
   background-image: linear-gradient(25deg, #0044bd, #1e66d3, #2a88e9, #2dacff);
   color: white !important;
+}
+.tabs {
+  margin-left: auto !important;
 }
 </style>
