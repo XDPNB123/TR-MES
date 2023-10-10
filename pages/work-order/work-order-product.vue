@@ -724,7 +724,7 @@ let keyToDetailChinese = ref<any>({
   mcode: "产出料",
   estimated_delivery_date: "预计交付时间",
   blueprint_id: "图纸号",
-  BOMList: "BOM清单",
+  bomdata: "BOM清单",
   procedure: "工序",
   project_code: "项目号",
   standard_time: "标准工时",
@@ -1264,7 +1264,10 @@ function handleBlueprintClick(item: any) {
 }
 //bom清单维护
 function handleBomClick(item: any) {
-  router.push({ path: "/work-order/bom-list" });
+  router.push({
+    path: "/work-order/bom-list",
+    query: { workorder_did: item.workorder_did },
+  });
 }
 </script>
 <style scoped>
