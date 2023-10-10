@@ -1264,7 +1264,10 @@ function handleBlueprintClick(item: any) {
 }
 //bom清单维护
 function handleBomClick(item: any) {
-  router.push({ path: "/work-order/bom-list" });
+  router.push({
+    path: "/work-order/bom-list",
+    query: { workorder_did: item.workorder_did },
+  });
 }
 </script>
 <style scoped>

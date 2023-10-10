@@ -3,7 +3,7 @@
     <v-row class="ma-2">
       <v-col cols="6">
         <v-text-field
-          label="工单明细编号"
+          label="物料编号"
           variant="outlined"
           density="compact"
           hide-details
@@ -215,10 +215,7 @@ useSeoMeta({
   // 社交媒体分享该页面时显示的图片
   ogImage: "/同日图标.png",
 });
-// 不采用布局
-definePageMeta({
-  keepalive: true,
-});
+
 let dialogAdd = ref(false);
 let dialogDelete = ref(false);
 let editDialog = ref(false);
@@ -265,8 +262,8 @@ async function filterTableData() {
     "get",
     undefined,
     {
-      workorder_did: searchWorkId.value,
-      material_id: "",
+      workorder_did: workorder_did,
+      material_id: searchWorkId.value,
       material_name: searchMaterialName.value,
       PageIndex: "1",
       PageSize: "20",
@@ -279,16 +276,20 @@ async function filterTableData() {
 
 // 重置搜索
 function resetFilter() {
-  (searchWorkId.value = ""), (searchMaterialName.value = ""), getBomList();
+  (searchWorkId.value = ""),
+    (searchMaterialName.value = ""),
+    getBomList(workorder_did);
 }
-
-async function getBomList() {
+let route = useRoute();
+let workorder_did = route.query.workorder_did;
+//搜素bom物料
+async function getBomList(workorder_did: any) {
   const data: any = await useHttp(
     "/MesWorkBom/M16GetBomList",
     "get",
     undefined,
     {
-      workorder_did: "",
+      workorder_did: workorder_did,
       material_id: "",
       material_name: "",
       PageIndex: "1",
@@ -297,16 +298,20 @@ async function getBomList() {
       SortType: 0,
     }
   );
+
   bomTableList.value = data.data.pageList;
+  console.log(workorder_did);
+  console.log(bomTableList.value);
 }
 onMounted(() => {
-  getBomList();
+  console.log(route.query.workorder_did);
+  getBomList(workorder_did);
 });
 
 //新增前重置conference对象内容
 function showDialogAdd() {
   conference.value = {
-    workorder_did: "",
+    workorder_did: workorder_did,
     material_id: "",
     material_name: "",
     required_quantity: "",
