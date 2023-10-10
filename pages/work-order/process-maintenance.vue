@@ -64,7 +64,7 @@
               color="red"
               size="small"
               @click.stop="
-                operateProcess = { ...item.raw };
+                operate = { ...item.raw };
                 deleteDialog = true;
               "
             >
@@ -180,7 +180,7 @@
 
           <v-list>
             <v-list-item
-              v-for="(value, key, index) in operateProcess"
+              v-for="(value, key, index) in operate"
               :key="index"
             >
               <template #prepend> {{ getChineseKey(key) }}:</template>
@@ -234,6 +234,7 @@ let operateProcess = ref({
   procedure_description: "",
   defaul_outsource: "",
 });
+let operate=ref()
 let keyToChinese = ref<any>({
   procedure_id: "工序编号",
   procedure_name: "工序名称",
@@ -348,6 +349,7 @@ function resetFilter() {
 function resetAddDialog() {
   // 清空文本框
   operateProcess.value = {
+  
     procedure_id: "",
     procedure_name: "",
     procedure_description: "",
@@ -381,12 +383,12 @@ async function editProcess() {
 
 // 删除工单
 async function deleteProcess() {
-  console.log(operateProcess.value.id);
+
   const data: any = await useHttp(
     "/MesWorkProcess/M12DeleteProcedure",
     "delete",
     undefined,
-    { ids: [operateProcess.value.id] }
+    { ids: [operate.value.id] }
   );
   getWorkOrder();
   deleteDialog.value = false;
