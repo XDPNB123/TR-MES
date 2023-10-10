@@ -319,22 +319,20 @@ function showDialogAdd() {
 }
 async function addCertain() {
   await useHttp("/MesWorkBom/M17AddBomInfo", "post", [conference.value]);
-  getBomList();
+  getBomList("");
   dialogAdd.value = false;
 }
 async function deleteCertain() {
   await useHttp("/MesWorkBom/M19DeleteBomInfo", "delete", undefined, {
     workorderbom_ids: [conference.value.id],
   });
-  getBomList();
+  getBomList("");
   dialogDelete.value = false;
 }
-function goBack() {
-  router.back();
-}
+
 async function editCertain() {
   await useHttp("/MesWorkBom/M18UpdateBomInfo", "put", [conference.value]);
-  getBomList();
+  getBomList("");
   editDialog.value = false;
 }
 </script>
