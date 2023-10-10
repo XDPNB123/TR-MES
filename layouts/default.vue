@@ -238,14 +238,9 @@ function exit() {
 
             <v-menu open-on-hover>
               <template v-slot:activator="{ props }">
-                <v-btn
-                  class="mr-6"
-                  size="x-large"
-                  variant="flat"
-                  v-bind="props"
-                >
+                <v-btn size="x-large" variant="flat" v-bind="props">
                   <v-icon>fa-solid fa-folder-open</v-icon>
-                  <div class="mx-6">已打开页面</div>
+                  <div class="ml-6">已打开页面</div>
                 </v-btn>
               </template>
 
