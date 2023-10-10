@@ -300,11 +300,8 @@ async function getBomList(workorder_did: any) {
   );
 
   bomTableList.value = data.data.pageList;
-  console.log(workorder_did);
-  console.log(bomTableList.value);
 }
 onMounted(() => {
-  console.log(route.query.workorder_did);
   getBomList(workorder_did);
 });
 
