@@ -38,9 +38,9 @@ onMounted(async function () {
 let tab = ref<any>(null);
 
 // 手机号
-let tel = ref<string>("");
+let tel = ref<string|undefined>("");
 // 密码
-let password = ref<string>("");
+let password = ref<string|undefined>("");
 // 是否显示密码
 let showPassword = ref<boolean>(false);
 // 密码登陆的表单校验
@@ -69,18 +69,16 @@ const telRule = ref<any[]>([
 
 // 密码校验规则
 const passwordRule = ref<any[]>([
-  (v) => !!v || "密码不能为空",
-  (v) => /^[a-zA-Z0-9]*$/.test(v) || "密码只能包含数字和字母",
-  (v) => (v && v.length <= 20) || "密码长度不能超过20位",
+  (v: any) => !!v || "密码不能为空",
+  (v: string) => /^[a-zA-Z0-9]*$/.test(v) || "密码只能包含数字和字母",
+  (v: string | any[]) => (v && v.length <= 20) || "密码长度不能超过20位",
 ]);
 
 // 密码登陆
 async function passwordLogin() {
   // 表单校验不成功则直接返回
   // if (!passwordFormValid.value) return;
-
-  // 密码加密
-  const md5Password = useMd5(password.value);
+  const md5Password = useMd5(password.value as string) ;
 
   // 发送登陆请求
   const data: any = await useHttp("/Account/A01LoginV1", "post", {
