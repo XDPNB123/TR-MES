@@ -223,9 +223,9 @@ let editDialog = ref(false);
 let searchWorkId = ref("");
 let searchMaterialName = ref("");
 // 表格初始页
-let tablePage = ref<already_received_quantity>(1);
+let tablePage = ref<number>(1);
 // 表格每页条数
-let tablePerPage = ref<already_received_quantity>(10);
+let tablePerPage = ref<number>(10);
 // 表格有多少页
 let tablePageCount = computed(() => {
   return Math.ceil(bomTableList.value.length / tablePerPage.value);
@@ -319,22 +319,20 @@ function showDialogAdd() {
 }
 async function addCertain() {
   await useHttp("/MesWorkBom/M17AddBomInfo", "post", [conference.value]);
-  getBomList();
+  getBomList("");
   dialogAdd.value = false;
 }
 async function deleteCertain() {
   await useHttp("/MesWorkBom/M19DeleteBomInfo", "delete", undefined, {
     workorderbom_ids: [conference.value.id],
   });
-  getBomList();
+  getBomList("");
   dialogDelete.value = false;
 }
-function goBack() {
-  router.back();
-}
+
 async function editCertain() {
   await useHttp("/MesWorkBom/M18UpdateBomInfo", "put", [conference.value]);
-  getBomList();
+  getBomList("");
   editDialog.value = false;
 }
 </script>

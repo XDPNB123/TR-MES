@@ -135,11 +135,15 @@ let sortBy = ["start_date"];
 let sortDesc = [true];
 //工单表头通过开始日期进行降序排列
 let sortedData = computed(() => {
-  return tableData.value.slice().sort((a, b) => {
+  return tableData.value.slice().sort((a: any, b: any) => {
     if (sortDesc[0]) {
-      return new Date(b[sortBy[0]]) - new Date(a[sortBy[0]]);
+      return (
+        new Date(b[sortBy[0]]).getTime() - new Date(a[sortBy[0]]).getTime()
+      );
     } else {
-      return new Date(a[sortBy[0]]) - new Date(b[sortBy[0]]);
+      return (
+        new Date(a[sortBy[0]]).getTime() - new Date(b[sortBy[0]]).getTime()
+      );
     }
   });
 });
@@ -230,11 +234,17 @@ let sortByDetail = ["estimated_delivery_date"];
 let sortDescDetail = [true];
 //通过预计交付日期对工单明细进行升序排列
 let sortedDataDetail = computed(() => {
-  return tableDataDetail.value.slice().sort((a, b) => {
-    if (sortDesc[0]) {
-      return new Date(a[sortByDetail[0]]) - new Date(b[sortByDetail[0]]);
+  return tableDataDetail.value.slice().sort((a: any, b: any) => {
+    if (sortDescDetail[0]) {
+      return (
+        new Date(a[sortByDetail[0]]).getTime() -
+        new Date(b[sortByDetail[0]]).getTime()
+      );
     } else {
-      return new Date(b[sortByDetail[0]]) - new Date(a[sortByDetail[0]]);
+      return (
+        new Date(b[sortByDetail[0]]).getTime() -
+        new Date(a[sortByDetail[0]]).getTime()
+      );
     }
   });
 });
@@ -335,7 +345,7 @@ async function batchWork() {
     }
   );
   let selectedData = data.data.pageList;
-  innerTableSelectData.value = selectedData.filter((item) =>
+  innerTableSelectData.value = selectedData.filter((item: any) =>
     selected.value.includes(item.id)
   );
 
@@ -551,11 +561,11 @@ async function getWorkOrder() {
     }
   );
   tableData.value = formatDate(data.data.pageList);
-  workorderId.value = data.data.pageList.map((item) => item.workorder_hid);
+  workorderId.value = data.data.pageList.map((item: any) => item.workorder_hid);
 }
 //将工单数据的日期进行截取，保留年月份
 function formatDate(data: any) {
-  data.forEach((item, index) => {
+  data.forEach((item: any, index: number) => {
     item.start_date = item.start_date.substring(0, 10);
     item.finish_date = item.finish_date.substring(0, 10);
     item.planned_completion_time = item.planned_completion_time.substring(
@@ -597,7 +607,7 @@ async function getWorkOrderDetail(workorder_hid: string) {
 
 //将工单明细数据的日期进行截取，保留年月份
 function formatDateDetail(data: any) {
-  data.forEach((item, index) => {
+  data.forEach((item: any) => {
     item.estimated_delivery_date = item.estimated_delivery_date.substring(
       0,
       10
@@ -631,7 +641,7 @@ async function addTicket() {
   addDialog.value = false;
 }
 // 新增工单明细前重置新增对话框
-function resetAddDetailDialog(workorder_hid: any) {
+function resetAddDetailDialog() {
   operatingTicketDetail.value = {
     mcode: "",
     estimated_delivery_date: "",
@@ -807,7 +817,6 @@ function saveProduct() {
               v-model:page="tablePage"
               :headers="tableHeaders"
               :items="sortedData"
-              :sort-by.sync="sortBy"
               :sort-desc.sync="sortDesc"
               multi-sort
               :items-per-page="tablePerPage"
@@ -948,7 +957,6 @@ function saveProduct() {
               v-model:page="tablePage"
               :items-per-page="tablePerPage"
               v-model="selected"
-              :sort-by.sync="sortByDetail"
               :sort-desc.sync="sortDescDetail"
               multi-sort
               show-select
