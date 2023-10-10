@@ -223,9 +223,9 @@ let editDialog = ref(false);
 let searchWorkId = ref("");
 let searchMaterialName = ref("");
 // 表格初始页
-let tablePage = ref<already_received_quantity>(1);
+let tablePage = ref<number>(1);
 // 表格每页条数
-let tablePerPage = ref<already_received_quantity>(10);
+let tablePerPage = ref<number>(10);
 // 表格有多少页
 let tablePageCount = computed(() => {
   return Math.ceil(bomTableList.value.length / tablePerPage.value);
