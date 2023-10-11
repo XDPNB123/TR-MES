@@ -16,7 +16,37 @@ useSeoMeta({
 definePageMeta({
   keepalive: true,
 });
-
+//单位
+let units = ref<string[]>([
+  "PCS",
+  "米",
+  "毫米",
+  "张",
+  "KG",
+  "瓶（通）",
+  "盒（包）",
+  "双（对）",
+  "平方米",
+  "卷",
+  "台",
+  "套",
+  "件",
+  "根",
+  "个",
+  "袋",
+  "立方",
+  "升",
+  "支",
+  "箱",
+  "盒",
+  "节",
+  "把",
+  "片",
+  "公斤",
+  "干公斤",
+  "包",
+  "本",
+]);
 //工单表头的状态
 let workStatus = ref([
   "新建未审核",
@@ -55,6 +85,7 @@ let deleteDetailDialog = ref(false);
 let editDetailDialog = ref(false);
 let productDialog = ref(false);
 let auditDialog = ref(false);
+let processDialog = ref(false);
 // 工单搜索
 let searchTicketNumber = ref<string>("");
 let searchProjectNumber = ref<string>("");
@@ -76,7 +107,6 @@ let operatingTicket = ref<any>({
   finish_date: "",
   status: "",
 });
-
 let keyToChinese = ref<any>({
   id: "序号",
   workorder_hid: "工单编号",
@@ -124,10 +154,9 @@ let keyToDetailChinese = ref<any>({
   actual_delivery_date: "实际交付时间",
 });
 let getDetailChineseKey = (key: any) => keyToDetailChinese.value[key] || key;
-
+//工单表按照开始时间进行降序排序
 let sortBy = ["start_date"];
 let sortDesc = [true];
-//工单表头通过开始日期进行降序排列
 let sortedData = computed(() => {
   return tableData.value.slice().sort((a: any, b: any) => {
     if (sortDesc[0]) {
@@ -224,9 +253,9 @@ let tableHeaders = ref<any[]>([
   },
 ]);
 
+//工单明细通过预计交付日期对工单明细进行升序排列
 let sortByDetail = ["estimated_delivery_date"];
 let sortDescDetail = [true];
-//通过预计交付日期对工单明细进行升序排列
 let sortedDataDetail = computed(() => {
   return tableDataDetail.value.slice().sort((a: any, b: any) => {
     if (sortDescDetail[0]) {
@@ -242,7 +271,6 @@ let sortedDataDetail = computed(() => {
     }
   });
 });
-
 //工单明细表头
 let headers = ref<any[]>([
   { title: "产出料", align: "start", key: "mcode" },
@@ -267,39 +295,41 @@ let headers = ref<any[]>([
     filterable: false,
   },
 ]);
-
 //工单明细表格展示的数据
 let tableDataDetail = ref<any[]>([]);
-// 表格初始页
+
+// 工单表格初始页
 let tablePage = ref<number>(1);
 // 工单表格每页条数
 let tablePerPage = ref<number>(10);
-// 表格初始页
-let tableDetailPage = ref<number>(1);
-// 工单明细表格每页条数
-let tableDetailPerPage = ref<number>(10);
-// 表格初始页
-let productTablePage = ref<number>(1);
-// 工单明细表格每页条数
-let productTablePerPage = ref<number>(10);
-// 工单明细表格有多少页
-let tableDetailPageCount = computed(() => {
-  return Math.ceil(sortedDataDetail.value.length / tableDetailPerPage.value);
-});
 // 工单表格有多少页
 let tablePageCount = computed(() => {
   return Math.ceil(sortedData.value.length / tablePerPage.value);
 });
+
+// 工单明细表格初始页
+let tableDetailPage = ref<number>(1);
+// 工单明细表格每页条数
+let tableDetailPerPage = ref<number>(10);
+// 工单明细表格有多少页
+let tableDetailPageCount = computed(() => {
+  return Math.ceil(sortedDataDetail.value.length / tableDetailPerPage.value);
+});
+
+// 产品表格初始页
+let productTablePage = ref<number>(1);
+// 产品表格每页条数
+let productTablePerPage = ref<number>(10);
 //产品列表有多少页
 let productTablePageCount = computed(() => {
   return Math.ceil(sortedDataDetail.value.length / productTablePerPage.value);
 });
+
 //工序模块
-//实现拖拽功能的方法
-let processDialog = ref(false);
-let chips = ref<any[]>([]);
-let droppedChips = ref<any[]>([]);
+let chips = ref<any[]>([]);//存储常用工序
+let droppedChips = ref<any[]>([]);//维护选择的工序
 let draggedChip = ref(null);
+//实现拖拽功能的方法
 function dragStart(chip: any) {
   draggedChip.value = chip;
 }
@@ -316,7 +346,8 @@ function removeChip(index: number) {
   const removedChip = droppedChips.value.splice(index, 1)[0];
   chips.value.push(removedChip);
 }
-//用来存储选择的的数据
+
+//用来存储表格selected选择的的数据
 let innerTableSelectData = ref<any[]>([]);
 // 发请求获取完整的选中的数据
 // 判断工序是否一致
@@ -410,11 +441,13 @@ async function showProcessDialog(item: any) {
   }
   processDialog.value = true;
 }
+
 //关闭\取消工序维护框，需要清空已选择的数据
 function cancelProcess() {
   innerTableSelectData.value = [];
   processDialog.value = false;
 }
+
 //保存工序
 async function saveTicket() {
   try {
@@ -440,6 +473,7 @@ async function saveTicket() {
   processDialog.value = false;
   innerTableSelectData.value = [];
 }
+
 // 工单表头搜索过滤
 async function filterTableData() {
   try {
@@ -482,7 +516,6 @@ async function filterTableData() {
     console.log(error);
   }
 }
-
 // 工单表头重置搜索
 function resetFilter() {
   searchTicketType.value = "";
@@ -492,6 +525,7 @@ function resetFilter() {
   detailName.value = "";
   getWorkOrder();
 }
+
 //工单明细搜素
 async function filterTableDataDetail() {
   try {
@@ -538,7 +572,6 @@ async function filterTableDataDetail() {
     console.log(error);
   }
 }
-
 //重置工单明细的搜素
 function resetFilterDetail() {
   searchOutputs.value = "";
@@ -663,6 +696,7 @@ function resetAddDialog() {
     product_id: "",
     start_date: "",
     finish_date: "",
+    unit: "件",
     status: "新建未审核",
   };
   addDialog.value = true;
@@ -693,7 +727,7 @@ function resetAddDetailDialog() {
     procedure: "123",
     planned_quantity: "",
     reported_quantity: "",
-    unit: "",
+    unit: "件",
     workorder_did: "",
     workorder_hid: "",
     actual_delivery_date: null,
@@ -967,7 +1001,7 @@ function saveProduct() {
                 <!-- <v-icon color="orange" size="small" class="mr-3" @click.stop="">
               fa-solid fa-eye
             </v-icon> -->
-            <!-- 未审核 -->
+                <!-- 未审核 -->
                 <v-icon
                   color="green"
                   size="small"
@@ -1205,7 +1239,7 @@ function saveProduct() {
 
           <v-select
             label="单位"
-            :items="['个', '件', '套', '组', '盒', '对', '台']"
+            :items="units"
             v-model="operatingTicket.unit"
           ></v-select>
           <v-text-field
@@ -1263,7 +1297,7 @@ function saveProduct() {
           ></v-text-field>
           <v-select
             label="单位"
-            :items="['个', '件', '套', '组', '盒', '对', '台']"
+            :items="units"
             v-model="operatingTicket.unit"
           ></v-select>
           <v-text-field
@@ -1387,7 +1421,7 @@ function saveProduct() {
           ></v-text-field>
           <v-select
             label="单位"
-            :items="['个', '件', '套', '组', '盒', '对', '台']"
+            :items="units"
             v-model="operatingTicketDetail.unit"
           ></v-select>
           <v-select
@@ -1493,7 +1527,7 @@ function saveProduct() {
           ></v-text-field>
           <v-select
             label="单位"
-            :items="['个', '件', '套', '组', '盒', '对', '台']"
+            :items="units"
             v-model="operatingTicketDetail.unit"
           ></v-select>
           <v-select
