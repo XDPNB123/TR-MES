@@ -730,19 +730,11 @@ async function editTicket() {
   }
   editDialog.value = false;
 }
-//判断该条工单的状态初始值是否为“新建未审核”
-let statusAudit=ref(false)
-function auditIsNew(){
-    if(status.value!=="新建未审核"){
-        statusAudit.value=true
-    }else{
-        statusAudit.value=false
-    }
-} 
+
 //审核通过
-async function auditTicket(){
-     try {
-       operatingTicket.value.status="已审核待排产"
+async function auditTicket() {
+  try {
+    operatingTicket.value.status = "已审核待排产";
     const data: any = await useHttp(
       "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
       "put",
@@ -752,7 +744,7 @@ async function auditTicket(){
   } catch (error) {
     console.log(error);
   }
-  auditDialog.value=false
+  auditDialog.value = false;
 }
 
 //修改工单明细行
@@ -880,7 +872,6 @@ function saveProduct() {
   }
   productDialog.value = false;
 }
-
 </script>
 
 <template>
@@ -976,17 +967,22 @@ function saveProduct() {
                 <!-- <v-icon color="orange" size="small" class="mr-3" @click.stop="">
               fa-solid fa-eye
             </v-icon> -->
+            <!-- 未审核 -->
                 <v-icon
                   color="green"
                   size="small"
                   class="mr-3"
-                  :disabled="statusAudit"
+                  v-if="item.raw.status === '新建未审核'"
                   @click.stop="
                     operatingTicket = { ...item.raw };
                     auditDialog = true;
                   "
                 >
                   fa-solid fa-eye
+                </v-icon>
+                <!-- 已审核 -->
+                <v-icon color="black" size="small" class="mr-3" v-else>
+                  fa-solid fa-eye-slash
                 </v-icon>
                 <v-icon
                   color="blue"
@@ -1255,7 +1251,7 @@ function saveProduct() {
             :items="['装配', '机加工']"
             v-model="operatingTicket.workorder_type"
           ></v-select>
-           <v-text-field
+          <v-text-field
             v-model="operatingTicket.product_id"
             label="产品编号"
             append-inner-icon="fa-regular fa-hand-pointer"
