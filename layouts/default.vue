@@ -5,8 +5,32 @@ const router = useRouter();
 // 使用 cookie
 const name = useCookie("name");
 
-// 此处定义所有导航
-const allNavigation = ref<any[]>([
+// 此处定义用户菜单
+const userMenus = ref<any[]>([
+  {
+    name: "个人信息",
+    path: "/auth/personal-information",
+    icon: "fa-solid fa-user",
+  },
+  {
+    name: "修改密码",
+    path: "/auth/update-password",
+    icon: "fa-solid fa-pen-to-square",
+  },
+  {
+    name: "系统设置",
+    path: "/auth/system-setting",
+    icon: "fa-solid fa-gear",
+  },
+  {
+    name: "常见问题",
+    path: "/auth/FAQ",
+    icon: "fa-solid fa-circle-question",
+  },
+]);
+
+// 此处定义页面菜单
+const pageMenus = ref<any[]>([
   {
     title: "看板",
     path: "/dashboard",
@@ -123,6 +147,18 @@ function changeFullScreen() {
 function exit() {
   router.push({ path: "/auth/login" });
 }
+
+// 检测 tabs 长度，如果为 0，则跳转到 home 页面
+watch(
+  tabs,
+  () => {
+    if (tabs.value.length === 0) {
+      alert("ok");
+      router.push({ path: "/home" });
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -146,60 +182,37 @@ function exit() {
             </v-avatar>
           </template>
 
-          <v-list width="240" rounded="lg">
-            <v-list-item
-              prepend-avatar="/头像.jpg"
-              :title="name || '默认用户'"
-              subtitle="205451"
-              class="mb-3"
-            >
-            </v-list-item>
+          <v-card class="pa-5" rounded="xl">
+            <v-list width="180">
+              <v-list-item
+                rounded="lg"
+                class="mb-3"
+                prepend-avatar="/头像.jpg"
+                :title="name || '默认用户'"
+                subtitle="205451"
+              >
+              </v-list-item>
 
-            <v-divider></v-divider>
+              <v-divider></v-divider>
 
-            <v-list-item to="/auth/personal-information">
-              <template #prepend>
-                <v-icon class="mr-3" size="small"> fa-solid fa-user </v-icon>
-                <div class="text-body-2">个人信息</div>
-              </template>
-            </v-list-item>
+              <v-list-item
+                rounded="lg"
+                :to="item.path"
+                :subtitle="item.name"
+                :prepend-icon="item.icon"
+                v-for="(item, index) in userMenus"
+                :key="index"
+              ></v-list-item>
 
-            <v-list-item to="/auth/update-password">
-              <template #prepend>
-                <v-icon class="mr-3" size="small">
-                  fa-solid fa-pen-to-square
-                </v-icon>
-                <div class="text-body-2">修改密码</div>
-              </template>
-            </v-list-item>
-
-            <v-list-item to="/auth/system-setting">
-              <template #prepend>
-                <v-icon class="mr-3" size="small"> fa-solid fa-gear </v-icon>
-                <div class="text-body-2">系统设置</div>
-              </template>
-            </v-list-item>
-
-            <v-list-item to="/auth/FAQ">
-              <template #prepend>
-                <v-icon class="mr-3" size="small">
-                  fa-solid fa-circle-question
-                </v-icon>
-                <div class="text-body-2">常问问题</div>
-              </template>
-            </v-list-item>
-
-            <v-divider></v-divider>
-
-            <v-list-item @click="exit()">
-              <template #prepend>
-                <v-icon class="mr-3" size="small">
-                  fa-solid fa-right-from-bracket
-                </v-icon>
-                <div class="text-body-2">退出登录</div>
-              </template>
-            </v-list-item>
-          </v-list>
+              <v-list-item
+                rounded="lg"
+                @click="exit()"
+                prepend-icon="fa-solid fa-right-from-bracket"
+                subtitle="退出登录"
+              >
+              </v-list-item>
+            </v-list>
+          </v-card>
         </v-menu>
       </template>
 
@@ -210,7 +223,7 @@ function exit() {
             <div>
               <v-menu
                 open-on-hover
-                v-for="(item, index) in allNavigation"
+                v-for="(item, index) in pageMenus"
                 :key="index"
               >
                 <template v-slot:activator="{ props }">
@@ -248,34 +261,40 @@ function exit() {
               </v-menu>
             </div>
 
-            <v-menu open-on-hover>
+            <v-menu open-on-hover :close-on-content-click="false">
               <template v-slot:activator="{ props }">
                 <v-btn size="x-large" variant="flat" v-bind="props">
-                  <v-icon>fa-solid fa-folder-open</v-icon>
-                  <div class="ml-6">已打开页面</div>
+                  <v-badge :content="tabs.length" color="green">
+                    <v-icon>fa-regular fa-folder-open</v-icon>
+                  </v-badge>
                 </v-btn>
               </template>
 
               <v-list rounded="lg" class="pa-3">
                 <!-- 当 url 匹配到 to 时，就会触发 active-class -->
                 <v-list-item
-                  class="mb-3"
+                  class="mb-1"
                   rounded="lg"
                   active-class="list-item-active"
                   v-for="(item, index) in tabs"
                   :key="index"
                   :to="item.path"
-                  :prepend-icon="item.icon"
-                  :title="item.name"
                 >
+                  <template v-slot:prepend>
+                    <v-icon class="mr-6">{{ item.icon }}</v-icon>
+                    <div>{{ item.name }}</div>
+                  </template>
+                  <template v-slot:append>
+                    <v-icon @click="removeTab(item)">fa-solid fa-xmark</v-icon>
+                  </template>
                 </v-list-item>
-                <v-list-item
-                  rounded="lg"
-                  active-class="list-item-active"
-                  prepend-icon="fa-solid fa-trash"
-                  title="关闭所有"
-                  @click="tabs = []"
-                >
+
+                <v-list-item class="mb-1" rounded="lg" @click="tabs = []">
+                  <template v-slot:prepend>
+                    <v-icon class="mr-6">fa-solid fa-trash</v-icon>
+                    <div v-if="tabs.length > 0">关闭所有</div>
+                    <div v-else>没有打开任何页面</div>
+                  </template>
                 </v-list-item>
               </v-list>
             </v-menu>

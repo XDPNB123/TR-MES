@@ -38,9 +38,9 @@ onMounted(async function () {
 let tab = ref<any>(null);
 
 // 手机号
-let tel = ref<string|undefined>("");
+let tel = ref<string | undefined>("");
 // 密码
-let password = ref<string|undefined>("");
+let password = ref<string | undefined>("");
 // 是否显示密码
 let showPassword = ref<boolean>(false);
 // 密码登陆的表单校验
@@ -78,7 +78,7 @@ const passwordRule = ref<any[]>([
 async function passwordLogin() {
   // 表单校验不成功则直接返回
   // if (!passwordFormValid.value) return;
-  const md5Password = useMd5(password.value as string) ;
+  const md5Password = useMd5(password.value as string);
 
   // 发送登陆请求
   const data: any = await useHttp("/Account/A01LoginV1", "post", {
@@ -105,7 +105,7 @@ async function passwordLogin() {
   setSnackbar("green", "登陆成功，正在跳转...");
 
   setTimeout(function () {
-    router.push({ path: "/dashboard/main-dashboard" });
+    router.push({ path: "/home" });
   }, 1000);
 }
 
@@ -160,7 +160,7 @@ async function captchaLogin() {
   setSnackbar("green", "登陆成功，正在跳转...");
 
   setTimeout(function () {
-    router.push({ path: "/dashboard/main-dashboard" });
+    router.push({ path: "/home" });
   }, 1000);
 }
 
