@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Raw } from "nuxt/dist/app/compat/capi";
-
 // 搜索引擎优化
 useSeoMeta({
   // 该页面的标题
@@ -56,6 +54,7 @@ let addDetailDialog = ref(false);
 let deleteDetailDialog = ref(false);
 let editDetailDialog = ref(false);
 let productDialog = ref(false);
+let auditDialog = ref(false);
 // 工单搜索
 let searchTicketNumber = ref<string>("");
 let searchProjectNumber = ref<string>("");
@@ -490,6 +489,7 @@ function resetFilter() {
   searchTicketNumber.value = "";
   startDate.value = "";
   endDate.value = "";
+  detailName.value = "";
   getWorkOrder();
 }
 //工单明细搜素
@@ -505,7 +505,7 @@ async function filterTableDataDetail() {
         SortType: 0,
         SortedBy: "id",
         workorder_did: "",
-        workorder_hid: "",
+        workorder_hid: detailName.value,
         blueprint_id: "",
         mcode: searchOutputs.value,
         planned_quantity: "",
@@ -545,8 +545,7 @@ function resetFilterDetail() {
   searchProjectNumber.value = "";
   startDateDetail.value = "";
   endDateDetail.value = "";
-  detailName.value = "";
-  getWorkOrderDetail("");
+  getWorkOrderDetail(detailName.value);
 }
 //页面加载时获取数据
 onMounted(async () => {
@@ -711,7 +710,7 @@ async function addTicketDetail() {
       "post",
       [operatingTicketDetail.value]
     );
-    getWorkOrderDetail("");
+    getWorkOrderDetail(detailName.value);
   } catch (error) {
     console.log(error);
   }
@@ -731,6 +730,30 @@ async function editTicket() {
   }
   editDialog.value = false;
 }
+//判断该条工单的状态初始值是否为“新建未审核”
+let statusAudit=ref(false)
+function auditIsNew(){
+    if(status.value!=="新建未审核"){
+        statusAudit.value=true
+    }else{
+        statusAudit.value=false
+    }
+} 
+//审核通过
+async function auditTicket(){
+     try {
+       operatingTicket.value.status="已审核待排产"
+    const data: any = await useHttp(
+      "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
+      "put",
+      operatingTicket.value
+    );
+    getWorkOrder();
+  } catch (error) {
+    console.log(error);
+  }
+  auditDialog.value=false
+}
 
 //修改工单明细行
 async function editTicketDetail() {
@@ -740,7 +763,7 @@ async function editTicketDetail() {
       "put",
       [operatingTicketDetail.value]
     );
-    getWorkOrderDetail("");
+    getWorkOrderDetail(detailName.value);
   } catch (error) {
     console.log(error);
   }
@@ -774,7 +797,7 @@ async function deleteTicketDetail() {
       undefined,
       { workorderdetail_ids: [operatingTicketDetail.value.id] }
     );
-    getWorkOrderDetail("");
+    getWorkOrderDetail(detailName.value);
   } catch (error) {
     console.log(error);
   }
@@ -849,9 +872,7 @@ function saveProduct() {
       selectProducts.value.includes(item.id)
     );
     //将找到的产品信息，拼接成字符串
-    let productString = selectedData
-      .map((item: any) => item.mcode)
-      .productArray.join(",");
+    let productString = selectedData.map((item: any) => item.mcode).join(",");
     //将选择的产品信息值，赋值给新建工单的产品信息
     operatingTicket.value.product_id = productString;
   } catch (error) {
@@ -859,6 +880,7 @@ function saveProduct() {
   }
   productDialog.value = false;
 }
+
 </script>
 
 <template>
@@ -929,7 +951,7 @@ function saveProduct() {
               size="large"
               @click="resetAddDialog()"
             >
-              新增
+              新增工单
             </v-btn>
             <v-btn color="blue" class="mr-2" size="large">导出</v-btn>
           </v-col>
@@ -954,7 +976,18 @@ function saveProduct() {
                 <!-- <v-icon color="orange" size="small" class="mr-3" @click.stop="">
               fa-solid fa-eye
             </v-icon> -->
-
+                <v-icon
+                  color="green"
+                  size="small"
+                  class="mr-3"
+                  :disabled="statusAudit"
+                  @click.stop="
+                    operatingTicket = { ...item.raw };
+                    auditDialog = true;
+                  "
+                >
+                  fa-solid fa-eye
+                </v-icon>
                 <v-icon
                   color="blue"
                   size="small"
@@ -1194,11 +1227,6 @@ function saveProduct() {
             type="date"
             v-model="operatingTicket.planned_completion_time"
           ></v-text-field>
-          <v-select
-            label="工单状态"
-            :items="workStatus"
-            v-model="operatingTicket.status"
-          ></v-select>
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -1227,9 +1255,11 @@ function saveProduct() {
             :items="['装配', '机加工']"
             v-model="operatingTicket.workorder_type"
           ></v-select>
-          <v-text-field
+           <v-text-field
             v-model="operatingTicket.product_id"
             label="产品编号"
+            append-inner-icon="fa-regular fa-hand-pointer"
+            @click:append-inner="showProductDialog"
           ></v-text-field>
           <v-text-field
             v-model="operatingTicket.planned_quantity"
@@ -1697,6 +1727,60 @@ function saveProduct() {
             确定
           </v-btn>
           <v-btn color="grey" size="large" @click="productDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+    <!-- 工单表头审核 -->
+    <v-dialog v-model="auditDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 工单审核 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="auditDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-text-field
+            label="工单类型"
+            readonly
+            v-model="operatingTicket.workorder_type"
+          ></v-text-field>
+          <v-text-field
+            readonly
+            v-model="operatingTicket.product_id"
+            label="产品编号"
+          ></v-text-field>
+          <v-text-field
+            readonly
+            v-model="operatingTicket.planned_quantity"
+            label="计划数量"
+          ></v-text-field>
+          <v-text-field
+            readonly
+            label="单位"
+            v-model="operatingTicket.unit"
+          ></v-text-field>
+          <v-text-field
+            readonly
+            v-model="operatingTicket.start_date"
+            label="开始日期"
+          ></v-text-field>
+
+          <v-text-field
+            v-model="operatingTicket.planned_completion_time"
+            label="计划完成日期"
+            readonly
+          ></v-text-field>
+        </v-card-text>
+
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn color="blue" size="large" class="mr-2" @click="auditTicket()">
+            审核通过
+          </v-btn>
+          <v-btn color="grey" size="large" @click="auditDialog = false">
             取消
           </v-btn>
         </div>
