@@ -89,6 +89,7 @@
         </v-data-table>
       </v-col>
     </v-row>
+    <!-- 增加物料 -->
     <v-dialog v-model="dialogAdd" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
@@ -135,6 +136,7 @@
         </div>
       </v-card>
     </v-dialog>
+    <!-- 删除物料 -->
     <v-dialog v-model="dialogDelete" min-width="400px" width="500px">
       <v-card>
         <v-toolbar color="blue">
@@ -160,6 +162,7 @@
         </div>
       </v-card>
     </v-dialog>
+    <!-- 物料修改 -->
     <v-dialog v-model="editDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">

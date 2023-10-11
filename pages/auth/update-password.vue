@@ -67,7 +67,7 @@ async function updatePasswordSubmit() {
   setSnackbar("green", "修改密码成功");
 
   setTimeout(function () {
-    router.push({ path: "/dashboard/main-dashboard" });
+    router.push({ path: "/home" });
   }, 1500);
 }
 
