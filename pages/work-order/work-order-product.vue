@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Raw } from 'nuxt/dist/app/compat/capi';
+import { Raw } from "nuxt/dist/app/compat/capi";
 
 // 搜索引擎优化
 useSeoMeta({
@@ -381,41 +381,40 @@ async function batchWork() {
 
 //工序维护
 async function showProcessDialog(item: any) {
-    try {    
-  const data: any = await useHttp(
-    "/MesWorkProcess/M09GetProcedureData",
-    "get",
-    undefined,
-    {
-      SortedBy: "id",
-      PageIndex: 1,
-      SortType: 0,
-      procedure_name: "",
-      procedure_id: "",
-      PageSize: 5,
-    }
-  );
-  chips.value = data.data;
-  //将点击的哪行数据存到选择数据中
-   innerTableSelectData.value.push(item)
-  //过滤出已选工序和未选工序
-  const workorderHids = item.procedure.split(",");
-  droppedChips.value = chips.value.filter((chip) =>
-    workorderHids.includes(chip.procedure_name)
-  );
-  chips.value = chips.value.filter(
-    (chip) => !workorderHids.includes(chip.procedure_name)
-  );
-  
-    } catch (error) {
-     console.log(error);   
-    }
+  try {
+    const data: any = await useHttp(
+      "/MesWorkProcess/M09GetProcedureData",
+      "get",
+      undefined,
+      {
+        SortedBy: "id",
+        PageIndex: 1,
+        SortType: 0,
+        procedure_name: "",
+        procedure_id: "",
+        PageSize: 5,
+      }
+    );
+    chips.value = data.data;
+    //将点击的哪行数据存到选择数据中
+    innerTableSelectData.value.push(item);
+    //过滤出已选工序和未选工序
+    const workorderHids = item.procedure.split(",");
+    droppedChips.value = chips.value.filter((chip) =>
+      workorderHids.includes(chip.procedure_name)
+    );
+    chips.value = chips.value.filter(
+      (chip) => !workorderHids.includes(chip.procedure_name)
+    );
+  } catch (error) {
+    console.log(error);
+  }
   processDialog.value = true;
 }
 //关闭\取消工序维护框，需要清空已选择的数据
-function cancelProcess(){
-    innerTableSelectData.value=[]
-    processDialog.value=false
+function cancelProcess() {
+  innerTableSelectData.value = [];
+  processDialog.value = false;
 }
 //保存工序
 async function saveTicket() {
@@ -440,7 +439,7 @@ async function saveTicket() {
     console.log(error);
   }
   processDialog.value = false;
-  innerTableSelectData.value=[]
+  innerTableSelectData.value = [];
 }
 // 工单表头搜索过滤
 async function filterTableData() {
@@ -455,12 +454,12 @@ async function filterTableData() {
         SortType: 0,
         SortedBy: "id",
         workorder_hid: searchTicketNumber.value,
-        status: "",
+        status: searchTicketType.value,
         start_date: null,
         planned_quantity: null,
         product_id: null,
         planned_completion_time: null,
-        workorder_type: searchTicketType.value,
+        workorder_type: "",
         finish_date: null,
       }
     );
@@ -831,28 +830,33 @@ async function showProductDialog() {
   productDialog.value = true;
 }
 
-let productTypeName=ref("外购件")
+let productTypeName = ref("外购件");
 //切换数据
 function handoffData() {
   if (productTableData.value === tableDataDetail.value) {
     productTableData.value = tableData.value;
-    productTypeName.value="自制件"
+    productTypeName.value = "自制件";
   } else {
     productTableData.value = tableDataDetail.value;
-    productTypeName.value="外购件"
+    productTypeName.value = "外购件";
   }
 }
 //选择产品编号
 function saveProduct() {
- 
-  const selectedData = productTableData.value.filter((item: any) =>
-    selectProducts.value.includes(item.id)
-  );
-  console.log(selectedData);
-  let productArray = selectedData.map((item:any) => item.mcode);
-  let productString = productArray.join(",");
-
-  operatingTicket.value.product_id = productString;
+  try {
+    //找到所选的产品信息
+    const selectedData = productTableData.value.filter((item: any) =>
+      selectProducts.value.includes(item.id)
+    );
+    //将找到的产品信息，拼接成字符串
+    let productString = selectedData
+      .map((item: any) => item.mcode)
+      .productArray.join(",");
+    //将选择的产品信息值，赋值给新建工单的产品信息
+    operatingTicket.value.product_id = productString;
+  } catch (error) {
+    console.log(error);
+  }
   productDialog.value = false;
 }
 </script>
@@ -875,13 +879,14 @@ function saveProduct() {
           </v-col>
 
           <v-col cols="6">
-            <v-text-field
-              label="工单类型"
+            <v-select
+              label="工单状态"
               variant="outlined"
               density="compact"
               v-model="searchTicketType"
+              :items="workStatus"
               hide-details
-            ></v-text-field>
+            ></v-select>
           </v-col>
 
           <v-col cols="6">
@@ -1108,7 +1113,7 @@ function saveProduct() {
                   fa-solid fa-trash
                 </v-icon>
               </template>
-                <template v-slot:item.procedure="{ item }">
+              <template v-slot:item.procedure="{ item }">
                 <span @click="showProcessDialog(item.raw)">{{
                   item.raw.procedure
                 }}</span>
