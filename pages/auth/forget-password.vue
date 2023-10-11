@@ -72,8 +72,9 @@ async function getCaptcha() {
     setSnackbar("black", "同一账号五分钟内请勿重复发送短信");
 }
 
-// 忘记密码
+// 忘记密码提交表单
 async function forgetPasswordSubmit() {
+  // 表单校验不成功则直接返回
   if (!forgetPasswordFormValid.value) return;
 
   // 密码加密
@@ -89,11 +90,11 @@ async function forgetPasswordSubmit() {
   // 处理错误
   if (data.code !== 200) return setSnackbar("black", "验证码错误");
 
-  // 储存 Cookie
+  // 修改成功，则储存 Cookie
   useCookie("tel").value = tel.value;
   useCookie("password").value = newPassword.value;
 
-  // 成功找回密码
+  // 成功找回密码提示
   setSnackbar("green", "修改密码成功");
 
   setTimeout(function () {

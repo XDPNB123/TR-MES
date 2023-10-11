@@ -53,8 +53,6 @@ async function updatePasswordSubmit() {
     new_passwd_md5: md5NewPassword,
   });
 
-  console.log(data);
-
   // 处理错误
   if (data.code === 500) return setSnackbar("black", "修改失败，旧密码错误");
 

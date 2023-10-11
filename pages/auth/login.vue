@@ -28,8 +28,7 @@ const { captchaCountDown, captchaDisable, setCountDown } =
 
 // 页面渲染完成时，获取 Cookie，填充登陆输入框
 // useCookie 会自动转换类型，如果 cookie 中储存的是数字，那么 useCookie.value 获取的值也是数字类型，需要手动转换成字符串类型
-
-onMounted(async function () {
+onMounted(function () {
   tel.value = useCookie("tel").value?.toString();
   password.value = useCookie("password").value?.toString();
 });
@@ -77,7 +76,9 @@ const passwordRule = ref<any[]>([
 // 密码登陆
 async function passwordLogin() {
   // 表单校验不成功则直接返回
-  // if (!passwordFormValid.value) return;
+  if (!passwordFormValid.value) return;
+
+  // 密码加密
   const md5Password = useMd5(password.value as string);
 
   // 发送登陆请求
@@ -89,19 +90,17 @@ async function passwordLogin() {
     platform_version: "网页1.00",
   });
 
-  console.log(data);
-
-  // 登陆失败则直接返回;
+  // 登陆失败出现提示，并则直接返回;
   if (data.code === 201) return setSnackbar("black", "账号不存在或密码错误");
 
-  // 储存 Cookie
+  // 登陆成功，则储存 Cookie
   useCookie("tel").value = tel.value;
   useCookie("password").value = password.value;
   useCookie("name").value = data.data.name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
 
-  // 登陆成功
+  // 登陆成功的提示
   setSnackbar("green", "登陆成功，正在跳转...");
 
   setTimeout(function () {
@@ -144,19 +143,17 @@ async function captchaLogin() {
     platform_version: "magna consectetur",
   });
 
-  console.log(data);
-
   // 登陆失败则直接返回
   if (data.code !== 200) return setSnackbar("black", "验证码错误");
 
-  // 储存 Cookie
+  // 登陆成功，则储存 Cookie
   useCookie("tel").value = tel.value;
   useCookie("password").value = password.value;
   useCookie("name").value = data.data.name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
 
-  // 登陆成功
+  // 登陆成功提示
   setSnackbar("green", "登陆成功，正在跳转...");
 
   setTimeout(function () {
