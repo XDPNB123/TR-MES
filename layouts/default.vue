@@ -280,7 +280,14 @@ function exit() {
                   </template>
                 </v-list-item>
 
-                <v-list-item class="mb-1" rounded="lg" @click="tabs = []">
+                <v-list-item
+                  class="mb-1"
+                  rounded="lg"
+                  @click="
+                    tabs = [];
+                    router.push({ path: '/home' });
+                  "
+                >
                   <template v-slot:prepend>
                     <v-icon class="mr-6">fa-solid fa-trash</v-icon>
                     <div v-if="tabs.length > 0">关闭所有</div>
