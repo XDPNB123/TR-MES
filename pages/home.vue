@@ -17,7 +17,7 @@ useSeoMeta({
 <template>
   <div>
     <client-only>
-      <Vue3Lottie animationLink="/主页.json" height="90vh" />
+      <Vue3Lottie animationLink="/主页.json" height="80vh" />
     </client-only>
   </div>
 </template>

@@ -147,6 +147,18 @@ function changeFullScreen() {
 function exit() {
   router.push({ path: "/auth/login" });
 }
+
+// 检测 tabs 长度，如果为 0，则跳转到 home 页面
+watch(
+  tabs,
+  () => {
+    if (tabs.value.length === 0) {
+      alert("ok");
+      router.push({ path: "/home" });
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -211,7 +223,6 @@ function exit() {
             <div>
               <v-menu
                 open-on-hover
-                :close-on-content-click="false"
                 v-for="(item, index) in pageMenus"
                 :key="index"
               >
@@ -250,7 +261,7 @@ function exit() {
               </v-menu>
             </div>
 
-            <v-menu open-on-hover>
+            <v-menu open-on-hover :close-on-content-click="false">
               <template v-slot:activator="{ props }">
                 <v-btn size="x-large" variant="flat" v-bind="props">
                   <v-badge :content="tabs.length" color="green">
@@ -274,20 +285,11 @@ function exit() {
                     <div>{{ item.name }}</div>
                   </template>
                   <template v-slot:append>
-                    <v-icon @click.prevent="removeTab(item)"
-                      >fa-solid fa-xmark</v-icon
-                    >
+                    <v-icon @click="removeTab(item)">fa-solid fa-xmark</v-icon>
                   </template>
                 </v-list-item>
 
-                <v-list-item
-                  class="mb-1"
-                  rounded="lg"
-                  @click="
-                    tabs = [];
-                    router.push({ path: '/home' });
-                  "
-                >
+                <v-list-item class="mb-1" rounded="lg" @click="tabs = []">
                   <template v-slot:prepend>
                     <v-icon class="mr-6">fa-solid fa-trash</v-icon>
                     <div v-if="tabs.length > 0">关闭所有</div>

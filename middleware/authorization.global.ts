@@ -16,4 +16,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
 
   // 如果目标路由为除上述路由的其他路由，则需要鉴定权限，没有权限则跳转到登录
   if (!token.value) return navigateTo("/auth/login");
+
+  // 如果目标路由为除上述路由的其他路由，且具有权限
+  return;
 });
