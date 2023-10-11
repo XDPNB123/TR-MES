@@ -15,7 +15,7 @@ const allNavigation = ref<any[]>([
       {
         name: "主看板",
         path: "/dashboard/main-dashboard",
-        icon: "fa-solid fa-chart-line",
+        icon: "fa-solid fa-boxes-stacked",
       },
     ],
   },
@@ -46,12 +46,25 @@ const allNavigation = ref<any[]>([
       },
     ],
   },
+  {
+    title: "WMS仓储管理",
+    path: "/wms",
+    icon: "fa-solid fa-chart-column",
+    children: [
+      {
+        name: "仓库主页",
+        path: "/wms/home",
+        icon: "fa-solid fa-gauge",
+      },
+    ],
+  },
 ]);
 
 // tabs 类型
 type tabType = {
   name: string;
   path: string;
+  icon: string;
 };
 
 // 选中的 tab
@@ -193,71 +206,101 @@ function exit() {
       <template v-slot:extension>
         <div class="w-100">
           <v-divider></v-divider>
-
-          <v-menu
-            open-on-hover
-            v-for="(item, index) in allNavigation"
-            :key="index"
-          >
-            <template v-slot:activator="{ props }">
-              <v-btn
-                class="mr-6"
-                size="x-large"
-                :color="
-                  router.currentRoute.value.fullPath.startsWith(item.path)
-                    ? 'blue-darken-3'
-                    : undefined
-                "
-                variant="flat"
-                v-bind="props"
+          <div class="d-flex justify-space-between align-center">
+            <div>
+              <v-menu
+                open-on-hover
+                v-for="(item, index) in allNavigation"
+                :key="index"
               >
-                <v-icon>{{ item.icon }}</v-icon>
-                <div class="mx-6">{{ item.title }}</div>
-                <v-icon>fa-solid fa-angle-down</v-icon>
-              </v-btn>
-            </template>
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    class="mr-6"
+                    size="x-large"
+                    :color="
+                      router.currentRoute.value.fullPath.startsWith(item.path)
+                        ? 'blue-darken-3'
+                        : undefined
+                    "
+                    variant="flat"
+                    v-bind="props"
+                  >
+                    <v-icon>{{ item.icon }}</v-icon>
+                    <div class="mx-6">{{ item.title }}</div>
+                    <v-icon>fa-solid fa-angle-down</v-icon>
+                  </v-btn>
+                </template>
 
-            <v-list rounded="lg" class="pa-3">
-              <!-- 当 url 匹配到 to 时，就会触发 active-class -->
-              <v-list-item
-                rounded="lg"
-                active-class="list-item-active"
-                v-for="(item_, index_) in item.children"
-                :key="index_"
-                :to="item_.path"
-                :prepend-icon="item_.icon"
-                :title="item_.name"
-                @click="
-                  addTab({
-                    name: item_.name,
-                    path: item_.path,
-                  })
-                "
-              >
-              </v-list-item>
-            </v-list>
-          </v-menu>
+                <v-list rounded="lg" class="pa-3">
+                  <!-- 当 url 匹配到 to 时，就会触发 active-class -->
+                  <v-list-item
+                    rounded="lg"
+                    active-class="list-item-active"
+                    v-for="(item_, index_) in item.children"
+                    :key="index_"
+                    :to="item_.path"
+                    :prepend-icon="item_.icon"
+                    :title="item_.name"
+                    @click="addTab(item_)"
+                  >
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </div>
 
-          <v-btn-toggle
-            divided
-            :border="true"
-            density="compact"
-            color="blue-darken-3"
-            v-model="selectTab"
-          >
-            <v-btn
-              v-for="(item, index) in tabs"
-              :key="index"
-              :value="item.name"
-              @click="router.push({ path: item.path })"
+            <v-menu open-on-hover>
+              <template v-slot:activator="{ props }">
+                <v-btn size="x-large" variant="flat" v-bind="props">
+                  <v-icon>fa-solid fa-folder-open</v-icon>
+                  <div class="ml-6">已打开页面</div>
+                </v-btn>
+              </template>
+
+              <v-list rounded="lg" class="pa-3">
+                <!-- 当 url 匹配到 to 时，就会触发 active-class -->
+                <v-list-item
+                  class="mb-3"
+                  rounded="lg"
+                  active-class="list-item-active"
+                  v-for="(item, index) in tabs"
+                  :key="index"
+                  :to="item.path"
+                  :prepend-icon="item.icon"
+                  :title="item.name"
+                >
+                </v-list-item>
+                <v-list-item
+                  rounded="lg"
+                  active-class="list-item-active"
+                  prepend-icon="fa-solid fa-trash"
+                  title="关闭所有"
+                  @click="tabs = []"
+                >
+                </v-list-item>
+              </v-list>
+            </v-menu>
+
+            <!-- <v-btn-toggle
+              divided
+              :border="true"
+              density="compact"
+              color="blue-darken-3"
+              v-model="selectTab"
             >
-              <span class="hidden-sm-and-down">{{ item.name }}</span>
+              <v-btn
+                v-for="(item, index) in tabs"
+                :key="index"
+                :value="item.name"
+                @click="router.push({ path: item.path })"
+              >
+                <span class="hidden-sm-and-down">{{ item.name }}</span>
 
-              <v-icon end @click.stop="removeTab(item)">
-                fa-solid fa-xmark
-              </v-icon>
-            </v-btn>
-          </v-btn-toggle>
+                <v-icon end @click.stop="removeTab(item)">
+                  fa-solid fa-xmark
+                </v-icon>
+              </v-btn>
+            </v-btn-toggle> -->
+          </div>
         </div>
       </template>
     </v-app-bar>
