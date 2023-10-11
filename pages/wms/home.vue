@@ -21,6 +21,6 @@ function addOne( ss : number ){
   <div>
     <div>这是WMS主页面</div>
     <label>{{counter}}</label>
-    <v-btn onclick="addOne(3)">增加3</v-btn>
+    <v-btn @click="addOne(3)">增加3</v-btn>
   </div>
 </template>
