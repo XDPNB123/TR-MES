@@ -285,7 +285,9 @@ watch(
                     <div>{{ item.name }}</div>
                   </template>
                   <template v-slot:append>
-                    <v-icon @click="removeTab(item)">fa-solid fa-xmark</v-icon>
+                    <v-icon @click.prevent="removeTab(item)"
+                      >fa-solid fa-xmark</v-icon
+                    >
                   </template>
                 </v-list-item>
 
