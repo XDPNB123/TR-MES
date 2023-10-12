@@ -98,7 +98,7 @@ let searchTicketType = ref<string>("");
 let searchOutputs = ref<string>("");
 // 正在操作的工单
 let operatingTicket = ref<any>({
-  workorder_hid: "",
+ 
   workorder_type: "",
   planned_completion_time: "",
   unit: "",
@@ -274,7 +274,7 @@ let tableDataDetail = ref<any[]>([]);
 let homemadeHeaders = ref<any[]>([
   { title: "项目号", align: "start", key: "projectCode" },
   { title: "项目类型", align: "start", key: "projectType" },
-  { title: "总装物料名", align: "start", key: "totalName " },
+  { title: "总装物料名", align: "start", key: "totalName" },
   { title: "零件名", align: "center", key: "partName" },
   { title: "单位名", align: "start", key: "unitName" },
   { title: "物料编码", align: "start", key: "resultCode" },
@@ -286,8 +286,8 @@ let homemadeData = ref<any[]>([]);
 let materialHeaders = ref<any[]>([
   { title: "种类描述", align: "start", key: "middleName" },
   { title: "细类描述", align: "start", key: "smallName" },
-  { title: "型号描述", align: "start", key: "xhms " },
-  { title: "规格描述", align: "center", key: " ggms" },
+  { title: "型号描述", align: "start", key: "xhms" },
+  { title: "规格描述", align: "center", key: "ggms" },
   { title: "细类名", align: "start", key: "thinName" },
   { title: "单位名", align: "start", key: "unitName" },
   { title: "物料编码", align: "start", key: "resultCode" },
@@ -693,8 +693,7 @@ async function showTicketDetail(item: any, obj: any) {
 // 新增工单前重置新增对话框
 function resetAddDialog() {
   operatingTicket.value = {
-    workorder_hid: "",
-    workorder_type: "",
+    workorder_type: "机加工",
     product_id: "",
     product_description: "",
     start_date: "",
@@ -731,7 +730,7 @@ function resetAddDetailDialog() {
     planned_quantity: "",
     reported_quantity: 0,
     unit: "件",
-    workorder_hid: "",
+    workorder_hid: detailName.value,
     actual_delivery_date: null,
     status: null,
   };
@@ -1246,11 +1245,6 @@ function saveProduct() {
 
         <v-card-text class="mt-4">
           <v-text-field
-            v-model="operatingTicket.workorder_hid"
-            label="工单编号"
-          ></v-text-field>
-
-          <v-text-field
             v-model="operatingTicket.product_description"
             label="产品描述"
             append-inner-icon="fa-regular fa-hand-pointer"
@@ -1670,17 +1664,6 @@ function saveProduct() {
                 hide-details
               ></v-text-field>
             </v-col>
-
-            <v-col cols="6">
-              <v-text-field
-                label="产出料"
-                variant="outlined"
-                density="compact"
-                v-model="searchOutputs"
-                hide-details
-              ></v-text-field>
-            </v-col>
-
             <v-col cols="8">
               <v-btn
                 color="black"
