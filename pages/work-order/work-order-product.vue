@@ -71,7 +71,7 @@ let detailName = ref("");
 // 用于刷新视图的 key
 let key = ref<number>(0);
 //多选产品编号
-let selectProducts = ref<any[]>([]);
+let selectedRows = ref<any[]>([]);
 //创建一个键值对数组，存储工单明细
 let details = ref<any>({});
 // 路由
@@ -96,9 +96,9 @@ let startDateDetail = ref("");
 let endDateDetail = ref("");
 let searchTicketType = ref<string>("");
 let searchOutputs = ref<string>("");
+let searchProduct = ref<string>("");
 // 正在操作的工单
 let operatingTicket = ref<any>({
- 
   workorder_type: "",
   planned_completion_time: "",
   unit: "",
@@ -157,7 +157,6 @@ let keyToDetailChinese = ref<any>({
 });
 let getDetailChineseKey = (key: any) => keyToDetailChinese.value[key] || key;
 //工单表按照开始时间进行降序排序
-
 // 展示的工单表格数据
 let tableData = ref<any[]>([]);
 // 工单表头
@@ -272,25 +271,25 @@ let tableDataDetail = ref<any[]>([]);
 
 //自制件表头
 let homemadeHeaders = ref<any[]>([
+  { title: "零件名", align: "center", key: "partName" },
+  { title: "总装物料名", align: "start", key: "totalName" },
+  { title: "物料编码", align: "start", key: "resultCode" },
   { title: "项目号", align: "start", key: "projectCode" },
   { title: "项目类型", align: "start", key: "projectType" },
-  { title: "总装物料名", align: "start", key: "totalName" },
-  { title: "零件名", align: "center", key: "partName" },
   { title: "单位名", align: "start", key: "unitName" },
-  { title: "物料编码", align: "start", key: "resultCode" },
 ]);
 //自制表数据
 let homemadeData = ref<any[]>([]);
 
 //外购件表头
 let materialHeaders = ref<any[]>([
-  { title: "种类描述", align: "start", key: "middleName" },
-  { title: "细类描述", align: "start", key: "smallName" },
   { title: "型号描述", align: "start", key: "xhms" },
   { title: "规格描述", align: "center", key: "ggms" },
+  { title: "物料编码", align: "start", key: "resultCode" },
+  { title: "种类描述", align: "start", key: "middleName" },
+  { title: "细类描述", align: "start", key: "smallName" },
   { title: "细类名", align: "start", key: "thinName" },
   { title: "单位名", align: "start", key: "unitName" },
-  { title: "物料编码", align: "start", key: "resultCode" },
 ]);
 //外购表数据
 let materialData = ref<any[]>([]);
@@ -319,7 +318,7 @@ let productTablePage = ref<number>(1);
 let productTablePerPage = ref<number>(10);
 //产品列表有多少页
 let productTablePageCount = computed(() => {
-  return Math.ceil(tableDataDetail.value.length / productTablePerPage.value);
+  return Math.ceil(productTableData.value.length / productTablePerPage.value);
 });
 
 //工序模块
@@ -620,12 +619,18 @@ async function getWorkOrder() {
 function formatDate(data: any) {
   try {
     data.forEach((item: any, index: number) => {
-      item.start_date = item.start_date.substring(0, 10);
-      item.finish_date = item.finish_date.substring(0, 10);
-      item.planned_completion_time = item.planned_completion_time.substring(
-        0,
-        10
-      );
+      if (item.start_date) {
+        item.start_date = item.start_date.substring(0, 10);
+      }
+      if (item.finish_date) {
+        item.finish_date = item.finish_date.substring(0, 10);
+      }
+      if (item.planned_completion_time) {
+        item.planned_completion_time = item.planned_completion_time.substring(
+          0,
+          10
+        );
+      }
     });
     return data;
   } catch (error) {
@@ -847,6 +852,7 @@ function handleBomClick(item: any) {
 //产品编号列表数据
 let productTableData = ref();
 let productHeaders = ref();
+let productTypeName = ref("");
 //点击弹出产品编号表格弹框
 async function showProductDialog() {
   try {
@@ -857,7 +863,7 @@ async function showProductDialog() {
       {
         PageIndex: 1,
         PageSize: 30,
-        SortType: 1,
+        SortType: 0,
         SortedBy: "id",
         queryname: "",
       }
@@ -878,40 +884,116 @@ async function showProductDialog() {
     materialData.value = outData.pageList;
     productTableData.value = homemadeData.value;
     productHeaders.value = homemadeHeaders.value;
+    productTypeName.value = "自制件";
   } catch (error) {
     console.log(error);
   }
   productDialog.value = true;
 }
-
-let productTypeName = ref("自制件");
-//切换数据
-function handoffData() {
+//切换产品类别
+watch(productTypeName, () => {
   if (productTypeName.value === "自制件") {
-    productTableData.value = materialData.value;
-    productTypeName.value = "外制件";
-    productHeaders.value = materialHeaders.value;
-  } else {
+    selectedRows.value = [];
     productTableData.value = homemadeData.value;
-    productTypeName.value = "自制件";
     productHeaders.value = homemadeHeaders.value;
+  } else if (productTypeName.value === "标准外购件") {
+    selectedRows.value = [];
+    productTableData.value = materialData.value;
+    productHeaders.value = materialHeaders.value;
   }
-}
+});
+
 //选择产品编号
 function saveProduct() {
   try {
     //找到所选的产品信息
-    const selectedData = productTableData.value.filter((item: any) =>
-      selectProducts.value.includes(item.id)
-    );
-    //将找到的产品信息，拼接成字符串
-    let productString = selectedData.map((item: any) => item.mcode).join(",");
-    //将选择的产品信息值，赋值给新建工单的产品信息
-    operatingTicket.value.product_description = productString;
+    //判断是否只选择一个产品
+
+    if (selectedRows.value.length === 1) {
+      const selectedData = selectedRows.value[0];
+      //将找到的物料编码，拼接成字符串
+      let productIdString = selectedData.resultCode;
+      //产品描述
+      let productString = "";
+      //当选择的是自制件的类型
+      if (productTypeName.value === "自制件") {
+        //将选择的自制件数据的零件名拼接成字符串
+        let productPartName = selectedData.partName;
+        //将选择的自制件数据的总装物件名拼接成字符串
+        let productTotalName = selectedData.totalName;
+        //将俩个字符串连接起来
+        productString = productPartName + "," + productTotalName;
+      }
+      if (productTypeName.value === "标准外购件") {
+        //将选择的标准外购件数据的零件名拼接成字符串
+        let productXhms = selectedData.xhms;
+        //将选择的标准外购件数据的规格拼接成字符串
+        let productggms = selectedData.ggms;
+        //将俩个字符串连接起来
+        productString = productXhms + "," + productggms;
+      }
+
+      //将选择的产品信息值，赋值给新建工单的产品信息
+      operatingTicket.value.product_description = productString;
+      //将选择的物料编码，赋值给新建工单的产品id
+      operatingTicket.value.product_id = productIdString;
+      console.log(operatingTicket.value.product_description);
+      console.log(operatingTicket.value.product_id);
+    } else {
+      alert("一次只能选择一个");
+    }
   } catch (error) {
     console.log(error);
   }
+
   productDialog.value = false;
+}
+//产品的搜素
+async function filterProduct() {
+  try {
+    if (productTypeName.value === "自制件") {
+      const homeData: any = await useHttp(
+        "/MaterialForm/GetHomemadeForm",
+        "get",
+        undefined,
+        {
+          PageIndex: 1,
+          PageSize: 30,
+          SortType: 0,
+          SortedBy: "id",
+          queryname: searchProduct.value,
+        }
+      );
+      productTableData.value = homeData.pageList;
+    }
+    if (productTypeName.value === "标准外购件") {
+      const outData: any = await useHttp(
+        "/MaterialForm/GetMaterialForm",
+        "get",
+        undefined,
+        {
+          PageIndex: 1,
+          PageSize: 30,
+          SortType: 1,
+          SortedBy: "id",
+          queryname: searchProduct.value,
+        }
+      );
+      productTableData.value = outData.pageList;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+//重置搜素
+function resetFilterProduct() {
+  searchProduct.value = "";
+  if (productTypeName.value === "自制件") {
+    productTableData.value = homemadeData.value;
+  }
+  if (productTypeName.value === "标准外购件") {
+    productTableData.value = materialData.value;
+  }
 }
 </script>
 
@@ -1149,7 +1231,6 @@ function saveProduct() {
               v-model:page="tableDetailPage"
               :items-per-page="tableDetailPerPage"
               v-model="selected"
-              multi-sort
               show-select
               :key="key"
               :headers="headers"
@@ -1643,7 +1724,7 @@ function saveProduct() {
       </v-card>
     </v-dialog>
     <!-- 产品编号类型 -->
-    <v-dialog v-model="productDialog" min-width="400px" width="560px">
+    <v-dialog v-model="productDialog" min-width="400px" width="1000px">
       <v-card>
         <v-toolbar color="blue">
           <v-toolbar-title> 选择产品描述 </v-toolbar-title>
@@ -1657,36 +1738,38 @@ function saveProduct() {
           <v-row class="ma-2">
             <v-col cols="6">
               <v-text-field
-                label="项目号"
+                label="产品查询"
                 variant="outlined"
                 density="compact"
-                v-model="searchProjectNumber"
+                v-model="searchProduct"
                 hide-details
               ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-select
+                variant="outlined"
+                density="compact"
+                label="当前产品类别"
+                :items="['自制件', '标准外购件']"
+                v-model="productTypeName"
+              >
+              </v-select>
             </v-col>
             <v-col cols="8">
               <v-btn
                 color="black"
                 class="mr-2"
                 size="large"
-                @click="filterTableDataDetail()"
+                @click="filterProduct()"
                 >查询</v-btn
               >
               <v-btn
                 color="red"
                 class="mr-2"
                 size="large"
-                @click="resetFilterDetail()"
+                @click="resetFilterProduct()"
               >
                 重置查询
-              </v-btn>
-              <v-btn
-                color="green"
-                class="mr-2"
-                size="large"
-                @click="handoffData()"
-              >
-                {{ productTypeName }}
               </v-btn>
             </v-col>
             <v-col cols="4">
@@ -1704,8 +1787,8 @@ function saveProduct() {
               <v-data-table
                 v-model:page="productTablePage"
                 :items-per-page="productTablePerPage"
-                v-model="selectProducts"
-                multi-sort
+                v-model="selectedRows"
+                return-object
                 show-select
                 :key="key"
                 :headers="productHeaders"
@@ -1749,7 +1832,7 @@ function saveProduct() {
             </v-col>
           </v-row>
         </v-card>
-        <div class="d-flex justify-end mr-6 mb-4">
+        <div class="d-flex justify-end mr-6 my-4">
           <v-btn color="blue" size="large" class="mr-2" @click="saveProduct()">
             确定
           </v-btn>
