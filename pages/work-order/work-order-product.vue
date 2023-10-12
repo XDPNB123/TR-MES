@@ -66,6 +66,7 @@ let workDetailStatus = ref([
   "异常取消",
   "强制关闭",
 ]);
+
 let detailName = ref("");
 // 用于刷新视图的 key
 let key = ref<number>(0);
@@ -103,6 +104,7 @@ let operatingTicket = ref<any>({
   unit: "",
   planned_quantity: "",
   product_id: "",
+  product_description: "",
   start_date: "",
   finish_date: "",
   status: "",
@@ -113,7 +115,7 @@ let keyToChinese = ref<any>({
   workorder_type: "工单类型",
   unit: "单位",
   planned_quantity: "计划数量",
-  product_id: "产品编号",
+  product_description: "产品描述",
   start_date: "开始日期",
   finish_date: "完成日期",
   planned_completion_time: "计划完成时间",
@@ -132,9 +134,9 @@ let operatingTicketDetail = ref<any>({
   planned_quantity: "",
   reported_quantity: "",
   unit: "",
-  workorder_did: "",
   workorder_hid: "",
   actual_delivery_date: "",
+  status: "",
 });
 let keyToDetailChinese = ref<any>({
   mcode: "产出料",
@@ -155,21 +157,7 @@ let keyToDetailChinese = ref<any>({
 });
 let getDetailChineseKey = (key: any) => keyToDetailChinese.value[key] || key;
 //工单表按照开始时间进行降序排序
-let sortBy = ["start_date"];
-let sortDesc = [true];
-let sortedData = computed(() => {
-  return tableData.value.slice().sort((a: any, b: any) => {
-    if (sortDesc[0]) {
-      return (
-        new Date(b[sortBy[0]]).getTime() - new Date(a[sortBy[0]]).getTime()
-      );
-    } else {
-      return (
-        new Date(a[sortBy[0]]).getTime() - new Date(b[sortBy[0]]).getTime()
-      );
-    }
-  });
-});
+
 // 展示的工单表格数据
 let tableData = ref<any[]>([]);
 // 工单表头
@@ -182,19 +170,13 @@ let tableHeaders = ref<any[]>([
     filterable: true,
   },
   {
-    title: "工单编号",
+    title: "工单号",
     key: "workorder_hid",
     align: "center",
     sortable: false,
     filterable: true,
   },
-  {
-    title: "产品编号",
-    key: "product_id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
+
   {
     title: "工单类型",
     key: "workorder_type",
@@ -238,6 +220,13 @@ let tableHeaders = ref<any[]>([
     filterable: true,
   },
   {
+    title: "产品描述",
+    key: "product_description",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
     title: "工单状态",
     key: "status",
     align: "center",
@@ -253,26 +242,9 @@ let tableHeaders = ref<any[]>([
   },
 ]);
 
-//工单明细通过预计交付日期对工单明细进行升序排列
-let sortByDetail = ["estimated_delivery_date"];
-let sortDescDetail = [true];
-let sortedDataDetail = computed(() => {
-  return tableDataDetail.value.slice().sort((a: any, b: any) => {
-    if (sortDescDetail[0]) {
-      return (
-        new Date(a[sortByDetail[0]]).getTime() -
-        new Date(b[sortByDetail[0]]).getTime()
-      );
-    } else {
-      return (
-        new Date(b[sortByDetail[0]]).getTime() -
-        new Date(a[sortByDetail[0]]).getTime()
-      );
-    }
-  });
-});
 //工单明细表头
 let headers = ref<any[]>([
+  { title: "序号", align: "start", key: "id" },
   { title: "产出料", align: "start", key: "mcode" },
   { title: "工序", align: "start", key: "procedure" },
   { title: "图纸号", align: "start", key: "blueprint_id" },
@@ -298,13 +270,38 @@ let headers = ref<any[]>([
 //工单明细表格展示的数据
 let tableDataDetail = ref<any[]>([]);
 
+//自制件表头
+let homemadeHeaders = ref<any[]>([
+  { title: "项目号", align: "start", key: "projectCode" },
+  { title: "项目类型", align: "start", key: "projectType" },
+  { title: "总装物料名", align: "start", key: "totalName " },
+  { title: "零件名", align: "center", key: "partName" },
+  { title: "单位名", align: "start", key: "unitName" },
+  { title: "物料编码", align: "start", key: "resultCode" },
+]);
+//自制表数据
+let homemadeData = ref<any[]>([]);
+
+//外购件表头
+let materialHeaders = ref<any[]>([
+  { title: "种类描述", align: "start", key: "middleName" },
+  { title: "细类描述", align: "start", key: "smallName" },
+  { title: "型号描述", align: "start", key: "xhms " },
+  { title: "规格描述", align: "center", key: " ggms" },
+  { title: "细类名", align: "start", key: "thinName" },
+  { title: "单位名", align: "start", key: "unitName" },
+  { title: "物料编码", align: "start", key: "resultCode" },
+]);
+//外购表数据
+let materialData = ref<any[]>([]);
+
 // 工单表格初始页
 let tablePage = ref<number>(1);
 // 工单表格每页条数
 let tablePerPage = ref<number>(10);
 // 工单表格有多少页
 let tablePageCount = computed(() => {
-  return Math.ceil(sortedData.value.length / tablePerPage.value);
+  return Math.ceil(tableData.value.length / tablePerPage.value);
 });
 
 // 工单明细表格初始页
@@ -313,7 +310,7 @@ let tableDetailPage = ref<number>(1);
 let tableDetailPerPage = ref<number>(10);
 // 工单明细表格有多少页
 let tableDetailPageCount = computed(() => {
-  return Math.ceil(sortedDataDetail.value.length / tableDetailPerPage.value);
+  return Math.ceil(tableDataDetail.value.length / tableDetailPerPage.value);
 });
 
 // 产品表格初始页
@@ -322,12 +319,12 @@ let productTablePage = ref<number>(1);
 let productTablePerPage = ref<number>(10);
 //产品列表有多少页
 let productTablePageCount = computed(() => {
-  return Math.ceil(sortedDataDetail.value.length / productTablePerPage.value);
+  return Math.ceil(tableDataDetail.value.length / productTablePerPage.value);
 });
 
 //工序模块
-let chips = ref<any[]>([]);//存储常用工序
-let droppedChips = ref<any[]>([]);//维护选择的工序
+let chips = ref<any[]>([]); //存储常用工序
+let droppedChips = ref<any[]>([]); //维护选择的工序
 let draggedChip = ref(null);
 //实现拖拽功能的方法
 function dragStart(chip: any) {
@@ -384,7 +381,7 @@ async function batchWork() {
         {
           SortedBy: "id",
           PageIndex: 1,
-          SortType: 0,
+          SortType: 1,
           procedure_name: "",
           procedure_id: "",
           PageSize: 5,
@@ -419,7 +416,7 @@ async function showProcessDialog(item: any) {
       {
         SortedBy: "id",
         PageIndex: 1,
-        SortType: 0,
+        SortType: 1,
         procedure_name: "",
         procedure_id: "",
         PageSize: 5,
@@ -484,13 +481,14 @@ async function filterTableData() {
       {
         PageIndex: 1,
         PageSize: 20,
-        SortType: 0,
+        SortType: 1,
         SortedBy: "id",
         workorder_hid: searchTicketNumber.value,
         status: searchTicketType.value,
         start_date: null,
         planned_quantity: null,
         product_id: null,
+        product_description: "",
         planned_completion_time: null,
         workorder_type: "",
         finish_date: null,
@@ -536,7 +534,7 @@ async function filterTableDataDetail() {
       {
         PageIndex: 1,
         PageSize: 30,
-        SortType: 0,
+        SortType: 1,
         SortedBy: "id",
         workorder_did: "",
         workorder_hid: detailName.value,
@@ -597,13 +595,14 @@ async function getWorkOrder() {
       {
         PageIndex: 1,
         PageSize: 20,
-        SortType: 0,
+        SortType: 1,
         SortedBy: "id",
         workorder_hid: "",
         status: "",
         start_date: null,
         planned_quantity: null,
         product_id: null,
+        product_description: "",
         planned_completion_time: null,
         workorder_type: "",
         finish_date: null,
@@ -644,7 +643,7 @@ async function getWorkOrderDetail(workorder_hid: string) {
       {
         PageIndex: 1,
         PageSize: 30,
-        SortType: 0,
+        SortType: 1,
         SortedBy: "id",
         workorder_did: "",
         workorder_hid: workorder_hid,
@@ -671,11 +670,14 @@ async function getWorkOrderDetail(workorder_hid: string) {
 function formatDateDetail(data: any) {
   try {
     data.forEach((item: any) => {
-      item.estimated_delivery_date = item.estimated_delivery_date.substring(
-        0,
-        10
-      );
-      item.actual_delivery_date = item.actual_delivery_date.substring(0, 10);
+      if (item.estimated_delivery_date !== null) {
+        item.estimated_delivery_date = item.estimated_delivery_date.substring(
+          0,
+          10
+        );
+      }
+      if (item.actual_delivery_date !== null)
+        item.actual_delivery_date = item.actual_delivery_date.substring(0, 10);
     });
     return data;
   } catch (error) {
@@ -694,6 +696,7 @@ function resetAddDialog() {
     workorder_hid: "",
     workorder_type: "",
     product_id: "",
+    product_description: "",
     start_date: "",
     finish_date: "",
     unit: "件",
@@ -723,14 +726,14 @@ function resetAddDetailDialog() {
     blueprint_id: "",
     project_code: "",
     standard_time: "",
-    actual_time: "",
-    procedure: "123",
+    actual_time: 0,
+    procedure: null,
     planned_quantity: "",
-    reported_quantity: "",
+    reported_quantity: 0,
     unit: "件",
-    workorder_did: "",
     workorder_hid: "",
     actual_delivery_date: null,
+    status: null,
   };
   addDetailDialog.value = true;
   getWorkOrder();
@@ -844,50 +847,55 @@ function handleBomClick(item: any) {
 
 //产品编号列表数据
 let productTableData = ref();
+let productHeaders = ref();
 //点击弹出产品编号表格弹框
 async function showProductDialog() {
   try {
-    const data: any = await useHttp(
-      "/MesWorkOrderDetail/M05WorkOrderDetails",
+    const homeData: any = await useHttp(
+      "/MaterialForm/GetHomemadeForm",
       "get",
       undefined,
       {
         PageIndex: 1,
         PageSize: 30,
-        SortType: 0,
+        SortType: 1,
         SortedBy: "id",
-        workorder_did: "",
-        workorder_hid: "",
-        blueprint_id: "",
-        mcode: "",
-        planned_quantity: "",
-        unit: "",
-        procedure: "",
-        project_code: "",
-        reported_quantity: "",
-        estimated_delivery_date: "",
-        actual_delivery_date: "",
-        actual_time: "",
-        standard_time: "",
+        queryname: "",
       }
     );
-    tableDataDetail.value = formatDateDetail(data.data.pageList);
-    productTableData.value = tableDataDetail.value;
+    const outData: any = await useHttp(
+      "/MaterialForm/GetMaterialForm",
+      "get",
+      undefined,
+      {
+        PageIndex: 1,
+        PageSize: 30,
+        SortType: 1,
+        SortedBy: "id",
+        queryname: "",
+      }
+    );
+    homemadeData.value = homeData.pageList;
+    materialData.value = outData.pageList;
+    productTableData.value = homemadeData.value;
+    productHeaders.value = homemadeHeaders.value;
   } catch (error) {
     console.log(error);
   }
   productDialog.value = true;
 }
 
-let productTypeName = ref("外购件");
+let productTypeName = ref("自制件");
 //切换数据
 function handoffData() {
-  if (productTableData.value === tableDataDetail.value) {
-    productTableData.value = tableData.value;
-    productTypeName.value = "自制件";
+  if (productTypeName.value === "自制件") {
+    productTableData.value = materialData.value;
+    productTypeName.value = "外制件";
+    productHeaders.value = materialHeaders.value;
   } else {
-    productTableData.value = tableDataDetail.value;
-    productTypeName.value = "外购件";
+    productTableData.value = homemadeData.value;
+    productTypeName.value = "自制件";
+    productHeaders.value = homemadeHeaders.value;
   }
 }
 //选择产品编号
@@ -900,7 +908,7 @@ function saveProduct() {
     //将找到的产品信息，拼接成字符串
     let productString = selectedData.map((item: any) => item.mcode).join(",");
     //将选择的产品信息值，赋值给新建工单的产品信息
-    operatingTicket.value.product_id = productString;
+    operatingTicket.value.product_description = productString;
   } catch (error) {
     console.log(error);
   }
@@ -987,9 +995,7 @@ function saveProduct() {
             <v-data-table
               v-model:page="tablePage"
               :headers="tableHeaders"
-              :items="sortedData"
-              :sort-desc.sync="sortDesc"
-              multi-sort
+              :items="tableData"
               :items-per-page="tablePerPage"
               style="white-space: nowrap"
               @click:row="showTicketDetail"
@@ -1081,7 +1087,7 @@ function saveProduct() {
           </v-col>
           <v-col cols="6">
             <v-text-field
-              label="最早交付容器"
+              label="最早交付日期"
               type="date"
               variant="outlined"
               density="compact"
@@ -1144,14 +1150,16 @@ function saveProduct() {
               v-model:page="tableDetailPage"
               :items-per-page="tableDetailPerPage"
               v-model="selected"
-              :sort-desc.sync="sortDescDetail"
               multi-sort
               show-select
               :key="key"
               :headers="headers"
-              :items="sortedDataDetail"
+              :items="tableDataDetail"
               class="font-size"
             >
+              <template v-slot:item.id="{ index }">
+                {{ index + 1 }}
+              </template>
               <template v-slot:item.actions="{ item }">
                 <v-icon
                   color="blue"
@@ -1177,19 +1185,40 @@ function saveProduct() {
                 </v-icon>
               </template>
               <template v-slot:item.procedure="{ item }">
-                <span @click="showProcessDialog(item.raw)">{{
-                  item.raw.procedure
-                }}</span>
+                <span>
+                  <v-btn
+                    @click="showProcessDialog(item.raw)"
+                    :color="item.raw.procedure ? 'green' : 'red'"
+                    >{{ item.raw.procedure ? "可维护" : "未维护" }}
+                    <v-tooltip activator="parent" location="top">{{
+                      item.raw.procedure
+                    }}</v-tooltip>
+                  </v-btn>
+                </span>
               </template>
               <template v-slot:item.bomdata="{ item }">
-                <span @click="handleBomClick(item.raw)">{{
-                  item.raw.bomdata
-                }}</span>
+                <span>
+                  <v-btn
+                    @click="handleBomClick(item.raw)"
+                    :color="item.raw.bomdata ? 'green' : 'red'"
+                    >{{ item.raw.bomdata ? "可维护" : "未维护" }}
+                    <v-tooltip activator="parent" location="top">{{
+                      item.raw.bomdata
+                    }}</v-tooltip>
+                  </v-btn></span
+                >
               </template>
               <template v-slot:item.blueprint_id="{ item }">
-                <span @click="handleBlueprintClick(item.raw)">{{
-                  item.raw.blueprint_id
-                }}</span>
+                <span>
+                  <v-btn
+                    @click="handleBlueprintClick(item.raw)"
+                    :color="item.raw.blueprint_id ? 'green' : 'red'"
+                    >{{ item.raw.blueprint_id ? "可维护" : "未维护" }}
+                    <v-tooltip activator="parent" location="top">{{
+                      item.raw.blueprint_id
+                    }}</v-tooltip>
+                  </v-btn>
+                </span>
               </template>
               <template v-slot:bottom>
                 <div class="text-center pt-2">
@@ -1222,8 +1251,8 @@ function saveProduct() {
           ></v-text-field>
 
           <v-text-field
-            v-model="operatingTicket.product_id"
-            label="产品编号"
+            v-model="operatingTicket.product_description"
+            label="产品描述"
             append-inner-icon="fa-regular fa-hand-pointer"
             @click:append-inner="showProductDialog"
           ></v-text-field>
@@ -1286,8 +1315,8 @@ function saveProduct() {
             v-model="operatingTicket.workorder_type"
           ></v-select>
           <v-text-field
-            v-model="operatingTicket.product_id"
-            label="产品编号"
+            v-model="operatingTicket.product_description"
+            label="产品描述"
             append-inner-icon="fa-regular fa-hand-pointer"
             @click:append-inner="showProductDialog"
           ></v-text-field>
@@ -1405,10 +1434,6 @@ function saveProduct() {
             v-model="operatingTicketDetail.project_code"
             label="项目号"
           ></v-text-field>
-          <v-text-field
-            v-model="operatingTicketDetail.workorder_did"
-            label="工单明细编号"
-          ></v-text-field>
 
           <v-text-field
             v-model="operatingTicketDetail.standard_time"
@@ -1423,11 +1448,6 @@ function saveProduct() {
             label="单位"
             :items="units"
             v-model="operatingTicketDetail.unit"
-          ></v-select>
-          <v-select
-            label="工单明细状态"
-            :items="workDetailStatus"
-            v-model="operatingTicketDetail.status"
           ></v-select>
         </v-card-text>
 
@@ -1529,11 +1549,6 @@ function saveProduct() {
             label="单位"
             :items="units"
             v-model="operatingTicketDetail.unit"
-          ></v-select>
-          <v-select
-            label="工单明细状态"
-            :items="workDetailStatus"
-            v-model="operatingTicketDetail.status"
           ></v-select>
         </v-card-text>
 
@@ -1707,11 +1722,10 @@ function saveProduct() {
                 v-model:page="productTablePage"
                 :items-per-page="productTablePerPage"
                 v-model="selectProducts"
-                :sort-desc.sync="sortDescDetail"
                 multi-sort
                 show-select
                 :key="key"
-                :headers="headers"
+                :headers="productHeaders"
                 :items="productTableData"
                 class="font-size"
                 style="max-height: 400px; overflow-y: auto"
@@ -1780,8 +1794,8 @@ function saveProduct() {
           ></v-text-field>
           <v-text-field
             readonly
-            v-model="operatingTicket.product_id"
-            label="产品编号"
+            v-model="operatingTicket.product_description"
+            label="产品描述"
           ></v-text-field>
           <v-text-field
             readonly
