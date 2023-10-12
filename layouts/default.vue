@@ -227,7 +227,6 @@ watch(
               >
                 <template v-slot:activator="{ props }">
                   <v-btn
-                    class="mr-6"
                     size="x-large"
                     :color="
                       router.currentRoute.value.fullPath.startsWith(item.path)

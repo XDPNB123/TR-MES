@@ -49,7 +49,6 @@
           :items-per-page="tablePerPage"
           :headers="headers"
           :items="bomTableList"
-          class="elevation-1"
         >
           <template v-slot:item.id="{ index }">
             {{ index + 1 }}
