@@ -298,28 +298,24 @@ let materialData = ref<any[]>([]);
 let tablePage = ref<number>(1);
 // 工单表格每页条数
 let tablePerPage = ref<number>(10);
-// 工单表格有多少页
-let tablePageCount = computed(() => {
-  return Math.ceil(tableData.value.length / tablePerPage.value);
-});
+//一共有多少行工单数据
+let tableDataLength = ref<number>(0);
 
 // 工单明细表格初始页
 let tableDetailPage = ref<number>(1);
 // 工单明细表格每页条数
 let tableDetailPerPage = ref<number>(10);
-// 工单明细表格有多少页
-let tableDetailPageCount = computed(() => {
-  return Math.ceil(tableDataDetail.value.length / tableDetailPerPage.value);
-});
+//一共有多少工单明细行数据
+let tableDataDetailLength = ref<number>(0);
+
 
 // 产品表格初始页
 let productTablePage = ref<number>(1);
 // 产品表格每页条数
 let productTablePerPage = ref<number>(10);
-//产品列表有多少页
-let productTablePageCount = computed(() => {
-  return Math.ceil(productTableData.value.length / productTablePerPage.value);
-});
+//一共有多少行产品数据
+let productDataLength = ref<number>(0);
+
 
 //工序模块
 let chips = ref<any[]>([]); //存储常用工序
@@ -479,7 +475,7 @@ async function filterTableData() {
       undefined,
       {
         PageIndex: 1,
-        PageSize: 20,
+        PageSize: 10,
         SortType: 1,
         SortedBy: "id",
         workorder_hid: searchTicketNumber.value,
@@ -494,7 +490,7 @@ async function filterTableData() {
       }
     );
     tableData.value = formatDate(workData.data.pageList);
-
+      
     // 确保日期已经选择
     // 确保日期已经选择
     if (startDate.value === "" || endDate.value === "") {
@@ -551,6 +547,7 @@ async function filterTableDataDetail() {
       }
     );
     tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
+
     // 确保日期已经选择
     // 确保日期已经选择
     if (startDateDetail.value === "" || endDateDetail.value === "") {
@@ -592,8 +589,8 @@ async function getWorkOrder() {
       "get",
       undefined,
       {
-        PageIndex: 1,
-        PageSize: 20,
+        PageIndex: tablePage.value,
+        PageSize: productTablePerPage.value,
         SortType: 1,
         SortedBy: "id",
         workorder_hid: "",
@@ -608,6 +605,7 @@ async function getWorkOrder() {
       }
     );
     tableData.value = formatDate(data.data.pageList);
+    tableDataLength.value = data.data.totalCount;
     workorderId.value = data.data.pageList.map(
       (item: any) => item.workorder_hid
     );
@@ -615,6 +613,14 @@ async function getWorkOrder() {
     console.log(error);
   }
 }
+//跳转页面时再次请求数据库数据
+watch(tablePage, () => {
+  getWorkOrder();
+});
+// 工单表格有多少页
+let tablePageCount = computed(() => {
+  return Math.ceil(tableDataLength.value / tablePerPage.value);
+});
 //将工单数据的日期进行截取，保留年月份
 function formatDate(data: any) {
   try {
@@ -646,8 +652,8 @@ async function getWorkOrderDetail(workorder_hid: string) {
       "get",
       undefined,
       {
-        PageIndex: 1,
-        PageSize: 30,
+        PageIndex: tableDetailPage.value,
+        PageSize: tableDetailPerPage.value,
         SortType: 1,
         SortedBy: "id",
         workorder_did: "",
@@ -666,11 +672,18 @@ async function getWorkOrderDetail(workorder_hid: string) {
       }
     );
     tableDataDetail.value = formatDateDetail(data.data.pageList);
+    tableDataDetailLength.value=data.data.totalCount
   } catch (error) {
     console.log(error);
   }
 }
-
+// 工单明细表格有多少页
+let tableDetailPageCount = computed(() => {
+    return Math.ceil(tableDataDetailLength.value / tableDetailPerPage.value);
+});
+watch(tableDetailPage,()=>{
+    getWorkOrderDetail("")
+})
 //将工单明细数据的日期进行截取，保留年月份
 function formatDateDetail(data: any) {
   try {
@@ -853,37 +866,50 @@ function handleBomClick(item: any) {
 let productTableData = ref();
 let productHeaders = ref();
 let productTypeName = ref("");
+//获取到自制件的数据
+async function getHomeData() {
+  const homeData: any = await useHttp(
+    "/MaterialForm/GetHomemadeForm",
+    "get",
+    undefined,
+    {
+      PageIndex: productTablePage.value,
+      PageSize: productTablePerPage.value,
+      SortType: 0,
+      SortedBy: "id",
+      queryname: "",
+    }
+  );
+  homemadeData.value = homeData.pageList;//赋值
+  productDataLength.value = homeData.totalCount;//获取数据库总数据条
+  productTableData.value = homemadeData.value;//将数据赋值到表格数据
+  productHeaders.value = homemadeHeaders.value;//给数据表头赋值相对应的值
+  
+}
+//获取到标准外购件的数据
+async function getMaterialData() {
+  const outData: any = await useHttp(
+    "/MaterialForm/GetMaterialForm",
+    "get",
+    undefined,
+    {
+      PageIndex: productTablePage.value,
+      PageSize: productTablePerPage.value,
+      SortType: 1,
+      SortedBy: "id",
+      queryname: "",
+    }
+  );
+  materialData.value = outData.pageList;
+  productDataLength.value = outData.totalCount;
+   productTableData.value = materialData.value;
+    productHeaders.value = materialHeaders.value;
+}
+
 //点击弹出产品编号表格弹框
 async function showProductDialog() {
   try {
-    const homeData: any = await useHttp(
-      "/MaterialForm/GetHomemadeForm",
-      "get",
-      undefined,
-      {
-        PageIndex: 1,
-        PageSize: 30,
-        SortType: 0,
-        SortedBy: "id",
-        queryname: "",
-      }
-    );
-    const outData: any = await useHttp(
-      "/MaterialForm/GetMaterialForm",
-      "get",
-      undefined,
-      {
-        PageIndex: 1,
-        PageSize: 30,
-        SortType: 1,
-        SortedBy: "id",
-        queryname: "",
-      }
-    );
-    homemadeData.value = homeData.pageList;
-    materialData.value = outData.pageList;
-    productTableData.value = homemadeData.value;
-    productHeaders.value = homemadeHeaders.value;
+    getHomeData();
     productTypeName.value = "自制件";
   } catch (error) {
     console.log(error);
@@ -891,18 +917,26 @@ async function showProductDialog() {
   productDialog.value = true;
 }
 //切换产品类别
-watch(productTypeName, () => {
+watch(productTypeName, async () => {
   if (productTypeName.value === "自制件") {
     selectedRows.value = [];
-    productTableData.value = homemadeData.value;
-    productHeaders.value = homemadeHeaders.value;
+    getHomeData()
   } else if (productTypeName.value === "标准外购件") {
     selectedRows.value = [];
-    productTableData.value = materialData.value;
-    productHeaders.value = materialHeaders.value;
+   getMaterialData()
   }
 });
-
+//产品列表有多少页
+const productTablePageCount = computed(() => {
+    return Math.ceil(productDataLength.value / productTablePerPage.value);
+});
+watch(productTablePage,()=>{
+     if (productTypeName.value === "自制件") {
+        getHomeData()
+    } else if (productTypeName.value === "标准外购件") {
+        getMaterialData()
+    }
+})
 //选择产品编号
 function saveProduct() {
   try {
@@ -937,8 +971,6 @@ function saveProduct() {
       operatingTicket.value.product_description = productString;
       //将选择的物料编码，赋值给新建工单的产品id
       operatingTicket.value.product_id = productIdString;
-      console.log(operatingTicket.value.product_description);
-      console.log(operatingTicket.value.product_id);
     } else {
       alert("一次只能选择一个");
     }
@@ -957,8 +989,8 @@ async function filterProduct() {
         "get",
         undefined,
         {
-          PageIndex: 1,
-          PageSize: 30,
+          PageIndex: productTablePage.value,
+          PageSize: productTablePerPage.value,
           SortType: 0,
           SortedBy: "id",
           queryname: searchProduct.value,
@@ -1074,10 +1106,10 @@ function resetFilterProduct() {
             <v-divider></v-divider>
             <!-- 工单表头表格 -->
             <v-data-table
-              v-model:page="tablePage"
               :headers="tableHeaders"
               :items="tableData"
               :items-per-page="tablePerPage"
+              hover
               style="white-space: nowrap"
               @click:row="showTicketDetail"
             >
@@ -1085,9 +1117,6 @@ function resetFilterProduct() {
                 {{ index + 1 }}
               </template>
               <template v-slot:item.actions="{ item }">
-                <!-- <v-icon color="orange" size="small" class="mr-3" @click.stop="">
-              fa-solid fa-eye
-            </v-icon> -->
                 <!-- 未审核 -->
                 <v-icon
                   color="green"
@@ -1130,14 +1159,14 @@ function resetFilterProduct() {
               </template>
 
               <template v-slot:bottom>
-                <div class="text-center pt-2">
+                 <div class="text-center pt-2">
                   <v-pagination
                     v-model="tablePage"
                     :length="tablePageCount"
                   ></v-pagination>
-                </div>
-              </template>
+                </div> </template>
             </v-data-table>
+           
           </v-col>
         </v-row>
       </v-card>
@@ -1228,7 +1257,7 @@ function resetFilterProduct() {
           <v-col cols="12">
             <v-divider></v-divider>
             <v-data-table
-              v-model:page="tableDetailPage"
+              hover
               :items-per-page="tableDetailPerPage"
               v-model="selected"
               show-select
@@ -1300,15 +1329,14 @@ function resetFilterProduct() {
                   </v-btn>
                 </span>
               </template>
-              <template v-slot:bottom>
-                <div class="text-center pt-2">
-                  <v-pagination
-                    v-model="tableDetailPage"
-                    :length="tableDetailPageCount"
-                  ></v-pagination>
-                </div>
-              </template>
+              <template v-slot:bottom> </template>
             </v-data-table>
+            <div class="text-center pt-2">
+              <v-pagination
+                v-model="tableDetailPage"
+                :length="tableDetailPageCount"
+              ></v-pagination>
+            </div>
           </v-col>
         </v-row>
       </v-card>
@@ -1785,7 +1813,7 @@ function resetFilterProduct() {
             <v-col cols="12">
               <v-divider></v-divider>
               <v-data-table
-                v-model:page="productTablePage"
+                hover
                 :items-per-page="productTablePerPage"
                 v-model="selectedRows"
                 return-object
@@ -1821,10 +1849,10 @@ function resetFilterProduct() {
                   </v-icon>
                 </template>
                 <template v-slot:bottom>
-                  <div class="text-center pt-2">
+                  <div class="text-center pt-2 mb-4">
                     <v-pagination
                       v-model="productTablePage"
-                      :length="tableDetailPageCount"
+                      :length="productTablePageCount"
                     ></v-pagination>
                   </div>
                 </template>
@@ -1905,9 +1933,11 @@ function resetFilterProduct() {
   white-space: nowrap;
   width: 100%;
 }
+
 .row-container {
   background-color: rgb(174, 182, 182);
 }
+
 .date-input {
   margin-bottom: 24px;
   color: grey;
