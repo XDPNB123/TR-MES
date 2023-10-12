@@ -16,6 +16,14 @@ useSeoMeta({
 definePageMeta({
   layout: false,
 });
+onMounted(() => {
+  // 页面初始动画
+  useGsap.from(".initial-animation", {
+    x: 100,
+    opacity: 0,
+    duration: 1,
+  });
+});
 
 // 获取路由对象
 const router = useRouter();
@@ -108,7 +116,7 @@ const debounceForgetPasswordSubmit = useDebounce(forgetPasswordSubmit, 1000);
 
 <template>
   <v-app>
-    <v-row no-gutters class="h-screen">
+    <v-row no-gutters class="h-screen initial-animation">
       <v-col
         cols="12"
         md="6"

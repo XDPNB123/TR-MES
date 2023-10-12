@@ -16,6 +16,16 @@ useSeoMeta({
 definePageMeta({
   layout: false,
 });
+onMounted(() => {
+  // 页面初始动画
+  useGsap.from(".initial-animation", {
+    y: 200,
+    opacity: 0,
+    duration: 2,
+    ease: "back",
+  });
+});
+
 // 获取路由
 const router = useRouter();
 // 去登陆页面
@@ -25,7 +35,7 @@ function goToLogin() {
 </script>
 
 <template>
-  <div>
+  <div class="initial-animation">
     <client-only>
       <Vue3Lottie animationLink="/欢迎.json" height="100vh" />
     </client-only>
