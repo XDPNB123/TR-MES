@@ -152,10 +152,7 @@ function exit() {
 watch(
   tabs,
   () => {
-    if (tabs.value.length === 0) {
-      alert("ok");
-      router.push({ path: "/home" });
-    }
+    if (tabs.value.length === 0) router.push({ path: "/home" });
   },
   { deep: true }
 );
@@ -175,7 +172,7 @@ watch(
           @click="changeFullScreen()"
         ></v-btn>
 
-        <v-menu open-on-hover>
+        <v-menu open-on-hover open-delay="0" close-delay="100">
           <template v-slot:activator="{ props }">
             <v-avatar v-bind="props" class="mr-3">
               <v-img src="/头像.jpg" alt="头像" />
@@ -223,6 +220,8 @@ watch(
             <div>
               <v-menu
                 open-on-hover
+                open-delay="0"
+                close-delay="100"
                 v-for="(item, index) in pageMenus"
                 :key="index"
               >
@@ -261,7 +260,12 @@ watch(
               </v-menu>
             </div>
 
-            <v-menu open-on-hover :close-on-content-click="false">
+            <v-menu
+              open-on-hover
+              open-delay="0"
+              close-delay="100"
+              :close-on-content-click="false"
+            >
               <template v-slot:activator="{ props }">
                 <v-btn size="x-large" variant="flat" v-bind="props">
                   <v-badge :content="tabs.length" color="green">
@@ -279,6 +283,7 @@ watch(
                   v-for="(item, index) in tabs"
                   :key="index"
                   :to="item.path"
+                  @click="selectTab = item.name"
                 >
                   <template v-slot:prepend>
                     <v-icon class="mr-6">{{ item.icon }}</v-icon>

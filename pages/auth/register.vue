@@ -94,6 +94,7 @@ async function getCaptcha() {
 
 // 注册
 async function registerSubmit() {
+  // 如果注册表单校验失败，则直接返回
   if (!registerFormValid.value) return;
 
   // 密码加密
@@ -108,8 +109,6 @@ async function registerSubmit() {
     platform: "Q!*l",
     password: md5Password,
   });
-
-  console.log(data);
 
   // 如果账号已存在
   if (data.code === 1005) return setSnackbar("black", "验证码错误");
