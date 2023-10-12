@@ -490,7 +490,7 @@ async function filterTableData() {
       }
     );
     tableData.value = formatDate(workData.data.pageList);
-      
+      tableDataLength.value = workData.data.totalCount;
     // 确保日期已经选择
     // 确保日期已经选择
     if (startDate.value === "" || endDate.value === "") {
@@ -547,7 +547,7 @@ async function filterTableDataDetail() {
       }
     );
     tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
-
+        tableDataDetailLength.value = workDataDetail.data.totalCount
     // 确保日期已经选择
     // 确保日期已经选择
     if (startDateDetail.value === "" || endDateDetail.value === "") {
@@ -930,6 +930,7 @@ watch(productTypeName, async () => {
 const productTablePageCount = computed(() => {
     return Math.ceil(productDataLength.value / productTablePerPage.value);
 });
+//切换页面，重新给表格赋值
 watch(productTablePage,()=>{
      if (productTypeName.value === "自制件") {
         getHomeData()
@@ -997,6 +998,7 @@ async function filterProduct() {
         }
       );
       productTableData.value = homeData.pageList;
+      productDataLength.value = homeData.totalCount;
     }
     if (productTypeName.value === "标准外购件") {
       const outData: any = await useHttp(
@@ -1012,6 +1014,7 @@ async function filterProduct() {
         }
       );
       productTableData.value = outData.pageList;
+      productDataLength.value = outData.totalCount;
     }
   } catch (error) {
     console.log(error);
