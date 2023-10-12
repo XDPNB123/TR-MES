@@ -12,10 +12,18 @@ useSeoMeta({
   // 社交媒体分享该页面时显示的图片
   ogImage: "/同日图标.png",
 });
+onMounted(() => {
+  // 页面初始动画
+  useGsap.from(".initial-animation", {
+    y: 100,
+    opacity: 0,
+    duration: 0.5,
+  });
+});
 </script>
 
 <template>
-  <div>
+  <div class="initial-animation">
     <client-only>
       <Vue3Lottie animationLink="/主页.json" height="80vh" />
     </client-only>

@@ -16,8 +16,16 @@ useSeoMeta({
 definePageMeta({
   layout: false,
 });
+onMounted(() => {
+  // 页面初始动画
+  useGsap.from(".initial-animation", {
+    y: 100,
+    opacity: 0,
+    duration: 1,
+  });
+});
 </script>
 
 <template>
-  <div>这是个人信息页面</div>
+  <div class="initial-animation">这是个人信息页面</div>
 </template>

@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^6.4.2",
+    "@hypernym/nuxt-gsap": "^2.4.1",
     "@nuxt/devtools": "latest",
     "nuxt": "^3.7.3",
     "nuxt-lodash": "^2.5.0",
