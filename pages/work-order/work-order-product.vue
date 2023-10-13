@@ -244,27 +244,117 @@ let tableHeaders = ref<any[]>([
 
 //工单明细表头
 let headers = ref<any[]>([
-  { title: "序号", align: "start", key: "id" },
-  { title: "产出料", align: "start", key: "mcode" },
-  { title: "工序", align: "start", key: "procedure" },
-  { title: "图纸号", align: "start", key: "blueprint_id" },
-  { title: "BOM清单", align: "center", key: "bomdata" },
-  { title: "预计交付日期", align: "start", key: "estimated_delivery_date" },
-  { title: "实际交付日期", align: "start", key: "actual_delivery_date" },
-  { title: "工单明细编号", align: "start", key: "workorder_did" },
-  { title: "项目号", align: "start", key: "project_code" },
-  { title: "标准工时", align: "start", key: "standard_time" },
-  { title: "实际工时", align: "start", key: "actual_time" },
-  { title: "计划数量", align: "start", key: "planned_quantity" },
-  { title: "实际报工数量", align: "start", key: "reported_quantity" },
-  { title: "单位", align: "start", key: "unit" },
-  { title: "状态", align: "start", key: "status" },
+  {
+    title: "序号",
+    align: "center",
+    key: "id",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "产出料",
+    align: "center",
+    key: "mcode",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工序",
+    align: "center",
+    key: "procedure",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "图纸号",
+    align: "center",
+    key: "blueprint_id",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "BOM清单",
+    align: "center",
+    key: "bomdata",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "预计交付日期",
+    align: "center",
+    key: "estimated_delivery_date",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "实际交付日期",
+    align: "center",
+    key: "actual_delivery_date",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工单明细编号",
+    align: "center",
+    key: "workorder_did",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "项目号",
+    align: "center",
+    key: "project_code",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "标准工时",
+    align: "center",
+    key: "standard_time",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "实际工时",
+    align: "center",
+    key: "actual_time",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "计划数量",
+    align: "center",
+    key: "planned_quantity",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "实际报工数量",
+    align: "center",
+    key: "reported_quantity",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "单位",
+    align: "center",
+    key: "unit",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "状态",
+    align: "center",
+    key: "status",
+    sortable: false,
+    filterable: true,
+  },
   {
     title: "操作",
     key: "actions",
     align: "center",
     sortable: false,
-    filterable: false,
+    filterable: true,
   },
 ]);
 //工单明细表格展示的数据
@@ -674,6 +764,7 @@ async function getWorkOrderDetail(workorder_hid: string) {
     );
     tableDataDetail.value = formatDateDetail(data.data.pageList);
     tableDataDetailLength.value = data.data.totalCount;
+    tableDataDetailLength.value = data.data.totalCount;
   } catch (error) {
     console.log(error);
   }
@@ -912,6 +1003,8 @@ async function getMaterialData() {
   productDataLength.value = outData.totalCount;
   productTableData.value = materialData.value;
   productHeaders.value = materialHeaders.value;
+  productTableData.value = materialData.value;
+  productHeaders.value = materialHeaders.value;
 }
 
 //点击弹出产品编号表格弹框
@@ -1119,7 +1212,7 @@ function resetFilterProduct() {
               重置查询
             </v-btn>
             <v-btn
-              color="green"
+              color="teal"
               class="mr-2"
               size="large"
               @click="resetAddDialog()"
@@ -1187,10 +1280,13 @@ function resetFilterProduct() {
 
               <template v-slot:bottom>
                 <div class="text-center pt-2">
+                <div class="text-center pt-2">
                   <v-pagination
                     v-model="tablePage"
                     :length="tablePageCount"
                   ></v-pagination>
+                </div>
+              </template>
                 </div>
               </template>
             </v-data-table>
@@ -1261,19 +1357,21 @@ function resetFilterProduct() {
               重置查询
             </v-btn>
             <v-btn
-              color="green"
+              color="teal"
               class="mr-2"
               size="large"
               @click="resetAddDetailDialog()"
               >新增明细</v-btn
             >
-            <v-btn @click="batchWork()" class="mr-2 bg-primary" size="large"
+            <v-btn @click="batchWork()" class="mr-2" color="blue" size="large"
               >批量工序维护</v-btn
             >
           </v-col>
           <v-col cols="2">
             <v-select
               class="mr-1"
+              density="compact"
+              hide-details
               variant="outlined"
               density="compact"
               hide-details
@@ -1326,7 +1424,7 @@ function resetFilterProduct() {
                 <span>
                   <v-btn
                     @click="showProcessDialog(item.raw)"
-                    :color="item.raw.procedure ? 'green' : 'red'"
+                    :color="item.raw.procedure ? 'green' : 'grey'"
                     >{{ item.raw.procedure ? "可维护" : "未维护" }}
                     <v-tooltip activator="parent" location="top">{{
                       item.raw.procedure
@@ -1338,7 +1436,7 @@ function resetFilterProduct() {
                 <span>
                   <v-btn
                     @click="handleBomClick(item.raw)"
-                    :color="item.raw.bomdata ? 'green' : 'red'"
+                    :color="item.raw.bomdata ? 'green' : 'grey'"
                     >{{ item.raw.bomdata ? "可维护" : "未维护" }}
                     <v-tooltip activator="parent" location="top">{{
                       item.raw.bomdata
@@ -1350,7 +1448,7 @@ function resetFilterProduct() {
                 <span>
                   <v-btn
                     @click="handleBlueprintClick(item.raw)"
-                    :color="item.raw.blueprint_id ? 'green' : 'red'"
+                    :color="item.raw.blueprint_id ? 'green' : 'grey'"
                     >{{ item.raw.blueprint_id ? "可维护" : "未维护" }}
                     <v-tooltip activator="parent" location="top">{{
                       item.raw.blueprint_id
