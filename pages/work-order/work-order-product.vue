@@ -882,7 +882,7 @@ let productTypeName = ref("");
 //获取到自制件的数据
 async function getHomeData(name: any) {
   const homeData: any = await useHttp(
-    "/MaterialForm/GetHomemadeForm",
+    "/MaterialForm/M52GetHomemadeForm",
     "get",
     undefined,
     {
@@ -901,7 +901,7 @@ async function getHomeData(name: any) {
 //获取到标准外购件的数据
 async function getMaterialData(searchProduct: any) {
   const outData: any = await useHttp(
-    "/MaterialForm/GetMaterialForm",
+    "/MaterialForm/M51GetMaterialForm",
     "get",
     undefined,
     {
@@ -923,6 +923,7 @@ async function showProductDialog() {
   try {
     getHomeData(searchProduct);
     productTypeName.value = "自制件";
+    searchProduct.value=""
   } catch (error) {
     console.log(error);
   }
@@ -1023,9 +1024,10 @@ function resetFilterProduct() {
 //根据产品的项目号来查找新增的产出料
 function showMcodeDialog() {
   getHomeData("");
+  productTypeName.value = "自制件";
+  searchProduct.value = ""
   mcodeDialog.value = true;
 }
-
 
 //选择数据批量创建工单明细
 async function saveMcodeProduct() {
@@ -1160,6 +1162,7 @@ async function saveMcodeProduct() {
               fixed-footer
               fixed-header
               height="610"
+               no-data-text="没有找到符合的数据"
               @click:row="showTicketDetail"
             >
               <template v-slot:item.id="{ index }">
@@ -1319,6 +1322,7 @@ async function saveMcodeProduct() {
               style="overflow-x: auto; white-space: nowrap"
               fixed-footer
               fixed-header
+               no-data-text="没有找到符合的数据"
               height="610"
             >
               <template v-slot:item.id="{ index }">
