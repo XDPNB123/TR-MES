@@ -68,6 +68,8 @@ let workDetailStatus = ref([
 ]);
 //存储当前操作的工单编号
 let detailName = ref("");
+//存储当前工单数据的产品编号
+let productId = ref("");
 // 用于刷新视图的 key
 let key = ref<number>(0);
 //多选产品编号
@@ -87,6 +89,7 @@ let editDetailDialog = ref(false);
 let productDialog = ref(false);
 let auditDialog = ref(false);
 let processDialog = ref(false);
+let mcodeDialog = ref(false);
 // 工单搜索
 let searchTicketNumber = ref<string>("");
 let searchProjectNumber = ref<string>("");
@@ -715,6 +718,7 @@ function formatDateDetail(data: any) {
 //点击表单显示表单明细
 async function showTicketDetail(item: any, obj: any) {
   detailName.value = obj.item.raw.workorder_hid;
+  productId.value = obj.item.raw.product_id.slice(-9);
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
@@ -880,7 +884,7 @@ let productTableData = ref();
 let productHeaders = ref();
 let productTypeName = ref("");
 //获取到自制件的数据
-async function getHomeData(searchProduct: any) {
+async function getHomeData(name: any) {
   const homeData: any = await useHttp(
     "/MaterialForm/GetHomemadeForm",
     "get",
@@ -890,7 +894,7 @@ async function getHomeData(searchProduct: any) {
       PageSize: productTablePerPage.value,
       SortType: 1,
       SortedBy: "_id",
-      queryname: searchProduct.value,
+      queryname: name.value,
     }
   );
   homemadeData.value = homeData.data.pageList; //赋值
@@ -1026,6 +1030,15 @@ function resetFilterProduct() {
     getMaterialData(searchProduct);
   }
 }
+//根据产品的项目号来查找新增的产出料
+ function showMcodeDialog() {
+    searchProduct.value= productId.value
+  getHomeData(searchProduct);
+  mcodeDialog.value = true;
+}
+
+//
+function saveMcodeProduct() {}
 </script>
 
 <template>
@@ -1118,7 +1131,10 @@ function resetFilterProduct() {
               :items="tableData"
               :items-per-page="tablePerPage"
               hover
-              style="white-space: nowrap"
+              style="overflow-x: auto; white-space: nowrap"
+              fixed-footer
+              fixed-header
+              height="610"
               @click:row="showTicketDetail"
             >
               <template v-slot:item.id="{ index }">
@@ -1245,7 +1261,8 @@ function resetFilterProduct() {
               color="teal"
               class="mr-2"
               size="large"
-              @click="resetAddDetailDialog()"
+              v-if="detailName"
+              @click="showMcodeDialog()"
               >新增明细</v-btn
             >
             <v-btn @click="batchWork()" class="mr-2" color="blue" size="large"
@@ -1274,7 +1291,10 @@ function resetFilterProduct() {
               :key="key"
               :headers="headers"
               :items="tableDataDetail"
-              style="white-space: nowrap"
+              style="overflow-x: auto; white-space: nowrap"
+              fixed-footer
+              fixed-header
+              height="610"
             >
               <template v-slot:item.id="{ index }">
                 {{ index + 1 }}
@@ -1512,7 +1532,7 @@ function resetFilterProduct() {
       </v-card>
     </v-dialog>
     <!-- 新增工单明细 -->
-    <v-dialog v-model="addDetailDialog" min-width="400px" width="560px">
+    <!-- <v-dialog v-model="addDetailDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
           <v-toolbar-title> 新增工单明细 </v-toolbar-title>
@@ -1526,12 +1546,10 @@ function resetFilterProduct() {
           <v-text-field
             v-model="operatingTicketDetail.mcode"
             label="产出料"
+            append-inner-icon="fa-regular fa-hand-pointer"
+            @click:append-inner="showMcodeDialog"
           ></v-text-field>
-          <v-select
-            label="工单编号"
-            :items="workorderId"
-            v-model="operatingTicketDetail.workorder_hid"
-          ></v-select>
+
           <v-text-field
             v-model="operatingTicketDetail.estimated_delivery_date"
             type="date"
@@ -1578,7 +1596,7 @@ function resetFilterProduct() {
           </v-btn>
         </div>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
     <!-- 删除工单明细行 -->
     <v-dialog v-model="deleteDetailDialog" min-width="400px" width="560px">
       <v-card>
@@ -1772,7 +1790,6 @@ function resetFilterProduct() {
           </v-btn>
         </v-toolbar>
         <v-card>
-          <v-toolbar class="text-h6 pl-6">产品类型</v-toolbar>
           <v-row class="ma-2">
             <v-col cols="6">
               <v-text-field
@@ -1833,32 +1850,11 @@ function resetFilterProduct() {
                 :key="key"
                 :headers="productHeaders"
                 :items="productTableData"
-                style="max-height: 400px; overflow-y: auto; white-space: nowrap"
+                style="overflow-x: auto; white-space: nowrap"
+                fixed-footer
+                fixed-header
+                height="400"
               >
-                <template v-slot:item.actions="{ item }">
-                  <v-icon
-                    color="blue"
-                    size="small"
-                    class="mr-3"
-                    @click="
-                      operatingTicketDetail = { ...item.raw };
-                      editDetailDialog = true;
-                    "
-                  >
-                    fa-solid fa-pen
-                  </v-icon>
-
-                  <v-icon
-                    color="red"
-                    size="small"
-                    @click="
-                      operatingTicketDetail = { ...item.raw };
-                      deleteDetailDialog = true;
-                    "
-                  >
-                    fa-solid fa-trash
-                  </v-icon>
-                </template>
                 <template v-slot:bottom>
                   <div class="text-center pt-2 mb-4">
                     <v-pagination
@@ -1876,6 +1872,58 @@ function resetFilterProduct() {
             确定
           </v-btn>
           <v-btn color="grey" size="large" @click="productDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 工单明细产出料 -->
+    <v-dialog v-model="mcodeDialog" min-width="400px" width="1000px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 选择产出料 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="mcodeDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card>
+          <v-data-table
+            hover
+            :items-per-page="productTablePerPage"
+            v-model="selectedRows"
+            return-object
+            show-select
+            :key="key"
+            :headers="productHeaders"
+            :items="productTableData"
+            style="overflow-x: auto; white-space: nowrap"
+            fixed-footer
+            fixed-header
+            height="400"
+          >
+            
+            <template v-slot:bottom>
+              <div class="text-center pt-2 mb-4">
+                <v-pagination
+                  v-model="productTablePage"
+                  :length="productTablePageCount"
+                ></v-pagination>
+              </div>
+            </template>
+          </v-data-table>
+        </v-card>
+        <div class="d-flex justify-end mr-6 my-4">
+          <v-btn
+            color="blue"
+            size="large"
+            class="mr-2"
+            @click="saveMcodeProduct()"
+          >
+            确定
+          </v-btn>
+          <v-btn color="grey" size="large" @click="mcodeDialog = false">
             取消
           </v-btn>
         </div>
