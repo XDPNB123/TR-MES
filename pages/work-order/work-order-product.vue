@@ -1051,7 +1051,6 @@ function saveProduct() {
   try {
     //找到所选的产品信息
     //判断是否只选择一个产品
-
     if (selectedRows.value.length === 1) {
       const selectedData = selectedRows.value[0];
       //将找到的物料编码，拼接成字符串
@@ -1080,14 +1079,15 @@ function saveProduct() {
       operatingTicket.value.product_description = productString;
       //将选择的物料编码，赋值给新建工单的产品id
       operatingTicket.value.product_id = productIdString;
+      //清空选择的数据
+      selectedRows.value=[]
+       productDialog.value = false;
     } else {
       alert("一次只能选择一个");
     }
   } catch (error) {
     console.log(error);
   }
-
-  productDialog.value = false;
 }
 //产品的搜素
 async function filterProduct() {
