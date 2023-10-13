@@ -21,7 +21,7 @@ dependencies:
     specifier: ^3.1.0
     version: 3.1.0(vue@3.3.4)
   vuetify:
-    specifier: 3.3.17
+    specifier: ^3.3.17
     version: 3.3.17(typescript@5.2.2)(vue@3.3.4)
 
 devDependencies:

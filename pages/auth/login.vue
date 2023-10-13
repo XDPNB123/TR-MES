@@ -21,7 +21,9 @@ onMounted(() => {
   useGsap.from(".initial-animation", {
     x: -100,
     opacity: 0,
-    duration: 1,
+    duration: 2,
+    rotate:20,
+    ease:'bounce'
   });
 });
 

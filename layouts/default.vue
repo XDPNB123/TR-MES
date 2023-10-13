@@ -44,7 +44,7 @@ const pageMenus = ref<any[]>([
     ],
   },
   {
-    title: "工单",
+    title: "MES",
     path: "/work-order",
     icon: "fa-solid fa-table-list",
     children: [
