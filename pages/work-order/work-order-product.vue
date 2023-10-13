@@ -579,7 +579,7 @@ async function filterTableData() {
       }
     );
     tableData.value = formatDate(workData.data.pageList);
-    tableDataLength.value = workData.data.totalCount;
+
     // 确保日期已经选择
     // 确保日期已经选择
     if (startDate.value === "" || endDate.value === "") {
@@ -1280,13 +1280,10 @@ function resetFilterProduct() {
 
               <template v-slot:bottom>
                 <div class="text-center pt-2">
-                <div class="text-center pt-2">
                   <v-pagination
                     v-model="tablePage"
                     :length="tablePageCount"
                   ></v-pagination>
-                </div>
-              </template>
                 </div>
               </template>
             </v-data-table>
@@ -1373,8 +1370,6 @@ function resetFilterProduct() {
               density="compact"
               hide-details
               variant="outlined"
-              density="compact"
-              hide-details
               label="每页最大数"
               :items="[10, 20, 30, 40]"
               v-model="tableDetailPerPage"
@@ -1391,7 +1386,7 @@ function resetFilterProduct() {
               :key="key"
               :headers="headers"
               :items="tableDataDetail"
-                style="white-space: nowrap"
+              style="white-space: nowrap"
             >
               <template v-slot:item.id="{ index }">
                 {{ index + 1 }}
@@ -1932,7 +1927,7 @@ function resetFilterProduct() {
                 class="mr-1"
                 variant="outlined"
                 density="compact"
-                   hide-details
+                hide-details
                 label="每页最大数"
                 :items="[10, 20, 30, 40]"
                 v-model="productTablePerPage"
@@ -1950,7 +1945,7 @@ function resetFilterProduct() {
                 :key="key"
                 :headers="productHeaders"
                 :items="productTableData"
-                style="max-height: 400px; overflow-y: auto;white-space: nowrap"
+                style="max-height: 400px; overflow-y: auto; white-space: nowrap"
               >
                 <template v-slot:item.actions="{ item }">
                   <v-icon
@@ -2056,7 +2051,6 @@ function resetFilterProduct() {
 </template>
 
 <style scoped>
-
 .row-container {
   background-color: rgb(174, 182, 182);
 }
