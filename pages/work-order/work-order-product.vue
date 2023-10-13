@@ -558,37 +558,7 @@ async function saveTicket() {
 // 工单表头搜索过滤
 async function filterTableData() {
   try {
-    const workData: any = await useHttp(
-      "/MesWorkOrder/M01GetWorkOrderList",
-      "get",
-      undefined,
-      {
-        PageIndex: 1,
-        PageSize: 10,
-        SortType: 1,
-        SortedBy: "id",
-        workorder_hid: searchTicketNumber.value,
-        status: searchTicketStatus.value,
-        workorder_type: searchTicketType.value,
-
-      }
-    );
-    tableData.value = formatDate(workData.data.pageList);
-      tableDataLength.value=workData.data.totalCount
-    // 确保日期已经选择
-    // 确保日期已经选择
-    if (startDate.value === "" || endDate.value === "") {
-      return;
-    }
-    // 转换日期为时间戳进行比较
-    const startTimestamp = new Date(startDate.value).getTime();
-    const endTimestamp = new Date(endDate.value).getTime();
-
-    // 过滤表数据
-    tableData.value = tableData.value.filter((item) => {
-      const itemTimestamp = new Date(item.start_date).getTime();
-      return itemTimestamp >= startTimestamp && itemTimestamp <= endTimestamp;
-    });
+    getWorkOrder();
   } catch (error) {
     console.log(error);
   }
@@ -607,36 +577,7 @@ function resetFilter() {
 //工单明细搜素
 async function filterTableDataDetail() {
   try {
-    const workDataDetail: any = await useHttp(
-      "/MesWorkOrderDetail/M05WorkOrderDetails",
-      "get",
-      undefined,
-      {
-        PageIndex: 1,
-        PageSize: 30,
-        SortType: 1,
-        SortedBy: "id",
-        workorder_hid: detailName.value,
-        mcode: searchOutputs.value,
-        project_code: searchProjectNumber.value,
-      }
-    );
-    tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
-    tableDataDetailLength.value = workDataDetail.data.totalCount;
-    // 确保日期已经选择
-    // 确保日期已经选择
-    if (startDateDetail.value === "" || endDateDetail.value === "") {
-      return;
-    }
-    // 转换日期为时间戳进行比较
-    const startTimestamp = new Date(startDateDetail.value).getTime();
-    const endTimestamp = new Date(endDateDetail.value).getTime();
-
-    // 过滤表数据
-    tableDataDetail.value = tableDataDetail.value.filter((item) => {
-      const itemTimestamp = new Date(item.estimated_delivery_date).getTime();
-      return itemTimestamp >= startTimestamp && itemTimestamp <= endTimestamp;
-    });
+    getWorkOrderDetail(detailName.value);
   } catch (error) {
     console.log(error);
   }
@@ -668,6 +609,11 @@ async function getWorkOrder() {
         PageSize: productTablePerPage.value,
         SortType: 1,
         SortedBy: "id",
+        workorder_hid: searchTicketNumber.value,
+        status: searchTicketStatus.value,
+        workorder_type: searchTicketType.value,
+        start_date: startDate.value,
+        end_date: endDate.value,
       }
     );
     tableData.value = formatDate(data.data.pageList);
@@ -724,10 +670,13 @@ async function getWorkOrderDetail(workorder_hid: string) {
         SortType: 1,
         SortedBy: "id",
         workorder_hid: workorder_hid,
+        mcode: searchOutputs.value,
+        project_code: searchProjectNumber.value,
+        estimated_delivery_date: startDateDetail.value,
+        end_date: endDateDetail.value,
       }
     );
     tableDataDetail.value = formatDateDetail(data.data.pageList);
-    tableDataDetailLength.value = data.data.totalCount;
     tableDataDetailLength.value = data.data.totalCount;
   } catch (error) {
     console.log(error);
@@ -931,7 +880,7 @@ let productTableData = ref();
 let productHeaders = ref();
 let productTypeName = ref("");
 //获取到自制件的数据
-async function getHomeData(searchProduct:any) {
+async function getHomeData(searchProduct: any) {
   const homeData: any = await useHttp(
     "/MaterialForm/GetHomemadeForm",
     "get",
@@ -950,7 +899,7 @@ async function getHomeData(searchProduct:any) {
   productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
 }
 //获取到标准外购件的数据
-async function getMaterialData(searchProduct:any) {
+async function getMaterialData(searchProduct: any) {
   const outData: any = await useHttp(
     "/MaterialForm/GetMaterialForm",
     "get",
@@ -1058,10 +1007,10 @@ function saveProduct() {
 async function filterProduct() {
   try {
     if (productTypeName.value === "自制件") {
-     getHomeData(searchProduct)
+      getHomeData(searchProduct);
     }
     if (productTypeName.value === "标准外购件") {
-     getMaterialData(searchProduct);
+      getMaterialData(searchProduct);
     }
   } catch (error) {
     console.log(error);
@@ -1071,10 +1020,10 @@ async function filterProduct() {
 function resetFilterProduct() {
   searchProduct.value = "";
   if (productTypeName.value === "自制件") {
-    getHomeData(searchProduct)
+    getHomeData(searchProduct);
   }
   if (productTypeName.value === "标准外购件") {
-      getMaterialData(searchProduct);
+    getMaterialData(searchProduct);
   }
 }
 </script>
