@@ -574,7 +574,7 @@ async function filterTableData() {
       }
     );
     tableData.value = formatDate(workData.data.pageList);
-
+      tableDataLength.value=workData.data.totalCount
     // 确保日期已经选择
     // 确保日期已经选择
     if (startDate.value === "" || endDate.value === "") {
