@@ -97,7 +97,7 @@ let endDateDetail = ref("");
 let searchTicketStatus = ref<string>("");
 let searchTicketType = ref("");
 let searchOutputs = ref<string>("");
-let searchProduct = ref<string>("");
+let searchProduct = ref<any>("");
 // 正在操作的工单
 let operatingTicket = ref<any>({
   workorder_type: "",
@@ -569,13 +569,8 @@ async function filterTableData() {
         SortedBy: "id",
         workorder_hid: searchTicketNumber.value,
         status: searchTicketStatus.value,
-        start_date: null,
-        planned_quantity: null,
-        product_id: null,
-        product_description: "",
-        planned_completion_time: null,
         workorder_type: searchTicketType.value,
-        finish_date: null,
+
       }
     );
     tableData.value = formatDate(workData.data.pageList);
@@ -621,19 +616,9 @@ async function filterTableDataDetail() {
         PageSize: 30,
         SortType: 1,
         SortedBy: "id",
-        workorder_did: "",
         workorder_hid: detailName.value,
-        blueprint_id: "",
         mcode: searchOutputs.value,
-        planned_quantity: "",
-        unit: "",
-        procedure: "",
         project_code: searchProjectNumber.value,
-        reported_quantity: "",
-        estimated_delivery_date: "",
-        actual_delivery_date: "",
-        actual_time: "",
-        standard_time: "",
       }
     );
     tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
@@ -683,15 +668,6 @@ async function getWorkOrder() {
         PageSize: productTablePerPage.value,
         SortType: 1,
         SortedBy: "id",
-        workorder_hid: "",
-        status: "",
-        start_date: null,
-        planned_quantity: null,
-        product_id: null,
-        product_description: "",
-        planned_completion_time: null,
-        workorder_type: "",
-        finish_date: null,
       }
     );
     tableData.value = formatDate(data.data.pageList);
@@ -747,19 +723,7 @@ async function getWorkOrderDetail(workorder_hid: string) {
         PageSize: tableDetailPerPage.value,
         SortType: 1,
         SortedBy: "id",
-        workorder_did: "",
         workorder_hid: workorder_hid,
-        blueprint_id: "",
-        mcode: "",
-        planned_quantity: "",
-        unit: "",
-        procedure: "",
-        project_code: "",
-        reported_quantity: "",
-        estimated_delivery_date: "",
-        actual_delivery_date: "",
-        actual_time: "",
-        standard_time: "",
       }
     );
     tableDataDetail.value = formatDateDetail(data.data.pageList);
@@ -967,7 +931,7 @@ let productTableData = ref();
 let productHeaders = ref();
 let productTypeName = ref("");
 //获取到自制件的数据
-async function getHomeData() {
+async function getHomeData(searchProduct:any) {
   const homeData: any = await useHttp(
     "/MaterialForm/GetHomemadeForm",
     "get",
@@ -975,18 +939,18 @@ async function getHomeData() {
     {
       PageIndex: productTablePage.value,
       PageSize: productTablePerPage.value,
-      SortType: 0,
-      SortedBy: "id",
-      queryname: "",
+      SortType: 1,
+      SortedBy: "_id",
+      queryname: searchProduct.value,
     }
   );
-  homemadeData.value = homeData.pageList; //赋值
-  productDataLength.value = homeData.totalCount; //获取数据库总数据条
+  homemadeData.value = homeData.data.pageList; //赋值
+  productDataLength.value = homeData.data.totalCount; //获取数据库总数据条
   productTableData.value = homemadeData.value; //将数据赋值到表格数据
   productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
 }
 //获取到标准外购件的数据
-async function getMaterialData() {
+async function getMaterialData(searchProduct:any) {
   const outData: any = await useHttp(
     "/MaterialForm/GetMaterialForm",
     "get",
@@ -995,12 +959,12 @@ async function getMaterialData() {
       PageIndex: productTablePage.value,
       PageSize: productTablePerPage.value,
       SortType: 1,
-      SortedBy: "id",
-      queryname: "",
+      SortedBy: "_id",
+      queryname: searchProduct.value,
     }
   );
-  materialData.value = outData.pageList;
-  productDataLength.value = outData.totalCount;
+  materialData.value = outData.data.pageList;
+  productDataLength.value = outData.data.totalCount;
   productTableData.value = materialData.value;
   productHeaders.value = materialHeaders.value;
   productTableData.value = materialData.value;
@@ -1010,7 +974,7 @@ async function getMaterialData() {
 //点击弹出产品编号表格弹框
 async function showProductDialog() {
   try {
-    getHomeData();
+    getHomeData(searchProduct);
     productTypeName.value = "自制件";
   } catch (error) {
     console.log(error);
@@ -1021,10 +985,10 @@ async function showProductDialog() {
 watch(productTypeName, async () => {
   if (productTypeName.value === "自制件") {
     selectedRows.value = [];
-    getHomeData();
+    getHomeData(searchProduct);
   } else if (productTypeName.value === "标准外购件") {
     selectedRows.value = [];
-    getMaterialData();
+    getMaterialData(searchProduct);
   }
 });
 //产品列表有多少页
@@ -1034,16 +998,17 @@ const productTablePageCount = computed(() => {
 //切换页面，重新给表格赋值
 watch(productTablePage, () => {
   if (productTypeName.value === "自制件") {
-    getHomeData();
+    getHomeData(searchProduct);
   } else if (productTypeName.value === "标准外购件") {
-    getMaterialData();
+    getMaterialData(searchProduct);
   }
 });
+//修改当前页最大数量
 watch(productTablePerPage, () => {
   if (productTypeName.value === "自制件") {
-    getHomeData();
+    getHomeData(searchProduct);
   } else if (productTypeName.value === "标准外购件") {
-    getMaterialData();
+    getMaterialData(searchProduct);
   }
 });
 //选择产品编号
@@ -1064,7 +1029,7 @@ function saveProduct() {
         //将选择的自制件数据的总装物件名拼接成字符串
         let productTotalName = selectedData.totalName;
         //将俩个字符串连接起来
-        productString = productPartName + "," + productTotalName;
+        productString = productTotalName + "," + productPartName;
       }
       if (productTypeName.value === "标准外购件") {
         //将选择的标准外购件数据的零件名拼接成字符串
@@ -1080,8 +1045,8 @@ function saveProduct() {
       //将选择的物料编码，赋值给新建工单的产品id
       operatingTicket.value.product_id = productIdString;
       //清空选择的数据
-      selectedRows.value=[]
-       productDialog.value = false;
+      selectedRows.value = [];
+      productDialog.value = false;
     } else {
       alert("一次只能选择一个");
     }
@@ -1093,36 +1058,10 @@ function saveProduct() {
 async function filterProduct() {
   try {
     if (productTypeName.value === "自制件") {
-      const homeData: any = await useHttp(
-        "/MaterialForm/GetHomemadeForm",
-        "get",
-        undefined,
-        {
-          PageIndex: productTablePage.value,
-          PageSize: productTablePerPage.value,
-          SortType: 0,
-          SortedBy: "id",
-          queryname: searchProduct.value,
-        }
-      );
-      productTableData.value = homeData.pageList;
-      productDataLength.value = homeData.totalCount;
+     getHomeData(searchProduct)
     }
     if (productTypeName.value === "标准外购件") {
-      const outData: any = await useHttp(
-        "/MaterialForm/GetMaterialForm",
-        "get",
-        undefined,
-        {
-          PageIndex: 1,
-          PageSize: 30,
-          SortType: 1,
-          SortedBy: "id",
-          queryname: searchProduct.value,
-        }
-      );
-      productTableData.value = outData.pageList;
-      productDataLength.value = outData.totalCount;
+     getMaterialData(searchProduct);
     }
   } catch (error) {
     console.log(error);
@@ -1132,10 +1071,10 @@ async function filterProduct() {
 function resetFilterProduct() {
   searchProduct.value = "";
   if (productTypeName.value === "自制件") {
-    productTableData.value = homemadeData.value;
+    getHomeData(searchProduct)
   }
   if (productTypeName.value === "标准外购件") {
-    productTableData.value = materialData.value;
+      getMaterialData(searchProduct);
   }
 }
 </script>
