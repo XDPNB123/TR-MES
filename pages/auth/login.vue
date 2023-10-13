@@ -22,8 +22,8 @@ onMounted(() => {
     x: -100,
     opacity: 0,
     duration: 2,
-    rotate:20,
-    ease:'bounce'
+    rotate: 20,
+    ease: "bounce",
   });
 });
 
