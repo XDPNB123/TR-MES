@@ -66,7 +66,7 @@ let workDetailStatus = ref([
   "异常取消",
   "强制关闭",
 ]);
-
+//存储当前操作的工单编号
 let detailName = ref("");
 // 用于刷新视图的 key
 let key = ref<number>(0);
@@ -94,7 +94,8 @@ let startDate = ref("");
 let endDate = ref("");
 let startDateDetail = ref("");
 let endDateDetail = ref("");
-let searchTicketType = ref<string>("");
+let searchTicketStatus = ref<string>("");
+let searchTicketType = ref("");
 let searchOutputs = ref<string>("");
 let searchProduct = ref<string>("");
 // 正在操作的工单
@@ -308,14 +309,12 @@ let tableDetailPerPage = ref<number>(10);
 //一共有多少工单明细行数据
 let tableDataDetailLength = ref<number>(0);
 
-
 // 产品表格初始页
 let productTablePage = ref<number>(1);
 // 产品表格每页条数
 let productTablePerPage = ref<number>(10);
 //一共有多少行产品数据
 let productDataLength = ref<number>(0);
-
 
 //工序模块
 let chips = ref<any[]>([]); //存储常用工序
@@ -479,18 +478,18 @@ async function filterTableData() {
         SortType: 1,
         SortedBy: "id",
         workorder_hid: searchTicketNumber.value,
-        status: searchTicketType.value,
+        status: searchTicketStatus.value,
         start_date: null,
         planned_quantity: null,
         product_id: null,
         product_description: "",
         planned_completion_time: null,
-        workorder_type: "",
+        workorder_type: searchTicketType.value,
         finish_date: null,
       }
     );
     tableData.value = formatDate(workData.data.pageList);
-      tableDataLength.value = workData.data.totalCount;
+    tableDataLength.value = workData.data.totalCount;
     // 确保日期已经选择
     // 确保日期已经选择
     if (startDate.value === "" || endDate.value === "") {
@@ -511,8 +510,9 @@ async function filterTableData() {
 }
 // 工单表头重置搜索
 function resetFilter() {
-  searchTicketType.value = "";
+  searchTicketStatus.value = "";
   searchTicketNumber.value = "";
+  searchTicketType.value = "";
   startDate.value = "";
   endDate.value = "";
   detailName.value = "";
@@ -547,7 +547,7 @@ async function filterTableDataDetail() {
       }
     );
     tableDataDetail.value = formatDateDetail(workDataDetail.data.pageList);
-        tableDataDetailLength.value = workDataDetail.data.totalCount
+    tableDataDetailLength.value = workDataDetail.data.totalCount;
     // 确保日期已经选择
     // 确保日期已经选择
     if (startDateDetail.value === "" || endDateDetail.value === "") {
@@ -613,10 +613,11 @@ async function getWorkOrder() {
     console.log(error);
   }
 }
-//跳转页面时再次请求数据库数据
+//点击下一页面时再次请求数据库数据
 watch(tablePage, () => {
   getWorkOrder();
 });
+
 // 工单表格有多少页
 let tablePageCount = computed(() => {
   return Math.ceil(tableDataLength.value / tablePerPage.value);
@@ -672,18 +673,23 @@ async function getWorkOrderDetail(workorder_hid: string) {
       }
     );
     tableDataDetail.value = formatDateDetail(data.data.pageList);
-    tableDataDetailLength.value=data.data.totalCount
+    tableDataDetailLength.value = data.data.totalCount;
   } catch (error) {
     console.log(error);
   }
 }
 // 工单明细表格有多少页
 let tableDetailPageCount = computed(() => {
-    return Math.ceil(tableDataDetailLength.value / tableDetailPerPage.value);
+  return Math.ceil(tableDataDetailLength.value / tableDetailPerPage.value);
 });
-watch(tableDetailPage,()=>{
-    getWorkOrderDetail("")
-})
+//工单明细下一页
+watch(tableDetailPage, () => {
+  getWorkOrderDetail("");
+});
+//更改工单明细页面显示的最大数量
+watch(tableDetailPerPage, () => {
+  getWorkOrderDetail("");
+});
 //将工单明细数据的日期进行截取，保留年月份
 function formatDateDetail(data: any) {
   try {
@@ -704,9 +710,12 @@ function formatDateDetail(data: any) {
 }
 //点击表单显示表单明细
 async function showTicketDetail(item: any, obj: any) {
-  getWorkOrderDetail(obj.item.raw.workorder_hid);
   detailName.value = obj.item.raw.workorder_hid;
 }
+//通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
+watch(detailName, () => {
+  getWorkOrderDetail(detailName.value);
+});
 
 // 新增工单前重置新增对话框
 function resetAddDialog() {
@@ -880,11 +889,10 @@ async function getHomeData() {
       queryname: "",
     }
   );
-  homemadeData.value = homeData.pageList;//赋值
-  productDataLength.value = homeData.totalCount;//获取数据库总数据条
-  productTableData.value = homemadeData.value;//将数据赋值到表格数据
-  productHeaders.value = homemadeHeaders.value;//给数据表头赋值相对应的值
-  
+  homemadeData.value = homeData.pageList; //赋值
+  productDataLength.value = homeData.totalCount; //获取数据库总数据条
+  productTableData.value = homemadeData.value; //将数据赋值到表格数据
+  productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
 }
 //获取到标准外购件的数据
 async function getMaterialData() {
@@ -902,8 +910,8 @@ async function getMaterialData() {
   );
   materialData.value = outData.pageList;
   productDataLength.value = outData.totalCount;
-   productTableData.value = materialData.value;
-    productHeaders.value = materialHeaders.value;
+  productTableData.value = materialData.value;
+  productHeaders.value = materialHeaders.value;
 }
 
 //点击弹出产品编号表格弹框
@@ -920,24 +928,31 @@ async function showProductDialog() {
 watch(productTypeName, async () => {
   if (productTypeName.value === "自制件") {
     selectedRows.value = [];
-    getHomeData()
+    getHomeData();
   } else if (productTypeName.value === "标准外购件") {
     selectedRows.value = [];
-   getMaterialData()
+    getMaterialData();
   }
 });
 //产品列表有多少页
 const productTablePageCount = computed(() => {
-    return Math.ceil(productDataLength.value / productTablePerPage.value);
+  return Math.ceil(productDataLength.value / productTablePerPage.value);
 });
 //切换页面，重新给表格赋值
-watch(productTablePage,()=>{
-     if (productTypeName.value === "自制件") {
-        getHomeData()
-    } else if (productTypeName.value === "标准外购件") {
-        getMaterialData()
-    }
-})
+watch(productTablePage, () => {
+  if (productTypeName.value === "自制件") {
+    getHomeData();
+  } else if (productTypeName.value === "标准外购件") {
+    getMaterialData();
+  }
+});
+watch(productTablePerPage, () => {
+  if (productTypeName.value === "自制件") {
+    getHomeData();
+  } else if (productTypeName.value === "标准外购件") {
+    getMaterialData();
+  }
+});
 //选择产品编号
 function saveProduct() {
   try {
@@ -1039,7 +1054,7 @@ function resetFilterProduct() {
       <v-card class="h-100">
         <v-toolbar class="text-h6 pl-6">工单</v-toolbar>
         <v-row class="ma-2">
-          <v-col cols="6">
+          <v-col cols="4">
             <v-text-field
               label="工单编号"
               variant="outlined"
@@ -1049,17 +1064,26 @@ function resetFilterProduct() {
             ></v-text-field>
           </v-col>
 
-          <v-col cols="6">
+          <v-col cols="4">
             <v-select
               label="工单状态"
               variant="outlined"
               density="compact"
-              v-model="searchTicketType"
+              v-model="searchTicketStatus"
               :items="workStatus"
               hide-details
             ></v-select>
           </v-col>
-
+          <v-col cols="4">
+            <v-select
+              label="工单类型"
+              variant="outlined"
+              density="compact"
+              v-model="searchTicketType"
+              :items="['机加工', '装配']"
+              hide-details
+            ></v-select>
+          </v-col>
           <v-col cols="6">
             <v-text-field
               label="最早开始日期"
@@ -1162,14 +1186,14 @@ function resetFilterProduct() {
               </template>
 
               <template v-slot:bottom>
-                 <div class="text-center pt-2">
+                <div class="text-center pt-2">
                   <v-pagination
                     v-model="tablePage"
                     :length="tablePageCount"
                   ></v-pagination>
-                </div> </template>
+                </div>
+              </template>
             </v-data-table>
-           
           </v-col>
         </v-row>
       </v-card>
@@ -1251,6 +1275,8 @@ function resetFilterProduct() {
             <v-select
               class="mr-1"
               variant="outlined"
+              density="compact"
+              hide-details
               label="每页最大数"
               :items="[10, 20, 30, 40]"
               v-model="tableDetailPerPage"
@@ -1267,7 +1293,7 @@ function resetFilterProduct() {
               :key="key"
               :headers="headers"
               :items="tableDataDetail"
-              class="font-size"
+                style="white-space: nowrap"
             >
               <template v-slot:item.id="{ index }">
                 {{ index + 1 }}
@@ -1276,7 +1302,7 @@ function resetFilterProduct() {
                 <v-icon
                   color="blue"
                   size="small"
-                  class="mr-3"
+                  class="mr-2"
                   @click="
                     operatingTicketDetail = { ...item.raw };
                     editDetailDialog = true;
@@ -1807,6 +1833,8 @@ function resetFilterProduct() {
               <v-select
                 class="mr-1"
                 variant="outlined"
+                density="compact"
+                   hide-details
                 label="每页最大数"
                 :items="[10, 20, 30, 40]"
                 v-model="productTablePerPage"
@@ -1824,8 +1852,7 @@ function resetFilterProduct() {
                 :key="key"
                 :headers="productHeaders"
                 :items="productTableData"
-                class="font-size"
-                style="max-height: 400px; overflow-y: auto"
+                style="max-height: 400px; overflow-y: auto;white-space: nowrap"
               >
                 <template v-slot:item.actions="{ item }">
                   <v-icon
@@ -1931,11 +1958,6 @@ function resetFilterProduct() {
 </template>
 
 <style scoped>
-.font-size {
-  font-size: small;
-  white-space: nowrap;
-  width: 100%;
-}
 
 .row-container {
   background-color: rgb(174, 182, 182);
