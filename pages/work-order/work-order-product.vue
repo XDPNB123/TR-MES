@@ -749,7 +749,6 @@ function formatDateDetail(data: any) {
 async function showTicketDetail(item: any, obj: any) {
   detailName.value = obj.item.raw.workorder_hid;
   productName.value = obj.item.raw.product_id.slice(-9); //点击存储当前行的项目号
-  
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
@@ -1074,45 +1073,45 @@ function resetFilterProduct() {
   }
 }
 
-let productPage=ref(1)
-let productPerPage=ref(10)
-let productLength=ref(0)
+let productPage = ref(1);
+let productPerPage = ref(10);
+let productLength = ref(0);
 //根据项目号和零件名查询产料
 async function productList() {
-    try {
-        const data: any = await useHttp(
-            "/MaterialForm/M53GetHomemadeForm",
-            "get",
-            undefined,
-            {
-                PageIndex: productPage.value,
-                PageSize: productPerPage.value,
-                SortType: 1,
-                SortedBy: "_id",
-                projectCode: productName.value,
-                partName: searchName.value,
-            }
-        );
-        if (!data.data.totalCount) return (productTableData.value = []);
-        productTableData.value = data.data.pageList; //赋值
-        productLength.value = data.data.totalCount; //获取数据库总数据条
-        productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
-    } catch (error) {
-        console.log(error);
-    }
+  try {
+    const data: any = await useHttp(
+      "/MaterialForm/M53GetHomemadeForm",
+      "get",
+      undefined,
+      {
+        PageIndex: productPage.value,
+        PageSize: productPerPage.value,
+        SortType: 1,
+        SortedBy: "_id",
+        projectCode: productName.value,
+        partName: searchName.value,
+      }
+    );
+    if (!data.data.totalCount) return (productTableData.value = []);
+    productTableData.value = data.data.pageList; //赋值
+    productLength.value = data.data.totalCount; //获取数据库总数据条
+    productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 //当前项目产品列表有多少页
 const productPageCount = computed(() => {
-    return Math.ceil(productLength.value / productPerPage.value);
+  return Math.ceil(productLength.value / productPerPage.value);
 });
 
 //根据产品的项目号来查找新增的产出料
 async function showMcodeDialog() {
   try {
-    productLength.value = 0
-      searchName.value = ""
-    productList()
+    productLength.value = 0;
+    searchName.value = "";
+    productList();
     productTypeName.value = "自制件";
   } catch (error) {
     console.log(error);
@@ -1121,26 +1120,26 @@ async function showMcodeDialog() {
 }
 
 //搜素
-async function filterNameProduct(params:type) {
-    try {
-      productList()
-    } catch (error) {
-        console.log(error);
-    }
+async function filterNameProduct(params: type) {
+  try {
+    productList();
+  } catch (error) {
+    console.log(error);
+  }
 }
 //重置搜素
-function resetFilterNameProduct(){
-    searchName.value=""
-    productList()    
+function resetFilterNameProduct() {
+  searchName.value = "";
+  productList();
 }
 
-watch(productPage,()=>{
-    productList()
-})
+watch(productPage, () => {
+  productList();
+});
 
-watch(productPerPage,()=>{
-    productList()
-})
+watch(productPerPage, () => {
+  productList();
+});
 //选择数据批量创建工单明细产料名和项目号
 async function saveMcodeProduct() {
   try {
