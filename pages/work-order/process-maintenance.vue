@@ -315,7 +315,7 @@ async function getWorkOrder() {
     }
   );
 
-  tableData.value = data.data;
+  tableData.value = data.data.result;
 }
 // 搜索过滤
 async function filterTableData() {

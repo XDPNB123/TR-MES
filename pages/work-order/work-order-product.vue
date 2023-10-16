@@ -101,6 +101,7 @@ let searchTicketStatus = ref<string>("");
 let searchTicketType = ref("");
 let searchOutputs = ref<string>("");
 let searchProduct = ref<any>("");
+let searchName = ref("");
 // 正在操作的工单
 let operatingTicket = ref<any>({
   workorder_type: "",
@@ -409,6 +410,7 @@ let productDataLength = ref<number>(0);
 let chips = ref<any[]>([]); //存储常用工序
 let droppedChips = ref<any[]>([]); //维护选择的工序
 let draggedChip = ref(null);
+let produceGroups = ref(); //常用工艺路线
 //实现拖拽功能的方法
 function dragStart(chip: any) {
   draggedChip.value = chip;
@@ -470,15 +472,29 @@ async function batchWork() {
           PageSize: 5,
         }
       );
-      chips.value = data.data;
+      chips.value = data.data.result.map((item: any) => item.procedure_name);
+      //常用工序流程
+      const newData: any = await useHttp(
+        "/MesWorkProcess/M47GetProcessBasisConfig",
+        "get",
+        undefined
+      );
+      //
+      produceGroups.value = newData.data;
       //过滤出已选工序和未选工序
-      const workorderHids = innerTableSelectData.value[0].procedure.split(",");
-      droppedChips.value = chips.value.filter((chip) =>
-        workorderHids.includes(chip.procedure_name)
-      );
-      chips.value = chips.value.filter(
-        (chip) => !workorderHids.includes(chip.procedure_name)
-      );
+      if (
+        innerTableSelectData.value[0] &&
+        innerTableSelectData.value[0].procedure
+      ) {
+        const workorderHids =
+          innerTableSelectData.value[0].procedure.split(",");
+        droppedChips.value = chips.value.filter((chip) =>
+          workorderHids.includes(chip)
+        );
+        chips.value = chips.value.filter(
+          (chip) => !workorderHids.includes(chip)
+        );
+      }
     } else {
       alert("您选择的数据的初始工序属性并不一致，请检查后重新选择");
       return;
@@ -505,17 +521,28 @@ async function showProcessDialog(item: any) {
         PageSize: 5,
       }
     );
-    chips.value = data.data;
+    chips.value = data.data.result.map((item: any) => item.procedure_name);
+    //常用工序流程
+    const newData: any = await useHttp(
+      "/MesWorkProcess/M47GetProcessBasisConfig",
+      "get",
+      undefined
+    );
+    //
+    produceGroups.value = newData.data;
     //将点击的哪行数据存到选择数据中
     innerTableSelectData.value.push(item);
     //过滤出已选工序和未选工序
-    const workorderHids = item.procedure.split(",");
-    droppedChips.value = chips.value.filter((chip) =>
-      workorderHids.includes(chip.procedure_name)
-    );
-    chips.value = chips.value.filter(
-      (chip) => !workorderHids.includes(chip.procedure_name)
-    );
+    if (
+      innerTableSelectData.value[0] &&
+      innerTableSelectData.value[0].procedure
+    ) {
+      const workorderHids = item.procedure.split(",");
+      droppedChips.value = chips.value.filter((chip) =>
+        workorderHids.includes(chip)
+      );
+      chips.value = chips.value.filter((chip) => !workorderHids.includes(chip));
+    }
   } catch (error) {
     console.log(error);
   }
@@ -525,6 +552,7 @@ async function showProcessDialog(item: any) {
 //关闭\取消工序维护框，需要清空已选择的数据
 function cancelProcess() {
   innerTableSelectData.value = [];
+  droppedChips.value = [];
   processDialog.value = false;
 }
 
@@ -537,9 +565,7 @@ async function saveTicket() {
     }
     // 将选择的工序数组拼接成字符串
     innerTableSelectData.value.forEach((item) => {
-      item.procedure = droppedChips.value
-        .map((item) => item.procedure_name)
-        .join(",");
+      item.procedure = droppedChips.value.map((item) => item).join(",");
     });
     await useHttp(
       "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
@@ -552,6 +578,14 @@ async function saveTicket() {
   }
   processDialog.value = false;
   innerTableSelectData.value = [];
+  droppedChips.value = [];
+}
+
+//常用工序流程
+function commonProduce(item: any) {
+  let array = item.rsv2.split(",");
+  droppedChips.value = array;
+  chips.value = chips.value.filter((chip) => !array.includes(chip));
 }
 
 // 工单表头搜索过滤
@@ -714,7 +748,8 @@ function formatDateDetail(data: any) {
 //点击表单显示表单明细
 async function showTicketDetail(item: any, obj: any) {
   detailName.value = obj.item.raw.workorder_hid;
-  productName.value = obj.item.raw.product_description;//点击列表存储总装名称（备用）
+  productName.value = obj.item.raw.product_id.slice(-9); //点击存储当前行的项目号
+  
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
@@ -749,40 +784,57 @@ async function addTicket() {
   addDialog.value = false;
 }
 // // 新增工单明细前重置新增对话框
-// function resetAddDetailDialog() {
-//   operatingTicketDetail.value = {
-//     mcode: "",
-//     estimated_delivery_date: "",
-//     blueprint_id: "",
-//     project_code: "",
-//     standard_time: "",
-//     actual_time: 0,
-//     procedure: null,
-//     planned_quantity: "",
-//     reported_quantity: 0,
-//     unit: "件",
-//     workorder_hid: detailName.value,
-//     actual_delivery_date: null,
-//     status: null,
-//   };
-//   addDetailDialog.value = true;
-//   getWorkOrder();
-// }
-
+function resetAddDetailDialog() {
+  operatingTicketDetail.value = {
+    estimated_delivery_date: "",
+    blueprint_id: "",
+    standard_time: "",
+    actual_time: 0,
+    procedure: null,
+    planned_quantity: "",
+    reported_quantity: 0,
+    unit: "件",
+    workorder_hid: detailName.value,
+    actual_delivery_date: null,
+    status: null,
+  };
+  addDetailDialog.value = true;
+}
 //新增工单明细行
-// async function addTicketDetail() {
-//   try {
-//     const data: any = await useHttp(
-//       "/MesWorkOrderDetail/M06AddWorkOrderDetails",
-//       "post",
-//       [operatingTicketDetail.value]
-//     );
-//     getWorkOrderDetail(detailName.value);
-//   } catch (error) {
-//     console.log(error);
-//   }
-//   addDetailDialog.value = false;
-// }
+async function addTicketDetail() {
+  try {
+    const tableArr: any[] = [];
+    selectedRows.value.forEach((item: any) => {
+      tableArr.push({
+        mcode: item.partName,
+        estimated_delivery_date:
+          operatingTicketDetail.value.estimated_delivery_date,
+        blueprint_id: operatingTicketDetail.value.blueprint_id,
+        project_code: item.projectCode,
+        standard_time: operatingTicketDetail.value.standard_time,
+        actual_time: "0",
+        procedure: null,
+        planned_quantity: operatingTicketDetail.value.planned_quantity,
+        reported_quantity: "0",
+        unit: operatingTicketDetail.value.unit,
+        workorder_hid: detailName.value,
+        actual_delivery_date: null,
+        status: "新增未分配",
+      });
+    });
+    console.log(tableArr);
+    const data: any = await useHttp(
+      "/MesWorkOrderDetail/M06AddWorkOrderDetails",
+      "post",
+      tableArr
+    );
+    getWorkOrderDetail(detailName.value);
+    selectedRows.value = [];
+  } catch (error) {
+    console.log(error);
+  }
+  addDetailDialog.value = false;
+}
 // 修改工单
 async function editTicket() {
   try {
@@ -923,7 +975,7 @@ async function showProductDialog() {
   try {
     getHomeData(searchProduct);
     productTypeName.value = "自制件";
-    searchProduct.value=""
+    searchProduct.value = "";
   } catch (error) {
     console.log(error);
   }
@@ -1021,50 +1073,88 @@ function resetFilterProduct() {
     getMaterialData(searchProduct);
   }
 }
-//根据产品的项目号来查找新增的产出料
-function showMcodeDialog() {
-  getHomeData("");
-  productTypeName.value = "自制件";
-  searchProduct.value = ""
-  mcodeDialog.value = true;
-}
 
-//选择数据批量创建工单明细
-async function saveMcodeProduct() {
+let productPage=ref(1)
+let productPerPage=ref(10)
+let productLength=ref(0)
+//根据项目号和零件名查询产料
+async function productList() {
     try {
-   if(selectedRows.value.length===0){
-    return alert("请选择产出料，创建工单明细")
-   }
-   const tableArr:any[]=[]
-
-    selectedRows.value.forEach((item:any)=>{
-        tableArr.push({
-            mcode: item.partName,
-            estimated_delivery_date: null,
-            blueprint_id: "",
-            project_code: item.projectCode,
-            standard_time: 0,
-            actual_time: 0,
-            procedure: null,
-            planned_quantity: 0,
-            reported_quantity: 0,
-            unit: "件",
-            workorder_hid: detailName.value,
-            actual_delivery_date: null,
-            status: null,
-        })
-    })
-    
         const data: any = await useHttp(
-            "/MesWorkOrderDetail/M06AddWorkOrderDetails",
-            "post",
-            tableArr
+            "/MaterialForm/M53GetHomemadeForm",
+            "get",
+            undefined,
+            {
+                PageIndex: productPage.value,
+                PageSize: productPerPage.value,
+                SortType: 1,
+                SortedBy: "_id",
+                projectCode: productName.value,
+                partName: searchName.value,
+            }
         );
-        getWorkOrderDetail(detailName.value);
-         mcodeDialog.value=false
+        if (!data.data.totalCount) return (productTableData.value = []);
+        productTableData.value = data.data.pageList; //赋值
+        productLength.value = data.data.totalCount; //获取数据库总数据条
+        productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
     } catch (error) {
         console.log(error);
     }
+}
+
+//当前项目产品列表有多少页
+const productPageCount = computed(() => {
+    return Math.ceil(productLength.value / productPerPage.value);
+});
+
+//根据产品的项目号来查找新增的产出料
+async function showMcodeDialog() {
+  try {
+    productLength.value = 0
+    productList()
+    productTypeName.value = "自制件";
+  } catch (error) {
+    console.log(error);
+  }
+  mcodeDialog.value = true;
+}
+
+//搜素
+async function filterNameProduct(params:type) {
+    try {
+      productList()
+    } catch (error) {
+        console.log(error);
+    }
+}
+//重置搜素
+function resetFilterNameProduct(){
+    searchName.value=""
+    productList()    
+}
+
+watch(productPage,()=>{
+    productList()
+})
+
+watch(productPerPage,()=>{
+    productList()
+})
+//选择数据批量创建工单明细产料名和项目号
+async function saveMcodeProduct() {
+  try {
+    if (selectedRows.value.length === 0) {
+      return alert("请选择产出料，创建工单明细");
+    }
+    operatingTicketDetail.value.mcode = selectedRows.value
+      .map((item) => item.partName)
+      .join(",");
+    mcodeDialog.value = false;
+    searchName.value=""
+   
+  } catch (error) {
+    console.log(error);
+  }
 }
 </script>
 
@@ -1162,7 +1252,7 @@ async function saveMcodeProduct() {
               fixed-footer
               fixed-header
               height="610"
-               no-data-text="没有找到符合的数据"
+              no-data-text="没有找到符合的数据"
               @click:row="showTicketDetail"
             >
               <template v-slot:item.id="{ index }">
@@ -1290,7 +1380,7 @@ async function saveMcodeProduct() {
               class="mr-2"
               size="large"
               v-if="detailName"
-              @click="showMcodeDialog()"
+              @click="resetAddDetailDialog()"
               >新增明细</v-btn
             >
             <v-btn @click="batchWork()" class="mr-2" color="blue" size="large"
@@ -1322,7 +1412,7 @@ async function saveMcodeProduct() {
               style="overflow-x: auto; white-space: nowrap"
               fixed-footer
               fixed-header
-               no-data-text="没有找到符合的数据"
+              no-data-text="没有找到符合的数据"
               height="610"
             >
               <template v-slot:item.id="{ index }">
@@ -1561,7 +1651,7 @@ async function saveMcodeProduct() {
       </v-card>
     </v-dialog>
     <!-- 新增工单明细 -->
-    <!-- <v-dialog v-model="addDetailDialog" min-width="400px" width="560px">
+    <v-dialog v-model="addDetailDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
           <v-toolbar-title> 新增工单明细 </v-toolbar-title>
@@ -1588,11 +1678,6 @@ async function saveMcodeProduct() {
           <v-text-field
             v-model="operatingTicketDetail.blueprint_id"
             label="图纸号"
-          ></v-text-field>
-
-          <v-text-field
-            v-model="operatingTicketDetail.project_code"
-            label="项目号"
           ></v-text-field>
 
           <v-text-field
@@ -1625,7 +1710,7 @@ async function saveMcodeProduct() {
           </v-btn>
         </div>
       </v-card>
-    </v-dialog> -->
+    </v-dialog>
     <!-- 删除工单明细行 -->
     <v-dialog v-model="deleteDetailDialog" min-width="400px" width="560px">
       <v-card>
@@ -1680,30 +1765,30 @@ async function saveMcodeProduct() {
         </v-toolbar>
         <v-card-text class="mt-4">
           <v-text-field
-            v-model="operatingTicketDetail.mcode"
-            label="产料"
-          ></v-text-field>
-          <v-text-field
             v-model="operatingTicketDetail.estimated_delivery_date"
             type="date"
-            label="交付时间"
+            label="预计交付时间"
           ></v-text-field>
           <v-text-field
-            v-model="operatingTicketDetail.blueprint_id"
-            label="图纸号"
-          ></v-text-field>
-
-          <v-text-field
-            v-model="operatingTicketDetail.project_code"
-            label="项目号"
+            v-model="operatingTicketDetail.actual_delivery_date"
+            type="date"
+            label="实际交付时间"
           ></v-text-field>
           <v-text-field
             v-model="operatingTicketDetail.standard_time"
             label="标准工时"
           ></v-text-field>
           <v-text-field
+            v-model="operatingTicketDetail.actual_time"
+            label="实际工时"
+          ></v-text-field>
+          <v-text-field
             v-model="operatingTicketDetail.planned_quantity"
             label="计划数量"
+          ></v-text-field>
+          <v-text-field
+            v-model="operatingTicketDetail.reported_quantity"
+            label="实际报工数量"
           ></v-text-field>
           <v-select
             label="单位"
@@ -1752,7 +1837,7 @@ async function saveMcodeProduct() {
                   text-color="white"
                   draggable="true"
                   v-if="droppedChips.length !== 0"
-                  :title="chip.procedure_name"
+                  :title="chip"
                 >
                   <template v-slot:prepend>
                     <v-badge color="red" overlap class="mr-4"> </v-badge
@@ -1790,10 +1875,25 @@ async function saveMcodeProduct() {
                   text-color="white"
                   size="large"
                 >
-                  {{ chip.procedure_name }}
+                  {{ chip }}
                 </v-chip>
               </div>
               <v-chip v-else>已无可选择的工序</v-chip>
+            </v-card>
+          </v-col>
+          <v-col cols="12">
+            <v-card>
+              <v-card-subtitle>常用工艺路线</v-card-subtitle>
+              <v-list>
+                <v-list-item
+                  v-for="(item, index) in produceGroups"
+                  :key="index"
+                  class="text-h6 mx-auto"
+                  @click="commonProduce(item)"
+                >
+                  {{ index + 1 }}. {{ item.rsv2 }}
+                </v-list-item>
+              </v-list>
             </v-card>
           </v-col>
         </v-row>
@@ -1911,101 +2011,106 @@ async function saveMcodeProduct() {
     <!-- 工单明细产出料 -->
     <v-dialog v-model="mcodeDialog" min-width="400px" width="1000px">
       <v-card>
-            <v-toolbar color="blue">
-              <v-toolbar-title> 选择产品描述 </v-toolbar-title>
-              <v-spacer></v-spacer>
-              <v-btn icon @click="mcodeDialog = false">
-                <v-icon>fa-solid fa-close</v-icon>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 选择产品描述 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="mcodeDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card>
+          <v-row class="ma-2">
+            <v-col cols="6">
+              <v-text-field
+                label="零件名查询"
+                variant="outlined"
+                density="compact"
+                v-model="searchName"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-select
+                variant="outlined"
+                density="compact"
+                label="当前产品类别"
+                :items="['自制件', '标准外购件']"
+                v-model="productTypeName"
+              >
+              </v-select>
+            </v-col>
+            <v-col cols="8">
+              <v-btn
+                color="black"
+                class="mr-2"
+                size="large"
+                @click="filterNameProduct()"
+                >查询</v-btn
+              >
+              <v-btn
+                color="red"
+                class="mr-2"
+                size="large"
+                @click="resetFilterNameProduct()"
+              >
+                重置查询
               </v-btn>
-            </v-toolbar>
-            <v-card>
-              <v-row class="ma-2">
-                <v-col cols="6">
-                  <v-text-field
-                    label="产品查询"
-                    variant="outlined"
-                    density="compact"
-                    v-model="searchProduct"
-                    hide-details
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-select
-                    variant="outlined"
-                    density="compact"
-                    label="当前产品类别"
-                    :items="['自制件', '标准外购件']"
-                    v-model="productTypeName"
-                  >
-                  </v-select>
-                </v-col>
-                <v-col cols="8">
-                  <v-btn
-                    color="black"
-                    class="mr-2"
-                    size="large"
-                    @click="filterProduct()"
-                    >查询</v-btn
-                  >
-                  <v-btn
-                    color="red"
-                    class="mr-2"
-                    size="large"
-                    @click="resetFilterProduct()"
-                  >
-                    重置查询
-                  </v-btn>
-                </v-col>
-                <v-col cols="4">
-                  <v-select
-                    class="mr-1"
-                    variant="outlined"
-                    density="compact"
-                    hide-details
-                    label="每页最大数"
-                    :items="[10, 20, 30, 40]"
-                    v-model="productTablePerPage"
-                  ></v-select>
-                </v-col>
+            </v-col>
+            <v-col cols="4">
+              <v-select
+                class="mr-1"
+                variant="outlined"
+                density="compact"
+                hide-details
+                label="每页最大数"
+                :items="[10, 20, 30, 40]"
+                v-model="productPerPage"
+              ></v-select>
+            </v-col>
 
-                <v-col cols="12">
-                  <v-divider></v-divider>
-                  <v-data-table
-                    hover
-                    :items-per-page="productTablePerPage"
-                    v-model="selectedRows"
-                    return-object
-                    show-select
-                    :key="key"
-                    :headers="productHeaders"
-                    :items="productTableData"
-                    style="overflow-x: auto; white-space: nowrap"
-                    fixed-footer
-                    fixed-header
-                    height="400"
-                    no-data-text="没有找到符合的数据"
-                  >
-                    <template v-slot:bottom>
-                      <div class="text-center pt-2 mb-4">
-                        <v-pagination
-                          v-model="productTablePage"
-                          :length="productTablePageCount"
-                        ></v-pagination>
-                      </div>
-                    </template>
-                  </v-data-table>
-                </v-col>
-              </v-row>
-            </v-card>
-            <div class="d-flex justify-end mr-6 my-4">
-              <v-btn color="blue" size="large" class="mr-2" @click="saveMcodeProduct()">
-                确定
-              </v-btn>
-              <v-btn color="grey" size="large" @click="mcodeDialog = false">
-                取消
-              </v-btn>
-            </div>
-          </v-card>
+            <v-col cols="12">
+              <v-divider></v-divider>
+              <v-data-table
+                hover
+                :items-per-page="productPerPage"
+                v-model="selectedRows"
+                return-object
+                show-select
+                :key="key"
+                :headers="productHeaders"
+                :items="productTableData"
+                style="overflow-x: auto; white-space: nowrap"
+                fixed-footer
+                fixed-header
+                height="400"
+                no-data-text="没有找到符合的数据"
+              >
+                <template v-slot:bottom>
+                  <div class="text-center pt-2 mb-4">
+                    <v-pagination
+                      v-model="productPage"
+                      :length="productPageCount"
+                    ></v-pagination>
+                  </div>
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
+        </v-card>
+        <div class="d-flex justify-end mr-6 my-4">
+          <v-btn
+            color="blue"
+            size="large"
+            class="mr-2"
+            @click="saveMcodeProduct()"
+          >
+            确定
+          </v-btn>
+          <v-btn color="grey" size="large" @click="mcodeDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
     </v-dialog>
     <!-- 工单表头审核 -->
     <v-dialog v-model="auditDialog" min-width="400px" width="560px">
