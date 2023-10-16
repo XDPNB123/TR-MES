@@ -19,7 +19,7 @@ definePageMeta({
 onMounted(() => {
   // 页面初始动画
   useGsap.from(".initial-animation", {
-    y: 100,
+    x: -100,
     opacity: 0,
     duration: 1,
   });

@@ -19,11 +19,9 @@ definePageMeta({
 onMounted(() => {
   // 页面初始动画
   useGsap.from(".initial-animation", {
-    x: -100,
+    y: 100,
     opacity: 0,
-    duration: 2,
-    rotate: 20,
-    ease: "bounce",
+    duration: 1,
   });
 });
 
