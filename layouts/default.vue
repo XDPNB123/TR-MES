@@ -88,15 +88,15 @@ const pageMenus = ref<any[]>([
     icon: "fa-solid fa-users-rays",
     children: [
       {
+        name: "班组信息",
+        path: "/work-class/work-class",
+        icon: "fa-solid fa-people-roof",
+      },
+      {
         name: "班组成员",
         path: "/work-class/work-class-info",
         icon: "fa-solid fa-users",
       },
-      {
-        name: "班组信息",
-        path: "/work-class/work-class",
-        icon: "fa-solid fa-people-roof",
-      }
     ],
   },
 ]);
