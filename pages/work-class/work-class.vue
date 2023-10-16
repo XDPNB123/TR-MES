@@ -1,5 +1,765 @@
 <script setup lang="ts">
+//控制弹框的属性
+let addDialog = ref(false);
+let editDialog = ref(false);
+let deleteDialog = ref(false);
+let addInfoDialog = ref(false);
+let editInfoDialog = ref(false);
+let deleteInfoDialog = ref(false);
+//页面加载时获取数据
+onMounted(() => {
+  getWorkClass();
+  getWorkClassInfo();
+});
+//班组信息操作
+//班组信息表头
+let workClassHeader = ref<any[]>([
+  {
+    title: "序号",
+    align: "center",
+    key: "id",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "班组编号",
+    align: "center",
+    key: "worker_id",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "班组名称",
+    align: "center",
+    key: "work_classname",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "班组负责人",
+    align: "center",
+    key: "leader_name",
+    sortable: false,
+    filterable: true,
+  },
+
+  {
+    title: "创建人",
+    align: "center",
+    key: "creator",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "创建时间",
+    align: "center",
+    key: "create_time",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "更新人",
+    align: "center",
+    key: "update_person",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "更新时间",
+    align: "center",
+    key: "update_time",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "操作",
+    key: "actions",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+]);
+//表格当前页
+let workClassPage=ref(1)
+//数据库一共存储多少数据
+let workClassPageCount=ref(0)
+//班组信息数据
+let workClassTableData = ref<any[]>([]);
+//计算一共有的多少页
+// let workClassTablePageCount = computed(() => {
+//     return Math.ceil(workClassTableData.value / 10);
+// });
+//获取班组信息数据
+async function getWorkClass() {
+  const data: any = await useHttp(
+    "/MesWorkClassInfo/M27GetWorkClass",
+    "get",
+    undefined,
+    {
+      worker_id: "",
+      work_classname: workClassName.value,
+      leader_name: workClassLeader.value,
+      PageIndex: workClassPage.value,
+      PageSize: 10,
+      SortedBy: "id",
+      SortType: 0,
+    }
+  );
+  workClassTableData.value = data.data.pageList;
+  workClassPageCount.value=data.data.totalCount
+}
+//点击获取当前班组的成员信息
+let workerId = ref("");
+function showInfo(item: any, obj: any) {
+  workerId.value = obj.item.raw.worker_id;
+}
+//班组对象
+let workClass = ref<any>({
+  worker_id: "",
+  work_classname: "",
+  leader_name: "",
+});
+//搜素操作
+let workClassName = ref("");
+let workClassLeader = ref("");
+//查询
+function searchWorkClass() {
+  getWorkClass();
+}
+//重置查询
+function resetWorkClass() {
+  workClassName.value = "";
+  workClassLeader.value = "";
+  workerId.value = "";
+  getWorkClass();
+}
+//通过改变workerId的值来改变右边表的数据
+watch(workerId, () => {
+  getWorkClassInfo();
+});
+//新增班组信息
+//新增前清空文本
+function showAddDialog() {
+  workClass.value = {
+    worker_id: "",
+    work_classname: "",
+    leader_name: "",
+  };
+  addDialog.value = true;
+}
+//确认新增
+async function addWorkClass() {
+  try {
+    await useHttp("/MesWorkClassInfo/M28AddWorkClass", "post", workClass.value);
+    getWorkClass();
+  } catch (error) {
+    console.log(error);
+  }
+  addDialog.value = false;
+}
+//修改班组信息
+async function editWorkClass() {
+  try {
+    await useHttp(
+      "/MesWorkClassInfo/M29UpdateWorkClass",
+      "put",
+      workClass.value
+    );
+    getWorkClass();
+  } catch (error) {
+    console.log(error);
+  }
+  editDialog.value = false;
+}
+//删除班组信息
+async function deleteWorkClass() {
+  try {
+    await useHttp("/MesWorkClassInfo/M30DeleteWorkClass", "delete", undefined, {
+      ids: [workClass.value.id],
+    });
+    getWorkClass();
+  } catch (error) {
+    console.log(error);
+  }
+  deleteDialog.value = false;
+}
+
+
+
+
+
+
+//班组成员操作
+//班组成员信息表头
+let workClassInfoHeader = ref<any[]>([
+  {
+    title: "序号",
+    align: "center",
+    key: "id",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "员工编号",
+    align: "center",
+    key: "employee_id",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "员工姓名",
+    align: "center",
+    key: "employee_name",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工位",
+    align: "center",
+    key: "station",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "创建人",
+    align: "center",
+    key: "creator",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "创建时间",
+    align: "center",
+    key: "create_time",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "更新人",
+    align: "center",
+    key: "update_person",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "更新时间",
+    align: "center",
+    key: "update_time",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "操作",
+    key: "actions",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+]);
+//班组成员信息数据
+let workClassInfoTableData = ref<any[]>([]);
+async function getWorkClassInfo() {
+  const data: any = await useHttp(
+    "/MesWorkClassInfo/M31GetWorkClassInfo",
+    "get",
+    undefined,
+    {
+      employee_id: employeeId.value,
+      employee_name: employeeName.value,
+      worker_id: workerId.value,
+      PageIndex: 1,
+      PageSize: 10,
+      SortedBy: "id",
+      SortType: 0,
+    }
+  );
+  workClassInfoTableData.value = data.data.pageList;
+}
+//班组成员数据
+let workClassInfo = ref<any>({
+  station: "",
+  worker_id: "",
+  employee_name: "",
+  employee_id: "",
+});
+//班组成员搜素
+let employeeId = ref("");
+let employeeName = ref("");
+//查询
+function searchWorkClassInfo() {
+  getWorkClassInfo();
+}
+//重置查询
+function resetWorkClassInfo() {
+  employeeId.value = "";
+  employeeName.value = "";
+  getWorkClassInfo();
+}
+//新增班组成员前重置文本
+function showAddInfoDialog() {
+  workClassInfo.value = {
+    station: "",
+    worker_id: "",
+    employee_name: "",
+    employee_id: "",
+  };
+  addInfoDialog.value = true;
+}
+//确定新增
+async function addWorkClassInfo() {
+  try {
+    await useHttp(
+      "/MesWorkClassInfo/M32AddWorkClassInfo",
+      "post",
+      workClassInfo.value
+    );
+    getWorkClassInfo();
+  } catch (error) {
+    console.log(error);
+  }
+  addInfoDialog.value = false;
+}
+//修改员工信息
+async function editWorkClassInfo() {
+  try {
+    await useHttp(
+      "/MesWorkClassInfo/M33UpdateWorkClassInfo",
+      "put",
+      workClassInfo.value
+    );
+    getWorkClassInfo();
+  } catch (error) {
+    console.log(error);
+  }
+  editInfoDialog.value = false;
+}
+//删除员工信息
+async function deleteWorkClassInfo() {
+  try {
+    await useHttp(
+      "/MesWorkClassInfo/M34DeleteWorkClassInfo",
+      "delete",
+      undefined,
+      {
+        ids: [workClassInfo.value.id],
+      }
+    );
+    getWorkClassInfo();
+  } catch (error) {
+    console.log(error);
+  }
+  deleteInfoDialog.value = false;
+}
 </script>
 <template>
-    班组信息
+  <v-row class="ma-2">
+    <!-- 左边数据 -->
+    <v-col cols="6">
+      <v-card class="h-100">
+        <v-toolbar class="text-h6 pl-6">班组信息</v-toolbar>
+        <v-row class="ma-2">
+          <v-col cols="6">
+            <v-text-field
+              label="班组名称"
+              variant="outlined"
+              density="compact"
+              v-model="workClassName"
+              hide-details
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              label="班组负责人"
+              variant="outlined"
+              density="compact"
+              v-model="workClassLeader"
+              hide-details
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12">
+            <v-btn
+              color="black"
+              class="mr-2"
+              size="large"
+              @click="searchWorkClass"
+              >查询</v-btn
+            >
+            <v-btn
+              color="red"
+              class="mr-2"
+              size="large"
+              @click="resetWorkClass"
+            >
+              重置查询
+            </v-btn>
+            <v-btn
+              color="teal"
+              class="mr-2"
+              size="large"
+              @click="showAddDialog"
+            >
+              新增班组
+            </v-btn>
+          </v-col>
+
+          <v-col cols="12">
+            <v-divider></v-divider>
+            <v-data-table
+              hover
+               :items-per-page="10"
+              :headers="workClassHeader"
+              :items="workClassTableData"
+              style="overflow-x: auto; white-space: nowrap"
+              fixed-footer
+              fixed-header
+              height="610"
+              no-data-text="没有找到符合的数据"
+              @click:row="showInfo"
+            >
+              <template v-slot:item.actions="{ item }">
+                <v-icon
+                  color="blue"
+                  size="small"
+                  class="mr-3"
+                  @click.stop="
+                    workClass = { ...item.raw };
+                    editDialog = true;
+                  "
+                >
+                  fa-solid fa-pen
+                </v-icon>
+
+                <v-icon
+                  color="red"
+                  size="small"
+                  @click.stop="
+                    workClass = { ...item.raw };
+                    deleteDialog = true;
+                  "
+                >
+                  fa-solid fa-trash
+                </v-icon>
+              </template>
+
+              <template v-slot:item.id="{ index }">
+                {{ index + 1 }}
+              </template>
+               <template v-slot:bottom>
+                    <div class="text-center pt-2">
+                      <v-pagination
+                        v-model="tablePage"
+                        :length="tablePageCount"
+                      ></v-pagination>
+                    </div>
+                  </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
+      </v-card>
+    </v-col>
+    <!-- 右边数据 -->
+    <v-col cols="6">
+      <v-card class="h-100">
+        <v-toolbar class="text-h6 pl-6">班组{{ workerId }}成员</v-toolbar>
+        <v-row class="ma-2">
+          <v-col cols="6">
+            <v-text-field
+              label="员工编号"
+              variant="outlined"
+              density="compact"
+              v-model="employeeId"
+              hide-details
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              label="员工姓名"
+              variant="outlined"
+              density="compact"
+              v-model="employeeName"
+              hide-details
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12">
+            <v-btn
+              color="black"
+              class="mr-2"
+              size="large"
+              @click="searchWorkClassInfo"
+              >查询</v-btn
+            >
+            <v-btn
+              color="red"
+              class="mr-2"
+              size="large"
+              @click="resetWorkClassInfo"
+            >
+              重置查询
+            </v-btn>
+            <v-btn
+              color="teal"
+              class="mr-2"
+              size="large"
+              @click="showAddInfoDialog"
+            >
+              新增成员
+            </v-btn>
+          </v-col>
+          <v-col cols="12">
+            <v-divider></v-divider>
+            <!-- 工单表头表格 -->
+            <v-data-table
+              hover
+              :headers="workClassInfoHeader"
+              :items="workClassInfoTableData"
+              style="overflow-x: auto; white-space: nowrap"
+              fixed-footer
+              fixed-header
+              height="610"
+              no-data-text="没有找到符合的数据"
+            >
+              <template v-slot:item.id="{ index }">
+                {{ index + 1 }}
+              </template>
+
+              <template v-slot:item.actions="{ item }">
+                <v-icon
+                  color="blue"
+                  size="small"
+                  class="mr-3"
+                  @click.stop="
+                    workClassInfo = { ...item.raw };
+                    editInfoDialog = true;
+                  "
+                >
+                  fa-solid fa-pen
+                </v-icon>
+
+                <v-icon
+                  color="red"
+                  size="small"
+                  @click.stop="
+                    workClassInfo = { ...item.raw };
+                    deleteInfoDialog = true;
+                  "
+                >
+                  fa-solid fa-trash
+                </v-icon>
+              </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
+      </v-card>
+    </v-col>
+  </v-row>
+  <!-- 新增班组信息 -->
+  <v-dialog v-model="addDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 新增班组信息 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="addDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card-text class="mt-4">
+        <v-text-field
+          label="班组编号"
+          v-model="workClass.worker_id"
+        ></v-text-field>
+        <v-text-field
+          label="班组名称"
+          v-model="workClass.work_classname"
+        ></v-text-field>
+        <v-text-field
+          label="班组负责人"
+          v-model="workClass.leader_name"
+        ></v-text-field>
+      </v-card-text>
+
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn color="blue" size="large" class="mr-2" @click="addWorkClass">
+          确认添加
+        </v-btn>
+        <v-btn color="grey" size="large" @click="addDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+  <!-- 修改班组信息 -->
+  <v-dialog v-model="editDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 修改班组信息 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="editDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card-text class="mt-4">
+        <v-text-field
+          label="班组编号"
+          v-model="workClass.worker_id"
+        ></v-text-field>
+        <v-text-field
+          label="班组名称"
+          v-model="workClass.work_classname"
+        ></v-text-field>
+        <v-text-field
+          label="班组负责人"
+          v-model="workClass.leader_name"
+        ></v-text-field>
+      </v-card-text>
+
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn color="blue" size="large" class="mr-2" @click="editWorkClass">
+          确认修改
+        </v-btn>
+        <v-btn color="grey" size="large" @click="editDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+  <!-- 删除班组信息 -->
+  <v-dialog v-model="deleteDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 删除班组信息 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="deleteDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card-text class="mt-4">
+        你确定要删除班组编号为"{{ workClass.worker_id }}"这条数据吗？
+      </v-card-text>
+
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn color="blue" size="large" class="mr-2" @click="deleteWorkClass">
+          确认删除
+        </v-btn>
+        <v-btn color="grey" size="large" @click="deleteDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+  <!-- 新增班组成员信息 -->
+  <v-dialog v-model="addInfoDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 新增班组成员信息 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="addInfoDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card-text class="mt-4">
+        <v-text-field
+          label="工位"
+          v-model="workClassInfo.station"
+        ></v-text-field>
+        <v-text-field
+          label="班组编号"
+          v-model="workClassInfo.worker_id"
+        ></v-text-field>
+        <v-text-field
+          label="员工名称"
+          v-model="workClassInfo.employee_name"
+        ></v-text-field>
+        <v-text-field
+          label="成员编号"
+          v-model="workClassInfo.employee_id"
+        ></v-text-field>
+      </v-card-text>
+
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn color="blue" size="large" class="mr-2" @click="addWorkClassInfo">
+          确认添加
+        </v-btn>
+        <v-btn color="grey" size="large" @click="addInfoDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+  <!-- 修改班组成员信息 -->
+  <v-dialog v-model="editInfoDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 修改班组成员信息 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="editInfoDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card-text class="mt-4">
+        <v-text-field
+          label="工位"
+          v-model="workClassInfo.station"
+        ></v-text-field>
+        <v-text-field
+          label="班组编号"
+          v-model="workClassInfo.worker_id"
+        ></v-text-field>
+        <v-text-field
+          label="员工名称"
+          v-model="workClassInfo.employee_name"
+        ></v-text-field>
+        <v-text-field
+          label="成员编号"
+          v-model="workClassInfo.employee_id"
+        ></v-text-field>
+      </v-card-text>
+
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn
+          color="blue"
+          size="large"
+          class="mr-2"
+          @click="editWorkClassInfo"
+        >
+          确认修改
+        </v-btn>
+        <v-btn color="grey" size="large" @click="editInfoDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+  <!-- 删除班组成员信息 -->
+  <v-dialog v-model="deleteInfoDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 删除成员信息 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="deleteInfoDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card-text class="mt-4">
+        你确定要删除名称为"{{ workClassInfo.employee_name }}"这位员工的数据吗？
+      </v-card-text>
+
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn
+          color="blue"
+          size="large"
+          class="mr-2"
+          @click="deleteWorkClassInfo"
+        >
+          确认删除
+        </v-btn>
+        <v-btn color="grey" size="large" @click="deleteInfoDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
 </template>

@@ -469,7 +469,7 @@ async function batchWork() {
           SortType: 1,
           procedure_name: "",
           procedure_id: "",
-          PageSize: 5,
+          PageSize: 100,
         }
       );
       chips.value = data.data.result.map((item: any) => item.procedure_name);
@@ -572,7 +572,7 @@ async function saveTicket() {
       "put",
       innerTableSelectData.value
     );
-    getWorkOrderDetail(detailName.value);
+    getWorkOrderDetail();
   } catch (error) {
     console.log(error);
   }
@@ -610,7 +610,7 @@ function resetFilter() {
 //工单明细搜素
 async function filterTableDataDetail() {
   try {
-    getWorkOrderDetail(detailName.value);
+    getWorkOrderDetail();
   } catch (error) {
     console.log(error);
   }
@@ -621,12 +621,12 @@ function resetFilterDetail() {
   searchProjectNumber.value = "";
   startDateDetail.value = "";
   endDateDetail.value = "";
-  getWorkOrderDetail(detailName.value);
+  getWorkOrderDetail();
 }
 //页面加载时获取数据
 onMounted(async () => {
   getWorkOrder();
-  getWorkOrderDetail("");
+  getWorkOrderDetail();
 });
 //存储工单数据的所有工单编号
 let workorderId = ref<any[]>([]);
@@ -691,7 +691,7 @@ function formatDate(data: any) {
 }
 
 //获取工单明细数据
-async function getWorkOrderDetail(workorder_hid: string) {
+async function getWorkOrderDetail() {
   try {
     const data: any = await useHttp(
       "/MesWorkOrderDetail/M05WorkOrderDetails",
@@ -702,7 +702,7 @@ async function getWorkOrderDetail(workorder_hid: string) {
         PageSize: tableDetailPerPage.value,
         SortType: 1,
         SortedBy: "id",
-        workorder_hid: workorder_hid,
+        workorder_hid: detailName.value,
         mcode: searchOutputs.value,
         project_code: searchProjectNumber.value,
         estimated_delivery_date: startDateDetail.value,
@@ -721,11 +721,11 @@ let tableDetailPageCount = computed(() => {
 });
 //工单明细下一页
 watch(tableDetailPage, () => {
-  getWorkOrderDetail("");
+  getWorkOrderDetail();
 });
 //更改工单明细页面显示的最大数量
 watch(tableDetailPerPage, () => {
-  getWorkOrderDetail("");
+  getWorkOrderDetail();
 });
 //将工单明细数据的日期进行截取，保留年月份
 function formatDateDetail(data: any) {
@@ -752,7 +752,7 @@ async function showTicketDetail(item: any, obj: any) {
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
-  getWorkOrderDetail(detailName.value);
+  getWorkOrderDetail();
 });
 
 // 新增工单前重置新增对话框
@@ -827,7 +827,7 @@ async function addTicketDetail() {
       "post",
       tableArr
     );
-    getWorkOrderDetail(detailName.value);
+    getWorkOrderDetail();
     selectedRows.value = [];
   } catch (error) {
     console.log(error);
@@ -873,7 +873,7 @@ async function editTicketDetail() {
       "put",
       [operatingTicketDetail.value]
     );
-    getWorkOrderDetail(detailName.value);
+    getWorkOrderDetail();
   } catch (error) {
     console.log(error);
   }
@@ -907,7 +907,7 @@ async function deleteTicketDetail() {
       undefined,
       { workorderdetail_ids: [operatingTicketDetail.value.id] }
     );
-    getWorkOrderDetail(detailName.value);
+    getWorkOrderDetail();
   } catch (error) {
     console.log(error);
   }
@@ -1120,7 +1120,7 @@ async function showMcodeDialog() {
 }
 
 //搜素
-async function filterNameProduct(params: type) {
+async function filterNameProduct() {
   try {
     productList();
   } catch (error) {
