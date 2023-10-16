@@ -45,33 +45,38 @@ const pageMenus = ref<any[]>([
   },
   {
     title: "MES",
-    path: "/work-order",
+    path: "/mes",
     icon: "fa-solid fa-table-list",
     children: [
       {
         name: "生产工单",
-        path: "/work-order/work-order-product",
+        path: "/mes/work-order-product",
         icon: "fa-solid fa-table-list",
       },
       {
         name: "工单排产",
-        path: "/work-order/work-produce-recode",
+        path: "/mes/work-produce-recode",
         icon: "fa-solid fa-list-ol",
       },
       {
         name: "常用工序",
-        path: "/work-order/process-maintenance",
+        path: "/mes/process-maintenance",
         icon: "fa-solid fa-screwdriver-wrench",
       },
       {
         name: "BOM清单",
-        path: "/work-order/bom-list",
+        path: "/mes/bom-list",
         icon: "fa-solid fa-list",
+      },
+      {
+        name: "工作中心",
+        path: "/mes/work-center",
+        icon: "fa-solid fa-location-crosshairs",
       },
     ],
   },
   {
-    title: "WMS仓储管理",
+    title: "WMS",
     path: "/wms",
     icon: "fa-solid fa-chart-column",
     children: [
@@ -352,8 +357,5 @@ watch(
 .list-item-active {
   background-image: linear-gradient(25deg, #0044bd, #1e66d3, #2a88e9, #2dacff);
   color: white !important;
-}
-.tabs {
-  margin-left: auto !important;
 }
 </style>

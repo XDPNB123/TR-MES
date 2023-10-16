@@ -31,17 +31,10 @@
         <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
           重置
         </v-btn>
-        <v-btn
-          color="green"
-          variant="flat"
-          size="large"
-          @click="showDialogAdd"
-          class="mr-2"
+        <v-btn color="green" size="large" @click="showDialogAdd" class="mr-2"
           >新增
         </v-btn>
-        <v-btn color="blue-darken-4" variant="flat" size="large" class="mr-2">
-          导入
-        </v-btn>
+        <v-btn color="blue-darken-4" size="large" class="mr-2"> 导入 </v-btn>
       </v-col>
       <v-col cols="12">
         <v-data-table
@@ -247,12 +240,27 @@ const headers = ref<any[]>([
     sortable: false,
     key: "id",
   },
-  { title: "工单明细编号", align: "center", key: "workorder_did" },
-  { title: "物料编号", align: "center", key: "material_id" },
-  { title: "物料名称", align: "center", key: "material_name" },
-  { title: "物料数量", align: "center", key: "required_quantity" },
-  { title: "已领取数量", align: "center", key: "already_received_quantity" },
-  { title: "单位", align: "center", key: "unit" },
+  {
+    title: "工单明细编号",
+    align: "center",
+    key: "workorder_did",
+    sortable: false,
+  },
+  { title: "物料编号", align: "center", key: "material_id", sortable: false },
+  { title: "物料名称", align: "center", key: "material_name", sortable: false },
+  {
+    title: "物料数量",
+    align: "center",
+    key: "required_quantity",
+    sortable: false,
+  },
+  {
+    title: "已领取数量",
+    align: "center",
+    key: "already_received_quantity",
+    sortable: false,
+  },
+  { title: "单位", align: "center", key: "unit", sortable: false },
   { title: "操作", align: "center", key: "actions", sortable: false },
 ]);
 let bomTableList = ref<any[]>([]);
