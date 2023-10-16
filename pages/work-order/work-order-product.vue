@@ -1824,7 +1824,7 @@ async function saveMcodeProduct() {
         <v-row class="ma-3">
           <v-col cols="1"></v-col>
           <v-col cols="6">
-            <v-card class="h-60">
+            <v-card height="350px" style="overflow-y: auto">
               <v-card-subtitle>已选工序</v-card-subtitle>
               <v-list @dragover.prevent @drop="drop">
                 <v-list-item
@@ -1857,7 +1857,7 @@ async function saveMcodeProduct() {
           </v-col>
           <v-col cols="1"></v-col>
           <v-col cols="3">
-            <v-card flat>
+            <v-card flat height="350px" style="overflow-y: auto">
               <v-card-subtitle>可选工序</v-card-subtitle>
               <div
                 v-for="(chip, index) in chips"
@@ -1879,7 +1879,7 @@ async function saveMcodeProduct() {
               <v-chip v-else>已无可选择的工序</v-chip>
             </v-card>
           </v-col>
-          <v-col cols="12">
+          <v-col cols="12" height="350px" style="overflow-y: auto">
             <v-card>
               <v-card-subtitle>常用工艺路线</v-card-subtitle>
               <v-list>

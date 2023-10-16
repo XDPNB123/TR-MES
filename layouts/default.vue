@@ -83,7 +83,7 @@ const pageMenus = ref<any[]>([
     ],
   },
   {
-    title: "成员班组",
+    title: "基础信息",
     path: "/work-class",
     icon: "fa-solid fa-users-rays",
     children: [
@@ -91,11 +91,6 @@ const pageMenus = ref<any[]>([
         name: "班组信息",
         path: "/work-class/work-class",
         icon: "fa-solid fa-people-roof",
-      },
-      {
-        name: "班组成员",
-        path: "/work-class/work-class-info",
-        icon: "fa-solid fa-users",
       },
     ],
   },
