@@ -572,7 +572,7 @@ async function saveTicket() {
       "put",
       innerTableSelectData.value
     );
-    getWorkOrderDetail("");
+    getWorkOrderDetail(detailName.value);
   } catch (error) {
     console.log(error);
   }
@@ -1111,6 +1111,7 @@ const productPageCount = computed(() => {
 async function showMcodeDialog() {
   try {
     productLength.value = 0
+      searchName.value = ""
     productList()
     productTypeName.value = "自制件";
   } catch (error) {
@@ -1150,8 +1151,6 @@ async function saveMcodeProduct() {
       .map((item) => item.partName)
       .join(",");
     mcodeDialog.value = false;
-    searchName.value=""
-   
   } catch (error) {
     console.log(error);
   }
