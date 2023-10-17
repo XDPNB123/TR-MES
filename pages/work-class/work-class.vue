@@ -81,14 +81,17 @@ let workClassHeader = ref<any[]>([
 ]);
 //表格当前页
 let workClassPage=ref(1)
+watch(workClassPage,()=>{
+    getWorkClass()
+})
 //数据库一共存储多少数据
 let workClassPageCount=ref(0)
 //班组信息数据
 let workClassTableData = ref<any[]>([]);
 //计算一共有的多少页
-// let workClassTablePageCount = computed(() => {
-//     return Math.ceil(workClassTableData.value / 10);
-// });
+let workClassTablePageCount = computed(() => {
+    return Math.ceil(workClassPageCount.value / 10);
+});
 //获取班组信息数据
 async function getWorkClass() {
   const data: any = await useHttp(
@@ -105,9 +108,26 @@ async function getWorkClass() {
       SortType: 0,
     }
   );
-  workClassTableData.value = data.data.pageList;
+  workClassTableData.value = formateDate(data.data.pageList);
   workClassPageCount.value=data.data.totalCount
 }
+//日期截取
+function formateDate(data:any){
+    try {
+     data.forEach((item: any, index: number) => {
+        if (item.create_time) {
+            item.create_time = item.create_time.substring(0, 10);
+        }
+        if (item.update_time) {
+            item.update_time = item.update_time.substring(0, 10);
+        }
+    });
+    return data;
+      } catch (error) {
+        console.log(error);
+    }
+}
+
 //点击获取当前班组的成员信息
 let workerId = ref("");
 function showInfo(item: any, obj: any) {
@@ -185,10 +205,6 @@ async function deleteWorkClass() {
 }
 
 
-
-
-
-
 //班组成员操作
 //班组成员信息表头
 let workClassInfoHeader = ref<any[]>([
@@ -258,6 +274,17 @@ let workClassInfoHeader = ref<any[]>([
 ]);
 //班组成员信息数据
 let workClassInfoTableData = ref<any[]>([]);
+//表格当前页
+let workClassPageInfo = ref(1)
+watch(workClassPageInfo, () => {
+    getWorkClassInfo()
+})
+//数据库一共存储多少数据
+let workClassInfoPageCount = ref(0)
+//计算一共有的多少页
+let workClassInfoTablePageCount = computed(() => {
+    return Math.ceil(workClassInfoPageCount.value / 10);
+});
 async function getWorkClassInfo() {
   const data: any = await useHttp(
     "/MesWorkClassInfo/M31GetWorkClassInfo",
@@ -267,14 +294,16 @@ async function getWorkClassInfo() {
       employee_id: employeeId.value,
       employee_name: employeeName.value,
       worker_id: workerId.value,
-      PageIndex: 1,
+      PageIndex: workClassPageInfo.value,
       PageSize: 10,
       SortedBy: "id",
       SortType: 0,
     }
   );
-  workClassInfoTableData.value = data.data.pageList;
+  workClassInfoTableData.value = formateDate(data.data.pageList);
+  workClassInfoPageCount.value=data.data.totalCount
 }
+
 //班组成员数据
 let workClassInfo = ref<any>({
   station: "",
@@ -299,7 +328,7 @@ function resetWorkClassInfo() {
 function showAddInfoDialog() {
   workClassInfo.value = {
     station: "",
-    worker_id: "",
+    worker_id: workerId.value,
     employee_name: "",
     employee_id: "",
   };
@@ -449,8 +478,8 @@ async function deleteWorkClassInfo() {
                <template v-slot:bottom>
                     <div class="text-center pt-2">
                       <v-pagination
-                        v-model="tablePage"
-                        :length="tablePageCount"
+                        v-model="workClassPage"
+                        :length="workClassTablePageCount"
                       ></v-pagination>
                     </div>
                   </template>
@@ -505,6 +534,7 @@ async function deleteWorkClassInfo() {
               class="mr-2"
               size="large"
               @click="showAddInfoDialog"
+              v-if="workerId"
             >
               新增成员
             </v-btn>
@@ -514,6 +544,7 @@ async function deleteWorkClassInfo() {
             <!-- 工单表头表格 -->
             <v-data-table
               hover
+               :items-per-page="10"
               :headers="workClassInfoHeader"
               :items="workClassInfoTableData"
               style="overflow-x: auto; white-space: nowrap"
@@ -550,6 +581,14 @@ async function deleteWorkClassInfo() {
                   fa-solid fa-trash
                 </v-icon>
               </template>
+              <template v-slot:bottom>
+                        <div class="text-center pt-2">
+                          <v-pagination
+                            v-model="workClassPageInfo"
+                            :length="workClassInfoTablePageCount"
+                          ></v-pagination>
+                        </div>
+                      </template>
             </v-data-table>
           </v-col>
         </v-row>
