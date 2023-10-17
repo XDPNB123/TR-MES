@@ -16,6 +16,9 @@ useSeoMeta({
 definePageMeta({
   keepalive: true,
 });
+// 获取消息条对象
+const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
+    useSnackbar();
 //单位
 let units = ref<string[]>([
   "PCS",
@@ -442,8 +445,7 @@ async function batchWork() {
   try {
     //判断是否选择数据
     if (selected.value.length === 0) {
-      alert("请选择需要工序维护的产料");
-      return;
+      return setSnackbar("black", "请选择需要工序维护的产料");
     }
 
     //获取到当前选择的数据
@@ -496,8 +498,7 @@ async function batchWork() {
         );
       }
     } else {
-      alert("您选择的数据的初始工序属性并不一致，请检查后重新选择");
-      return;
+      return setSnackbar("black", "您选择的数据的初始工序属性并不一致，请检查后重新选择")
     }
   } catch (error) {
     console.log(error);
@@ -560,8 +561,8 @@ function cancelProcess() {
 async function saveTicket() {
   try {
     if (droppedChips.value.length === 0) {
-      alert("请你至少选择一个工序");
-      return;
+      
+      return setSnackbar("black", "请你至少选择一个工序")
     }
     // 将选择的工序数组拼接成字符串
     innerTableSelectData.value.forEach((item) => {
@@ -591,6 +592,7 @@ function commonProduce(item: any) {
 // 工单表头搜索过滤
 async function filterTableData() {
   try {
+    tablePage.value=1
     getWorkOrder();
   } catch (error) {
     console.log(error);
@@ -604,12 +606,14 @@ function resetFilter() {
   startDate.value = "";
   endDate.value = "";
   detailName.value = "";
+   tablePage.value = 1
   getWorkOrder();
 }
 
 //工单明细搜素
 async function filterTableDataDetail() {
   try {
+    tableDetailPage.value=1
     getWorkOrderDetail();
   } catch (error) {
     console.log(error);
@@ -621,6 +625,7 @@ function resetFilterDetail() {
   searchProjectNumber.value = "";
   startDateDetail.value = "";
   endDateDetail.value = "";
+  tableDetailPage.value = 1
   getWorkOrderDetail();
 }
 //页面加载时获取数据
@@ -752,6 +757,7 @@ async function showTicketDetail(item: any, obj: any) {
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
+    tableDetailPage.value = 1
   getWorkOrderDetail();
 });
 
@@ -782,7 +788,8 @@ async function addTicket() {
   }
   addDialog.value = false;
 }
-// // 新增工单明细前重置新增对话框
+ 
+// 新增工单明细前重置新增对话框
 function resetAddDetailDialog() {
   operatingTicketDetail.value = {
     estimated_delivery_date: "",
@@ -1043,7 +1050,8 @@ function saveProduct() {
       selectedRows.value = [];
       productDialog.value = false;
     } else {
-      alert("一次只能选择一个");
+      
+      return setSnackbar("black", "一次只能选择一个")
     }
   } catch (error) {
     console.log(error);
@@ -1052,6 +1060,7 @@ function saveProduct() {
 //产品的搜素
 async function filterProduct() {
   try {
+        productTablePage.value=1
     if (productTypeName.value === "自制件") {
       getHomeData(searchProduct);
     }
@@ -1065,6 +1074,7 @@ async function filterProduct() {
 //重置搜素
 function resetFilterProduct() {
   searchProduct.value = "";
+   productTablePage.value = 1
   if (productTypeName.value === "自制件") {
     getHomeData(searchProduct);
   }
@@ -1106,12 +1116,13 @@ const productPageCount = computed(() => {
   return Math.ceil(productLength.value / productPerPage.value);
 });
 
-//根据产品的项目号来查找新增的产出料
+//根据产品的项目号来筛选新增的产出料
 async function showMcodeDialog() {
   try {
     productLength.value = 0;
     searchName.value = "";
     productList();
+    productPage.value = 1
     productTypeName.value = "自制件";
   } catch (error) {
     console.log(error);
@@ -1122,6 +1133,7 @@ async function showMcodeDialog() {
 //搜素
 async function filterNameProduct() {
   try {
+    productPage.value=1
     productList();
   } catch (error) {
     console.log(error);
@@ -1130,13 +1142,12 @@ async function filterNameProduct() {
 //重置搜素
 function resetFilterNameProduct() {
   searchName.value = "";
+    productPage.value = 1
   productList();
 }
-
 watch(productPage, () => {
   productList();
 });
-
 watch(productPerPage, () => {
   productList();
 });
@@ -1144,7 +1155,7 @@ watch(productPerPage, () => {
 async function saveMcodeProduct() {
   try {
     if (selectedRows.value.length === 0) {
-      return alert("请选择产出料，创建工单明细");
+      return setSnackbar("black", "请选择产出料，创建工单明细");
     }
     operatingTicketDetail.value.mcode = selectedRows.value
       .map((item) => item.partName)
@@ -2165,6 +2176,12 @@ async function saveMcodeProduct() {
       </v-card>
     </v-dialog>
   </v-row>
+   <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
+          {{ snackbarText }}
+          <template v-slot:actions>
+            <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
+          </template>
+        </v-snackbar>
 </template>
 
 <style scoped>
