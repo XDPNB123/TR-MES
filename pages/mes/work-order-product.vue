@@ -18,7 +18,7 @@ definePageMeta({
 });
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
-    useSnackbar();
+  useSnackbar();
 //单位
 let units = ref<string[]>([
   "PCS",
@@ -117,19 +117,6 @@ let operatingTicket = ref<any>({
   finish_date: "",
   status: "",
 });
-let keyToChinese = ref<any>({
-  id: "序号",
-  workorder_hid: "工单编号",
-  workorder_type: "工单类型",
-  unit: "单位",
-  planned_quantity: "计划数量",
-  product_description: "产品描述",
-  start_date: "开始日期",
-  finish_date: "完成日期",
-  planned_completion_time: "计划完成时间",
-  status: "工单状态",
-});
-let getChineseKey = (key: any) => keyToChinese.value[key] || key;
 //正在操作的工单明细
 let operatingTicketDetail = ref<any>({
   mcode: "",
@@ -146,24 +133,6 @@ let operatingTicketDetail = ref<any>({
   actual_delivery_date: "",
   status: "",
 });
-let keyToDetailChinese = ref<any>({
-  mcode: "产出料",
-  estimated_delivery_date: "预计交付时间",
-  blueprint_id: "图纸号",
-  bomdata: "BOM清单",
-  procedure: "工序",
-  project_code: "项目号",
-  standard_time: "标准工时",
-  actual_time: "实际工时",
-  planned_quantity: "计划数量",
-  reported_quantity: "实际报工数量",
-  unit: "单位",
-  status: "状态",
-  workorder_did: "工单明细编号",
-  workorder_hid: "工单编号",
-  actual_delivery_date: "实际交付时间",
-});
-let getDetailChineseKey = (key: any) => keyToDetailChinese.value[key] || key;
 //工单表按照开始时间进行降序排序
 // 展示的工单表格数据
 let tableData = ref<any[]>([]);
@@ -287,6 +256,13 @@ let headers = ref<any[]>([
     filterable: true,
   },
   {
+    title: "项目号",
+    align: "center",
+    key: "project_code",
+    sortable: false,
+    filterable: true,
+  },
+  {
     title: "预计交付日期",
     align: "center",
     key: "estimated_delivery_date",
@@ -307,13 +283,7 @@ let headers = ref<any[]>([
     sortable: false,
     filterable: true,
   },
-  {
-    title: "项目号",
-    align: "center",
-    key: "project_code",
-    sortable: false,
-    filterable: true,
-  },
+
   {
     title: "标准工时",
     align: "center",
@@ -498,7 +468,11 @@ async function batchWork() {
         );
       }
     } else {
-      return setSnackbar("black", "您选择的数据的初始工序属性并不一致，请检查后重新选择")
+      selected.value = [];
+      return setSnackbar(
+        "black",
+        "您选择的数据的初始工序属性并不一致，请检查后重新选择"
+      );
     }
   } catch (error) {
     console.log(error);
@@ -561,8 +535,7 @@ function cancelProcess() {
 async function saveTicket() {
   try {
     if (droppedChips.value.length === 0) {
-      
-      return setSnackbar("black", "请你至少选择一个工序")
+      return setSnackbar("black", "请你至少选择一个工序");
     }
     // 将选择的工序数组拼接成字符串
     innerTableSelectData.value.forEach((item) => {
@@ -592,7 +565,7 @@ function commonProduce(item: any) {
 // 工单表头搜索过滤
 async function filterTableData() {
   try {
-    tablePage.value=1
+    tablePage.value = 1;
     getWorkOrder();
   } catch (error) {
     console.log(error);
@@ -606,14 +579,14 @@ function resetFilter() {
   startDate.value = "";
   endDate.value = "";
   detailName.value = "";
-   tablePage.value = 1
+  tablePage.value = 1;
   getWorkOrder();
 }
 
 //工单明细搜素
 async function filterTableDataDetail() {
   try {
-    tableDetailPage.value=1
+    tableDetailPage.value = 1;
     getWorkOrderDetail();
   } catch (error) {
     console.log(error);
@@ -625,7 +598,7 @@ function resetFilterDetail() {
   searchProjectNumber.value = "";
   startDateDetail.value = "";
   endDateDetail.value = "";
-  tableDetailPage.value = 1
+  tableDetailPage.value = 1;
   getWorkOrderDetail();
 }
 //页面加载时获取数据
@@ -757,7 +730,7 @@ async function showTicketDetail(item: any, obj: any) {
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
-    tableDetailPage.value = 1
+  tableDetailPage.value = 1;
   getWorkOrderDetail();
 });
 
@@ -788,7 +761,7 @@ async function addTicket() {
   }
   addDialog.value = false;
 }
- 
+
 // 新增工单明细前重置新增对话框
 function resetAddDetailDialog() {
   operatingTicketDetail.value = {
@@ -1050,8 +1023,8 @@ function saveProduct() {
       selectedRows.value = [];
       productDialog.value = false;
     } else {
-      
-      return setSnackbar("black", "一次只能选择一个")
+      selectedRows.value = [];
+      return setSnackbar("black", "一次只能选择一个");
     }
   } catch (error) {
     console.log(error);
@@ -1060,7 +1033,7 @@ function saveProduct() {
 //产品的搜素
 async function filterProduct() {
   try {
-        productTablePage.value=1
+    productTablePage.value = 1;
     if (productTypeName.value === "自制件") {
       getHomeData(searchProduct);
     }
@@ -1074,7 +1047,7 @@ async function filterProduct() {
 //重置搜素
 function resetFilterProduct() {
   searchProduct.value = "";
-   productTablePage.value = 1
+  productTablePage.value = 1;
   if (productTypeName.value === "自制件") {
     getHomeData(searchProduct);
   }
@@ -1122,7 +1095,7 @@ async function showMcodeDialog() {
     productLength.value = 0;
     searchName.value = "";
     productList();
-    productPage.value = 1
+    productPage.value = 1;
     productTypeName.value = "自制件";
   } catch (error) {
     console.log(error);
@@ -1133,7 +1106,7 @@ async function showMcodeDialog() {
 //搜素
 async function filterNameProduct() {
   try {
-    productPage.value=1
+    productPage.value = 1;
     productList();
   } catch (error) {
     console.log(error);
@@ -1142,7 +1115,7 @@ async function filterNameProduct() {
 //重置搜素
 function resetFilterNameProduct() {
   searchName.value = "";
-    productPage.value = 1
+  productPage.value = 1;
   productList();
 }
 watch(productPage, () => {
@@ -1165,6 +1138,17 @@ async function saveMcodeProduct() {
     console.log(error);
   }
 }
+
+//文本规则、
+//数字规则
+const numberRule = ref<any>([(v: any) => /^\d+$/.test(v) || "只能填写数字"]);
+//日期规则
+const dateRule = ref<any>([
+  (v: any) =>
+    /^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$/.test(
+      v
+    ) || "日期格式如“2023-10-01”",
+]);
 </script>
 
 <template>
@@ -1181,6 +1165,7 @@ async function saveMcodeProduct() {
               density="compact"
               v-model="searchTicketNumber"
               hide-details
+              @keydown.enter="filterTableData()"
             ></v-text-field>
           </v-col>
 
@@ -1192,6 +1177,7 @@ async function saveMcodeProduct() {
               v-model="searchTicketStatus"
               :items="workStatus"
               hide-details
+              @keydown.enter="filterTableData()"
             ></v-select>
           </v-col>
           <v-col cols="4">
@@ -1202,16 +1188,18 @@ async function saveMcodeProduct() {
               v-model="searchTicketType"
               :items="['机加工', '装配']"
               hide-details
+              @keydown.enter="filterTableData()"
             ></v-select>
           </v-col>
           <v-col cols="6">
             <v-text-field
               label="最早开始日期"
-              type="date"
               variant="outlined"
               density="compact"
               v-model="startDate"
+              type="date"
               hide-details
+              @keydown.enter="filterTableData()"
             >
             </v-text-field>
           </v-col>
@@ -1223,6 +1211,7 @@ async function saveMcodeProduct() {
               density="compact"
               v-model="endDate"
               hide-details
+              @keydown.enter="filterTableData()"
             >
             </v-text-field>
           </v-col>
@@ -1334,6 +1323,7 @@ async function saveMcodeProduct() {
               density="compact"
               v-model="searchProjectNumber"
               hide-details
+              @keydown.enter="filterTableDataDetail()"
             ></v-text-field>
           </v-col>
 
@@ -1344,6 +1334,7 @@ async function saveMcodeProduct() {
               density="compact"
               v-model="searchOutputs"
               hide-details
+              @keydown.enter="filterTableDataDetail()"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
@@ -1354,6 +1345,7 @@ async function saveMcodeProduct() {
               density="compact"
               v-model="startDateDetail"
               hide-details
+              @keydown.enter="filterTableDataDetail()"
             >
             </v-text-field>
           </v-col>
@@ -1365,6 +1357,7 @@ async function saveMcodeProduct() {
               density="compact"
               v-model="endDateDetail"
               hide-details
+              @keydown.enter="filterTableDataDetail()"
             >
             </v-text-field>
           </v-col>
@@ -1525,6 +1518,7 @@ async function saveMcodeProduct() {
           <v-text-field
             v-model="operatingTicket.planned_quantity"
             label="计划数量"
+            :rules="numberRule"
           ></v-text-field>
 
           <v-select
@@ -1534,17 +1528,17 @@ async function saveMcodeProduct() {
           ></v-select>
           <v-text-field
             label="开始日期"
-            type="date"
+            :rules="dateRule"
             v-model="operatingTicket.start_date"
           />
           <v-text-field
             label="完成日期"
-            type="date"
+            :rules="dateRule"
             v-model="operatingTicket.finish_date"
           ></v-text-field>
           <v-text-field
             label="计划完成日期"
-            type="date"
+            :rules="dateRule"
             v-model="operatingTicket.planned_completion_time"
           ></v-text-field>
         </v-card-text>
@@ -1584,6 +1578,7 @@ async function saveMcodeProduct() {
           <v-text-field
             v-model="operatingTicket.planned_quantity"
             label="计划数量"
+            :rules="numberRule"
           ></v-text-field>
           <v-select
             label="单位"
@@ -1592,17 +1587,17 @@ async function saveMcodeProduct() {
           ></v-select>
           <v-text-field
             v-model="operatingTicket.start_date"
-            type="date"
+            :rules="dateRule"
             label="开始日期"
           ></v-text-field>
           <v-text-field
             v-model="operatingTicket.finish_date"
-            type="date"
+            :rules="dateRule"
             label="完成日期"
           ></v-text-field>
           <v-text-field
             v-model="operatingTicket.planned_completion_time"
-            type="date"
+            :rules="dateRule"
             label="计划完成日期"
           ></v-text-field>
           <v-select
@@ -1632,23 +1627,9 @@ async function saveMcodeProduct() {
             <v-icon>fa-solid fa-close</v-icon>
           </v-btn>
         </v-toolbar>
-
         <v-card-text class="mt-4 text-center text-red text-h6">
-          您确认要删除这条工单吗？
-
-          <v-list>
-            <v-list-item
-              v-for="(value, key, index) in operatingTicket"
-              :key="index"
-            >
-              <template #prepend> {{ getChineseKey(key) }}:</template>
-              <template #append>
-                {{ value }}
-              </template>
-            </v-list-item>
-          </v-list>
+          您确认要删除工单编号为{{ operatingTicket.workorder_hid }}这条数据吗？
         </v-card-text>
-
         <div class="d-flex justify-end mr-6 my-4">
           <v-btn color="red" size="large" class="mr-2" @click="deleteTicket()">
             确认删除
@@ -1663,7 +1644,7 @@ async function saveMcodeProduct() {
     <v-dialog v-model="addDetailDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 新增工单明细 </v-toolbar-title>
+          <v-toolbar-title> 批量新增工单明细 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="addDetailDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -1680,7 +1661,7 @@ async function saveMcodeProduct() {
 
           <v-text-field
             v-model="operatingTicketDetail.estimated_delivery_date"
-            type="date"
+            :rules="dateRule"
             label="预计交付时间"
           ></v-text-field>
 
@@ -1697,6 +1678,7 @@ async function saveMcodeProduct() {
           <v-text-field
             v-model="operatingTicketDetail.planned_quantity"
             label="计划数量"
+            :rules="numberRule"
           ></v-text-field>
           <v-select
             label="单位"
@@ -1732,21 +1714,8 @@ async function saveMcodeProduct() {
         </v-toolbar>
 
         <v-card-text class="mt-4 text-center text-red text-h6">
-          您确认要删除这条工单明细吗？
-
-          <v-list>
-            <v-list-item
-              v-for="(value, key, index) in operatingTicketDetail"
-              :key="index"
-            >
-              <template #prepend> {{ getDetailChineseKey(key) }}:</template>
-              <template #append>
-                {{ value }}
-              </template>
-            </v-list-item>
-          </v-list>
+          您确认要删除工单明细编号为{{ operatingTicketDetail.workorder_did}}这条数据吗？
         </v-card-text>
-
         <div class="d-flex justify-end mr-6 my-4">
           <v-btn
             color="red"
@@ -1775,12 +1744,12 @@ async function saveMcodeProduct() {
         <v-card-text class="mt-4">
           <v-text-field
             v-model="operatingTicketDetail.estimated_delivery_date"
-            type="date"
+            :rules="dateRule"
             label="预计交付时间"
           ></v-text-field>
           <v-text-field
             v-model="operatingTicketDetail.actual_delivery_date"
-            type="date"
+            :rules="dateRule"
             label="实际交付时间"
           ></v-text-field>
           <v-text-field
@@ -1794,10 +1763,12 @@ async function saveMcodeProduct() {
           <v-text-field
             v-model="operatingTicketDetail.planned_quantity"
             label="计划数量"
+            :rules="numberRule"
           ></v-text-field>
           <v-text-field
             v-model="operatingTicketDetail.reported_quantity"
             label="实际报工数量"
+            :rules="numberRule"
           ></v-text-field>
           <v-select
             label="单位"
@@ -1931,11 +1902,12 @@ async function saveMcodeProduct() {
           <v-row class="ma-2">
             <v-col cols="6">
               <v-text-field
-                label="产品查询"
+                label="模糊查询，如您输入零件名，物料编码，项目号等信息的部分便可查询"
                 variant="outlined"
                 density="compact"
                 v-model="searchProduct"
                 hide-details
+                @keydown.enter="filterProduct()"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
@@ -2016,12 +1988,11 @@ async function saveMcodeProduct() {
         </div>
       </v-card>
     </v-dialog>
-
     <!-- 工单明细产出料 -->
     <v-dialog v-model="mcodeDialog" min-width="400px" width="1000px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 选择产品描述 </v-toolbar-title>
+          <v-toolbar-title> 可以批量选择产品，批量增加产出料 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="mcodeDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -2036,6 +2007,7 @@ async function saveMcodeProduct() {
                 density="compact"
                 v-model="searchName"
                 hide-details
+                @keydown.enter="filterNameProduct()"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
@@ -2176,12 +2148,12 @@ async function saveMcodeProduct() {
       </v-card>
     </v-dialog>
   </v-row>
-   <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
-          {{ snackbarText }}
-          <template v-slot:actions>
-            <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
-          </template>
-        </v-snackbar>
+  <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
+    {{ snackbarText }}
+    <template v-slot:actions>
+      <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
+    </template>
+  </v-snackbar>
 </template>
 
 <style scoped>

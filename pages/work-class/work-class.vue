@@ -80,17 +80,17 @@ let workClassHeader = ref<any[]>([
   },
 ]);
 //表格当前页
-let workClassPage=ref(1)
-watch(workClassPage,()=>{
-    getWorkClass()
-})
+let workClassPage = ref(1);
+watch(workClassPage, () => {
+  getWorkClass();
+});
 //数据库一共存储多少数据
-let workClassPageCount=ref(0)
+let workClassPageCount = ref(0);
 //班组信息数据
 let workClassTableData = ref<any[]>([]);
 //计算一共有的多少页
 let workClassTablePageCount = computed(() => {
-    return Math.ceil(workClassPageCount.value / 10);
+  return Math.ceil(workClassPageCount.value / 10);
 });
 //获取班组信息数据
 async function getWorkClass() {
@@ -109,23 +109,23 @@ async function getWorkClass() {
     }
   );
   workClassTableData.value = formateDate(data.data.pageList);
-  workClassPageCount.value=data.data.totalCount
+  workClassPageCount.value = data.data.totalCount;
 }
 //日期截取
-function formateDate(data:any){
-    try {
-     data.forEach((item: any, index: number) => {
-        if (item.create_time) {
-            item.create_time = item.create_time.substring(0, 10);
-        }
-        if (item.update_time) {
-            item.update_time = item.update_time.substring(0, 10);
-        }
+function formateDate(data: any) {
+  try {
+    data.forEach((item: any, index: number) => {
+      if (item.create_time) {
+        item.create_time = item.create_time.substring(0, 10);
+      }
+      if (item.update_time) {
+        item.update_time = item.update_time.substring(0, 10);
+      }
     });
     return data;
-      } catch (error) {
-        console.log(error);
-    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 //点击获取当前班组的成员信息
@@ -204,7 +204,6 @@ async function deleteWorkClass() {
   deleteDialog.value = false;
 }
 
-
 //班组成员操作
 //班组成员信息表头
 let workClassInfoHeader = ref<any[]>([
@@ -275,15 +274,15 @@ let workClassInfoHeader = ref<any[]>([
 //班组成员信息数据
 let workClassInfoTableData = ref<any[]>([]);
 //表格当前页
-let workClassPageInfo = ref(1)
+let workClassPageInfo = ref(1);
 watch(workClassPageInfo, () => {
-    getWorkClassInfo()
-})
+  getWorkClassInfo();
+});
 //数据库一共存储多少数据
-let workClassInfoPageCount = ref(0)
+let workClassInfoPageCount = ref(0);
 //计算一共有的多少页
 let workClassInfoTablePageCount = computed(() => {
-    return Math.ceil(workClassInfoPageCount.value / 10);
+  return Math.ceil(workClassInfoPageCount.value / 10);
 });
 async function getWorkClassInfo() {
   const data: any = await useHttp(
@@ -301,7 +300,7 @@ async function getWorkClassInfo() {
     }
   );
   workClassInfoTableData.value = formateDate(data.data.pageList);
-  workClassInfoPageCount.value=data.data.totalCount
+  workClassInfoPageCount.value = data.data.totalCount;
 }
 
 //班组成员数据
@@ -393,6 +392,7 @@ async function deleteWorkClassInfo() {
               variant="outlined"
               density="compact"
               v-model="workClassName"
+              @keydown.enter="searchWorkClass"
               hide-details
             ></v-text-field>
           </v-col>
@@ -403,6 +403,7 @@ async function deleteWorkClassInfo() {
               variant="outlined"
               density="compact"
               v-model="workClassLeader"
+              @keydown.enter="searchWorkClass"
               hide-details
             ></v-text-field>
           </v-col>
@@ -437,7 +438,7 @@ async function deleteWorkClassInfo() {
             <v-divider></v-divider>
             <v-data-table
               hover
-               :items-per-page="10"
+              :items-per-page="10"
               :headers="workClassHeader"
               :items="workClassTableData"
               style="overflow-x: auto; white-space: nowrap"
@@ -475,14 +476,14 @@ async function deleteWorkClassInfo() {
               <template v-slot:item.id="{ index }">
                 {{ index + 1 }}
               </template>
-               <template v-slot:bottom>
-                    <div class="text-center pt-2">
-                      <v-pagination
-                        v-model="workClassPage"
-                        :length="workClassTablePageCount"
-                      ></v-pagination>
-                    </div>
-                  </template>
+              <template v-slot:bottom>
+                <div class="text-center pt-2">
+                  <v-pagination
+                    v-model="workClassPage"
+                    :length="workClassTablePageCount"
+                  ></v-pagination>
+                </div>
+              </template>
             </v-data-table>
           </v-col>
         </v-row>
@@ -499,6 +500,7 @@ async function deleteWorkClassInfo() {
               variant="outlined"
               density="compact"
               v-model="employeeId"
+              @keydown.enter="searchWorkClassInfo"
               hide-details
             ></v-text-field>
           </v-col>
@@ -509,6 +511,7 @@ async function deleteWorkClassInfo() {
               variant="outlined"
               density="compact"
               v-model="employeeName"
+              @keydown.enter="searchWorkClassInfo"
               hide-details
             ></v-text-field>
           </v-col>
@@ -544,7 +547,7 @@ async function deleteWorkClassInfo() {
             <!-- 工单表头表格 -->
             <v-data-table
               hover
-               :items-per-page="10"
+              :items-per-page="10"
               :headers="workClassInfoHeader"
               :items="workClassInfoTableData"
               style="overflow-x: auto; white-space: nowrap"
@@ -582,13 +585,13 @@ async function deleteWorkClassInfo() {
                 </v-icon>
               </template>
               <template v-slot:bottom>
-                        <div class="text-center pt-2">
-                          <v-pagination
-                            v-model="workClassPageInfo"
-                            :length="workClassInfoTablePageCount"
-                          ></v-pagination>
-                        </div>
-                      </template>
+                <div class="text-center pt-2">
+                  <v-pagination
+                    v-model="workClassPageInfo"
+                    :length="workClassInfoTablePageCount"
+                  ></v-pagination>
+                </div>
+              </template>
             </v-data-table>
           </v-col>
         </v-row>
@@ -703,10 +706,6 @@ async function deleteWorkClassInfo() {
         <v-text-field
           label="工位"
           v-model="workClassInfo.station"
-        ></v-text-field>
-        <v-text-field
-          label="班组编号"
-          v-model="workClassInfo.worker_id"
         ></v-text-field>
         <v-text-field
           label="员工名称"
