@@ -68,11 +68,6 @@ const pageMenus = ref<any[]>([
         path: "/mes/bom-list",
         icon: "fa-solid fa-list",
       },
-      {
-        name: "工作中心",
-        path: "/mes/work-center",
-        icon: "fa-solid fa-location-crosshairs",
-      },
     ],
   },
   {
@@ -92,6 +87,11 @@ const pageMenus = ref<any[]>([
     path: "/work-class",
     icon: "fa-solid fa-users-rays",
     children: [
+      {
+        name: "工作中心",
+        path: "/work-class/work-center",
+        icon: "fa-solid fa-location-crosshairs",
+      },
       {
         name: "班组信息",
         path: "/work-class/work-class",
