@@ -125,6 +125,10 @@ onMounted(function () {
   getWorkCenterList();
 });
 
+watch(showingPage, function () {
+  getWorkCenterList();
+});
+
 // 按条件查询数据
 async function getWorkCenterList() {
   const data = await useHttp(
@@ -158,6 +162,7 @@ async function getWorkCenterList() {
     }
     return item;
   });
+  totalPageCount.value = workCenterList.value.length / 10 + 1;
 }
 
 // 重置搜索
