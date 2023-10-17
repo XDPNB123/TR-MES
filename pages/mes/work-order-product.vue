@@ -93,6 +93,7 @@ let productDialog = ref(false);
 let auditDialog = ref(false);
 let processDialog = ref(false);
 let mcodeDialog = ref(false);
+let deleteProduceDialog = ref(false);
 // 工单搜索
 let searchTicketNumber = ref<string>("");
 let searchProjectNumber = ref<string>("");
@@ -175,6 +176,13 @@ let tableHeaders = ref<any[]>([
     filterable: true,
   },
   {
+    title: "产品描述",
+    key: "product_description",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
     title: "开始日期",
     key: "start_date",
     align: "center",
@@ -195,13 +203,7 @@ let tableHeaders = ref<any[]>([
     sortable: false,
     filterable: true,
   },
-  {
-    title: "产品描述",
-    key: "product_description",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
+
   {
     title: "工单状态",
     key: "status",
@@ -402,8 +404,45 @@ function removeChip(index: number) {
   chips.value.push(removedChip);
 }
 
+//获取全部的工序数据
+async function getProduce() {
+  try {
+    const data: any = await useHttp(
+      "/MesWorkProcess/M09GetProcedureData",
+      "get",
+      undefined,
+      {
+        SortedBy: "id",
+        PageIndex: 1,
+        SortType: 1,
+        procedure_name: "",
+        procedure_id: "",
+        PageSize: 100,
+      }
+    );
+    chips.value = data.data.result.map((item: any) => item.procedure_name);
+  } catch (error) {
+    console.log(error);
+  }
+}
+//获取常用工序流程
+async function getUsedProduce() {
+  try {
+    const newData: any = await useHttp(
+      "/MesWorkProcess/M47GetProcessBasisConfig",
+      "get",
+      undefined
+    );
+    //
+    produceGroups.value = newData.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
 //用来存储表格selected选择的的数据
 let innerTableSelectData = ref<any[]>([]);
+//用来存储产出料名称的字段，便于知道在维护哪一行数据
+let mcodeName = ref();
 // 发请求获取完整的选中的数据
 // 判断工序是否一致
 // 如果一致，则将选中的数据暂时保存
@@ -422,7 +461,9 @@ async function batchWork() {
     innerTableSelectData.value = tableDataDetail.value.filter((item: any) =>
       selected.value.includes(item.id)
     );
-
+    mcodeName.value = innerTableSelectData.value
+      .map((item: any) => item.mcode)
+      .join(",");
     //判断选择的数据他们的工序是否一致
     let isSameProcedure = innerTableSelectData.value.every(
       (item, index, array) => {
@@ -431,28 +472,9 @@ async function batchWork() {
     );
     if (isSameProcedure) {
       // 所有选中的数据都有相同的工序属性
-      const data: any = await useHttp(
-        "/MesWorkProcess/M09GetProcedureData",
-        "get",
-        undefined,
-        {
-          SortedBy: "id",
-          PageIndex: 1,
-          SortType: 1,
-          procedure_name: "",
-          procedure_id: "",
-          PageSize: 100,
-        }
-      );
-      chips.value = data.data.result.map((item: any) => item.procedure_name);
+      await getProduce();
       //常用工序流程
-      const newData: any = await useHttp(
-        "/MesWorkProcess/M47GetProcessBasisConfig",
-        "get",
-        undefined
-      );
-      //
-      produceGroups.value = newData.data;
+      await getUsedProduce();
       //过滤出已选工序和未选工序
       if (
         innerTableSelectData.value[0] &&
@@ -483,30 +505,14 @@ async function batchWork() {
 //工序维护
 async function showProcessDialog(item: any) {
   try {
-    const data: any = await useHttp(
-      "/MesWorkProcess/M09GetProcedureData",
-      "get",
-      undefined,
-      {
-        SortedBy: "id",
-        PageIndex: 1,
-        SortType: 1,
-        procedure_name: "",
-        procedure_id: "",
-        PageSize: 5,
-      }
-    );
-    chips.value = data.data.result.map((item: any) => item.procedure_name);
+    await getProduce();
     //常用工序流程
-    const newData: any = await useHttp(
-      "/MesWorkProcess/M47GetProcessBasisConfig",
-      "get",
-      undefined
-    );
-    //
-    produceGroups.value = newData.data;
+    await getUsedProduce();
     //将点击的哪行数据存到选择数据中
     innerTableSelectData.value.push(item);
+    mcodeName.value = innerTableSelectData.value
+      .map((item: any) => item.mcode)
+      .join(",");
     //过滤出已选工序和未选工序
     if (
       innerTableSelectData.value[0] &&
@@ -531,6 +537,48 @@ function cancelProcess() {
   processDialog.value = false;
 }
 
+//保存为常用工序路线
+async function saveComUsedProduce() {
+  try {
+    let names = droppedChips.value.join(",");
+    await useHttp("/MesWorkProcess/M48AddProcessBasis", "post", {
+      ids: "1,2,3",
+      names: names,
+      describe: null,
+    });
+    setSnackbar("green", "保存成功");
+    getUsedProduce();
+  } catch (error) {
+    console.log(error);
+    setSnackbar("black", "保存失败");
+  }
+}
+
+//删除时传第参数
+let produceItem = ref();
+function deleteProduce(item: any) {
+  produceItem.value = item;
+  deleteProduceDialog.value = true;
+}
+
+//删除常用工序路线
+async function deleteComUsedProduce() {
+  try {
+    await useHttp(
+      "/MesWorkProcess/M50DeleteProcessBasis",
+      "delete",
+      undefined,
+      {
+        config_code: produceItem.value.config_code,
+      }
+    );
+    setSnackbar("red", "删除成功");
+    deleteProduceDialog.value = false;
+    getUsedProduce();
+  } catch (error) {
+    console.log(error);
+  }
+}
 //保存工序
 async function saveTicket() {
   try {
@@ -547,15 +595,17 @@ async function saveTicket() {
       innerTableSelectData.value
     );
     getWorkOrderDetail();
+    setSnackbar("green", "保存成功");
   } catch (error) {
     console.log(error);
+    setSnackbar("black", "保存失败");
   }
   processDialog.value = false;
   innerTableSelectData.value = [];
   droppedChips.value = [];
 }
 
-//常用工序流程
+//点击常用工序流程
 function commonProduce(item: any) {
   let array = item.rsv2.split(",");
   droppedChips.value = array;
@@ -633,6 +683,7 @@ async function getWorkOrder() {
       (item: any) => item.workorder_hid
     );
   } catch (error) {
+    setSnackbar("black", "获取数据失败");
     console.log(error);
   }
 }
@@ -690,6 +741,7 @@ async function getWorkOrderDetail() {
     tableDataDetail.value = formatDateDetail(data.data.pageList);
     tableDataDetailLength.value = data.data.totalCount;
   } catch (error) {
+    setSnackbar("black", "获取数据失败");
     console.log(error);
   }
 }
@@ -750,14 +802,20 @@ function resetAddDialog() {
 // 新增工单
 async function addTicket() {
   try {
-    await useHttp(
+    const data: any = await useHttp(
       "/MesWorkOrder/M02AddWorkOrder",
       "post",
       operatingTicket.value
     );
     getWorkOrder();
+    if (data.code === 200) {
+      setSnackbar("green", "新增成功");
+    } else {
+      setSnackbar("black", "新增失败");
+    }
   } catch (error) {
     console.log(error);
+    setSnackbar("black", "新增失败");
   }
   addDialog.value = false;
 }
@@ -801,7 +859,6 @@ async function addTicketDetail() {
         status: "新增未分配",
       });
     });
-    console.log(tableArr);
     const data: any = await useHttp(
       "/MesWorkOrderDetail/M06AddWorkOrderDetails",
       "post",
@@ -809,8 +866,14 @@ async function addTicketDetail() {
     );
     getWorkOrderDetail();
     selectedRows.value = [];
+    if (data.code === 200) {
+      setSnackbar("green", "新增成功");
+    } else {
+      setSnackbar("black", "新增失败");
+    }
   } catch (error) {
     console.log(error);
+    setSnackbar("black", "新增失败");
   }
   addDetailDialog.value = false;
 }
@@ -823,8 +886,14 @@ async function editTicket() {
       operatingTicket.value
     );
     getWorkOrder();
+    if (data.code === 200) {
+      setSnackbar("green", "修改成功");
+    } else {
+      setSnackbar("black", "修改失败");
+    }
   } catch (error) {
     console.log(error);
+    setSnackbar("black", "修改失败");
   }
   editDialog.value = false;
 }
@@ -854,8 +923,14 @@ async function editTicketDetail() {
       [operatingTicketDetail.value]
     );
     getWorkOrderDetail();
+    if (data.code === 200) {
+      setSnackbar("green", "修改成功");
+    } else {
+      setSnackbar("black", "修改失败");
+    }
   } catch (error) {
     console.log(error);
+    setSnackbar("black", "修改失败");
   }
   editDetailDialog.value = false;
 }
@@ -872,8 +947,14 @@ async function deleteTicket() {
       }
     );
     getWorkOrder();
+    if (data.code === 200) {
+      setSnackbar("green", "删除成功");
+    } else {
+      setSnackbar("black", "删除失败");
+    }
   } catch (error) {
     console.log(error);
+    setSnackbar("black", "删除失败");
   }
   deleteDialog.value = false;
 }
@@ -888,8 +969,14 @@ async function deleteTicketDetail() {
       { workorderdetail_ids: [operatingTicketDetail.value.id] }
     );
     getWorkOrderDetail();
+    if (data.code === 200) {
+      setSnackbar("green", "删除成功");
+    } else {
+      setSnackbar("black", "删除失败");
+    }
   } catch (error) {
     console.log(error);
+    setSnackbar("black", "删除失败");
   }
   deleteDetailDialog.value = false;
 }
@@ -1628,7 +1715,9 @@ const dateRule = ref<any>([
           </v-btn>
         </v-toolbar>
         <v-card-text class="mt-4 text-center text-red text-h6">
-          您确认要删除工单编号为{{ operatingTicket.workorder_hid }}这条数据吗？
+          您确认要删除工单编号为"{{
+            operatingTicket.workorder_hid
+          }}"这条数据吗？
         </v-card-text>
         <div class="d-flex justify-end mr-6 my-4">
           <v-btn color="red" size="large" class="mr-2" @click="deleteTicket()">
@@ -1714,7 +1803,9 @@ const dateRule = ref<any>([
         </v-toolbar>
 
         <v-card-text class="mt-4 text-center text-red text-h6">
-          您确认要删除工单明细编号为{{ operatingTicketDetail.workorder_did}}这条数据吗？
+          您确认要删除工单明细编号为"{{
+            operatingTicketDetail.workorder_did
+          }}"这条数据吗？
         </v-card-text>
         <div class="d-flex justify-end mr-6 my-4">
           <v-btn
@@ -1793,10 +1884,10 @@ const dateRule = ref<any>([
       </v-card>
     </v-dialog>
     <!-- 工序维护弹框 -->
-    <v-dialog v-model="processDialog" min-width="400px" width="560px">
+    <v-dialog v-model="processDialog" min-width="400px" width="800px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 工序维护 </v-toolbar-title>
+          <v-toolbar-title> {{ mcodeName }}工序维护 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="cancelProcess()">
             <v-icon>fa-solid fa-close</v-icon>
@@ -1861,8 +1952,8 @@ const dateRule = ref<any>([
               <v-chip v-else>已无可选择的工序</v-chip>
             </v-card>
           </v-col>
-          <v-col cols="12" height="350px" style="overflow-y: auto">
-            <v-card>
+          <v-col cols="12">
+            <v-card height="350px" style="overflow-y: auto">
               <v-card-subtitle>常用工艺路线</v-card-subtitle>
               <v-list>
                 <v-list-item
@@ -1872,6 +1963,11 @@ const dateRule = ref<any>([
                   @click="commonProduce(item)"
                 >
                   {{ index + 1 }}. {{ item.rsv2 }}
+                  <template v-slot:append>
+                    <v-icon @click.stop="deleteProduce(item)" size="small"
+                      >fa-solid fa-xmark</v-icon
+                    ></template
+                  >
                 </v-list-item>
               </v-list>
             </v-card>
@@ -1879,6 +1975,16 @@ const dateRule = ref<any>([
         </v-row>
 
         <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="green"
+            v-if="droppedChips.length !== 0"
+            size="large"
+            class="mr-6"
+            @click="saveComUsedProduce()"
+          >
+            <v-icon class="mr-1">fa-solid fa-plus</v-icon>
+            常用工序路线
+          </v-btn>
           <v-btn color="blue" size="large" class="mr-2" @click="saveTicket()">
             保存工序
           </v-btn>
@@ -2147,6 +2253,35 @@ const dateRule = ref<any>([
         </div>
       </v-card>
     </v-dialog>
+    <!-- 删除常用工序流程 -->
+    <v-dialog v-model="deleteProduceDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 删除常用工序流程 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="deleteProduceDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+
+        <v-card-text class="mt-4 text-center text-red text-h6">
+          您确认要删除这条数据吗？
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="red"
+            size="large"
+            class="mr-2"
+            @click="deleteComUsedProduce()"
+          >
+            确认删除
+          </v-btn>
+          <v-btn color="grey" size="large" @click="deleteProduceDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
   </v-row>
   <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
     {{ snackbarText }}
@@ -2160,7 +2295,6 @@ const dateRule = ref<any>([
 .row-container {
   background-color: rgb(174, 182, 182);
 }
-
 .date-input {
   margin-bottom: 24px;
   color: grey;

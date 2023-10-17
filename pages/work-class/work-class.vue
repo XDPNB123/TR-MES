@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// 获取消息条对象
+const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
+  useSnackbar();
 //控制弹框的属性
 let addDialog = ref(false);
 let editDialog = ref(false);
@@ -94,22 +97,27 @@ let workClassTablePageCount = computed(() => {
 });
 //获取班组信息数据
 async function getWorkClass() {
-  const data: any = await useHttp(
-    "/MesWorkClassInfo/M27GetWorkClass",
-    "get",
-    undefined,
-    {
-      worker_id: "",
-      work_classname: workClassName.value,
-      leader_name: workClassLeader.value,
-      PageIndex: workClassPage.value,
-      PageSize: 10,
-      SortedBy: "id",
-      SortType: 0,
-    }
-  );
-  workClassTableData.value = formateDate(data.data.pageList);
-  workClassPageCount.value = data.data.totalCount;
+  try {
+    const data: any = await useHttp(
+      "/MesWorkClassInfo/M27GetWorkClass",
+      "get",
+      undefined,
+      {
+        worker_id: "",
+        work_classname: workClassName.value,
+        leader_name: workClassLeader.value,
+        PageIndex: workClassPage.value,
+        PageSize: 10,
+        SortedBy: "id",
+        SortType: 0,
+      }
+    );
+    workClassTableData.value = formateDate(data.data.pageList);
+    workClassPageCount.value = data.data.totalCount;
+  } catch (error) {
+    setSnackbar("black", "获取数据失败");
+    console.log(error);
+  }
 }
 //日期截取
 function formateDate(data: any) {
@@ -170,23 +178,41 @@ function showAddDialog() {
 //确认新增
 async function addWorkClass() {
   try {
-    await useHttp("/MesWorkClassInfo/M28AddWorkClass", "post", workClass.value);
+    const data: any = await useHttp(
+      "/MesWorkClassInfo/M28AddWorkClass",
+      "post",
+      workClass.value
+    );
     getWorkClass();
+
+    if (data.code === 200) {
+      setSnackbar("green", "新增成功");
+    } else {
+      setSnackbar("black", "新增失败");
+    }
   } catch (error) {
     console.log(error);
+    setSnackbar("black", "新增失败");
   }
   addDialog.value = false;
 }
 //修改班组信息
 async function editWorkClass() {
   try {
-    await useHttp(
+    const data: any = await useHttp(
       "/MesWorkClassInfo/M29UpdateWorkClass",
       "put",
       workClass.value
     );
     getWorkClass();
+
+    if (data.code === 200) {
+      setSnackbar("green", "修改成功");
+    } else {
+      setSnackbar("black", "修改失败");
+    }
   } catch (error) {
+    setSnackbar("black", "修改失败");
     console.log(error);
   }
   editDialog.value = false;
@@ -194,11 +220,22 @@ async function editWorkClass() {
 //删除班组信息
 async function deleteWorkClass() {
   try {
-    await useHttp("/MesWorkClassInfo/M30DeleteWorkClass", "delete", undefined, {
-      ids: [workClass.value.id],
-    });
+    const data: any = await useHttp(
+      "/MesWorkClassInfo/M30DeleteWorkClass",
+      "delete",
+      undefined,
+      {
+        ids: [workClass.value.id],
+      }
+    );
     getWorkClass();
+    if (data.code === 200) {
+      setSnackbar("green", "删除成功");
+    } else {
+      setSnackbar("black", "删除失败");
+    }
   } catch (error) {
+    setSnackbar("black", "删除失败");
     console.log(error);
   }
   deleteDialog.value = false;
@@ -285,22 +322,27 @@ let workClassInfoTablePageCount = computed(() => {
   return Math.ceil(workClassInfoPageCount.value / 10);
 });
 async function getWorkClassInfo() {
-  const data: any = await useHttp(
-    "/MesWorkClassInfo/M31GetWorkClassInfo",
-    "get",
-    undefined,
-    {
-      employee_id: employeeId.value,
-      employee_name: employeeName.value,
-      worker_id: workerId.value,
-      PageIndex: workClassPageInfo.value,
-      PageSize: 10,
-      SortedBy: "id",
-      SortType: 0,
-    }
-  );
-  workClassInfoTableData.value = formateDate(data.data.pageList);
-  workClassInfoPageCount.value = data.data.totalCount;
+  try {
+    const data: any = await useHttp(
+      "/MesWorkClassInfo/M31GetWorkClassInfo",
+      "get",
+      undefined,
+      {
+        employee_id: employeeId.value,
+        employee_name: employeeName.value,
+        worker_id: workerId.value,
+        PageIndex: workClassPageInfo.value,
+        PageSize: 10,
+        SortedBy: "id",
+        SortType: 0,
+      }
+    );
+    workClassInfoTableData.value = formateDate(data.data.pageList);
+    workClassInfoPageCount.value = data.data.totalCount;
+  } catch (error) {
+    setSnackbar("black", "获取数据失败");
+    console.log(error);
+  }
 }
 
 //班组成员数据
@@ -336,13 +378,19 @@ function showAddInfoDialog() {
 //确定新增
 async function addWorkClassInfo() {
   try {
-    await useHttp(
+    const data: any = await useHttp(
       "/MesWorkClassInfo/M32AddWorkClassInfo",
       "post",
       workClassInfo.value
     );
     getWorkClassInfo();
+    if (data.code === 200) {
+      setSnackbar("green", "新增成功");
+    } else {
+      setSnackbar("black", "新增失败");
+    }
   } catch (error) {
+    setSnackbar("black", "新增失败");
     console.log(error);
   }
   addInfoDialog.value = false;
@@ -350,13 +398,19 @@ async function addWorkClassInfo() {
 //修改员工信息
 async function editWorkClassInfo() {
   try {
-    await useHttp(
+    const data: any = await useHttp(
       "/MesWorkClassInfo/M33UpdateWorkClassInfo",
       "put",
       workClassInfo.value
     );
     getWorkClassInfo();
+    if (data.code === 200) {
+      setSnackbar("green", "修改成功");
+    } else {
+      setSnackbar("black", "修改失败");
+    }
   } catch (error) {
+    setSnackbar("black", "修改失败");
     console.log(error);
   }
   editInfoDialog.value = false;
@@ -364,7 +418,7 @@ async function editWorkClassInfo() {
 //删除员工信息
 async function deleteWorkClassInfo() {
   try {
-    await useHttp(
+    const data: any = await useHttp(
       "/MesWorkClassInfo/M34DeleteWorkClassInfo",
       "delete",
       undefined,
@@ -373,7 +427,13 @@ async function deleteWorkClassInfo() {
       }
     );
     getWorkClassInfo();
+    if (data.code === 200) {
+      setSnackbar("green", "删除成功");
+    } else {
+      setSnackbar("black", "删除失败");
+    }
   } catch (error) {
+    setSnackbar("black", "删除失败");
     console.log(error);
   }
   deleteInfoDialog.value = false;
@@ -678,7 +738,7 @@ async function deleteWorkClassInfo() {
           <v-icon>fa-solid fa-close</v-icon>
         </v-btn>
       </v-toolbar>
-      <v-card-text class="mt-4">
+      <v-card-text class="mt-4 text-center text-red text-h6">
         你确定要删除班组编号为"{{ workClass.worker_id }}"这条数据吗？
       </v-card-text>
 
@@ -781,7 +841,7 @@ async function deleteWorkClassInfo() {
           <v-icon>fa-solid fa-close</v-icon>
         </v-btn>
       </v-toolbar>
-      <v-card-text class="mt-4">
+      <v-card-text class="mt-4 text-center text-red text-h6">
         你确定要删除名称为"{{ workClassInfo.employee_name }}"这位员工的数据吗？
       </v-card-text>
 
@@ -800,4 +860,10 @@ async function deleteWorkClassInfo() {
       </div>
     </v-card>
   </v-dialog>
+  <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
+    {{ snackbarText }}
+    <template v-slot:actions>
+      <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
+    </template>
+  </v-snackbar>
 </template>

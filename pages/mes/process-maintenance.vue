@@ -39,10 +39,9 @@
       <v-col cols="12">
         <v-divider></v-divider>
         <v-data-table
-          v-model:page="tablePage"
           :headers="tableHeaders"
           :items="tableData"
-          :items-per-page="tablePerPage"
+          :items-per-page="10"
         >
           <template v-slot:item.id="{ index }">
             {{ index + 1 }}
@@ -177,15 +176,6 @@
 
         <v-card-text class="mt-4 text-center text-red text-h6">
           您确认要删除这条工序吗？
-
-          <v-list>
-            <v-list-item v-for="(value, key, index) in operate" :key="index">
-              <template #prepend> {{ getChineseKey(key) }}:</template>
-              <template #append>
-                {{ value }}
-              </template>
-            </v-list-item>
-          </v-list>
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 my-4">
@@ -232,17 +222,7 @@ let operateProcess = ref({
   defaul_outsource: "",
 });
 let operate = ref();
-let keyToChinese = ref<any>({
-  procedure_id: "工序编号",
-  procedure_name: "工序名称",
-  procedure_description: "工序说明",
-  defaul_outsource: "是否委外",
-});
-let getChineseKey = (key: any) => keyToChinese.value[key] || key;
-// 表格初始页
-let tablePage = ref<number>(1);
-// 表格每页条数
-let tablePerPage = ref<number>(10);
+
 let tableHeaders = ref<any[]>([
   {
     title: "序号",
@@ -290,51 +270,47 @@ let tableHeaders = ref<any[]>([
 
 //表格显示数据
 let tableData = ref<any[]>([]);
+// 当前页
+let tablePage = ref<number>(1);
+//查询到的数据条数
+let tableDateCount = ref(0);
 // 表格有多少页
 let tablePageCount = computed(() => {
-  return Math.ceil(tableData.value.length / tablePerPage.value);
+  return Math.ceil(tableDateCount.value / 10);
 });
-//拿取登录页面存储的token
-const token = useCookie("token");
+watch(tablePage, () => {
+  getWorkOrder();
+});
 //获取工序数据
 onMounted(() => {
   getWorkOrder();
 });
+//获取数据库数据
 async function getWorkOrder() {
-  const data: any = await useHttp(
-    "/MesWorkProcess/M09GetProcedureData",
-    "get",
-    undefined,
-    {
-      SortedBy: "id",
-      PageIndex: 1,
-      SortType: 0,
-      procedure_name: "",
-      procedure_id: "",
-      PageSize: 20,
-    }
-  );
-
-  tableData.value = data.data.result;
+  try {
+    const data: any = await useHttp(
+      "/MesWorkProcess/M09GetProcedureData",
+      "get",
+      undefined,
+      {
+        SortedBy: "id",
+        PageIndex: tablePage.value,
+        SortType: 0,
+        procedure_name: searchProcessName.value,
+        procedure_id: searchProcessNumber.value,
+        PageSize: 10,
+      }
+    );
+    tableData.value = data.data.result;
+    tableDateCount.value = data.data.totalCount;
+  } catch (error) {
+    console.log(error);
+  }
 }
 // 搜索过滤
 async function filterTableData() {
-  const data: any = await useHttp(
-    "/MesWorkProcess/M09GetProcedureData",
-    "get",
-    undefined,
-    {
-      SortedBy: "id",
-      PageIndex: 1,
-      SortType: 0,
-      procedure_name: searchProcessName.value,
-      procedure_id: searchProcessNumber.value,
-      PageSize: 20,
-    }
-  );
-  tableData.value = data.data;
+  getWorkOrder();
 }
-
 // 重置搜索
 function resetFilter() {
   searchProcessName.value = "";
@@ -353,39 +329,47 @@ function resetAddDialog() {
   };
   addDialog.value = true;
 }
-
 // 新增工序
 async function addProcess() {
-  const data: any = await useHttp(
-    "/MesWorkProcess/M11AddProcedure",
-    "post",
-    operateProcess.value
-  );
-
-  getWorkOrder();
+  try {
+    const data: any = await useHttp(
+      "/MesWorkProcess/M11AddProcedure",
+      "post",
+      operateProcess.value
+    );
+    getWorkOrder();
+  } catch (error) {
+    console.log(error);
+  }
   addDialog.value = false;
 }
-
 // 修改工序
 async function editProcess() {
-  const data: any = await useHttp(
-    "/MesWorkProcess/M10ProcedureMaintenance",
-    "put",
-    operateProcess.value
-  );
-  getWorkOrder();
+  try {
+    const data: any = await useHttp(
+      "/MesWorkProcess/M10ProcedureMaintenance",
+      "put",
+      operateProcess.value
+    );
+    getWorkOrder();
+  } catch (error) {
+    console.log(error);
+  }
   editDialog.value = false;
 }
-
 // 删除工单
 async function deleteProcess() {
-  const data: any = await useHttp(
-    "/MesWorkProcess/M12DeleteProcedure",
-    "delete",
-    undefined,
-    { ids: [operate.value.id] }
-  );
-  getWorkOrder();
+  try {
+    const data: any = await useHttp(
+      "/MesWorkProcess/M12DeleteProcedure",
+      "delete",
+      undefined,
+      { ids: [operate.value.id] }
+    );
+    getWorkOrder();
+  } catch (error) {
+    console.log(error);
+  }
   deleteDialog.value = false;
 }
 </script>
