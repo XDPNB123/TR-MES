@@ -93,6 +93,11 @@ const pageMenus = ref<any[]>([
         icon: "fa-solid fa-location-crosshairs",
       },
       {
+        name: "工作中心图形化界面",
+        path: "/work-class/work-center-img",
+        icon: "fa-solid fa-location-crosshairs",
+      },
+      {
         name: "班组信息",
         path: "/work-class/work-class",
         icon: "fa-solid fa-people-roof",
