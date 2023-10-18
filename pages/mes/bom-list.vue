@@ -38,8 +38,7 @@
       </v-col>
       <v-col cols="12">
         <v-data-table
-          v-model:page="tablePage"
-          :items-per-page="tablePerPage"
+          :items-per-page="10"
           :headers="headers"
           :items="bomTableList"
         >
@@ -219,20 +218,17 @@ let searchWorkId = ref("");
 let searchMaterialName = ref("");
 // 表格初始页
 let tablePage = ref<number>(1);
-// 表格每页条数
-let tablePerPage = ref<number>(10);
+watch(tablePage, function () {
+  getBomList();
+});
+// 数据库存储数据的条数
+let tableCount = ref<number>(0);
 // 表格有多少页
 let tablePageCount = computed(() => {
-  return Math.ceil(bomTableList.value.length / tablePerPage.value);
+  return Math.ceil(tableCount.value / 10);
 });
-let conference = ref<any>({
-  workorder_did: "",
-  material_id: "",
-  material_name: "",
-  required_quantity: "",
-  already_received_quantity: "",
-  unit: "",
-});
+//bom对象
+let conference = ref<any>({});
 const headers = ref<any[]>([
   {
     title: "序号",
@@ -263,10 +259,22 @@ const headers = ref<any[]>([
   { title: "单位", align: "center", key: "unit", sortable: false },
   { title: "操作", align: "center", key: "actions", sortable: false },
 ]);
+//bom清单数据
 let bomTableList = ref<any[]>([]);
 
 // 搜索过滤
 async function filterTableData() {
+  getBomList();
+}
+
+// 重置搜索
+function resetFilter() {
+  (searchWorkId.value = ""), (searchMaterialName.value = ""), getBomList();
+}
+let route = useRoute();
+let workorder_did = route.query.workorder_did;
+//获取bom物料数据
+async function getBomList() {
   const data: any = await useHttp(
     "/MesWorkBom/M16GetBomList",
     "get",
@@ -275,44 +283,17 @@ async function filterTableData() {
       workorder_did: workorder_did,
       material_id: searchWorkId.value,
       material_name: searchMaterialName.value,
-      PageIndex: "1",
-      PageSize: "20",
+      PageIndex: tablePage.value,
+      PageSize: "10",
       SortedBy: "id",
       SortType: 0,
     }
   );
   bomTableList.value = data.data.pageList;
-}
-
-// 重置搜索
-function resetFilter() {
-  (searchWorkId.value = ""),
-    (searchMaterialName.value = ""),
-    getBomList(workorder_did);
-}
-let route = useRoute();
-let workorder_did = route.query.workorder_did;
-//搜素bom物料
-async function getBomList(workorder_did: any) {
-  const data: any = await useHttp(
-    "/MesWorkBom/M16GetBomList",
-    "get",
-    undefined,
-    {
-      workorder_did: workorder_did,
-      material_id: "",
-      material_name: "",
-      PageIndex: "1",
-      PageSize: "20",
-      SortedBy: "id",
-      SortType: 0,
-    }
-  );
-
-  bomTableList.value = data.data.pageList;
+  tableCount.value = data.data.totalCount;
 }
 onMounted(() => {
-  getBomList(workorder_did);
+  getBomList();
 });
 
 //新增前重置conference对象内容
@@ -327,22 +308,24 @@ function showDialogAdd() {
   };
   dialogAdd.value = true;
 }
+// 新增bom清单
 async function addCertain() {
   await useHttp("/MesWorkBom/M17AddBomInfo", "post", [conference.value]);
-  getBomList("");
+  getBomList();
   dialogAdd.value = false;
 }
+//删除bom清单
 async function deleteCertain() {
   await useHttp("/MesWorkBom/M19DeleteBomInfo", "delete", undefined, {
     workorderbom_ids: [conference.value.id],
   });
-  getBomList("");
+  getBomList();
   dialogDelete.value = false;
 }
-
+//修改bom清单
 async function editCertain() {
   await useHttp("/MesWorkBom/M18UpdateBomInfo", "put", [conference.value]);
-  getBomList("");
+  getBomList();
   editDialog.value = false;
 }
 </script>

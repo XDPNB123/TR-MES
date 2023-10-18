@@ -420,7 +420,7 @@ async function getProduce() {
         PageSize: 100,
       }
     );
-    chips.value = data.data.result.map((item: any) => item.procedure_name);
+    chips.value = data.data.pageList.map((item: any) => item.procedure_name);
   } catch (error) {
     console.log(error);
   }
@@ -433,7 +433,7 @@ async function getUsedProduce() {
       "get",
       undefined
     );
-    //
+
     produceGroups.value = newData.data;
   } catch (error) {
     console.log(error);
@@ -606,9 +606,10 @@ async function saveTicket() {
 }
 
 //点击常用工序流程
-function commonProduce(item: any) {
+async function commonProduce(item: any) {
   let array = item.rsv2.split(",");
   droppedChips.value = array;
+  await getProduce();
   chips.value = chips.value.filter((chip) => !array.includes(chip));
 }
 

@@ -273,7 +273,7 @@ let tableData = ref<any[]>([]);
 // 当前页
 let tablePage = ref<number>(1);
 //查询到的数据条数
-let tableDateCount = ref(0);
+let tableDateCount = ref<number>(0);
 // 表格有多少页
 let tablePageCount = computed(() => {
   return Math.ceil(tableDateCount.value / 10);
@@ -301,7 +301,7 @@ async function getWorkOrder() {
         PageSize: 10,
       }
     );
-    tableData.value = data.data.result;
+    tableData.value = data.data.pageList;
     tableDateCount.value = data.data.totalCount;
   } catch (error) {
     console.log(error);
@@ -357,7 +357,7 @@ async function editProcess() {
   }
   editDialog.value = false;
 }
-// 删除工单
+// 删除工序
 async function deleteProcess() {
   try {
     const data: any = await useHttp(
