@@ -132,7 +132,7 @@ onMounted(function () {
 watch(showingPage, function () {
   getWorkCenterList();
 });
-// 按条件查询数据
+//获取数据
 async function getWorkCenterList() {
   const data = await useHttp(
     "/WorkCenter/M13WorkCenterList",
@@ -166,6 +166,11 @@ async function getWorkCenterList() {
     return item;
   });
   totalPageCount.value = data.data.totalCount;
+}
+//按条件查询数据
+function searchWorkCenterList() {
+  showingPage.value = 1;
+  getWorkCenterList();
 }
 // 重置搜索
 function resetSearch() {
@@ -774,7 +779,7 @@ async function deleteCenterDetail() {
                   color="black"
                   class="mx-3"
                   prepend-icon="fa-solid fa-search"
-                  @click="getWorkCenterList()"
+                  @click="searchWorkCenterList()"
                   >条件查询</v-btn
                 >
                 <v-btn
