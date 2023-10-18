@@ -626,10 +626,10 @@ async function deleteCenterDetail() {
 </script>
 
 <template>
-  <v-row class="ma-2">
+  <v-row>
     <!-- 左边的工作中心表 -->
     <v-col cols="6">
-      <v-card class="ma-3">
+      <v-card>
         <v-toolbar class="text-h6 pl-6">工作中心</v-toolbar>
         <v-data-table
           :items-per-page="15"
@@ -819,7 +819,7 @@ async function deleteCenterDetail() {
     <!-- 右边的俩个表 -->
     <v-col cols="6">
       <!-- 设备信息表 -->
-      <v-card class="ma-3">
+      <v-card>
         <v-toolbar v-if="workCenterId" class="text-h6 pl-6"
           >工作中心编号{{ workCenterId }}=>设备信息</v-toolbar
         >
@@ -935,7 +935,7 @@ async function deleteCenterDetail() {
         </v-data-table>
       </v-card>
       <!-- 工位信息表 -->
-      <v-card class="ma-3">
+      <v-card>
         <v-toolbar class="text-h6 pl-6" v-if="workCenterId && asCode"
           >工作中心编号{{ workCenterId }}=>行政编码{{
             asCode
