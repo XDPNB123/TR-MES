@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { fa } from "vuetify/lib/iconsets/fa.mjs";
-
 // 搜索引擎优化
 useSeoMeta({
   // 该页面的标题
@@ -117,7 +115,6 @@ let headers = ref<any[]>([
     filterable: false,
   },
 ]);
-
 // 对话框
 let dialogAdd = ref<boolean>(false);
 let dialogUpdate = ref<boolean>(false);
@@ -125,18 +122,16 @@ let dialogDelete = ref<boolean>(false);
 
 // 正在操作的表格数据行
 let operateRow = ref<any>(null);
-
+let workCenterId = ref<string>(""); //存储工作中心编号的字段
 onMounted(function () {
   // 页面渲染完成时，加载表格所有数据
   getWorkCenterList();
   getMachineData();
   getWorkCenterDetail();
 });
-
 watch(showingPage, function () {
   getWorkCenterList();
 });
-
 // 按条件查询数据
 async function getWorkCenterList() {
   const data = await useHttp(
@@ -184,6 +179,7 @@ function resetSearch() {
   searchStartUpdateTime.value = undefined;
   searchEndUpdateTime.value = undefined;
   searchUpdatePerson.value = undefined;
+  workCenterId.value = "";
   getWorkCenterList();
 }
 // 重置正在操作的行数据
@@ -232,10 +228,23 @@ async function deleteWorkCenter() {
   // 关闭对话框
   dialogDelete.value = false;
 }
+//点击筛选当前工作中心的设备和工位
+function getMachineList(item: any, obj: any) {
+  workCenterId.value = obj.item.raw.work_center_id;
+  asCode.value = "";
+}
+watch(workCenterId, function () {
+  machinePage.value = 1;
+  workCenterDetailPage.value = 1;
+  getMachineData();
+  getWorkCenterDetail();
+});
 
 //设备信息
 // 设备表格所有数据
 let machineList = ref<any[]>([]);
+//存储行政编码的字段
+let asCode = ref<string>("");
 //设备对象
 let operateMachine = ref<any>();
 // 表格当前页
@@ -243,7 +252,6 @@ let machinePage = ref<number>(1);
 watch(machinePage, function () {
   getMachineData();
 });
-
 // 数据库一共有多少条数据
 let machineTotalPageCount = ref<number>(0);
 // 表格总页数
@@ -331,6 +339,7 @@ async function getMachineData() {
       "get",
       undefined,
       {
+        work_center_id: workCenterId.value,
         administrative_code: codeSearch.value,
         machine_name: machineNameSearch.value,
         user: userNameSearch.value,
@@ -340,7 +349,11 @@ async function getMachineData() {
         SortType: 1,
       }
     );
-    machineList.value = data.data.pageList;
+    machineList.value = data.data.pageList.map((item: any) => {
+      item.purchase_date = item.purchase_date.substring(0, 10);
+      item.receive_time = item.receive_time.substring(0, 10);
+      return item;
+    });
     machineTotalPageCount.value = data.data.totalCount;
   } catch (error) {
     console.log(error);
@@ -359,6 +372,7 @@ function getMachineSearch() {
 //重置搜素
 function resetMachineSearch() {
   machinePage.value = 1;
+  asCode.value = "";
   (codeSearch.value = ""),
     (machineNameSearch.value = ""),
     (userNameSearch.value = "");
@@ -375,7 +389,7 @@ function showAddMachineDialog() {
     purchase_date: "",
     user_department: "",
     administrative_code: "",
-    work_center_id: "",
+    work_center_id: workCenterId.value,
     machine_name: "",
     machine_site: "",
     equipment_type: "",
@@ -427,6 +441,14 @@ async function deleteMachine() {
   }
   dialogDeleteMachine.value = false;
 }
+//点击获取行政编码
+function getWorkCenterDetailList(item: any, obj: any) {
+  asCode.value = obj.item.raw.administrative_code;
+}
+watch(asCode, function () {
+  workCenterDetailPage.value = 1;
+  getWorkCenterDetail();
+});
 
 //工位信息
 //工位表格的所有数据
@@ -512,6 +534,8 @@ async function getWorkCenterDetail() {
       "get",
       undefined,
       {
+        work_center_id: workCenterId.value,
+        administrative_code: asCode.value,
         station_name: stationNameSearch.value,
         employee_name: employeeNameSearch.value,
         PageIndex: workCenterDetailPage.value,
@@ -550,9 +574,9 @@ let dialogDeleteDetail = ref<boolean>(false);
 function resetCenterDetail() {
   operateWorkCenterDetail.value = {
     station_id: "",
-    administrative_code: "",
+    administrative_code: asCode.value,
     employee_name: "",
-    work_center_id: "",
+    work_center_id: workCenterId.value,
     station_name: "",
     employee_id: "",
   };
@@ -573,13 +597,26 @@ async function addCenterDetail() {
 }
 //修改工位信息
 async function updateCenterDetail() {
-    const data: any = await useHttp(
-        "/WorkCenterDetail/M56UpdateWorkCenterDetail",
-        "put",
-        operateWorkCenterDetail.value
-    );
-    getWorkCenterDetail();
-    dialogUpdateDetail.value=false
+  const data: any = await useHttp(
+    "/WorkCenterDetail/M56UpdateWorkCenterDetail",
+    "put",
+    operateWorkCenterDetail.value
+  );
+  getWorkCenterDetail();
+  dialogUpdateDetail.value = false;
+}
+//删除工位信息
+async function deleteCenterDetail() {
+  const data: any = await useHttp(
+    "/WorkCenterDetail/M57DeleteWorkCenterDetail",
+    "delete",
+    undefined,
+    {
+      ids: operateWorkCenterDetail.value.id,
+    }
+  );
+  getWorkCenterDetail();
+  dialogDeleteDetail.value = false;
 }
 </script>
 
@@ -596,9 +633,10 @@ async function updateCenterDetail() {
           style="overflow-x: auto; white-space: nowrap"
           fixed-footer
           fixed-header
-          height="850"
+          height="846px"
           no-data-text="没有找到符合的数据"
           hover
+          @click:row="getMachineList"
         >
           <template v-slot:item.id="{ index }">
             {{ index + 1 }}
@@ -776,7 +814,10 @@ async function updateCenterDetail() {
     <!-- 右边的俩个表 -->
     <v-col cols="6">
       <v-card class="ma-3">
-        <v-toolbar class="text-h6 pl-6">设备信息</v-toolbar>
+        <v-toolbar v-if="workCenterId" class="text-h6 pl-6"
+          >工作中心编号{{ workCenterId }}=>设备信息</v-toolbar
+        >
+        <v-toolbar v-else class="text-h6 pl-6">设备信息</v-toolbar>
         <v-data-table
           :headers="machineHeaders"
           :items="machineList"
@@ -786,6 +827,7 @@ async function updateCenterDetail() {
           height="350px"
           no-data-text="没有找到符合的数据"
           hover
+          @click:row="getWorkCenterDetailList"
         >
           <template v-slot:item.id="{ index }">
             {{ index + 1 }}
@@ -865,6 +907,7 @@ async function updateCenterDetail() {
                   size="large"
                   color="teal"
                   class="mr-3"
+                  v-if="workCenterId"
                   prepend-icon="fa-solid fa-add"
                   @click="
                     dialogAddMachine = true;
@@ -887,7 +930,18 @@ async function updateCenterDetail() {
       </v-card>
 
       <v-card class="ma-3">
-        <v-toolbar class="text-h6 pl-6">工位信息</v-toolbar>
+        <v-toolbar class="text-h6 pl-6" v-if="workCenterId && asCode"
+          >工作中心编号{{ workCenterId }}=>行政编码{{
+            asCode
+          }}=>工位信息</v-toolbar
+        >
+        <v-toolbar class="text-h6 pl-6" v-else-if="workCenterId"
+          >工作中心编号{{ workCenterId }}=>工位信息</v-toolbar
+        >
+        <v-toolbar class="text-h6 pl-6" v-else-if="asCode"
+          >行政编码{{ asCode }}=>工位信息</v-toolbar
+        >
+        <v-toolbar class="text-h6 pl-6" v-else>工位信息</v-toolbar>
         <v-data-table
           :headers="workCenterDetailHeaders"
           :items="workCenterDetailList"
@@ -968,6 +1022,7 @@ async function updateCenterDetail() {
                   size="large"
                   color="teal"
                   class="mr-3"
+                  v-if="workCenterId"
                   prepend-icon="fa-solid fa-add"
                   @click="
                     dialogAddDetail = true;
@@ -1129,11 +1184,7 @@ async function updateCenterDetail() {
           v-model="operateMachine.administrative_code"
           label="行政编码"
         ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateMachine.work_center_id"
-          label="工作中心编号"
-        ></v-text-field>
+
         <v-text-field
           variant="outlined"
           v-model="operateMachine.machine_name"
@@ -1278,6 +1329,50 @@ async function updateCenterDetail() {
         ></v-text-field>
         <v-text-field
           variant="outlined"
+          v-model="operateWorkCenterDetail.employee_id"
+          label="员工编号"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
+          v-model="operateWorkCenterDetail.employee_name"
+          label="员工姓名"
+        ></v-text-field>
+      </v-card-text>
+      <v-divider></v-divider>
+      <div class="text-right my-3">
+        <v-btn color="green" class="mr-3" @click="addCenterDetail()"
+          >确认</v-btn
+        >
+        <v-btn color="grey" class="mr-3" @click="dialogAddMachine = false"
+          >取消</v-btn
+        >
+      </div>
+    </v-card>
+  </v-dialog>
+  <!-- 修改设备信息 -->
+  <v-dialog v-model="dialogUpdateDetail" max-width="400">
+    <v-card>
+      <v-toolbar color="blue-darken-3">
+        <v-toolbar-title>修改工位信息</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-icon class="mr-3" @click="dialogUpdateDetail = false"
+          >fa-solid fa-remove</v-icon
+        >
+      </v-toolbar>
+      <v-card-text>
+        <v-text-field
+          class="mt-3"
+          variant="outlined"
+          v-model="operateWorkCenterDetail.station_id"
+          label="工位编号"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
+          v-model="operateWorkCenterDetail.station_name"
+          label="工位名称"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
           v-model="operateWorkCenterDetail.administrative_code"
           label="行政编码"
         ></v-text-field>
@@ -1299,86 +1394,36 @@ async function updateCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="addCenterDetail()"
+        <v-btn color="green" class="mr-3" @click="updateCenterDetail()"
           >确认</v-btn
         >
-        <v-btn color="grey" class="mr-3" @click="dialogAddMachine = false"
+        <v-btn color="grey" class="mr-3" @click="dialogUpdateDetail = false"
           >取消</v-btn
         >
       </div>
     </v-card>
   </v-dialog>
-  <!-- 修改设备信息 -->
-      <v-dialog v-model="dialogUpdateDetail" max-width="400">
-        <v-card>
-          <v-toolbar color="blue-darken-3">
-            <v-toolbar-title>修改工位信息</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-icon class="mr-3" @click="dialogUpdateDetail = false"
-              >fa-solid fa-remove</v-icon
-            >
-          </v-toolbar>
-          <v-card-text>
-            <v-text-field
-              class="mt-3"
-              variant="outlined"
-              v-model="operateWorkCenterDetail.station_id"
-              label="工位编号"
-            ></v-text-field>
-            <v-text-field
-              variant="outlined"
-              v-model="operateWorkCenterDetail.station_name"
-              label="工位名称"
-            ></v-text-field>
-            <v-text-field
-              variant="outlined"
-              v-model="operateWorkCenterDetail.administrative_code"
-              label="行政编码"
-            ></v-text-field>
-            <v-text-field
-              variant="outlined"
-              v-model="operateWorkCenterDetail.employee_id"
-              label="员工编号"
-            ></v-text-field>
-            <v-text-field
-              variant="outlined"
-              v-model="operateWorkCenterDetail.employee_name"
-              label="员工姓名"
-            ></v-text-field>
-            <v-text-field
-              variant="outlined"
-              v-model="operateWorkCenterDetail.work_center_id"
-              label="工作中心编号"
-            ></v-text-field>
-          </v-card-text>
-          <v-divider></v-divider>
-          <div class="text-right my-3">
-            <v-btn color="green" class="mr-3" @click="updateCenterDetail()"
-              >确认</v-btn
-            >
-            <v-btn color="grey" class="mr-3" @click="dialogUpdateDetail = false"
-              >取消</v-btn
-            >
-          </div>
-        </v-card>
-      </v-dialog>
-  <!-- 删除设备信息 -->
-  <v-dialog v-model="dialogDeleteMachine" max-width="400">
+  <!-- 删除工位信息 -->
+  <v-dialog v-model="dialogDeleteDetail" max-width="400">
     <v-card>
       <v-toolbar color="blue-darken-3">
-        <v-toolbar-title>删除工作中心</v-toolbar-title>
+        <v-toolbar-title>删除工位信息</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-icon class="mr-3" @click="dialogDeleteMachine = false"
+        <v-icon class="mr-3" @click="dialogDeleteDetail = false"
           >fa-solid fa-remove</v-icon
         >
       </v-toolbar>
       <v-card-text class="my-6 text-h6 text-red font-weight-medium text-center">
-        您确认要删除"{{ operateMachine.machine_name }}"这台设备的信息吗？
+        您确认要删除工位名称为"{{
+          operateWorkCenterDetail.station_name
+        }}"的这个工位的信息吗？
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="red" class="mr-3" @click="deleteMachine()">确认</v-btn>
-        <v-btn color="grey" class="mr-3" @click="dialogDeleteMachine = false"
+        <v-btn color="red" class="mr-3" @click="deleteCenterDetail()"
+          >确认</v-btn
+        >
+        <v-btn color="grey" class="mr-3" @click="dialogDeleteDetail = false"
           >取消</v-btn
         >
       </div>
