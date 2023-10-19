@@ -672,7 +672,7 @@ async function deleteCenterDetail() {
           </div></v-col
         >
       </v-row>
-      <div class="text-center mb-16">
+      <div class="text-center my-6">
         <v-pagination
           v-model="machinePage"
           :length="machineTablePageCount"
