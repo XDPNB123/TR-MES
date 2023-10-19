@@ -21,6 +21,8 @@ let dialogShow = ref<boolean>(false);
 let operateRow = ref<any>();
 //用来存储工作中心编号
 let workCenterId = ref<string>("");
+//存储工作中心名称
+let workCenterName = ref<string>("");
 let searchWorkCenterName = ref<string>("");
 let searchType = ref<string>("");
 let searchWorkCenterAddress = ref<string>("");
@@ -121,6 +123,7 @@ async function deleteWorkCenter() {
 //点击查看工作中心中的设备信息和工位信息
 function showWorkCenter(item: any) {
   workCenterId.value = item.work_center_id;
+  workCenterName.value = item.work_center_name;
   getMachineData();
   getWorkCenterDetail();
   dialogShow.value = true;
@@ -129,8 +132,7 @@ function showWorkCenter(item: any) {
 //设备信息
 // 设备表格所有数据
 let machineList = ref<any[]>([]);
-//存储行政编码的字段
-let asCode = ref<string>("");
+
 //设备对象
 let operateMachine = ref<any>();
 // 表格当前页
@@ -184,7 +186,6 @@ function getMachineSearch() {
 //重置搜素
 function resetMachineSearch() {
   machinePage.value = 1;
-  asCode.value = "";
   (codeSearch.value = ""),
     (machineNameSearch.value = ""),
     (userNameSearch.value = "");
@@ -253,14 +254,6 @@ async function deleteMachine() {
   }
   dialogDeleteMachine.value = false;
 }
-//点击获取行政编码
-function getWorkCenterDetailList(item: any, obj: any) {
-  asCode.value = obj.item.raw.administrative_code;
-}
-// watch(asCode, function () {
-//   workCenterDetailPage.value = 1;
-//   getWorkCenterDetail();
-// });
 
 //工位信息
 //工位表格的所有数据
@@ -287,7 +280,7 @@ async function getWorkCenterDetail() {
       undefined,
       {
         work_center_id: workCenterId.value,
-        administrative_code: asCode.value,
+        administrative_code: "",
         station_name: stationNameSearch.value,
         employee_name: employeeNameSearch.value,
         PageIndex: workCenterDetailPage.value,
@@ -325,7 +318,7 @@ let dialogDeleteDetail = ref<boolean>(false);
 function resetCenterDetail() {
   operateWorkCenterDetail.value = {
     station_id: "",
-    administrative_code: asCode.value,
+    administrative_code: "",
     employee_name: "",
     work_center_id: workCenterId.value,
     station_name: "",
@@ -368,6 +361,24 @@ async function deleteCenterDetail() {
   );
   getWorkCenterDetail();
   dialogDeleteDetail.value = false;
+}
+let chineData = ref(true);
+let stationData = ref(false);
+//显示设备信息
+function showChine() {
+  chineData.value = true;
+  stationData.value = false;
+}
+//显示工位信息
+function showStation() {
+  chineData.value = false;
+  stationData.value = true;
+}
+//关闭工作中心信息
+function cancelDialog() {
+  chineData.value = true;
+  stationData.value = false;
+  dialogShow.value = false;
 }
 </script>
 <template>
@@ -441,7 +452,7 @@ async function deleteCenterDetail() {
       <v-card rounded="lg" @click="showWorkCenter(item)">
         <v-img
           src="/工作中心.jpg"
-          height="200px"
+          height="150px"
           cover
           class="align-end"
           gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.3)"
@@ -522,17 +533,26 @@ async function deleteCenterDetail() {
   <!-- 工作中心内容 -->
   <v-dialog v-model="dialogShow" class="my-dialog" max-width="90vw">
     <v-card>
-      <v-icon
-        class="dialog-right-top-icon"
-        size="x-large"
-        @click="dialogShow = false"
-        >fa-solid fa-remove</v-icon
+      <v-toolbar
+        style="position: sticky; top: 0; z-index: 1000"
+        class="text-h5"
       >
-      <v-toolbar>
-        <v-toolbar-title class="text-h5">设备信息</v-toolbar-title>
+        <v-toolbar-title>{{ workCenterName }}的设备与工位信息</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-icon size="x-large" @click="cancelDialog">fa-solid fa-remove</v-icon>
       </v-toolbar>
+      <div>
+        <v-tabs fixed-tabs>
+          <v-tab @click="showChine" class="text-h6">
+            设备({{ machineTotalPageCount }})
+          </v-tab>
+          <v-tab @click="showStation" class="text-h6">
+            工位({{ workCenterDetailCount }})
+          </v-tab>
+        </v-tabs>
+      </div>
       <!-- 设备信息 -->
-      <v-row class="ma-3">
+      <v-row class="ma-3" v-if="chineData">
         <v-col cols="4">
           <v-text-field
             label="设备编号"
@@ -598,7 +618,7 @@ async function deleteCenterDetail() {
           <v-card>
             <v-img
               src="/设备.jpg"
-              height="200px"
+              height="150px"
               cover
               class="align-end"
               gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
@@ -669,25 +689,20 @@ async function deleteCenterDetail() {
           </v-card>
         </v-col>
         <v-col v-else>
-          <div class="text-center text-h5 text-grey">
-            当前工作中心没有设备
-          </div></v-col
-        >
+          <div class="text-center text-h5 text-grey">当前工作中心没有设备</div>
+        </v-col>
+        <v-col cols="12">
+          <div class="text-center my-6">
+            <v-pagination
+              v-model="machinePage"
+              :length="machineTablePageCount"
+            ></v-pagination>
+          </div>
+        </v-col>
       </v-row>
-      <div class="text-center my-6">
-        <v-pagination
-          v-model="machinePage"
-          :length="machineTablePageCount"
-        ></v-pagination>
-      </div>
 
-      <v-divider></v-divider>
-
-      <v-toolbar>
-        <v-toolbar-title class="text-h5"> 工位信息 </v-toolbar-title>
-      </v-toolbar>
       <!--工位信息 -->
-      <v-row class="ma-3">
+      <v-row class="ma-3" v-if="stationData">
         <v-col cols="6">
           <v-text-field
             label="工位名称"
@@ -745,7 +760,7 @@ async function deleteCenterDetail() {
           <v-card>
             <v-img
               src="/工位.jpg"
-              height="200px"
+              height="150px"
               cover
               class="align-end"
               gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
@@ -823,13 +838,15 @@ async function deleteCenterDetail() {
             当前工作中心没有设置工位
           </div></v-col
         >
+        <v-col cols="12">
+          <div class="text-center">
+            <v-pagination
+              v-model="workCenterDetailPage"
+              :length="workCenterDetailPageCount"
+            ></v-pagination>
+          </div>
+        </v-col>
       </v-row>
-      <div class="text-center">
-        <v-pagination
-          v-model="workCenterDetailPage"
-          :length="workCenterDetailPageCount"
-        ></v-pagination>
-      </div>
     </v-card>
   </v-dialog>
   <!-- 新增工作中心 -->
