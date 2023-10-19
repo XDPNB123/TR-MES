@@ -378,7 +378,7 @@ async function deleteCenterDetail() {
         v-model="searchWorkCenterName"
         variant="outlined"
         density="compact"
-        class="mt-3 ml-3"
+        class="mt-3"
         hide-details
       ></v-text-field>
     </v-col>
@@ -388,7 +388,7 @@ async function deleteCenterDetail() {
         v-model="searchType"
         variant="outlined"
         density="compact"
-        class="mt-3 ml-3"
+        class="mt-3 "
         hide-details
       ></v-text-field>
     </v-col>
@@ -398,7 +398,7 @@ async function deleteCenterDetail() {
         v-model="searchWorkCenterAddress"
         variant="outlined"
         density="compact"
-        class="mt-3 ml-3"
+        class="mt-3"
         hide-details
       ></v-text-field>
     </v-col>
@@ -406,7 +406,7 @@ async function deleteCenterDetail() {
       <v-btn
         size="large"
         color="black"
-        class="mx-3"
+        class="mr-3"
         prepend-icon="fa-solid fa-search"
         @click="searchWorkCenterList()"
         >条件查询</v-btn
@@ -439,66 +439,70 @@ async function deleteCenterDetail() {
       class="mt-4"
     >
       <v-card rounded="lg" @click="showWorkCenter(item)">
-        <div
-          class="d-flex justify-center align-center"
-          style="background-color: rgb(57, 28, 186)"
+        <v-toolbar>
+          <v-toolbar-title class="text-h6 font-weight-medium">{{
+            item.work_center_name
+          }}</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-icon
+            size="small"
+            color="grey-darken-1"
+            class="mr-3"
+            @click.stop="
+              dialogDelete = true;
+              operateRow = { ...item };
+            "
+            >fa-solid fa-pen</v-icon
+          >
+          <v-icon
+            size="small"
+            color="grey-darken-1"
+            class="mr-3"
+            @click.stop="
+              dialogDelete = true;
+              operateRow = { ...item };
+            "
+            >fa-solid fa-trash</v-icon
+          >
+        </v-toolbar>
+        <v-img
+          src="/工作中心.jpg"
+          height="200px"
+          cover
+          class="align-end"
+          gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
         >
-          <v-card-title class="text-white text-h4"
-            >{{ item.work_center_name }}
-          </v-card-title>
-        </div>
-
+        </v-img>
         <v-list class="w-100">
           <v-list-item>
             <template v-slot:prepend>
-              <div>操作</div>
-            </template>
-            <div class="d-flex flex-row-reverse">
-              <v-icon
-                color="blue"
-                size="x-large"
-                @click.stop="
-                  dialogUpdate = true;
-                  operateRow = { ...item };
-                "
-                >fa-solid fa-pen</v-icon
-              >
-              <v-icon
-                color="red"
-                class="mr-3"
-                size="x-large"
-                @click.stop="
-                  dialogDelete = true;
-                  operateRow = { ...item };
-                "
-                >fa-solid fa-trash</v-icon
-              >
-            </div>
-          </v-list-item>
-          <v-divider></v-divider>
-          <v-list-item>
-            <template v-slot:prepend>
-              <v-icon class="mr-3">fa-solid fa-hashtag</v-icon>
+              <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
               <div>
-                编号:<span class="ml-3">{{ item.work_center_id }}</span>
+                编号:<span class="text-body-2 text-grey-darken-2">{{
+                  item.work_center_id
+                }}</span>
               </div>
             </template>
           </v-list-item>
           <v-divider></v-divider>
           <v-list-item>
             <template v-slot:prepend>
-              <v-icon class="mr-3">fa-solid fa-layer-group</v-icon>
+              <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
               <div>
-                类型:<span class="ml-3">{{ item.type }}</span>
+                类型:<span class="text-body-2 text-grey-darken-2">{{
+                  item.type
+                }}</span>
               </div>
             </template>
           </v-list-item>
           <v-divider></v-divider>
           <v-list-item>
             <template v-slot:prepend>
-              <v-icon class="mr-3">fa-solid fa-location-dot</v-icon>
+              <v-icon class="mr-5">fa-solid fa-location-dot</v-icon>
               <div>
-                地址:<span class="ml-3">{{ item.work_center_address }}</span>
+                地址:<span class="text-body-2 text-grey-darken-2">{{
+                  item.work_center_address
+                }}</span>
               </div>
             </template>
           </v-list-item>
@@ -512,114 +516,7 @@ async function deleteCenterDetail() {
       :length="workCenterCount"
     ></v-pagination>
   </div>
-  <!-- 新增工作中心 -->
-  <v-dialog v-model="dialogAdd" max-width="400">
-    <v-card>
-      <v-toolbar color="blue-darken-3">
-        <v-toolbar-title>新增工作中心</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-icon class="mr-3" @click="dialogAdd = false"
-          >fa-solid fa-remove</v-icon
-        >
-      </v-toolbar>
-      <v-card-text>
-        <v-text-field
-          class="mt-3"
-          variant="outlined"
-          v-model="operateRow.work_center_id"
-          label="工作中心编号"
-        ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateRow.type"
-          label="工作中心类型"
-        ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateRow.work_center_name"
-          label="工作中心名称"
-        ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateRow.work_center_address"
-          label="工作中心地址"
-        ></v-text-field>
-      </v-card-text>
-      <v-divider></v-divider>
-      <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="addWorkCenter()">确认</v-btn>
-        <v-btn color="grey" class="mr-3" @click="dialogAdd = false">取消</v-btn>
-      </div>
-    </v-card>
-  </v-dialog>
-  <!-- 修改工作中心信息 -->
-  <v-dialog v-model="dialogUpdate" max-width="400">
-    <v-card>
-      <v-toolbar color="blue-darken-3">
-        <v-toolbar-title>更新工作中心</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-icon class="mr-3" @click="dialogUpdate = false"
-          >fa-solid fa-remove</v-icon
-        >
-      </v-toolbar>
-      <v-card-text>
-        <v-text-field
-          class="mt-3"
-          variant="outlined"
-          v-model="operateRow.work_center_id"
-          label="工作中心编号"
-        ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateRow.type"
-          label="工作中心类型"
-        ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateRow.work_center_name"
-          label="工作中心名称"
-        ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateRow.work_center_address"
-          label="工作中心地址"
-        ></v-text-field>
-      </v-card-text>
-      <v-divider></v-divider>
-      <div class="text-right my-3">
-        <v-btn color="blue" class="mr-3" @click="updateWorkCenter()"
-          >确认</v-btn
-        >
-        <v-btn color="grey" class="mr-3" @click="dialogUpdate = false"
-          >取消</v-btn
-        >
-      </div>
-    </v-card>
-  </v-dialog>
-  <!-- 删除工作中心 -->
-  <v-dialog v-model="dialogDelete" max-width="400">
-    <v-card>
-      <v-toolbar color="blue-darken-3">
-        <v-toolbar-title>删除工作中心</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-icon class="mr-3" @click="dialogDelete = false"
-          >fa-solid fa-remove</v-icon
-        >
-      </v-toolbar>
-      <v-card-text class="my-6 text-h6 text-red font-weight-medium text-center">
-        您确认要删除"{{ operateRow.work_center_name }}"这条工作中心吗？
-      </v-card-text>
-      <v-divider></v-divider>
-      <div class="text-right my-3">
-        <v-btn color="red" class="mr-3" @click="deleteWorkCenter()">确认</v-btn>
-        <v-btn color="grey" class="mr-3" @click="dialogDelete = false"
-          >取消</v-btn
-        >
-      </div>
-    </v-card>
-  </v-dialog>
   <!-- 工作中心内容 -->
-
   <v-dialog v-model="dialogShow" class="my-dialog">
     <v-card>
       <v-toolbar color="blue-darken-3">
@@ -637,7 +534,7 @@ async function deleteCenterDetail() {
             v-model="codeSearch"
             variant="outlined"
             density="compact"
-            class="mt-3 ml-3"
+            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
@@ -647,7 +544,7 @@ async function deleteCenterDetail() {
             v-model="machineNameSearch"
             variant="outlined"
             density="compact"
-            class="mt-3 ml-3"
+            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
@@ -657,7 +554,7 @@ async function deleteCenterDetail() {
             v-model="userNameSearch"
             variant="outlined"
             density="compact"
-            class="mt-3 ml-3"
+            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
@@ -665,7 +562,7 @@ async function deleteCenterDetail() {
           <v-btn
             size="large"
             color="black"
-            class="mx-3"
+            class="mr-3"
             prepend-icon="fa-solid fa-search"
             @click="getMachineSearch()"
             >条件查询</v-btn
@@ -682,7 +579,6 @@ async function deleteCenterDetail() {
             size="large"
             color="teal"
             class="mr-3"
-            v-if="workCenterId"
             prepend-icon="fa-solid fa-add"
             @click="
               dialogAddMachine = true;
@@ -785,15 +681,16 @@ async function deleteCenterDetail() {
         ></v-pagination>
       </div>
       <v-divider></v-divider>
+
       <!--工位信息 -->
-      <v-row>
+      <v-row class="ma-3">
         <v-col cols="6">
           <v-text-field
             label="工位名称"
             v-model="stationNameSearch"
             variant="outlined"
             density="compact"
-            class="mt-3 ml-3"
+            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
@@ -803,7 +700,7 @@ async function deleteCenterDetail() {
             v-model="employeeNameSearch"
             variant="outlined"
             density="compact"
-            class="mt-3 ml-3"
+            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
@@ -811,7 +708,7 @@ async function deleteCenterDetail() {
           <v-btn
             size="large"
             color="black"
-            class="mx-3"
+            class="mr-3"
             prepend-icon="fa-solid fa-search"
             @click="searchWorkCenterDetail()"
             >条件查询</v-btn
@@ -844,7 +741,33 @@ async function deleteCenterDetail() {
           v-if="workCenterDetailList.length"
         >
           <v-card>
-            <v-toolbar class="text-h6 pl-6">工位信息</v-toolbar>
+            <v-toolbar>
+              <v-toolbar-title class="text-h6 font-weight-medium"
+                >工位信息</v-toolbar-title
+              >
+              <v-spacer></v-spacer>
+
+              <v-icon
+                size="small"
+                color="grey-darken-1"
+                class="mr-3"
+                @click="
+                  dialogUpdateDetail = true;
+                  operateWorkCenterDetail = { ...item };
+                "
+                >fa-solid fa-pen</v-icon
+              >
+              <v-icon
+                size="small"
+                color="grey-darken-1"
+                class="mr-3"
+                @click="
+                  dialogDeleteDetail = true;
+                  operateWorkCenterDetail = { ...item };
+                "
+                >fa-solid fa-trash</v-icon
+              >
+            </v-toolbar>
             <v-img
               src="/工位.jpg"
               height="200px"
@@ -860,54 +783,36 @@ async function deleteCenterDetail() {
             <v-list class="w-100">
               <v-list-item>
                 <template v-slot:prepend>
-                  <div>操作</div>
-                </template>
-                <div class="d-flex flex-row-reverse">
-                  <v-icon
-                    color="blue"
-                    size="x-large"
-                    @click="
-                      dialogUpdateDetail = true;
-                      operateWorkCenterDetail = { ...item };
-                    "
-                    >fa-solid fa-pen</v-icon
-                  >
-                  <v-icon
-                    color="red"
-                    class="mr-3"
-                    size="x-large"
-                    @click="
-                      dialogDeleteDetail = true;
-                      operateWorkCenterDetail = { ...item };
-                    "
-                    >fa-solid fa-trash</v-icon
-                  >
-                </div>
-              </v-list-item>
-              <v-divider></v-divider>
-              <v-list-item>
-                <template v-slot:prepend>
-                  <v-icon class="mr-3">fa-solid fa-hashtag</v-icon>
+                  <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
                   <div>
-                    编号:<span class="ml-3">{{ item.station_id }}</span>
+                    编号:
+                    <span class="text-body-2 text-grey-darken-2">{{
+                      item.station_id
+                    }}</span>
                   </div>
                 </template>
               </v-list-item>
               <v-divider></v-divider>
               <v-list-item>
                 <template v-slot:prepend>
-                  <v-icon class="mr-3">fa-solid fa-layer-group</v-icon>
+                  <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
                   <div>
-                    名称:<span class="ml-3">{{ item.station_name }}</span>
+                    名称:
+                    <span class="text-body-2 text-grey-darken-2">{{
+                      item.station_name
+                    }}</span>
                   </div>
                 </template>
               </v-list-item>
               <v-divider></v-divider>
               <v-list-item>
                 <template v-slot:prepend>
-                  <v-icon class="mr-3">fa-solid fa-circle-user</v-icon>
+                  <v-icon class="mr-5">fa-solid fa-circle-user</v-icon>
                   <div>
-                    员工:<span class="ml-3">{{ item.employee_name }}</span>
+                    员工:
+                    <span class="text-body-2 text-grey-darken-2">{{
+                      item.employee_name
+                    }}</span>
                   </div>
                 </template>
               </v-list-item>
@@ -926,10 +831,110 @@ async function deleteCenterDetail() {
           :length="workCenterDetailPageCount"
         ></v-pagination>
       </div>
+    </v-card>
+  </v-dialog>
+  <!-- 新增工作中心 -->
+  <v-dialog v-model="dialogAdd" max-width="400">
+    <v-card>
+      <v-toolbar color="blue-darken-3">
+        <v-toolbar-title>新增工作中心</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-icon class="mr-3" @click="dialogAdd = false"
+          >fa-solid fa-remove</v-icon
+        >
+      </v-toolbar>
+      <v-card-text>
+        <v-text-field
+          class="mt-3"
+          variant="outlined"
+          v-model="operateRow.work_center_id"
+          label="工作中心编号"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
+          v-model="operateRow.type"
+          label="工作中心类型"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
+          v-model="operateRow.work_center_name"
+          label="工作中心名称"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
+          v-model="operateRow.work_center_address"
+          label="工作中心地址"
+        ></v-text-field>
+      </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="blue" class="mr-3" @click="dialogShow = false"
-          >关闭</v-btn
+        <v-btn color="green" class="mr-3" @click="addWorkCenter()">确认</v-btn>
+        <v-btn color="grey" class="mr-3" @click="dialogAdd = false">取消</v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+  <!-- 修改工作中心信息 -->
+  <v-dialog v-model="dialogUpdate" max-width="400">
+    <v-card>
+      <v-toolbar color="blue-darken-3">
+        <v-toolbar-title>更新工作中心</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-icon class="mr-3" @click="dialogUpdate = false"
+          >fa-solid fa-remove</v-icon
+        >
+      </v-toolbar>
+      <v-card-text>
+        <v-text-field
+          class="mt-3"
+          variant="outlined"
+          v-model="operateRow.work_center_id"
+          label="工作中心编号"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
+          v-model="operateRow.type"
+          label="工作中心类型"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
+          v-model="operateRow.work_center_name"
+          label="工作中心名称"
+        ></v-text-field>
+        <v-text-field
+          variant="outlined"
+          v-model="operateRow.work_center_address"
+          label="工作中心地址"
+        ></v-text-field>
+      </v-card-text>
+      <v-divider></v-divider>
+      <div class="text-right my-3">
+        <v-btn color="blue" class="mr-3" @click="updateWorkCenter()"
+          >确认</v-btn
+        >
+        <v-btn color="grey" class="mr-3" @click="dialogUpdate = false"
+          >取消</v-btn
+        >
+      </div>
+    </v-card>
+  </v-dialog>
+  <!-- 删除工作中心 -->
+  <v-dialog v-model="dialogDelete" max-width="400">
+    <v-card>
+      <v-toolbar color="blue-darken-3">
+        <v-toolbar-title>删除工作中心</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-icon class="mr-3" @click="dialogDelete = false"
+          >fa-solid fa-remove</v-icon
+        >
+      </v-toolbar>
+      <v-card-text class="my-6 text-h6 text-red font-weight-medium text-center">
+        您确认要删除"{{ operateRow.work_center_name }}"这条工作中心吗？
+      </v-card-text>
+      <v-divider></v-divider>
+      <div class="text-right my-3">
+        <v-btn color="red" class="mr-3" @click="deleteWorkCenter()">确认</v-btn>
+        <v-btn color="grey" class="mr-3" @click="dialogDelete = false"
+          >取消</v-btn
         >
       </div>
     </v-card>
