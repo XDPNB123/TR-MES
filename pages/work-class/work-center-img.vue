@@ -465,13 +465,7 @@ async function deleteCenterDetail() {
             >fa-solid fa-trash</v-icon
           >
         </v-toolbar>
-        <v-img
-          src="/工作中心.jpg"
-          height="200px"
-          cover
-          class="align-end"
-          gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-        >
+        <v-img src="/工作中心.jpg" height="200px" cover class="align-end">
         </v-img>
         <v-list class="w-100">
           <v-list-item>
@@ -517,17 +511,16 @@ async function deleteCenterDetail() {
     ></v-pagination>
   </div>
   <!-- 工作中心内容 -->
-  <v-dialog v-model="dialogShow" class="my-dialog">
+  <v-dialog v-model="dialogShow" class="my-dialog" max-width="86vw">
     <v-card>
-      <v-toolbar
-        color="blue-darken-3"
-        style="position: sticky; top: 0; z-index: 1000"
+      <v-icon
+        class="dialog-right-top-icon"
+        size="x-large"
+        @click="dialogShow = false"
+        >fa-solid fa-remove</v-icon
       >
-        <v-toolbar-title>工作中心内容</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-icon class="mr-3" @click="dialogShow = false"
-          >fa-solid fa-remove</v-icon
-        >
+      <v-toolbar>
+        <v-toolbar-title class="text-h5">设备信息</v-toolbar-title>
       </v-toolbar>
       <!-- 设备信息 -->
       <v-row class="ma-3">
@@ -537,7 +530,6 @@ async function deleteCenterDetail() {
             v-model="codeSearch"
             variant="outlined"
             density="compact"
-            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
@@ -547,7 +539,6 @@ async function deleteCenterDetail() {
             v-model="machineNameSearch"
             variant="outlined"
             density="compact"
-            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
@@ -557,11 +548,10 @@ async function deleteCenterDetail() {
             v-model="userNameSearch"
             variant="outlined"
             density="compact"
-            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
-        <v-col cols="12" class="mt-3">
+        <v-col cols="12">
           <v-btn
             size="large"
             color="black"
@@ -597,32 +587,6 @@ async function deleteCenterDetail() {
           v-if="machineList.length"
         >
           <v-card>
-            <v-toolbar>
-              <v-toolbar-title class="text-h6 font-weight-medium"
-                >设备信息</v-toolbar-title
-              >
-              <v-spacer></v-spacer>
-              <v-icon
-                size="small"
-                color="grey-darken-1"
-                class="mr-3"
-                @click="
-                  dialogUpdateMachine = true;
-                  operateMachine = { ...item };
-                "
-                >fa-solid fa-pen</v-icon
-              >
-              <v-icon
-                size="small"
-                color="grey-darken-1"
-                class="mr-3"
-                @click="
-                  dialogDeleteMachine = true;
-                  operateMachine = { ...item };
-                "
-                >fa-solid fa-trash</v-icon
-              >
-            </v-toolbar>
             <v-img
               src="/设备.jpg"
               height="200px"
@@ -630,9 +594,33 @@ async function deleteCenterDetail() {
               class="align-end"
               gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
             >
-              <v-card-title class="text-white">{{
-                item.machine_name
-              }}</v-card-title>
+              <div class="d-flex justify-space-between">
+                <v-card-title class="text-white">{{
+                  item.machine_name
+                }}</v-card-title>
+                <div class="align-self-center" style="opacity: 0.8">
+                  <v-icon
+                    size="small"
+                    color="white"
+                    class="mr-3"
+                    @click="
+                      dialogUpdateMachine = true;
+                      operateMachine = { ...item };
+                    "
+                    >fa-solid fa-pen</v-icon
+                  >
+                  <v-icon
+                    size="small"
+                    color="white"
+                    class="mr-3"
+                    @click="
+                      dialogDeleteMachine = true;
+                      operateMachine = { ...item };
+                    "
+                    >fa-solid fa-trash</v-icon
+                  >
+                </div>
+              </div>
             </v-img>
 
             <v-list class="w-100">
@@ -677,7 +665,7 @@ async function deleteCenterDetail() {
           </div></v-col
         >
       </v-row>
-      <div class="text-center">
+      <div class="text-center mb-16">
         <v-pagination
           v-model="machinePage"
           :length="machineTablePageCount"
@@ -686,6 +674,9 @@ async function deleteCenterDetail() {
 
       <v-divider></v-divider>
 
+      <v-toolbar>
+        <v-toolbar-title class="text-h5"> 工位信息 </v-toolbar-title>
+      </v-toolbar>
       <!--工位信息 -->
       <v-row class="ma-3">
         <v-col cols="6">
@@ -694,7 +685,6 @@ async function deleteCenterDetail() {
             v-model="stationNameSearch"
             variant="outlined"
             density="compact"
-            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
@@ -704,11 +694,10 @@ async function deleteCenterDetail() {
             v-model="employeeNameSearch"
             variant="outlined"
             density="compact"
-            class="mt-3"
             hide-details
           ></v-text-field>
         </v-col>
-        <v-col cols="12" class="mt-3">
+        <v-col cols="12">
           <v-btn
             size="large"
             color="black"
@@ -789,7 +778,7 @@ async function deleteCenterDetail() {
                 <template v-slot:prepend>
                   <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
                   <div>
-                    编号:
+                    编号：
                     <span class="text-body-2 text-grey-darken-2">{{
                       item.station_id
                     }}</span>
@@ -801,7 +790,7 @@ async function deleteCenterDetail() {
                 <template v-slot:prepend>
                   <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
                   <div>
-                    名称:
+                    名称：
                     <span class="text-body-2 text-grey-darken-2">{{
                       item.station_name
                     }}</span>
@@ -813,7 +802,7 @@ async function deleteCenterDetail() {
                 <template v-slot:prepend>
                   <v-icon class="mr-5">fa-solid fa-circle-user</v-icon>
                   <div>
-                    员工:
+                    员工：
                     <span class="text-body-2 text-grey-darken-2">{{
                       item.employee_name
                     }}</span>
@@ -1227,15 +1216,6 @@ async function deleteCenterDetail() {
   0% {
     transform: scale(0);
   }
-  25% {
-    transform: scale(0.25);
-  }
-  50% {
-    transform: scale(0.5);
-  }
-  75% {
-    transform: scale(0.75);
-  }
   100% {
     transform: scale(1);
   }
@@ -1243,5 +1223,11 @@ async function deleteCenterDetail() {
 
 .my-dialog {
   animation: my-animation 0.5s ease-out;
+}
+.dialog-right-top-icon {
+  z-index: 1;
+  position: fixed;
+  right: 1.3vw;
+  top: 1vh;
 }
 </style>
