@@ -388,7 +388,7 @@ async function deleteCenterDetail() {
         v-model="searchType"
         variant="outlined"
         density="compact"
-        class="mt-3 "
+        class="mt-3"
         hide-details
       ></v-text-field>
     </v-col>
@@ -519,7 +519,10 @@ async function deleteCenterDetail() {
   <!-- 工作中心内容 -->
   <v-dialog v-model="dialogShow" class="my-dialog">
     <v-card>
-      <v-toolbar color="blue-darken-3">
+      <v-toolbar
+        color="blue-darken-3"
+        style="position: sticky; top: 0; z-index: 1000"
+      >
         <v-toolbar-title>工作中心内容</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-icon class="mr-3" @click="dialogShow = false"
@@ -680,6 +683,7 @@ async function deleteCenterDetail() {
           :length="machineTablePageCount"
         ></v-pagination>
       </div>
+
       <v-divider></v-divider>
 
       <!--工位信息 -->
