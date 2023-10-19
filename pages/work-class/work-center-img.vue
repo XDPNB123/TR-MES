@@ -449,7 +449,7 @@ async function deleteCenterDetail() {
             color="grey-darken-1"
             class="mr-3"
             @click.stop="
-              dialogDelete = true;
+              dialogUpdate = true;
               operateRow = { ...item };
             "
             >fa-solid fa-pen</v-icon
