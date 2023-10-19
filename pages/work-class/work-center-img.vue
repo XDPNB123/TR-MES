@@ -479,7 +479,8 @@ async function deleteCenterDetail() {
             <template v-slot:prepend>
               <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
               <div>
-                编号:<span class="text-body-2 text-grey-darken-2">{{
+                编号：
+                <span class="text-body-2 text-grey-darken-2">{{
                   item.work_center_id
                 }}</span>
               </div>
@@ -490,7 +491,8 @@ async function deleteCenterDetail() {
             <template v-slot:prepend>
               <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
               <div>
-                类型:<span class="text-body-2 text-grey-darken-2">{{
+                类型：
+                <span class="text-body-2 text-grey-darken-2">{{
                   item.type
                 }}</span>
               </div>
@@ -501,7 +503,7 @@ async function deleteCenterDetail() {
             <template v-slot:prepend>
               <v-icon class="mr-5">fa-solid fa-location-dot</v-icon>
               <div>
-                地址:<span class="text-body-2 text-grey-darken-2">{{
+                地址：<span class="text-body-2 text-grey-darken-2">{{
                   item.work_center_address
                 }}</span>
               </div>
