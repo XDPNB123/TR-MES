@@ -157,7 +157,7 @@ watch(machinePage, function () {
 let machineTotalPageCount = ref<number>(0);
 // 表格总页数
 const machineTablePageCount = computed(() => {
-  return Math.ceil(machineTotalPageCount.value / 6);
+  return Math.ceil(machineTotalPageCount.value / 8);
 });
 //获取数据
 async function getMachineData() {
@@ -172,7 +172,7 @@ async function getMachineData() {
         machine_name: machineNameSearch.value,
         user: userNameSearch.value,
         PageIndex: machinePage.value,
-        PageSize: 6,
+        PageSize: 8,
         SortedBy: "id",
         SortType: 1,
       }
@@ -282,7 +282,7 @@ watch(workCenterDetailPage, function () {
 let workCenterDetailCount = ref<number>(0);
 //数据一共有多少页
 const workCenterDetailPageCount = computed(() => {
-  return Math.ceil(workCenterDetailCount.value / 6);
+  return Math.ceil(workCenterDetailCount.value / 8);
 });
 //获取数据
 async function getWorkCenterDetail() {
@@ -297,7 +297,7 @@ async function getWorkCenterDetail() {
         station_name: stationNameSearch.value,
         employee_name: employeeNameSearch.value,
         PageIndex: workCenterDetailPage.value,
-        PageSize: 6,
+        PageSize: 8,
         SortedBy: "id",
         SortType: 1,
       }
@@ -548,18 +548,22 @@ function cancelDialog() {
     <v-card>
       <v-toolbar
         style="position: sticky; top: 0; z-index: 1000"
-        class="text-h5"
+        class="text-h6"
       >
-        <v-toolbar-title>{{ workCenterName }}的设备与工位信息</v-toolbar-title>
+        <v-toolbar-title class="text-h5 font-weight-medium"
+          >{{ workCenterName }}的设备与工位信息</v-toolbar-title
+        >
         <v-spacer></v-spacer>
-        <v-icon size="x-large" @click="cancelDialog">fa-solid fa-remove</v-icon>
+        <v-icon size="x-large" @click="cancelDialog" class="mr-2"
+          >fa-solid fa-remove</v-icon
+        >
       </v-toolbar>
       <div>
         <v-tabs fixed-tabs>
-          <v-tab @click="showChine" class="text-h6">
+          <v-tab @click="showChine" class="text-h6 font-weight-bold">
             设备({{ machineTotalPageCount }})
           </v-tab>
-          <v-tab @click="showStation" class="text-h6">
+          <v-tab @click="showStation" class="text-h6 font-weight-bold">
             工位({{ workCenterDetailCount }})
           </v-tab>
         </v-tabs>
@@ -623,7 +627,7 @@ function cancelDialog() {
           >
         </v-col>
         <v-col
-          cols="2"
+          cols="3"
           v-for="(item, index) in machineList"
           :key="index"
           v-if="machineList.length"
@@ -765,7 +769,7 @@ function cancelDialog() {
           >
         </v-col>
         <v-col
-          cols="2"
+          cols="3"
           v-for="(item, index) in workCenterDetailList"
           :key="index"
           v-if="workCenterDetailList.length"
