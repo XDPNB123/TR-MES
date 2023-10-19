@@ -439,33 +439,40 @@ async function deleteCenterDetail() {
       class="mt-4"
     >
       <v-card rounded="lg" @click="showWorkCenter(item)">
-        <v-toolbar>
-          <v-toolbar-title class="text-h6 font-weight-medium">{{
-            item.work_center_name
-          }}</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-icon
-            size="small"
-            color="grey-darken-1"
-            class="mr-3"
-            @click.stop="
-              dialogUpdate = true;
-              operateRow = { ...item };
-            "
-            >fa-solid fa-pen</v-icon
-          >
-          <v-icon
-            size="small"
-            color="grey-darken-1"
-            class="mr-3"
-            @click.stop="
-              dialogDelete = true;
-              operateRow = { ...item };
-            "
-            >fa-solid fa-trash</v-icon
-          >
-        </v-toolbar>
-        <v-img src="/工作中心.jpg" height="200px" cover class="align-end">
+        <v-img
+          src="/工作中心.jpg"
+          height="200px"
+          cover
+          class="align-end"
+          gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.3)"
+        >
+          <div class="d-flex justify-space-between">
+            <v-card-title class="text-white">{{
+              item.work_center_name
+            }}</v-card-title>
+            <div class="align-self-center" style="opacity: 0.8">
+              <v-icon
+                size="small"
+                color="white"
+                class="mr-3"
+                @click.stop="
+                  dialogUpdate = true;
+                  operateRow = { ...item };
+                "
+                >fa-solid fa-pen</v-icon
+              >
+              <v-icon
+                size="small"
+                color="white"
+                class="mr-3"
+                @click.stop="
+                  dialogDelete = true;
+                  operateRow = { ...item };
+                "
+                >fa-solid fa-trash</v-icon
+              >
+            </div>
+          </div>
         </v-img>
         <v-list class="w-100">
           <v-list-item>
@@ -511,7 +518,7 @@ async function deleteCenterDetail() {
     ></v-pagination>
   </div>
   <!-- 工作中心内容 -->
-  <v-dialog v-model="dialogShow" class="my-dialog" max-width="86vw">
+  <v-dialog v-model="dialogShow" class="my-dialog" max-width="90vw">
     <v-card>
       <v-icon
         class="dialog-right-top-icon"
@@ -734,33 +741,6 @@ async function deleteCenterDetail() {
           v-if="workCenterDetailList.length"
         >
           <v-card>
-            <v-toolbar>
-              <v-toolbar-title class="text-h6 font-weight-medium"
-                >工位信息</v-toolbar-title
-              >
-              <v-spacer></v-spacer>
-
-              <v-icon
-                size="small"
-                color="grey-darken-1"
-                class="mr-3"
-                @click="
-                  dialogUpdateDetail = true;
-                  operateWorkCenterDetail = { ...item };
-                "
-                >fa-solid fa-pen</v-icon
-              >
-              <v-icon
-                size="small"
-                color="grey-darken-1"
-                class="mr-3"
-                @click="
-                  dialogDeleteDetail = true;
-                  operateWorkCenterDetail = { ...item };
-                "
-                >fa-solid fa-trash</v-icon
-              >
-            </v-toolbar>
             <v-img
               src="/工位.jpg"
               height="200px"
@@ -768,9 +748,33 @@ async function deleteCenterDetail() {
               class="align-end"
               gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
             >
-              <v-card-title class="text-white">{{
-                item.station_name
-              }}</v-card-title>
+              <div class="d-flex justify-space-between">
+                <v-card-title class="text-white">{{
+                  item.station_name
+                }}</v-card-title>
+                <div class="align-self-center" style="opacity: 0.8">
+                  <v-icon
+                    size="small"
+                    color="white"
+                    class="mr-3"
+                    @click="
+                      dialogUpdateDetail = true;
+                      operateWorkCenterDetail = { ...item };
+                    "
+                    >fa-solid fa-pen</v-icon
+                  >
+                  <v-icon
+                    size="small"
+                    color="white"
+                    class="mr-3"
+                    @click="
+                      dialogDeleteDetail = true;
+                      operateWorkCenterDetail = { ...item };
+                    "
+                    >fa-solid fa-trash</v-icon
+                  >
+                </div>
+              </div>
             </v-img>
 
             <v-list class="w-100">
