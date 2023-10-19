@@ -698,7 +698,32 @@ async function deleteCenterDetail() {
           v-if="machineList.length"
         >
           <v-card>
-            <v-toolbar class="text-h6 pl-6">设备信息</v-toolbar>
+            <v-toolbar>
+              <v-toolbar-title class="text-h6 font-weight-medium"
+                >设备信息</v-toolbar-title
+              >
+              <v-spacer></v-spacer>
+              <v-icon
+                size="small"
+                color="grey-darken-1"
+                class="mr-3"
+                @click="
+                  dialogUpdateMachine = true;
+                  operateMachine = { ...item };
+                "
+                >fa-solid fa-pen</v-icon
+              >
+              <v-icon
+                size="small"
+                color="grey-darken-1"
+                class="mr-3"
+                @click="
+                  dialogDeleteMachine = true;
+                  operateMachine = { ...item };
+                "
+                >fa-solid fa-trash</v-icon
+              >
+            </v-toolbar>
             <v-img
               src="/设备.jpg"
               height="200px"
@@ -714,36 +739,9 @@ async function deleteCenterDetail() {
             <v-list class="w-100">
               <v-list-item>
                 <template v-slot:prepend>
-                  <div>操作</div>
-                </template>
-                <div class="d-flex flex-row-reverse">
-                  <v-icon
-                    color="blue"
-                    size="x-large"
-                    @click="
-                      dialogUpdateMachine = true;
-                      operateMachine = { ...item };
-                    "
-                    >fa-solid fa-pen</v-icon
-                  >
-                  <v-icon
-                    color="red"
-                    class="mr-3"
-                    size="x-large"
-                    @click="
-                      dialogDeleteMachine = true;
-                      operateMachine = { ...item };
-                    "
-                    >fa-solid fa-trash</v-icon
-                  >
-                </div>
-              </v-list-item>
-              <v-divider></v-divider>
-              <v-list-item>
-                <template v-slot:prepend>
-                  <v-icon class="mr-3">fa-solid fa-hashtag</v-icon>
+                  <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
                   <div>
-                    编号:<span class="ml-3">{{
+                    编号：<span class="text-body-2 text-grey-darken-2">{{
                       item.administrative_code
                     }}</span>
                   </div>
@@ -752,18 +750,22 @@ async function deleteCenterDetail() {
               <v-divider></v-divider>
               <v-list-item>
                 <template v-slot:prepend>
-                  <v-icon class="mr-3">fa-solid fa-layer-group</v-icon>
+                  <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
                   <div>
-                    部门:<span class="ml-3">{{ item.user_department }}</span>
+                    部门：<span class="text-body-2 text-grey-darken-2">{{
+                      item.user_department
+                    }}</span>
                   </div>
                 </template>
               </v-list-item>
               <v-divider></v-divider>
               <v-list-item>
                 <template v-slot:prepend>
-                  <v-icon class="mr-3">fa-solid fa-chalkboard-user</v-icon>
+                  <v-icon class="mr-5">fa-solid fa-chalkboard-user</v-icon>
                   <div>
-                    使用人:<span class="ml-3">{{ item.user }}</span>
+                    使用人：<span class="text-body-2 text-grey-darken-2">{{
+                      item.user
+                    }}</span>
                   </div>
                 </template>
               </v-list-item>
