@@ -273,7 +273,7 @@ let machineHeaders = ref<any[]>([
     filterable: true,
   },
   {
-    title: "行政编码",
+    title: "设备编号",
     key: "administrative_code",
     align: "center",
     sortable: false,
@@ -437,7 +437,7 @@ async function deleteMachine() {
       "delete",
       undefined,
       {
-        workorder_ids: operateMachine.value.id,
+        ids: operateMachine.value.id,
       }
     );
     getMachineData();
@@ -454,6 +454,7 @@ watch(asCode, function () {
   workCenterDetailPage.value = 1;
   getWorkCenterDetail();
 });
+
 
 //工位信息
 //工位表格的所有数据
@@ -864,7 +865,7 @@ async function deleteCenterDetail() {
             <v-row no-gutters>
               <v-col cols="4">
                 <v-text-field
-                  label="行政编码"
+                  label="设备编号"
                   v-model="codeSearch"
                   variant="outlined"
                   density="compact"
