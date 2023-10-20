@@ -101,12 +101,6 @@ const pageMenus = ref<any[]>([
       },
       {
         parentName: "基础信息",
-        name: "工作中心图形化界面",
-        path: "/work-class/work-center-img",
-        icon: "fa-solid fa-location-crosshairs",
-      },
-      {
-        parentName: "基础信息",
         name: "班组信息",
         path: "/work-class/work-class",
         icon: "fa-solid fa-people-roof",

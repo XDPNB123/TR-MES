@@ -12,126 +12,34 @@ useSeoMeta({
   // 社交媒体分享该页面时显示的图片
   ogImage: "/同日图标.png",
 });
-
 // 表格所有数据
 let workCenterList = ref<any[]>([]);
 // 表格当前页
 let showingPage = ref<number>(1);
+watch(showingPage, function () {
+  getWorkCenterList();
+});
 // 表格总页数
 let totalPageCount = ref<number>(0);
 // 表格总页数
 const workCenterCount = computed(() => {
-  return Math.ceil(totalPageCount.value / 15);
+  return Math.ceil(totalPageCount.value / 12);
 });
-// 查询条件
-let searchWorkCenterId = ref<string | undefined>(undefined);
-let searchWorkCenterName = ref<string | undefined>(undefined);
-let searchType = ref<string | undefined>(undefined);
-let searchWorkCenterAddress = ref<string | undefined>(undefined);
-let searchCreator = ref<string | undefined>(undefined);
-let searchStartCreateTime = ref<string | undefined>(undefined);
-let searchEndCreateTime = ref<string | undefined>(undefined);
-let searchUpdatePerson = ref<string | undefined>(undefined);
-let searchStartUpdateTime = ref<string | undefined>(undefined);
-let searchEndUpdateTime = ref<string | undefined>(undefined);
-
-// 定义工作中心表头字段
-let headers = ref<any[]>([
-  {
-    title: "序号",
-    key: "id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工作中心编号",
-    key: "work_center_id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工作中心名称",
-    key: "work_center_name",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工作中心类型",
-    key: "type",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工作中心地址",
-    key: "work_center_address",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "是否废弃",
-    key: "isdelete",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "创建人",
-    key: "creator",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "创建时间",
-    key: "create_time",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "更新时间",
-    key: "update_time",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "更新人",
-    key: "update_person",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "操作",
-    key: "action",
-    align: "center",
-    sortable: false,
-    filterable: false,
-  },
-]);
 // 对话框
 let dialogAdd = ref<boolean>(false);
 let dialogUpdate = ref<boolean>(false);
 let dialogDelete = ref<boolean>(false);
+let dialogShow = ref<boolean>(false);
+//工作中心对象
+let operateRow = ref<any>();
+//用来存储工作中心编号
+let workCenterId = ref<string>("");
+//存储工作中心名称
+let workCenterName = ref<string>("");
+let searchWorkCenterName = ref<string>("");
+let searchType = ref<string>("");
+let searchWorkCenterAddress = ref<string>("");
 
-// 正在操作的表格数据行
-let operateRow = ref<any>(null);
-let workCenterId = ref<string>(""); //存储工作中心编号的字段
-onMounted(function () {
-  // 页面渲染完成时，加载表格所有数据
-  getWorkCenterList();
-  getMachineData();
-  getWorkCenterDetail();
-});
-watch(showingPage, function () {
-  getWorkCenterList();
-});
 //获取数据
 async function getWorkCenterList() {
   const data = await useHttp(
@@ -139,18 +47,11 @@ async function getWorkCenterList() {
     "get",
     undefined,
     {
-      work_center_id: searchWorkCenterId.value,
+      work_center_address: searchWorkCenterAddress.value,
       work_center_name: searchWorkCenterName.value,
       type: searchType.value,
-      work_center_address: searchWorkCenterAddress.value,
-      start_date_create: searchStartCreateTime.value,
-      end_date_create: searchEndCreateTime.value,
-      start_date_update: searchStartUpdateTime.value,
-      end_date_update: searchEndUpdateTime.value,
-      creator: searchCreator.value,
-      update_person: searchUpdatePerson.value,
       PageIndex: showingPage.value,
-      PageSize: 15,
+      PageSize: 12,
       SortedBy: "id",
       SortType: 0,
     }
@@ -167,33 +68,31 @@ async function getWorkCenterList() {
   });
   totalPageCount.value = data.data.totalCount;
 }
-//按条件查询数据
+onMounted(function () {
+  // 页面渲染完成时，加载表格所有数据
+  getWorkCenterList();
+});
+
+//按条件搜素工作中心
 function searchWorkCenterList() {
   showingPage.value = 1;
   getWorkCenterList();
 }
-// 重置搜索
+//重置搜素
 function resetSearch() {
-  searchWorkCenterId.value = undefined;
-  searchWorkCenterName.value = undefined;
-  searchType.value = undefined;
-  searchWorkCenterAddress.value = undefined;
-  searchCreator.value = undefined;
-  searchStartCreateTime.value = undefined;
-  searchEndCreateTime.value = undefined;
-  searchStartUpdateTime.value = undefined;
-  searchEndUpdateTime.value = undefined;
-  searchUpdatePerson.value = undefined;
-  workCenterId.value = "";
+  showingPage.value = 1;
+  searchWorkCenterName.value = "";
+  searchType.value = "";
+  searchWorkCenterAddress.value = "";
   getWorkCenterList();
 }
 // 重置正在操作的行数据
 function resetRow() {
   operateRow.value = {
-    work_center_id: undefined,
-    type: undefined,
-    work_center_name: undefined,
-    work_center_address: undefined,
+    work_center_id: "",
+    type: "",
+    work_center_name: "",
+    work_center_address: "",
   };
 }
 // 添加工作中心
@@ -209,6 +108,7 @@ async function addWorkCenter() {
   // 关闭对话框
   dialogAdd.value = false;
 }
+
 // 修改工作中心
 async function updateWorkCenter() {
   await useHttp("/WorkCenter/M15UpdateWorkCenter", "put", {
@@ -233,23 +133,23 @@ async function deleteWorkCenter() {
   // 关闭对话框
   dialogDelete.value = false;
 }
-//点击筛选当前工作中心的设备和工位
-function getMachineList(item: any, obj: any) {
-  workCenterId.value = obj.item.raw.work_center_id;
-  asCode.value = "";
-}
-watch(workCenterId, function () {
-  machinePage.value = 1;
-  workCenterDetailPage.value = 1;
+let chineData = ref(true);
+let stationData = ref(false);
+//点击查看工作中心中的设备信息和工位信息
+function showWorkCenter(item: any) {
+  workCenterId.value = item.work_center_id;
+  workCenterName.value = item.work_center_name;
   getMachineData();
   getWorkCenterDetail();
-});
+  chineData.value = true;
+  stationData.value = false;
+  dialogShow.value = true;
+}
 
 //设备信息
 // 设备表格所有数据
 let machineList = ref<any[]>([]);
-//存储行政编码的字段
-let asCode = ref<string>("");
+
 //设备对象
 let operateMachine = ref<any>();
 // 表格当前页
@@ -261,81 +161,8 @@ watch(machinePage, function () {
 let machineTotalPageCount = ref<number>(0);
 // 表格总页数
 const machineTablePageCount = computed(() => {
-  return Math.ceil(machineTotalPageCount.value / 10);
+  return Math.ceil(machineTotalPageCount.value / 4);
 });
-//定义设备信息的表头
-let machineHeaders = ref<any[]>([
-  {
-    title: "序号",
-    key: "id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "设备编号",
-    key: "administrative_code",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "固定资产名称",
-    key: "machine_name",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "使用部门",
-    key: "user_department",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "使用人",
-    key: "user",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "购入日期",
-    key: "purchase_date",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "规格型号",
-    key: "equipment_type",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "领用时间",
-    key: "receive_time",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "放置位置",
-    key: "machine_site",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "操作",
-    key: "action",
-    align: "center",
-    sortable: false,
-    filterable: false,
-  },
-]);
 //获取数据
 async function getMachineData() {
   try {
@@ -349,7 +176,7 @@ async function getMachineData() {
         machine_name: machineNameSearch.value,
         user: userNameSearch.value,
         PageIndex: machinePage.value,
-        PageSize: 10,
+        PageSize: 4,
         SortedBy: "id",
         SortType: 1,
       }
@@ -364,7 +191,6 @@ async function getMachineData() {
     console.log(error);
   }
 }
-
 //搜素操作
 let codeSearch = ref("");
 let machineNameSearch = ref("");
@@ -377,7 +203,6 @@ function getMachineSearch() {
 //重置搜素
 function resetMachineSearch() {
   machinePage.value = 1;
-  asCode.value = "";
   (codeSearch.value = ""),
     (machineNameSearch.value = ""),
     (userNameSearch.value = "");
@@ -446,14 +271,6 @@ async function deleteMachine() {
   }
   dialogDeleteMachine.value = false;
 }
-//点击获取行政编码
-function getWorkCenterDetailList(item: any, obj: any) {
-  asCode.value = obj.item.raw.administrative_code;
-}
-watch(asCode, function () {
-  workCenterDetailPage.value = 1;
-  getWorkCenterDetail();
-});
 
 //工位信息
 //工位表格的所有数据
@@ -469,68 +286,8 @@ watch(workCenterDetailPage, function () {
 let workCenterDetailCount = ref<number>(0);
 //数据一共有多少页
 const workCenterDetailPageCount = computed(() => {
-  return Math.ceil(workCenterDetailCount.value / 10);
+  return Math.ceil(workCenterDetailCount.value / 8);
 });
-//定义工位表头
-let workCenterDetailHeaders = ref<any[]>([
-  {
-    title: "序号",
-    key: "id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工作中心编号",
-    key: "work_center_id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "行政编码",
-    key: "administrative_code",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工位编号",
-    key: "station_id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工位名称",
-    key: "station_name",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "员工编号",
-    key: "employee_id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "员工名称",
-    key: "employee_name",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "操作",
-    key: "action",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-]);
-//获取数据
 //获取数据
 async function getWorkCenterDetail() {
   try {
@@ -540,11 +297,11 @@ async function getWorkCenterDetail() {
       undefined,
       {
         work_center_id: workCenterId.value,
-        administrative_code: asCode.value,
+        administrative_code: "",
         station_name: stationNameSearch.value,
         employee_name: employeeNameSearch.value,
         PageIndex: workCenterDetailPage.value,
-        PageSize: 10,
+        PageSize: 8,
         SortedBy: "id",
         SortType: 1,
       }
@@ -555,7 +312,6 @@ async function getWorkCenterDetail() {
     console.log(error);
   }
 }
-
 //搜素操作
 let stationNameSearch = ref<string>("");
 let employeeNameSearch = ref<string>("");
@@ -579,7 +335,7 @@ let dialogDeleteDetail = ref<boolean>(false);
 function resetCenterDetail() {
   operateWorkCenterDetail.value = {
     station_id: "",
-    administrative_code: asCode.value,
+    administrative_code: "",
     employee_name: "",
     work_center_id: workCenterId.value,
     station_name: "",
@@ -623,434 +379,498 @@ async function deleteCenterDetail() {
   getWorkCenterDetail();
   dialogDeleteDetail.value = false;
 }
+
+//显示设备信息
+function showChine() {
+  getMachineData();
+  chineData.value = true;
+  stationData.value = false;
+}
+//显示工位信息
+function showStation() {
+  getWorkCenterDetail();
+  chineData.value = false;
+  stationData.value = true;
+}
+//关闭工作中心信息
+function cancelDialog() {
+  chineData.value = true;
+  stationData.value = false;
+  dialogShow.value = false;
+}
 </script>
-
 <template>
-  <v-row>
-    <!-- 左边的工作中心表 -->
-    <v-col cols="6">
-      <v-card>
-        <v-toolbar class="text-h6 pl-6">工作中心</v-toolbar>
-        <v-data-table
-          :items-per-page="15"
-          :headers="headers"
-          :items="workCenterList"
-          style="overflow-x: auto; white-space: nowrap"
-          fixed-footer
-          fixed-header
-          height="846px"
-          no-data-text="没有找到符合的数据"
-          hover
-          @click:row="getMachineList"
-        >
-          <template v-slot:item.id="{ index }">
-            {{ index + 1 }}
-          </template>
-          <template v-slot:item.action="{ item }">
-            <v-icon
-              size="small"
-              color="blue"
-              class="mr-3"
-              @click="
-                dialogUpdate = true;
-                operateRow = { ...item.raw };
-              "
-              >fa-solid fa-pen</v-icon
-            >
-            <v-icon
-              size="small"
-              color="red"
-              @click="
-                dialogDelete = true;
-                operateRow = { ...item.raw };
-              "
-              >fa-solid fa-trash</v-icon
-            >
-          </template>
-
-          <template v-slot:top>
-            <v-row no-gutters>
-              <v-col cols="3">
-                <v-text-field
-                  label="工作中心编号"
-                  v-model="searchWorkCenterId"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="工作中心名称"
-                  v-model="searchWorkCenterName"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="工作中心类型"
-                  v-model="searchType"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="工作中心地址"
-                  v-model="searchWorkCenterAddress"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="3">
-                <v-text-field
-                  label="创建人"
-                  v-model="searchCreator"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="创建时间（起始）"
-                  v-model="searchStartCreateTime"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="创建时间（结束）"
-                  v-model="searchEndCreateTime"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="3">
-                <v-text-field
-                  label="更新人"
-                  v-model="searchUpdatePerson"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="更新时间（起始）"
-                  v-model="searchStartUpdateTime"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="更新时间（结束）"
-                  v-model="searchEndUpdateTime"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="12" class="mt-3">
-                <v-btn
-                  size="large"
-                  color="black"
-                  class="mx-3"
-                  prepend-icon="fa-solid fa-search"
-                  @click="searchWorkCenterList()"
-                  >条件查询</v-btn
-                >
-                <v-btn
-                  size="large"
-                  color="red"
-                  class="mr-3"
-                  prepend-icon="fa-solid fa-hourglass-start"
-                  @click="resetSearch()"
-                  >重置查询</v-btn
-                >
-                <v-btn
-                  size="large"
-                  color="teal"
-                  class="mr-3"
-                  prepend-icon="fa-solid fa-add"
-                  @click="
-                    dialogAdd = true;
-                    resetRow();
-                  "
-                  >新增工作中心</v-btn
-                >
-              </v-col>
-            </v-row>
-            <v-divider class="mt-3"></v-divider>
-          </template>
-
-          <template v-slot:bottom>
-            <v-pagination
-              v-model="showingPage"
-              :length="workCenterCount"
-            ></v-pagination>
-          </template>
-        </v-data-table>
-      </v-card>
+  <v-row class="ma-3">
+    <v-col cols="4">
+      <v-text-field
+        label="工作中心名称"
+        v-model="searchWorkCenterName"
+        variant="outlined"
+        density="compact"
+        class="mt-3"
+        hide-details
+      ></v-text-field>
+    </v-col>
+    <v-col cols="4">
+      <v-text-field
+        label="工作中心类型"
+        v-model="searchType"
+        variant="outlined"
+        density="compact"
+        class="mt-3"
+        hide-details
+      ></v-text-field>
+    </v-col>
+    <v-col cols="4">
+      <v-text-field
+        label="工作中心地址"
+        v-model="searchWorkCenterAddress"
+        variant="outlined"
+        density="compact"
+        class="mt-3"
+        hide-details
+      ></v-text-field>
+    </v-col>
+    <v-col cols="12" class="mt-3">
+      <v-btn
+        size="large"
+        color="blue-darken-2"
+        class="mr-3"
+        prepend-icon="fa-solid fa-search"
+        @click="searchWorkCenterList()"
+        >条件查询</v-btn
+      >
+      <v-btn
+        size="large"
+        color="red"
+        class="mr-3"
+        prepend-icon="fa-solid fa-hourglass-start"
+        @click="resetSearch()"
+        >重置查询</v-btn
+      >
+      <v-btn
+        size="large"
+        color="blue-darken-2"
+        class="mr-3"
+        prepend-icon="fa-solid fa-add"
+        @click="
+          dialogAdd = true;
+          resetRow();
+        "
+        >新增工作中心</v-btn
+      >
     </v-col>
 
-    <!-- 右边的俩个表 -->
-    <v-col cols="6">
-      <!-- 设备信息表 -->
-      <v-card>
-        <v-toolbar v-if="workCenterId" class="text-h6 pl-6"
-          >工作中心编号{{ workCenterId }}=>设备信息</v-toolbar
+    <v-col
+      cols="2"
+      v-for="(item, index) in workCenterList"
+      :key="index"
+      class="mt-4"
+    >
+      <v-card rounded="lg" @click="showWorkCenter(item)">
+        <v-img
+          src="/工作中心.jpg"
+          height="150px"
+          cover
+          class="align-end"
+          gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.3)"
         >
-        <v-toolbar v-else class="text-h6 pl-6">设备信息</v-toolbar>
-        <v-data-table
-          :headers="machineHeaders"
-          :items="machineList"
-          style="overflow-x: auto; white-space: nowrap"
-          fixed-footer
-          fixed-header
-          height="350px"
-          no-data-text="没有找到符合的数据"
-          hover
-          @click:row="getWorkCenterDetailList"
+          <div class="d-flex justify-space-between">
+            <v-card-title class="text-white">{{
+              item.work_center_name
+            }}</v-card-title>
+            <div class="align-self-center" style="opacity: 0.8">
+              <v-icon
+                size="small"
+                color="white"
+                class="mr-3"
+                @click.stop="
+                  dialogUpdate = true;
+                  operateRow = { ...item };
+                "
+                >fa-solid fa-pen</v-icon
+              >
+              <v-icon
+                size="small"
+                color="white"
+                class="mr-3"
+                @click.stop="
+                  dialogDelete = true;
+                  operateRow = { ...item };
+                "
+                >fa-solid fa-trash</v-icon
+              >
+            </div>
+          </div>
+        </v-img>
+        <v-list class="w-100">
+          <v-list-item>
+            <template v-slot:prepend>
+              <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
+              <div>
+                编号：
+                <span class="text-body-2 text-grey-darken-2">{{
+                  item.work_center_id
+                }}</span>
+              </div>
+            </template>
+          </v-list-item>
+          <v-divider></v-divider>
+          <v-list-item>
+            <template v-slot:prepend>
+              <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
+              <div>
+                类型：
+                <span class="text-body-2 text-grey-darken-2">{{
+                  item.type
+                }}</span>
+              </div>
+            </template>
+          </v-list-item>
+          <v-divider></v-divider>
+          <v-list-item>
+            <template v-slot:prepend>
+              <v-icon class="mr-5">fa-solid fa-location-dot</v-icon>
+              <div>
+                地址：<span class="text-body-2 text-grey-darken-2">{{
+                  item.work_center_address
+                }}</span>
+              </div>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-card>
+    </v-col>
+  </v-row>
+  <div class="text-center">
+    <v-pagination
+      v-model="showingPage"
+      :length="workCenterCount"
+    ></v-pagination>
+  </div>
+  <!-- 工作中心内容 -->
+  <v-dialog v-model="dialogShow" class="my-dialog" max-width="90vw">
+    <v-card>
+      <v-toolbar
+        style="position: sticky; top: 0; z-index: 1000"
+        class="text-h6"
+        color="blue-darken-2"
+      >
+        <v-toolbar-title class="text-h5 font-weight-medium"
+          >工作中心【{{ workCenterName }}】的设备与工位信息</v-toolbar-title
         >
-          <template v-slot:item.id="{ index }">
-            {{ index + 1 }}
-          </template>
-          <template v-slot:item.action="{ item }">
-            <v-icon
-              size="small"
-              color="blue"
-              class="mr-3"
-              @click="
-                dialogUpdateMachine = true;
-                operateMachine = { ...item.raw };
-              "
-              >fa-solid fa-pen</v-icon
-            >
-            <v-icon
-              size="small"
-              color="red"
-              @click="
-                dialogDeleteMachine = true;
-                operateMachine = { ...item.raw };
-              "
-              >fa-solid fa-trash</v-icon
-            >
-          </template>
-
-          <template v-slot:top>
-            <v-row no-gutters>
-              <v-col cols="4">
-                <v-text-field
-                  label="设备编号"
-                  v-model="codeSearch"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="4">
-                <v-text-field
-                  label="固定资产名称"
-                  v-model="machineNameSearch"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="4">
-                <v-text-field
-                  label="使用人"
-                  v-model="userNameSearch"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" class="mt-3">
-                <v-btn
-                  size="large"
-                  color="black"
-                  class="mx-3"
-                  prepend-icon="fa-solid fa-search"
-                  @click="getMachineSearch()"
-                  >条件查询</v-btn
+        <v-spacer></v-spacer>
+        <v-icon size="x-large" @click="cancelDialog" class="mr-2"
+          >fa-solid fa-remove</v-icon
+        >
+      </v-toolbar>
+      <div>
+        <v-tabs fixed-tabs>
+          <v-tab @click="showChine" class="text-h6 font-weight-bold">
+            设备({{ machineTotalPageCount }})
+          </v-tab>
+          <v-tab @click="showStation" class="text-h6 font-weight-bold">
+            工位({{ workCenterDetailCount }})
+          </v-tab>
+        </v-tabs>
+      </div>
+      <!-- 设备信息 -->
+      <v-row class="ma-3" v-if="chineData">
+        <v-col cols="4">
+          <v-text-field
+            label="设备编号"
+            v-model="codeSearch"
+            variant="outlined"
+            density="compact"
+            hide-details
+          ></v-text-field>
+        </v-col>
+        <v-col cols="4">
+          <v-text-field
+            label="设备名称"
+            v-model="machineNameSearch"
+            variant="outlined"
+            density="compact"
+            hide-details
+          ></v-text-field>
+        </v-col>
+        <v-col cols="4">
+          <v-text-field
+            label="使用人"
+            v-model="userNameSearch"
+            variant="outlined"
+            density="compact"
+            hide-details
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12">
+          <v-btn
+            size="large"
+            color="blue-darken-2"
+            class="mr-3"
+            prepend-icon="fa-solid fa-search"
+            @click="getMachineSearch()"
+            >条件查询</v-btn
+          >
+          <v-btn
+            size="large"
+            color="red"
+            class="mr-3"
+            prepend-icon="fa-solid fa-hourglass-start"
+            @click="resetMachineSearch()"
+            >重置查询</v-btn
+          >
+          <v-btn
+            size="large"
+            color="blue-darken-2"
+            class="mr-3"
+            prepend-icon="fa-solid fa-add"
+            @click="
+              dialogAddMachine = true;
+              showAddMachineDialog();
+            "
+            >新增设备</v-btn
+          >
+        </v-col>
+        <v-col
+          cols="3"
+          v-for="(item, index) in machineList"
+          :key="index"
+          v-if="machineList.length"
+        >
+          <v-card>
+            <v-img src="/设备.png" height="100px" class="align-end">
+              <div class="d-flex justify-end mb-2" style="opacity: 0.8">
+                <v-icon
+                  size="small"
+                  color="blue"
+                  class="mr-3"
+                  @click="
+                    dialogUpdateMachine = true;
+                    operateMachine = { ...item };
+                  "
+                  >fa-solid fa-pen</v-icon
                 >
-                <v-btn
-                  size="large"
+                <v-icon
+                  size="small"
                   color="red"
                   class="mr-3"
-                  prepend-icon="fa-solid fa-hourglass-start"
-                  @click="resetMachineSearch()"
-                  >重置查询</v-btn
-                >
-                <v-btn
-                  size="large"
-                  color="teal"
-                  class="mr-3"
-                  v-if="workCenterId"
-                  prepend-icon="fa-solid fa-add"
                   @click="
-                    dialogAddMachine = true;
-                    showAddMachineDialog();
+                    dialogDeleteMachine = true;
+                    operateMachine = { ...item };
                   "
-                  >新增设备</v-btn
+                  >fa-solid fa-trash</v-icon
                 >
-              </v-col>
-            </v-row>
-            <v-divider class="mt-3"></v-divider>
-          </template>
+              </div>
+            </v-img>
 
-          <template v-slot:bottom>
+            <v-list class="w-100">
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-solid fa-file-signature</v-icon>
+                  <div>
+                    名称：<span class="text-body-2 text-grey-darken-2">{{
+                      item.machine_name
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
+                  <div>
+                    型号：<span class="text-body-2 text-grey-darken-2">{{
+                      item.equipment_type
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-regular fa-calendar-plus</v-icon>
+                  <div>
+                    购入日期：<span class="text-body-2 text-grey-darken-2">{{
+                      item.purchase_date
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-regular fa-calendar-check</v-icon>
+                  <div>
+                    领用日期：<span class="text-body-2 text-grey-darken-2">{{
+                      item.receive_time
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
+                  <div>
+                    部门：<span class="text-body-2 text-grey-darken-2">{{
+                      item.user_department
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-solid fa-chalkboard-user</v-icon>
+                  <div>
+                    负责人：<span class="text-body-2 text-grey-darken-2">{{
+                      item.user
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-col>
+        <v-col v-else>
+          <div class="text-center text-h5 text-grey">当前工作中心没有设备</div>
+        </v-col>
+        <v-col cols="12">
+          <div class="text-center">
             <v-pagination
               v-model="machinePage"
               :length="machineTablePageCount"
             ></v-pagination>
-          </template>
-        </v-data-table>
-      </v-card>
-      <!-- 工位信息表 -->
-      <v-card>
-        <v-toolbar class="text-h6 pl-6" v-if="workCenterId && asCode"
-          >工作中心编号{{ workCenterId }}=>行政编码{{
-            asCode
-          }}=>工位信息</v-toolbar
-        >
-        <v-toolbar class="text-h6 pl-6" v-else-if="workCenterId"
-          >工作中心编号{{ workCenterId }}=>工位信息</v-toolbar
-        >
-        <v-toolbar class="text-h6 pl-6" v-else-if="asCode"
-          >行政编码{{ asCode }}=>工位信息</v-toolbar
-        >
-        <v-toolbar class="text-h6 pl-6" v-else>工位信息</v-toolbar>
-        <v-data-table
-          :headers="workCenterDetailHeaders"
-          :items="workCenterDetailList"
-          :items-per-page="10"
-          style="overflow-x: auto; white-space: nowrap"
-          fixed-footer
-          fixed-header
-          height="350px"
-          no-data-text="没有找到符合的数据"
-          hover
-        >
-          <template v-slot:item.id="{ index }">
-            {{ index + 1 }}
-          </template>
-          <template v-slot:item.action="{ item }">
-            <v-icon
-              size="small"
-              color="blue"
-              class="mr-3"
-              @click="
-                dialogUpdateDetail = true;
-                operateWorkCenterDetail = { ...item.raw };
-              "
-              >fa-solid fa-pen</v-icon
-            >
-            <v-icon
-              size="small"
-              color="red"
-              @click="
-                dialogDeleteDetail = true;
-                operateWorkCenterDetail = { ...item.raw };
-              "
-              >fa-solid fa-trash</v-icon
-            >
-          </template>
+          </div>
+        </v-col>
+      </v-row>
 
-          <template v-slot:top>
-            <v-row no-gutters>
-              <v-col cols="6">
-                <v-text-field
-                  label="工位名称"
-                  v-model="stationNameSearch"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  label="员工名称"
-                  v-model="employeeNameSearch"
-                  variant="outlined"
-                  density="compact"
-                  class="mt-3 ml-3"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="12" class="mt-3">
-                <v-btn
-                  size="large"
-                  color="black"
-                  class="mx-3"
-                  prepend-icon="fa-solid fa-search"
-                  @click="searchWorkCenterDetail()"
-                  >条件查询</v-btn
+      <!--工位信息 -->
+      <v-row class="ma-3" v-if="stationData">
+        <v-col cols="6">
+          <v-text-field
+            label="工位名称"
+            v-model="stationNameSearch"
+            variant="outlined"
+            density="compact"
+            hide-details
+          ></v-text-field>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field
+            label="员工名称"
+            v-model="employeeNameSearch"
+            variant="outlined"
+            density="compact"
+            hide-details
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12">
+          <v-btn
+            size="large"
+            color="blue-darken-2"
+            class="mr-3"
+            prepend-icon="fa-solid fa-search"
+            @click="searchWorkCenterDetail()"
+            >条件查询</v-btn
+          >
+          <v-btn
+            size="large"
+            color="red"
+            class="mr-3"
+            prepend-icon="fa-solid fa-hourglass-start"
+            @click="resetSearchWorkCenterDetail()"
+            >重置查询</v-btn
+          >
+          <v-btn
+            size="large"
+            color="blue-darken-2"
+            class="mr-3"
+            v-if="workCenterId"
+            prepend-icon="fa-solid fa-add"
+            @click="
+              dialogAddDetail = true;
+              resetCenterDetail();
+            "
+            >新增工位</v-btn
+          >
+        </v-col>
+        <v-col
+          cols="3"
+          v-for="(item, index) in workCenterDetailList"
+          :key="index"
+          v-if="workCenterDetailList.length"
+        >
+          <v-card class="rounded-pill">
+            <v-img src="/工位.png" height="100px" class="align-end">
+              <div class="d-flex justify-end mb-2" style="opacity: 0.8">
+                <v-icon
+                  size="small"
+                  color="blue"
+                  class="mr-3"
+                  @click="
+                    dialogUpdateDetail = true;
+                    operateWorkCenterDetail = { ...item };
+                  "
+                  >fa-solid fa-pen</v-icon
                 >
-                <v-btn
-                  size="large"
+                <v-icon
+                  size="small"
                   color="red"
                   class="mr-3"
-                  prepend-icon="fa-solid fa-hourglass-start"
-                  @click="resetSearchWorkCenterDetail()"
-                  >重置查询</v-btn
-                >
-                <v-btn
-                  size="large"
-                  color="teal"
-                  class="mr-3"
-                  v-if="workCenterId"
-                  prepend-icon="fa-solid fa-add"
                   @click="
-                    dialogAddDetail = true;
-                    resetCenterDetail();
+                    dialogDeleteDetail = true;
+                    operateWorkCenterDetail = { ...item };
                   "
-                  >新增工位</v-btn
+                  >fa-solid fa-trash</v-icon
                 >
-              </v-col>
-            </v-row>
-            <v-divider class="mt-3"></v-divider>
-          </template>
+              </div>
+            </v-img>
 
-          <template v-slot:bottom>
+            <v-list class="w-100">
+              <v-list-item class="d-flex justify-center">
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
+                  <div>
+                    名称：
+                    <span class="text-body-2 text-grey-darken-2">{{
+                      item.station_name
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item class="d-flex justify-center">
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-solid fa-circle-user</v-icon>
+                  <div>
+                    员工：
+                    <span class="text-body-2 text-grey-darken-2">{{
+                      item.employee_name
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-col>
+        <v-col v-else>
+          <div class="text-center text-h5 text-grey">
+            当前工作中心没有设置工位
+          </div>
+        </v-col>
+        <v-col cols="12">
+          <div class="text-center">
             <v-pagination
               v-model="workCenterDetailPage"
               :length="workCenterDetailPageCount"
             ></v-pagination>
-          </template>
-        </v-data-table>
-      </v-card>
-    </v-col>
-  </v-row>
+          </div>
+        </v-col>
+      </v-row>
+    </v-card>
+  </v-dialog>
   <!-- 新增工作中心 -->
   <v-dialog v-model="dialogAdd" max-width="400">
     <v-card>
@@ -1086,7 +906,9 @@ async function deleteCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="addWorkCenter()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="addWorkCenter()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogAdd = false">取消</v-btn>
       </div>
     </v-card>
@@ -1126,7 +948,7 @@ async function deleteCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="blue" class="mr-3" @click="updateWorkCenter()"
+        <v-btn color="blue-darken-2" class="mr-3" @click="updateWorkCenter()"
           >确认</v-btn
         >
         <v-btn color="grey" class="mr-3" @click="dialogUpdate = false"
@@ -1146,11 +968,13 @@ async function deleteCenterDetail() {
         >
       </v-toolbar>
       <v-card-text class="my-6 text-h6 text-red font-weight-medium text-center">
-        您确认要删除吗？
+        您确认要删除"{{ operateRow.work_center_name }}"这条工作中心吗？
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="red" class="mr-3" @click="deleteWorkCenter()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="deleteWorkCenter()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogDelete = false"
           >取消</v-btn
         >
@@ -1214,7 +1038,9 @@ async function deleteCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="addMachine()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="addMachine()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogAddMachine = false"
           >取消</v-btn
         >
@@ -1281,7 +1107,9 @@ async function deleteCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="upDateMachine()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="upDateMachine()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogUpdateMachine = false"
           >取消</v-btn
         >
@@ -1303,7 +1131,9 @@ async function deleteCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="red" class="mr-3" @click="deleteMachine()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="deleteMachine()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogDeleteMachine = false"
           >取消</v-btn
         >
@@ -1346,7 +1176,7 @@ async function deleteCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="addCenterDetail()"
+        <v-btn color="blue-darken-2" class="mr-3" @click="addCenterDetail()"
           >确认</v-btn
         >
         <v-btn color="grey" class="mr-3" @click="dialogAddDetail = false"
@@ -1400,7 +1230,7 @@ async function deleteCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="updateCenterDetail()"
+        <v-btn color="blue-darken-2" class="mr-3" @click="updateCenterDetail()"
           >确认</v-btn
         >
         <v-btn color="grey" class="mr-3" @click="dialogUpdateDetail = false"
@@ -1426,7 +1256,7 @@ async function deleteCenterDetail() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="red" class="mr-3" @click="deleteCenterDetail()"
+        <v-btn color="blue-darken-2" class="mr-3" @click="deleteCenterDetail()"
           >确认</v-btn
         >
         <v-btn color="grey" class="mr-3" @click="dialogDeleteDetail = false"
@@ -1436,3 +1266,23 @@ async function deleteCenterDetail() {
     </v-card>
   </v-dialog>
 </template>
+<style scoped>
+@keyframes my-animation {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.my-dialog {
+  animation: my-animation 0.5s ease-out;
+}
+.dialog-right-top-icon {
+  z-index: 1;
+  position: fixed;
+  right: 1.3vw;
+  top: 1vh;
+}
+</style>
