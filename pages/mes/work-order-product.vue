@@ -385,6 +385,7 @@ let productDataLength = ref<number>(0);
 let chips = ref<any[]>([]); //存储常用工序
 let droppedChips = ref<any[]>([]); //维护选择的工序
 let draggedChip = ref(null);
+let dragSrcEl = ref<number>(0);
 let produceGroups = ref(); //常用工艺路线
 //实现拖拽功能的方法
 function dragStart(chip: any) {
@@ -399,6 +400,18 @@ function drop() {
     chips.value = chips.value.filter((chip) => chip !== draggedChip.value);
   }
 }
+function dragstartItem(evt: DragEvent, index: number) {
+  dragSrcEl.value = index;
+  evt.dataTransfer!.effectAllowed = "move";
+}
+function dropItem(evt: DragEvent, index: number) {
+  if (dragSrcEl.value !== null && dragSrcEl.value !== index) {
+    const draggedElement = droppedChips.value[dragSrcEl.value];
+    droppedChips.value.splice(dragSrcEl.value, 1);
+    droppedChips.value.splice(index, 0, draggedElement);
+  }
+}
+
 function removeChip(index: number) {
   const removedChip = droppedChips.value.splice(index, 1)[0];
   chips.value.push(removedChip);
@@ -541,6 +554,13 @@ function cancelProcess() {
 async function saveComUsedProduce() {
   try {
     let names = droppedChips.value.join(",");
+    let isExist = produceGroups.value.some(
+      (group: any) => group.rsv2 === names
+    );
+    if (isExist) {
+      setSnackbar("black", "该工序路线已存在，无法重复添加");
+      return;
+    }
     await useHttp("/MesWorkProcess/M48AddProcessBasis", "post", {
       ids: "1,2,3",
       names: names,
@@ -1906,10 +1926,15 @@ const dateRule = ref<any>([
                   v-for="(chip, index) in droppedChips"
                   :key="index"
                   color="primary"
+                  border
                   text-color="white"
-                  draggable="true"
                   v-if="droppedChips.length !== 0"
+                  style="background-color: rgb(222, 237, 234)"
                   :title="chip"
+                  draggable="true"
+                  @dragstart="dragstartItem($event, index)"
+                  @dragover.prevent
+                  @drop="dropItem($event, index)"
                 >
                   <template v-slot:prepend>
                     <v-badge color="red" overlap class="mr-4"> </v-badge
