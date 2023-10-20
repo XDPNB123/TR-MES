@@ -203,6 +203,49 @@ watch(
         </div>
       </template>
 
+      <template v-slot:default>
+        <v-menu
+          open-on-hover
+          open-delay="0"
+          close-delay="100"
+          v-for="(item, index) in pageMenus"
+          :key="index"
+        >
+          <template v-slot:activator="{ props }">
+            <v-btn
+              class="rounded-0"
+              color="blue-darken-2"
+              :class="{
+                'white-text': router.currentRoute.value.fullPath.startsWith(
+                  item.path
+                ),
+              }"
+              variant="flat"
+              v-bind="props"
+            >
+              <v-icon>{{ item.icon }}</v-icon>
+              <div class="mx-6">{{ item.name }}</div>
+              <v-icon>fa-solid fa-angle-down</v-icon>
+            </v-btn>
+          </template>
+
+          <v-list rounded="lg" class="pa-3">
+            <!-- 当 url 匹配到 to 时，就会触发 active-class -->
+            <v-list-item
+              rounded="lg"
+              active-class="list-item-active"
+              v-for="(item_, index_) in item.children"
+              :key="index_"
+              :to="item_.path"
+              :prepend-icon="item_.icon"
+              :title="item_.name"
+              @click="addTab(item_)"
+            >
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </template>
+
       <template v-slot:append>
         <v-btn
           class="mr-3"
@@ -256,53 +299,14 @@ watch(
           <v-col cols="3">
             <div
               v-if="selectTab"
-              class="font-weight-bold text-blue-darken-2 h-100 d-flex align-center"
+              class="font-weight-bold text-body-2 text-blue-darken-2 h-100 d-flex align-center"
             >
               <v-icon size="small" class="mx-2">{{ selectTab?.icon }}</v-icon>
-              {{ `${selectTab?.parentName ?? ""} >> ${selectTab?.name ?? ""}` }}
+              {{ `${selectTab?.parentName ?? ""} > ${selectTab?.name ?? ""}` }}
             </div>
           </v-col>
-          <v-col cols="6" class="text-center">
-            <v-menu
-              open-on-hover
-              open-delay="0"
-              close-delay="100"
-              v-for="(item, index) in pageMenus"
-              :key="index"
-            >
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  class="rounded-0"
-                  :class="{
-                    'text-blue-darken-2':
-                      router.currentRoute.value.fullPath.startsWith(item.path),
-                  }"
-                  variant="flat"
-                  v-bind="props"
-                >
-                  <v-icon>{{ item.icon }}</v-icon>
-                  <div class="mx-6">{{ item.name }}</div>
-                  <v-icon>fa-solid fa-angle-down</v-icon>
-                </v-btn>
-              </template>
-
-              <v-list rounded="lg" class="pa-3">
-                <!-- 当 url 匹配到 to 时，就会触发 active-class -->
-                <v-list-item
-                  rounded="lg"
-                  active-class="list-item-active"
-                  v-for="(item_, index_) in item.children"
-                  :key="index_"
-                  :to="item_.path"
-                  :prepend-icon="item_.icon"
-                  :title="item_.name"
-                  @click="addTab(item_)"
-                >
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-col>
-          <v-col cols="3" class="text-right">
+          <!-- <v-col cols="6" class="text-center"> </v-col> -->
+          <v-col cols="9" class="text-right">
             <v-menu
               open-on-hover
               open-delay="0"
