@@ -22,7 +22,7 @@
       </v-col>
       <v-col cols="12"
         ><v-btn
-          color="black"
+          color="blue-darken-2"
           class="mr-2"
           size="large"
           @click="filterTableData()"
@@ -31,10 +31,14 @@
         <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
           重置
         </v-btn>
-        <v-btn color="green" size="large" @click="showDialogAdd" class="mr-2"
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          @click="showDialogAdd"
+          class="mr-2"
           >新增
         </v-btn>
-        <v-btn color="blue-darken-4" size="large" class="mr-2"> 导入 </v-btn>
+        <v-btn color="blue-darken-2" size="large" class="mr-2"> 导入 </v-btn>
       </v-col>
       <v-col cols="12">
         <v-data-table
@@ -118,7 +122,7 @@
           ></v-text-field>
         </v-card-text>
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue" size="large" class="mr-2" @click="addCertain()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addCertain()">
             确认
           </v-btn>
           <v-btn color="grey" size="large" @click="dialogAdd = false">
@@ -140,7 +144,7 @@
         <v-card-text>确定删除该物料吗?</v-card-text>
         <div class="d-flex justify-end mr-6 mb-4 mt-3">
           <v-btn
-            color="blue"
+            color="blue-darken-2"
             size="large"
             class="mr-2"
             @click="deleteCertain()"
@@ -184,7 +188,7 @@
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue" size="large" class="mr-2" @click="editCertain()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="editCertain()">
             确认修改
           </v-btn>
           <v-btn color="grey" size="large" @click="editDialog = false">

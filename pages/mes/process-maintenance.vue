@@ -23,7 +23,7 @@
 
       <v-col cols="12">
         <v-btn
-          color="black"
+          color="blue-darken-2"
           class="mr-2"
           size="large"
           @click="filterTableData()"
@@ -32,7 +32,7 @@
         <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
           重置
         </v-btn>
-        <v-btn color="green" class="mr-2" size="large" @click="resetAddDialog">
+        <v-btn color="blue-darken-2" class="mr-2" size="large" @click="resetAddDialog">
           新增工序
         </v-btn>
       </v-col>
@@ -114,7 +114,7 @@
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue" size="large" class="mr-2" @click="addProcess()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addProcess()">
             确认新增
           </v-btn>
           <v-btn color="grey" size="large" @click="addDialog = false">
@@ -154,7 +154,7 @@
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue" size="large" class="mr-2" @click="editProcess()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="editProcess()">
             确认修改
           </v-btn>
           <v-btn color="grey" size="large" @click="editDialog = false">
@@ -179,7 +179,7 @@
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 my-4">
-          <v-btn color="red" size="large" class="mr-2" @click="deleteProcess()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="deleteProcess()">
             确认删除
           </v-btn>
           <v-btn color="grey" size="large" @click="deleteDialog = false">

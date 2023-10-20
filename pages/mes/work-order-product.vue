@@ -1326,7 +1326,7 @@ const dateRule = ref<any>([
 
           <v-col cols="12">
             <v-btn
-              color="black"
+              color="blue-darken-2"
               class="mr-2"
               size="large"
               @click="filterTableData()"
@@ -1336,14 +1336,14 @@ const dateRule = ref<any>([
               重置查询
             </v-btn>
             <v-btn
-              color="teal"
+              color="blue-darken-2"
               class="mr-2"
               size="large"
               @click="resetAddDialog()"
             >
               新增工单
             </v-btn>
-            <v-btn color="blue" class="mr-2" size="large">导出</v-btn>
+            <v-btn color="blue-darken-2" class="mr-2" size="large">导出</v-btn>
           </v-col>
 
           <v-col cols="12">
@@ -1471,7 +1471,7 @@ const dateRule = ref<any>([
           </v-col>
           <v-col cols="10">
             <v-btn
-              color="black"
+              color="blue-darken-2"
               class="mr-2"
               size="large"
               @click="filterTableDataDetail()"
@@ -1486,14 +1486,18 @@ const dateRule = ref<any>([
               重置查询
             </v-btn>
             <v-btn
-              color="teal"
+              color="blue-darken-2"
               class="mr-2"
               size="large"
               v-if="detailName"
               @click="resetAddDetailDialog()"
               >新增明细</v-btn
             >
-            <v-btn @click="batchWork()" class="mr-2" color="blue" size="large"
+            <v-btn
+              @click="batchWork()"
+              class="mr-2"
+              color="blue-darken-2"
+              size="large"
               >批量工序维护</v-btn
             >
           </v-col>
@@ -1606,7 +1610,7 @@ const dateRule = ref<any>([
         <v-toolbar color="blue">
           <v-toolbar-title> 新增工单 </v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn icon @click="addDialog = false">
+          <v-btn @click="addDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -1652,7 +1656,7 @@ const dateRule = ref<any>([
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue" size="large" class="mr-2" @click="addTicket()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addTicket()">
             确认新增
           </v-btn>
           <v-btn color="grey" size="large" @click="addDialog = false">
@@ -1716,7 +1720,7 @@ const dateRule = ref<any>([
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue" size="large" class="mr-2" @click="editTicket()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="editTicket()">
             确认修改
           </v-btn>
           <v-btn color="grey" size="large" @click="editDialog = false">
@@ -1741,7 +1745,7 @@ const dateRule = ref<any>([
           }}"这条数据吗？
         </v-card-text>
         <div class="d-flex justify-end mr-6 my-4">
-          <v-btn color="red" size="large" class="mr-2" @click="deleteTicket()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="deleteTicket()">
             确认删除
           </v-btn>
           <v-btn color="grey" size="large" @click="deleteDialog = false">
@@ -1799,7 +1803,7 @@ const dateRule = ref<any>([
 
         <div class="d-flex justify-end mr-6 mb-4">
           <v-btn
-            color="blue"
+            color="blue-darken-2"
             size="large"
             class="mr-2"
             @click="addTicketDetail()"
@@ -1830,7 +1834,7 @@ const dateRule = ref<any>([
         </v-card-text>
         <div class="d-flex justify-end mr-6 my-4">
           <v-btn
-            color="red"
+            color="blue-darken-2"
             size="large"
             class="mr-2"
             @click="deleteTicketDetail()"
@@ -1891,7 +1895,7 @@ const dateRule = ref<any>([
 
         <div class="d-flex justify-end mr-6 mb-4">
           <v-btn
-            color="blue"
+            color="blue-darken-2"
             size="large"
             class="mr-2"
             @click="editTicketDetail()"
@@ -2002,7 +2006,7 @@ const dateRule = ref<any>([
 
         <div class="d-flex justify-end mr-6 mb-4">
           <v-btn
-            color="green"
+            color="blue-darken-2"
             v-if="droppedChips.length !== 0"
             size="large"
             class="mr-6"
@@ -2011,7 +2015,7 @@ const dateRule = ref<any>([
             <v-icon class="mr-1">fa-solid fa-plus</v-icon>
             常用工序路线
           </v-btn>
-          <v-btn color="blue" size="large" class="mr-2" @click="saveTicket()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="saveTicket()">
             保存工序
           </v-btn>
           <v-btn color="grey" size="large" @click="cancelProcess()">
@@ -2054,7 +2058,7 @@ const dateRule = ref<any>([
             </v-col>
             <v-col cols="8">
               <v-btn
-                color="black"
+                color="blue-darken-2"
                 class="mr-2"
                 size="large"
                 @click="filterProduct()"
@@ -2111,7 +2115,7 @@ const dateRule = ref<any>([
           </v-row>
         </v-card>
         <div class="d-flex justify-end mr-6 my-4">
-          <v-btn color="blue" size="large" class="mr-2" @click="saveProduct()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="saveProduct()">
             确定
           </v-btn>
           <v-btn color="grey" size="large" @click="productDialog = false">
@@ -2154,7 +2158,7 @@ const dateRule = ref<any>([
             </v-col>
             <v-col cols="8">
               <v-btn
-                color="black"
+                color="blue-darken-2"
                 class="mr-2"
                 size="large"
                 @click="filterNameProduct()"
@@ -2212,7 +2216,7 @@ const dateRule = ref<any>([
         </v-card>
         <div class="d-flex justify-end mr-6 my-4">
           <v-btn
-            color="blue"
+            color="blue-darken-2"
             size="large"
             class="mr-2"
             @click="saveMcodeProduct()"
@@ -2270,7 +2274,7 @@ const dateRule = ref<any>([
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue" size="large" class="mr-2" @click="auditTicket()">
+          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="auditTicket()">
             审核通过
           </v-btn>
           <v-btn color="grey" size="large" @click="auditDialog = false">
@@ -2295,7 +2299,7 @@ const dateRule = ref<any>([
         </v-card-text>
         <div class="d-flex justify-end mr-6 mb-4">
           <v-btn
-            color="red"
+            color="blue-darken-2"
             size="large"
             class="mr-2"
             @click="deleteComUsedProduce()"

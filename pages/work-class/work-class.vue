@@ -482,7 +482,7 @@ async function deleteWorkClassInfo() {
 
           <v-col cols="12">
             <v-btn
-              color="black"
+              color="blue-darken-2"
               class="mr-2"
               size="large"
               @click="searchWorkClass"
@@ -497,7 +497,7 @@ async function deleteWorkClassInfo() {
               重置查询
             </v-btn>
             <v-btn
-              color="teal"
+              color="blue-darken-2"
               class="mr-2"
               size="large"
               @click="showAddDialog"
@@ -590,7 +590,7 @@ async function deleteWorkClassInfo() {
 
           <v-col cols="12">
             <v-btn
-              color="black"
+              color="blue-darken-2"
               class="mr-2"
               size="large"
               @click="searchWorkClassInfo"
@@ -605,7 +605,7 @@ async function deleteWorkClassInfo() {
               重置查询
             </v-btn>
             <v-btn
-              color="teal"
+              color="blue-darken-2"
               class="mr-2"
               size="large"
               @click="showAddInfoDialog"
@@ -696,7 +696,7 @@ async function deleteWorkClassInfo() {
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn color="blue" size="large" class="mr-2" @click="addWorkClass">
+        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addWorkClass">
           确认添加
         </v-btn>
         <v-btn color="grey" size="large" @click="addDialog = false">
@@ -731,7 +731,7 @@ async function deleteWorkClassInfo() {
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn color="blue" size="large" class="mr-2" @click="editWorkClass">
+        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="editWorkClass">
           确认修改
         </v-btn>
         <v-btn color="grey" size="large" @click="editDialog = false">
@@ -755,7 +755,7 @@ async function deleteWorkClassInfo() {
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn color="blue" size="large" class="mr-2" @click="deleteWorkClass">
+        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="deleteWorkClass">
           确认删除
         </v-btn>
         <v-btn color="grey" size="large" @click="deleteDialog = false">
@@ -790,7 +790,7 @@ async function deleteWorkClassInfo() {
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn color="blue" size="large" class="mr-2" @click="addWorkClassInfo">
+        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addWorkClassInfo">
           确认添加
         </v-btn>
         <v-btn color="grey" size="large" @click="addInfoDialog = false">
@@ -830,7 +830,7 @@ async function deleteWorkClassInfo() {
 
       <div class="d-flex justify-end mr-6 mb-4">
         <v-btn
-          color="blue"
+          color="blue-darken-2"
           size="large"
           class="mr-2"
           @click="editWorkClassInfo"
@@ -859,7 +859,7 @@ async function deleteWorkClassInfo() {
 
       <div class="d-flex justify-end mr-6 mb-4">
         <v-btn
-          color="blue"
+          color="blue-darken-2"
           size="large"
           class="mr-2"
           @click="deleteWorkClassInfo"

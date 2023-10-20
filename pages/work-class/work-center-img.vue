@@ -434,7 +434,7 @@ function cancelDialog() {
     <v-col cols="12" class="mt-3">
       <v-btn
         size="large"
-        color="black"
+        color="blue-darken-2"
         class="mr-3"
         prepend-icon="fa-solid fa-search"
         @click="searchWorkCenterList()"
@@ -450,7 +450,7 @@ function cancelDialog() {
       >
       <v-btn
         size="large"
-        color="teal"
+        color="blue-darken-2"
         class="mr-3"
         prepend-icon="fa-solid fa-add"
         @click="
@@ -554,6 +554,7 @@ function cancelDialog() {
       <v-toolbar
         style="position: sticky; top: 0; z-index: 1000"
         class="text-h6"
+        color="blue-darken-2"
       >
         <v-toolbar-title class="text-h5 font-weight-medium"
           >工作中心【{{ workCenterName }}】的设备与工位信息</v-toolbar-title
@@ -605,7 +606,7 @@ function cancelDialog() {
         <v-col cols="12">
           <v-btn
             size="large"
-            color="black"
+            color="blue-darken-2"
             class="mr-3"
             prepend-icon="fa-solid fa-search"
             @click="getMachineSearch()"
@@ -621,7 +622,7 @@ function cancelDialog() {
           >
           <v-btn
             size="large"
-            color="teal"
+            color="blue-darken-2"
             class="mr-3"
             prepend-icon="fa-solid fa-add"
             @click="
@@ -638,7 +639,7 @@ function cancelDialog() {
           v-if="machineList.length"
         >
           <v-card>
-            <v-img src="/设备.png" height="150px" class="align-end">
+            <v-img src="/设备.png" height="100px" class="align-end">
               <div class="d-flex justify-end mb-2" style="opacity: 0.8">
                 <v-icon
                   size="small"
@@ -768,7 +769,7 @@ function cancelDialog() {
         <v-col cols="12">
           <v-btn
             size="large"
-            color="black"
+            color="blue-darken-2"
             class="mr-3"
             prepend-icon="fa-solid fa-search"
             @click="searchWorkCenterDetail()"
@@ -784,7 +785,7 @@ function cancelDialog() {
           >
           <v-btn
             size="large"
-            color="teal"
+            color="blue-darken-2"
             class="mr-3"
             v-if="workCenterId"
             prepend-icon="fa-solid fa-add"
@@ -802,7 +803,7 @@ function cancelDialog() {
           v-if="workCenterDetailList.length"
         >
           <v-card class="rounded-pill">
-            <v-img src="/工位.png" height="150px" class="align-end">
+            <v-img src="/工位.png" height="100px" class="align-end">
               <div class="d-flex justify-end mb-2" style="opacity: 0.8">
                 <v-icon
                   size="small"
@@ -905,7 +906,9 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="addWorkCenter()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="addWorkCenter()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogAdd = false">取消</v-btn>
       </div>
     </v-card>
@@ -945,7 +948,7 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="blue" class="mr-3" @click="updateWorkCenter()"
+        <v-btn color="blue-darken-2" class="mr-3" @click="updateWorkCenter()"
           >确认</v-btn
         >
         <v-btn color="grey" class="mr-3" @click="dialogUpdate = false"
@@ -969,7 +972,9 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="red" class="mr-3" @click="deleteWorkCenter()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="deleteWorkCenter()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogDelete = false"
           >取消</v-btn
         >
@@ -1033,7 +1038,9 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="addMachine()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="addMachine()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogAddMachine = false"
           >取消</v-btn
         >
@@ -1100,7 +1107,9 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="upDateMachine()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="upDateMachine()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogUpdateMachine = false"
           >取消</v-btn
         >
@@ -1122,7 +1131,9 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="red" class="mr-3" @click="deleteMachine()">确认</v-btn>
+        <v-btn color="blue-darken-2" class="mr-3" @click="deleteMachine()"
+          >确认</v-btn
+        >
         <v-btn color="grey" class="mr-3" @click="dialogDeleteMachine = false"
           >取消</v-btn
         >
@@ -1165,7 +1176,7 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="addCenterDetail()"
+        <v-btn color="blue-darken-2" class="mr-3" @click="addCenterDetail()"
           >确认</v-btn
         >
         <v-btn color="grey" class="mr-3" @click="dialogAddDetail = false"
@@ -1219,7 +1230,7 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="green" class="mr-3" @click="updateCenterDetail()"
+        <v-btn color="blue-darken-2" class="mr-3" @click="updateCenterDetail()"
           >确认</v-btn
         >
         <v-btn color="grey" class="mr-3" @click="dialogUpdateDetail = false"
@@ -1245,7 +1256,7 @@ function cancelDialog() {
       </v-card-text>
       <v-divider></v-divider>
       <div class="text-right my-3">
-        <v-btn color="red" class="mr-3" @click="deleteCenterDetail()"
+        <v-btn color="blue-darken-2" class="mr-3" @click="deleteCenterDetail()"
           >确认</v-btn
         >
         <v-btn color="grey" class="mr-3" @click="dialogDeleteDetail = false"
