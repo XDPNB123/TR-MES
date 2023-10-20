@@ -803,30 +803,28 @@ function cancelDialog() {
         >
           <v-card class="rounded-pill">
             <v-img src="/工位.png" height="150px" class="align-end">
-             
-                <div class="d-flex justify-end mb-2" style="opacity: 0.8">
-                  <v-icon
-                    size="small"
-                    color="blue"
-                    class="mr-3"
-                    @click="
-                      dialogUpdateDetail = true;
-                      operateWorkCenterDetail = { ...item };
-                    "
-                    >fa-solid fa-pen</v-icon
-                  >
-                  <v-icon
-                    size="small"
-                    color="red"
-                    class="mr-3"
-                    @click="
-                      dialogDeleteDetail = true;
-                      operateWorkCenterDetail = { ...item };
-                    "
-                    >fa-solid fa-trash</v-icon
-                  >
-                </div>
-            
+              <div class="d-flex justify-end mb-2" style="opacity: 0.8">
+                <v-icon
+                  size="small"
+                  color="blue"
+                  class="mr-3"
+                  @click="
+                    dialogUpdateDetail = true;
+                    operateWorkCenterDetail = { ...item };
+                  "
+                  >fa-solid fa-pen</v-icon
+                >
+                <v-icon
+                  size="small"
+                  color="red"
+                  class="mr-3"
+                  @click="
+                    dialogDeleteDetail = true;
+                    operateWorkCenterDetail = { ...item };
+                  "
+                  >fa-solid fa-trash</v-icon
+                >
+              </div>
             </v-img>
 
             <v-list class="w-100">
