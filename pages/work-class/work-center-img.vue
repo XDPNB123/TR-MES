@@ -133,12 +133,16 @@ async function deleteWorkCenter() {
   // 关闭对话框
   dialogDelete.value = false;
 }
+let chineData = ref(true);
+let stationData = ref(false);
 //点击查看工作中心中的设备信息和工位信息
 function showWorkCenter(item: any) {
   workCenterId.value = item.work_center_id;
   workCenterName.value = item.work_center_name;
   getMachineData();
   getWorkCenterDetail();
+  chineData.value = true;
+  stationData.value = false;
   dialogShow.value = true;
 }
 
@@ -375,15 +379,16 @@ async function deleteCenterDetail() {
   getWorkCenterDetail();
   dialogDeleteDetail.value = false;
 }
-let chineData = ref(true);
-let stationData = ref(false);
+
 //显示设备信息
 function showChine() {
+  getMachineData();
   chineData.value = true;
   stationData.value = false;
 }
 //显示工位信息
 function showStation() {
+  getWorkCenterDetail();
   chineData.value = false;
   stationData.value = true;
 }
@@ -853,8 +858,8 @@ function cancelDialog() {
         <v-col v-else>
           <div class="text-center text-h5 text-grey">
             当前工作中心没有设置工位
-          </div></v-col
-        >
+          </div>
+        </v-col>
         <v-col cols="12">
           <div class="text-center">
             <v-pagination
