@@ -1974,7 +1974,10 @@ const dateRule = ref<any>([
               </v-list> -->
               <draggable :list="droppedChips" group="people">
                 <template #item="{ element, index }">
-                  <v-list-item :border="true" :title="element"></v-list-item>
+                  <v-list-item
+                    :border="true"
+                    :title="index + 1 + '.' + element"
+                  ></v-list-item>
                 </template>
               </draggable>
             </v-card>
