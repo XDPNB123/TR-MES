@@ -252,17 +252,17 @@ watch(
       </template>
 
       <template v-slot:extension>
-        <div
-          class="w-100 d-flex justify-space-between pl-3 mt-1"
-          style="background-color: white"
-        >
-          <div class="text-h6 font-weight-medium text-blue-darken-2">
-            {{ selectTab?.parentName ?? "" }}
-            <span v-show="selectTab">/</span>
-            {{ selectTab?.name ?? "" }}
-          </div>
-
-          <div>
+        <v-row no-gutters style="background-color: white">
+          <v-col cols="3">
+            <div
+              v-if="selectTab"
+              class="font-weight-bold text-blue-darken-2 h-100 d-flex align-center"
+            >
+              <v-icon size="small" class="mx-2">{{ selectTab?.icon }}</v-icon>
+              {{ `${selectTab?.parentName ?? ""} >> ${selectTab?.name ?? ""}` }}
+            </div>
+          </v-col>
+          <v-col cols="6" class="text-center">
             <v-menu
               open-on-hover
               open-delay="0"
@@ -301,7 +301,8 @@ watch(
                 </v-list-item>
               </v-list>
             </v-menu>
-
+          </v-col>
+          <v-col cols="3" class="text-right">
             <v-menu
               open-on-hover
               open-delay="0"
@@ -348,8 +349,8 @@ watch(
                 </v-list-item>
               </v-list>
             </v-menu>
-          </div>
-        </div>
+          </v-col>
+        </v-row>
       </template>
     </v-app-bar>
 
