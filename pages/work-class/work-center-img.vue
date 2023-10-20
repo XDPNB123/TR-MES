@@ -161,7 +161,7 @@ watch(machinePage, function () {
 let machineTotalPageCount = ref<number>(0);
 // 表格总页数
 const machineTablePageCount = computed(() => {
-  return Math.ceil(machineTotalPageCount.value / 8);
+  return Math.ceil(machineTotalPageCount.value / 4);
 });
 //获取数据
 async function getMachineData() {
@@ -176,7 +176,7 @@ async function getMachineData() {
         machine_name: machineNameSearch.value,
         user: userNameSearch.value,
         PageIndex: machinePage.value,
-        PageSize: 8,
+        PageSize: 4,
         SortedBy: "id",
         SortType: 1,
       }
@@ -556,7 +556,7 @@ function cancelDialog() {
         class="text-h6"
       >
         <v-toolbar-title class="text-h5 font-weight-medium"
-          >{{ workCenterName }}的设备与工位信息</v-toolbar-title
+          >工作中心【{{ workCenterName }}】的设备与工位信息</v-toolbar-title
         >
         <v-spacer></v-spacer>
         <v-icon size="x-large" @click="cancelDialog" class="mr-2"
@@ -638,49 +638,71 @@ function cancelDialog() {
           v-if="machineList.length"
         >
           <v-card>
-            <v-img
-              src="/设备.jpg"
-              height="150px"
-              cover
-              class="align-end"
-              gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-            >
-              <div class="d-flex justify-space-between">
-                <v-card-title class="text-white">{{
-                  item.machine_name
-                }}</v-card-title>
-                <div class="align-self-center" style="opacity: 0.8">
-                  <v-icon
-                    size="small"
-                    color="white"
-                    class="mr-3"
-                    @click="
-                      dialogUpdateMachine = true;
-                      operateMachine = { ...item };
-                    "
-                    >fa-solid fa-pen</v-icon
-                  >
-                  <v-icon
-                    size="small"
-                    color="white"
-                    class="mr-3"
-                    @click="
-                      dialogDeleteMachine = true;
-                      operateMachine = { ...item };
-                    "
-                    >fa-solid fa-trash</v-icon
-                  >
-                </div>
+            <v-img src="/设备.png" height="150px" class="align-end">
+              <div class="d-flex justify-end mb-2" style="opacity: 0.8">
+                <v-icon
+                  size="small"
+                  color="blue"
+                  class="mr-3"
+                  @click="
+                    dialogUpdateMachine = true;
+                    operateMachine = { ...item };
+                  "
+                  >fa-solid fa-pen</v-icon
+                >
+                <v-icon
+                  size="small"
+                  color="red"
+                  class="mr-3"
+                  @click="
+                    dialogDeleteMachine = true;
+                    operateMachine = { ...item };
+                  "
+                  >fa-solid fa-trash</v-icon
+                >
               </div>
             </v-img>
 
             <v-list class="w-100">
               <v-list-item>
                 <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-solid fa-file-signature</v-icon>
+                  <div>
+                    名称：<span class="text-body-2 text-grey-darken-2">{{
+                      item.machine_name
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item>
+                <template v-slot:prepend>
                   <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
                   <div>
-                    编号：<span class="text-body-2 text-grey-darken-2">{{
-                      item.administrative_code
+                    型号：<span class="text-body-2 text-grey-darken-2">{{
+                      item.equipment_type
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-regular fa-calendar-plus</v-icon>
+                  <div>
+                    购入日期：<span class="text-body-2 text-grey-darken-2">{{
+                      item.purchase_date
+                    }}</span>
+                  </div>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon class="mr-5">fa-regular fa-calendar-check</v-icon>
+                  <div>
+                    领用日期：<span class="text-body-2 text-grey-darken-2">{{
+                      item.receive_time
                     }}</span>
                   </div>
                 </template>
@@ -701,7 +723,7 @@ function cancelDialog() {
                 <template v-slot:prepend>
                   <v-icon class="mr-5">fa-solid fa-chalkboard-user</v-icon>
                   <div>
-                    使用人：<span class="text-body-2 text-grey-darken-2">{{
+                    负责人：<span class="text-body-2 text-grey-darken-2">{{
                       item.user
                     }}</span>
                   </div>
@@ -714,7 +736,7 @@ function cancelDialog() {
           <div class="text-center text-h5 text-grey">当前工作中心没有设备</div>
         </v-col>
         <v-col cols="12">
-          <div class="text-center my-6">
+          <div class="text-center">
             <v-pagination
               v-model="machinePage"
               :length="machineTablePageCount"
@@ -779,22 +801,13 @@ function cancelDialog() {
           :key="index"
           v-if="workCenterDetailList.length"
         >
-          <v-card>
-            <v-img
-              src="/工位.jpg"
-              height="150px"
-              cover
-              class="align-end"
-              gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-            >
-              <div class="d-flex justify-space-between">
-                <v-card-title class="text-white">{{
-                  item.station_name
-                }}</v-card-title>
-                <div class="align-self-center" style="opacity: 0.8">
+          <v-card class="rounded-pill">
+            <v-img src="/工位.png" height="150px" class="align-end">
+             
+                <div class="d-flex justify-end mb-2" style="opacity: 0.8">
                   <v-icon
                     size="small"
-                    color="white"
+                    color="blue"
                     class="mr-3"
                     @click="
                       dialogUpdateDetail = true;
@@ -804,7 +817,7 @@ function cancelDialog() {
                   >
                   <v-icon
                     size="small"
-                    color="white"
+                    color="red"
                     class="mr-3"
                     @click="
                       dialogDeleteDetail = true;
@@ -813,23 +826,11 @@ function cancelDialog() {
                     >fa-solid fa-trash</v-icon
                   >
                 </div>
-              </div>
+            
             </v-img>
 
             <v-list class="w-100">
-              <v-list-item>
-                <template v-slot:prepend>
-                  <v-icon class="mr-5">fa-solid fa-hashtag</v-icon>
-                  <div>
-                    编号：
-                    <span class="text-body-2 text-grey-darken-2">{{
-                      item.station_id
-                    }}</span>
-                  </div>
-                </template>
-              </v-list-item>
-              <v-divider></v-divider>
-              <v-list-item>
+              <v-list-item class="d-flex justify-center">
                 <template v-slot:prepend>
                   <v-icon class="mr-5">fa-solid fa-layer-group</v-icon>
                   <div>
@@ -841,7 +842,7 @@ function cancelDialog() {
                 </template>
               </v-list-item>
               <v-divider></v-divider>
-              <v-list-item>
+              <v-list-item class="d-flex justify-center">
                 <template v-slot:prepend>
                   <v-icon class="mr-5">fa-solid fa-circle-user</v-icon>
                   <div>
@@ -1169,7 +1170,7 @@ function cancelDialog() {
         <v-btn color="green" class="mr-3" @click="addCenterDetail()"
           >确认</v-btn
         >
-        <v-btn color="grey" class="mr-3" @click="dialogAddMachine = false"
+        <v-btn color="grey" class="mr-3" @click="dialogAddDetail = false"
           >取消</v-btn
         >
       </div>

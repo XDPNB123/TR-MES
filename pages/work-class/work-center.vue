@@ -455,7 +455,6 @@ watch(asCode, function () {
   getWorkCenterDetail();
 });
 
-
 //工位信息
 //工位表格的所有数据
 let workCenterDetailList = ref<any[]>([]);
@@ -1350,7 +1349,7 @@ async function deleteCenterDetail() {
         <v-btn color="green" class="mr-3" @click="addCenterDetail()"
           >确认</v-btn
         >
-        <v-btn color="grey" class="mr-3" @click="dialogAddMachine = false"
+        <v-btn color="grey" class="mr-3" @click="dialogAddDetail = false"
           >取消</v-btn
         >
       </div>
