@@ -385,38 +385,7 @@ let productDataLength = ref<number>(0);
 //工序模块
 let chips = ref<any[]>([]); //存储常用工序
 let droppedChips = ref<any[]>([]); //维护选择的工序
-// let draggedChip = ref(null);
-// let dragSrcEl = ref<number>(0);
 let produceGroups = ref(); //常用工艺路线
-// //实现拖拽功能的方法
-// function dragStart(chip: any) {
-//   draggedChip.value = chip;
-// }
-// function dragEnd() {
-//   draggedChip.value = null;
-// }
-// function drop() {
-//   if (draggedChip.value) {
-//     droppedChips.value.push(draggedChip.value);
-//     chips.value = chips.value.filter((chip) => chip !== draggedChip.value);
-//   }
-// }
-// function dragstartItem(evt: DragEvent, index: number) {
-//   dragSrcEl.value = index;
-//   evt.dataTransfer!.effectAllowed = "move";
-// }
-// function dropItem(evt: DragEvent, index: number) {
-//   if (dragSrcEl.value !== null && dragSrcEl.value !== index) {
-//     const draggedElement = droppedChips.value[dragSrcEl.value];
-//     droppedChips.value.splice(dragSrcEl.value, 1);
-//     droppedChips.value.splice(index, 0, draggedElement);
-//   }
-// }
-
-// function removeChip(index: number) {
-//   const removedChip = droppedChips.value.splice(index, 1)[0];
-//   chips.value.push(removedChip);
-// }
 
 //获取全部的工序数据
 async function getProduce() {
@@ -1940,38 +1909,7 @@ const dateRule = ref<any>([
           <v-col cols="6">
             <v-card height="350px" style="overflow-y: auto">
               <v-card-subtitle>已选工序</v-card-subtitle>
-              <!-- <v-list @dragover.prevent @drop="drop">
-                <v-list-item
-                  class="ma-5"
-                  v-for="(chip, index) in droppedChips"
-                  :key="index"
-                  color="primary"
-                  border
-                  text-color="white"
-                  v-if="droppedChips.length !== 0"
-                  style="background-color: rgb(222, 237, 234)"
-                  :title="chip"
-                  draggable="true"
-                  @dragstart="dragstartItem($event, index)"
-                  @dragover.prevent
-                  @drop="dropItem($event, index)"
-                >
-                  <template v-slot:prepend>
-                    <v-badge color="red" overlap class="mr-4"> </v-badge
-                  ></template>
 
-                  <template v-slot:append>
-                    <v-icon @click="removeChip(index)" size="small"
-                      >fa-solid fa-xmark</v-icon
-                    ></template
-                  >
-                </v-list-item>
-                <v-list-item
-                  v-else
-                  subtitle="请选择工序"
-                  class="mb-5"
-                ></v-list-item>
-              </v-list> -->
               <draggable :list="droppedChips" group="people">
                 <template #item="{ element, index }">
                   <v-list-item
@@ -1986,24 +1924,7 @@ const dateRule = ref<any>([
           <v-col cols="3">
             <v-card flat height="350px" style="overflow-y: auto">
               <v-card-subtitle>可选工序</v-card-subtitle>
-              <!-- <div
-                v-for="(chip, index) in chips"
-                :key="index"
-                draggable="true"
-                @dragstart="dragStart(chip)"
-                @dragend="dragEnd"
-                v-if="chips.length !== 0"
-              >
-                <v-chip
-                  class="ma-2"
-                  color="primary"
-                  text-color="white"
-                  size="large"
-                >
-                  {{ chip }}
-                </v-chip>
-              </div>
-              <v-chip v-else>已无可选择的工序</v-chip> -->
+
               <draggable :list="chips" group="people">
                 <template #item="{ element, index }">
                   <v-list-item :border="true" :title="element"></v-list-item>
