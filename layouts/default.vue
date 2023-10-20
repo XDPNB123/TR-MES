@@ -214,9 +214,11 @@ watch(
           <template v-slot:activator="{ props }">
             <v-btn
               class="rounded-0"
+              color="blue-darken-2"
               :class="{
-                'text-blue-darken-2':
-                  router.currentRoute.value.fullPath.startsWith(item.path),
+                'white-text': router.currentRoute.value.fullPath.startsWith(
+                  item.path
+                ),
               }"
               variant="flat"
               v-bind="props"
