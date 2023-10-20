@@ -182,9 +182,12 @@ watch(
 
 <template>
   <v-app>
-    <v-app-bar extension-height="56" density="comfortable">
+    <v-app-bar color="blue-darken-2" density="compact" extension-height="44">
       <template v-slot:prepend>
-        <v-img src="/同日图标.png" width="194px" alt="同日图标" />
+        <v-img src="/同日图标.jpg" width="160px" alt="同日图标" />
+        <div class="text-white font-weight-bold text-h5 ml-1 mt-1">
+          数字化工厂系统
+        </div>
       </template>
 
       <template v-slot:append>
@@ -236,117 +239,103 @@ watch(
       </template>
 
       <template v-slot:extension>
-        <div class="w-100">
-          <v-divider></v-divider>
-          <div class="d-flex justify-space-between align-center">
-            <div>
-              <v-menu
-                open-on-hover
-                open-delay="0"
-                close-delay="100"
-                v-for="(item, index) in pageMenus"
+        <div
+          class="w-100 d-flex justify-space-between"
+          style="background-color: white"
+        >
+          <v-menu
+            open-on-hover
+            open-delay="0"
+            close-delay="100"
+            :close-on-content-click="false"
+          >
+            <template v-slot:activator="{ props }">
+              <div>
+                <v-btn variant="flat" v-bind="props" class="rounded-0">
+                  <v-badge :content="tabs.length" color="green">
+                    <v-icon>fa-regular fa-folder-open</v-icon>
+                  </v-badge>
+                </v-btn>
+                <span
+                  v-show="selectTab"
+                  class="font-weight-bold text-h6 menu-active mt-1"
+                >
+                  {{ selectTab }}页面
+                </span>
+              </div>
+            </template>
+
+            <v-list rounded="lg" class="pa-3">
+              <!-- 当 url 匹配到 to 时，就会触发 active-class -->
+              <v-list-item
+                class="mb-1"
+                rounded="lg"
+                active-class="list-item-active"
+                v-for="(item, index) in tabs"
                 :key="index"
+                :to="item.path"
+                @click="selectTab = item.name"
               >
-                <template v-slot:activator="{ props }">
-                  <v-btn
-                    size="x-large"
-                    :color="
-                      router.currentRoute.value.fullPath.startsWith(item.path)
-                        ? 'blue-darken-3'
-                        : undefined
-                    "
-                    variant="flat"
-                    v-bind="props"
-                  >
-                    <v-icon>{{ item.icon }}</v-icon>
-                    <div class="mx-6">{{ item.title }}</div>
-                    <v-icon>fa-solid fa-angle-down</v-icon>
-                  </v-btn>
+                <template v-slot:prepend>
+                  <v-icon class="mr-6">{{ item.icon }}</v-icon>
+                  <div>{{ item.name }}</div>
                 </template>
-
-                <v-list rounded="lg" class="pa-3">
-                  <!-- 当 url 匹配到 to 时，就会触发 active-class -->
-                  <v-list-item
-                    rounded="lg"
-                    active-class="list-item-active"
-                    v-for="(item_, index_) in item.children"
-                    :key="index_"
-                    :to="item_.path"
-                    :prepend-icon="item_.icon"
-                    :title="item_.name"
-                    @click="addTab(item_)"
+                <template v-slot:append>
+                  <v-icon @click.prevent="removeTab(item)"
+                    >fa-solid fa-xmark</v-icon
                   >
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </div>
+                </template>
+              </v-list-item>
 
+              <v-list-item class="mb-1" rounded="lg" @click="tabs = []">
+                <template v-slot:prepend>
+                  <v-icon class="mr-6">fa-solid fa-trash</v-icon>
+                  <div v-if="tabs.length > 0">关闭所有</div>
+                  <div v-else>没有打开任何页面</div>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+
+          <div>
             <v-menu
               open-on-hover
               open-delay="0"
               close-delay="100"
-              :close-on-content-click="false"
+              v-for="(item, index) in pageMenus"
+              :key="index"
             >
               <template v-slot:activator="{ props }">
-                <v-btn size="x-large" variant="flat" v-bind="props">
-                  <v-badge :content="tabs.length" color="green">
-                    <v-icon>fa-regular fa-folder-open</v-icon>
-                  </v-badge>
+                <v-btn
+                  class="rounded-0"
+                  :class="{
+                    'menu-active':
+                      router.currentRoute.value.fullPath.startsWith(item.path),
+                  }"
+                  variant="flat"
+                  v-bind="props"
+                >
+                  <v-icon>{{ item.icon }}</v-icon>
+                  <div class="mx-6">{{ item.title }}</div>
+                  <v-icon>fa-solid fa-angle-down</v-icon>
                 </v-btn>
               </template>
 
               <v-list rounded="lg" class="pa-3">
                 <!-- 当 url 匹配到 to 时，就会触发 active-class -->
                 <v-list-item
-                  class="mb-1"
                   rounded="lg"
                   active-class="list-item-active"
-                  v-for="(item, index) in tabs"
-                  :key="index"
-                  :to="item.path"
-                  @click="selectTab = item.name"
+                  v-for="(item_, index_) in item.children"
+                  :key="index_"
+                  :to="item_.path"
+                  :prepend-icon="item_.icon"
+                  :title="item_.name"
+                  @click="addTab(item_)"
                 >
-                  <template v-slot:prepend>
-                    <v-icon class="mr-6">{{ item.icon }}</v-icon>
-                    <div>{{ item.name }}</div>
-                  </template>
-                  <template v-slot:append>
-                    <v-icon @click.prevent="removeTab(item)"
-                      >fa-solid fa-xmark</v-icon
-                    >
-                  </template>
-                </v-list-item>
-
-                <v-list-item class="mb-1" rounded="lg" @click="tabs = []">
-                  <template v-slot:prepend>
-                    <v-icon class="mr-6">fa-solid fa-trash</v-icon>
-                    <div v-if="tabs.length > 0">关闭所有</div>
-                    <div v-else>没有打开任何页面</div>
-                  </template>
                 </v-list-item>
               </v-list>
             </v-menu>
-
-            <!-- <v-btn-toggle
-              divided
-              :border="true"
-              density="compact"
-              color="blue-darken-3"
-              v-model="selectTab"
-            >
-              <v-btn
-                v-for="(item, index) in tabs"
-                :key="index"
-                :value="item.name"
-                @click="router.push({ path: item.path })"
-              >
-                <span class="hidden-sm-and-down">{{ item.name }}</span>
-
-                <v-icon end @click.stop="removeTab(item)">
-                  fa-solid fa-xmark
-                </v-icon>
-              </v-btn>
-            </v-btn-toggle> -->
           </div>
         </div>
       </template>
@@ -362,5 +351,9 @@ watch(
 .list-item-active {
   background-image: linear-gradient(25deg, #0044bd, #1e66d3, #2a88e9, #2dacff);
   color: white !important;
+}
+.menu-active {
+  color: #1976d2;
+  border-bottom: 7px solid #1976d2;
 }
 </style>
