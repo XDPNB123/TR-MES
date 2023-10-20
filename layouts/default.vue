@@ -123,10 +123,10 @@ type TabType = {
   icon: string;
 };
 
-// 选中的 tab
+// 正在选中的 tab 对象
 let selectTab = ref<TabType | null>(null);
 
-// 正在显示的所有 tab
+// 已打开的所有 tab
 let tabs = ref<TabType[]>([]);
 
 // 添加 tab
@@ -198,9 +198,7 @@ watch(
     <v-app-bar color="blue-darken-2" density="compact" extension-height="44">
       <template v-slot:prepend>
         <v-img src="/同日图标.jpg" width="160px" alt="同日图标" />
-        <div class="text-white font-weight-bold text-h5 ml-1 mt-1">
-          数字化工厂系统
-        </div>
+        <div class="font-weight-bold text-h5 ml-1">数字化工厂系统</div>
       </template>
 
       <template v-slot:default>
@@ -212,17 +210,7 @@ watch(
           :key="index"
         >
           <template v-slot:activator="{ props }">
-            <v-btn
-              class="rounded-0"
-              color="blue-darken-2"
-              :class="{
-                'white-text': router.currentRoute.value.fullPath.startsWith(
-                  item.path
-                ),
-              }"
-              variant="flat"
-              v-bind="props"
-            >
+            <v-btn size="large" class="rounded-0" v-bind="props">
               <v-icon>{{ item.icon }}</v-icon>
               <div class="mx-6">{{ item.name }}</div>
               <v-icon>fa-solid fa-angle-down</v-icon>
@@ -233,6 +221,7 @@ watch(
             <!-- 当 url 匹配到 to 时，就会触发 active-class -->
             <v-list-item
               rounded="lg"
+              class="mb-1"
               active-class="list-item-active"
               v-for="(item_, index_) in item.children"
               :key="index_"
@@ -296,17 +285,16 @@ watch(
 
       <template v-slot:extension>
         <v-row no-gutters style="background-color: white">
-          <v-col cols="3">
+          <v-col cols="6">
             <div
               v-if="selectTab"
               class="font-weight-bold text-body-2 text-blue-darken-2 h-100 d-flex align-center"
             >
-              <v-icon size="small" class="mx-2">{{ selectTab?.icon }}</v-icon>
+              <v-icon class="mx-3">{{ selectTab?.icon }}</v-icon>
               {{ `${selectTab?.parentName ?? ""} > ${selectTab?.name ?? ""}` }}
             </div>
           </v-col>
-          <!-- <v-col cols="6" class="text-center"> </v-col> -->
-          <v-col cols="9" class="text-right">
+          <v-col cols="6" class="text-right">
             <v-menu
               open-on-hover
               open-delay="0"
@@ -314,7 +302,7 @@ watch(
               :close-on-content-click="false"
             >
               <template v-slot:activator="{ props }">
-                <v-btn variant="flat" v-bind="props" class="rounded-0">
+                <v-btn class="rounded-0" variant="elevated" v-bind="props">
                   <v-badge color="green" class="mr-3" :content="tabs.length">
                     <v-icon>fa-regular fa-folder-open</v-icon>
                   </v-badge>
@@ -344,7 +332,7 @@ watch(
                   </template>
                 </v-list-item>
 
-                <v-list-item class="mb-1" rounded="lg" @click="tabs = []">
+                <v-list-item rounded="lg" @click="tabs = []">
                   <template v-slot:prepend>
                     <v-icon class="mr-6">fa-solid fa-trash</v-icon>
                     <div v-if="tabs.length > 0">关闭所有</div>
