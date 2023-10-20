@@ -86,12 +86,6 @@ const pageMenus = ref<any[]>([
         path: "/wms/home",
         icon: "fa-solid fa-gauge",
       },
-      {
-        parentName: "WMS",
-        name: "拖拽",
-        path: "/wms/tuozhuai",
-        icon: "fa-solid fa-gauge",
-      },
     ],
   },
   {
