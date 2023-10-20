@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import draggable from "vuedraggable";
 // 搜索引擎优化
 useSeoMeta({
   // 该页面的标题
@@ -384,38 +385,38 @@ let productDataLength = ref<number>(0);
 //工序模块
 let chips = ref<any[]>([]); //存储常用工序
 let droppedChips = ref<any[]>([]); //维护选择的工序
-let draggedChip = ref(null);
-let dragSrcEl = ref<number>(0);
+// let draggedChip = ref(null);
+// let dragSrcEl = ref<number>(0);
 let produceGroups = ref(); //常用工艺路线
-//实现拖拽功能的方法
-function dragStart(chip: any) {
-  draggedChip.value = chip;
-}
-function dragEnd() {
-  draggedChip.value = null;
-}
-function drop() {
-  if (draggedChip.value) {
-    droppedChips.value.push(draggedChip.value);
-    chips.value = chips.value.filter((chip) => chip !== draggedChip.value);
-  }
-}
-function dragstartItem(evt: DragEvent, index: number) {
-  dragSrcEl.value = index;
-  evt.dataTransfer!.effectAllowed = "move";
-}
-function dropItem(evt: DragEvent, index: number) {
-  if (dragSrcEl.value !== null && dragSrcEl.value !== index) {
-    const draggedElement = droppedChips.value[dragSrcEl.value];
-    droppedChips.value.splice(dragSrcEl.value, 1);
-    droppedChips.value.splice(index, 0, draggedElement);
-  }
-}
+// //实现拖拽功能的方法
+// function dragStart(chip: any) {
+//   draggedChip.value = chip;
+// }
+// function dragEnd() {
+//   draggedChip.value = null;
+// }
+// function drop() {
+//   if (draggedChip.value) {
+//     droppedChips.value.push(draggedChip.value);
+//     chips.value = chips.value.filter((chip) => chip !== draggedChip.value);
+//   }
+// }
+// function dragstartItem(evt: DragEvent, index: number) {
+//   dragSrcEl.value = index;
+//   evt.dataTransfer!.effectAllowed = "move";
+// }
+// function dropItem(evt: DragEvent, index: number) {
+//   if (dragSrcEl.value !== null && dragSrcEl.value !== index) {
+//     const draggedElement = droppedChips.value[dragSrcEl.value];
+//     droppedChips.value.splice(dragSrcEl.value, 1);
+//     droppedChips.value.splice(index, 0, draggedElement);
+//   }
+// }
 
-function removeChip(index: number) {
-  const removedChip = droppedChips.value.splice(index, 1)[0];
-  chips.value.push(removedChip);
-}
+// function removeChip(index: number) {
+//   const removedChip = droppedChips.value.splice(index, 1)[0];
+//   chips.value.push(removedChip);
+// }
 
 //获取全部的工序数据
 async function getProduce() {
@@ -1656,7 +1657,12 @@ const dateRule = ref<any>([
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addTicket()">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="addTicket()"
+          >
             确认新增
           </v-btn>
           <v-btn color="grey" size="large" @click="addDialog = false">
@@ -1720,7 +1726,12 @@ const dateRule = ref<any>([
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="editTicket()">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="editTicket()"
+          >
             确认修改
           </v-btn>
           <v-btn color="grey" size="large" @click="editDialog = false">
@@ -1745,7 +1756,12 @@ const dateRule = ref<any>([
           }}"这条数据吗？
         </v-card-text>
         <div class="d-flex justify-end mr-6 my-4">
-          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="deleteTicket()">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="deleteTicket()"
+          >
             确认删除
           </v-btn>
           <v-btn color="grey" size="large" @click="deleteDialog = false">
@@ -1924,7 +1940,7 @@ const dateRule = ref<any>([
           <v-col cols="6">
             <v-card height="350px" style="overflow-y: auto">
               <v-card-subtitle>已选工序</v-card-subtitle>
-              <v-list @dragover.prevent @drop="drop">
+              <!-- <v-list @dragover.prevent @drop="drop">
                 <v-list-item
                   class="ma-5"
                   v-for="(chip, index) in droppedChips"
@@ -1955,14 +1971,19 @@ const dateRule = ref<any>([
                   subtitle="请选择工序"
                   class="mb-5"
                 ></v-list-item>
-              </v-list>
+              </v-list> -->
+              <draggable :list="droppedChips" group="people">
+                <template #item="{ element, index }">
+                  <v-list-item :border="true" :title="element"></v-list-item>
+                </template>
+              </draggable>
             </v-card>
           </v-col>
           <v-col cols="1"></v-col>
           <v-col cols="3">
             <v-card flat height="350px" style="overflow-y: auto">
               <v-card-subtitle>可选工序</v-card-subtitle>
-              <div
+              <!-- <div
                 v-for="(chip, index) in chips"
                 :key="index"
                 draggable="true"
@@ -1979,7 +2000,12 @@ const dateRule = ref<any>([
                   {{ chip }}
                 </v-chip>
               </div>
-              <v-chip v-else>已无可选择的工序</v-chip>
+              <v-chip v-else>已无可选择的工序</v-chip> -->
+              <draggable :list="chips" group="people">
+                <template #item="{ element, index }">
+                  <v-list-item :border="true" :title="element"></v-list-item>
+                </template>
+              </draggable>
             </v-card>
           </v-col>
           <v-col cols="12">
@@ -2015,7 +2041,12 @@ const dateRule = ref<any>([
             <v-icon class="mr-1">fa-solid fa-plus</v-icon>
             常用工序路线
           </v-btn>
-          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="saveTicket()">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="saveTicket()"
+          >
             保存工序
           </v-btn>
           <v-btn color="grey" size="large" @click="cancelProcess()">
@@ -2115,7 +2146,12 @@ const dateRule = ref<any>([
           </v-row>
         </v-card>
         <div class="d-flex justify-end mr-6 my-4">
-          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="saveProduct()">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="saveProduct()"
+          >
             确定
           </v-btn>
           <v-btn color="grey" size="large" @click="productDialog = false">
@@ -2274,7 +2310,12 @@ const dateRule = ref<any>([
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="auditTicket()">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="auditTicket()"
+          >
             审核通过
           </v-btn>
           <v-btn color="grey" size="large" @click="auditDialog = false">
