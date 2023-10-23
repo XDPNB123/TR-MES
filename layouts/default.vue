@@ -90,19 +90,19 @@ const pageMenus = ref<any[]>([
   },
   {
     name: "基础信息",
-    path: "/work-class",
+    path: "/work-basic",
     icon: "fa-solid fa-users-rays",
     children: [
       {
         parentName: "基础信息",
         name: "工作中心",
-        path: "/work-class/work-center",
+        path: "/work-basic/work-center",
         icon: "fa-solid fa-location-crosshairs",
       },
       {
         parentName: "基础信息",
         name: "班组信息",
-        path: "/work-class/work-class",
+        path: "/work-basic/work-class",
         icon: "fa-solid fa-people-roof",
       },
     ],
