@@ -592,6 +592,7 @@ async function saveTicket() {
   }
   processDialog.value = false;
   innerTableSelectData.value = [];
+  selected.value = [];
   droppedChips.value = [];
 }
 
@@ -1910,7 +1911,7 @@ const dateRule = ref<any>([
             <v-card height="350px" style="overflow-y: auto">
               <v-card-subtitle>已选工序</v-card-subtitle>
 
-              <draggable :list="droppedChips" group="people">
+              <draggable :list="droppedChips" group="people" item-key="element">
                 <template #item="{ element, index }">
                   <v-list-item
                     :border="true"
@@ -1925,7 +1926,7 @@ const dateRule = ref<any>([
             <v-card flat height="350px" style="overflow-y: auto">
               <v-card-subtitle>可选工序</v-card-subtitle>
 
-              <draggable :list="chips" group="people">
+              <draggable :list="chips" group="people" item-key="element">
                 <template #item="{ element, index }">
                   <v-list-item :border="true" :title="element"></v-list-item>
                 </template>
