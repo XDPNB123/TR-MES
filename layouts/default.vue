@@ -91,7 +91,7 @@ const pageMenus = ref<any[]>([
   {
     name: "基础信息",
     path: "/work-basic",
-    icon: "fa-solid fa-users-rays",
+    icon: "fa-solid fa-database",
     children: [
       {
         parentName: "基础信息",
