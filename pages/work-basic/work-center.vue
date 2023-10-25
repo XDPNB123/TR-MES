@@ -36,6 +36,7 @@ let operateRow = ref<any>();
 let workCenterId = ref<string>("");
 //存储工作中心名称
 let workCenterName = ref<string>("");
+
 let searchWorkCenterName = ref<string>("");
 let searchType = ref<string>("");
 let searchWorkCenterAddress = ref<string>("");

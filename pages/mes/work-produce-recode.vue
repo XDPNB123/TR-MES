@@ -42,17 +42,17 @@ async function getWorkOrder() {
   }
 }
 function showWorkOrderHid(item: any) {
-  if (tabArr.value.length) {
-    return alert("请你确认或者取消你当前的操作，才可以对其他的工单进行操作");
+  if (tabArr1.value.length) {
+    return alert("请你保存或者取消你当前的操作，才可以对其他的工单进行操作");
   }
   detailName.value = item.workorder_hid;
-  getWorkOrderDetail();
+  getWorkProduce();
 }
 //工单工序操作
 let workDetailList = ref<any[]>([]);
 
 //获取工单工序数据
-async function getWorkOrderDetail() {
+async function getWorkProduce() {
   try {
     const data: any = await useHttp(
       "/ProductionRecode/M21ProductionRecodeList",
@@ -61,7 +61,7 @@ async function getWorkOrderDetail() {
       {
         PageIndex: 1,
         PageSize: 1000000,
-        SortType: 0,
+        SortType: 1,
         SortedBy: "id",
         workorder_hid: detailName.value,
       }
@@ -78,7 +78,16 @@ async function getWorkOrderDetail() {
       .filter(
         (_item: any) =>
           _item.work_center_id === null || _item.work_center_id === ""
-      );
+      )
+      .sort((a: any, b: any) => {
+        if (a.procedure_order_id < b.procedure_order_id) {
+          return -1;
+        }
+        if (a.procedure_order_id > b.procedure_order_id) {
+          return 1;
+        }
+        return 0;
+      });
   } catch (error) {
     console.log(error);
   }
@@ -95,8 +104,6 @@ function onDragEnd(event: any, item: any) {
 
   // 获取鼠标所在位置的元素
   let element: any = document.elementFromPoint(x, y);
-
-  console.log(element);
   if (
     !element?.children ||
     !element?.children[1]?.innerText ||
@@ -104,9 +111,14 @@ function onDragEnd(event: any, item: any) {
   )
     return;
   item.work_center_id = element.children[0].innerText;
+  workCenterId.value = element.children[0].innerText;
+  workCenterName.value = element.innerText;
+
+  item.assignment_date = new Date().toISOString().split("T")[0];
   workDetailList.value.splice(workDetailList.value.indexOf(item), 1);
   tabArr.value.push(item);
   tabArr1.value.push(item);
+  getCenterProduce();
 }
 
 //存储工作中心的集合
@@ -115,6 +127,12 @@ let workPage = ref<number>(1);
 watch(workPage, function () {
   getWorkCenterList();
 });
+
+//搜素
+let searchWorkCenterName = ref<string>("");
+let searchType = ref<string>("");
+let searchWorkCenterAddress = ref<string>("");
+
 let workDetailCount = ref<number>(0);
 //获取工作中心数据
 async function getWorkCenterList() {
@@ -123,6 +141,9 @@ async function getWorkCenterList() {
     "get",
     undefined,
     {
+      work_center_address: searchWorkCenterAddress.value,
+      work_center_name: searchWorkCenterName.value,
+      type: searchType.value,
       PageIndex: workPage.value,
       PageSize: 4,
       SortedBy: "id",
@@ -136,13 +157,39 @@ async function getWorkCenterList() {
 let tableDetailPageCount = computed(() => {
   return Math.ceil(workDetailCount.value / 4);
 });
+//按条件搜素工作中心
+function searchWorkCenterList() {
+  workPage.value = 1;
+  getWorkCenterList();
+}
+//重置搜素
+function resetSearch() {
+  workPage.value = 1;
+  searchWorkCenterName.value = "";
+  searchType.value = "";
+  searchWorkCenterAddress.value = "";
+  getWorkCenterList();
+}
+
 onMounted(() => {
   getWorkOrder();
   getWorkCenterList();
 });
 
-//用显示来工作中心的数据
+//用显示来工作中心中任务的数据
 let tempTabArr = ref<any[]>([]);
+watch(tempTabArr, () => {
+  tempTabArr.value.sort((a, b) => {
+    if (a.procedure_order_id < b.procedure_order_id) {
+      return -1;
+    }
+    if (a.procedure_order_id > b.procedure_order_id) {
+      return 1;
+    }
+    return 0;
+  });
+});
+
 //存储工作中心编号
 let workCenterId = ref("");
 let workCenterName = ref("");
@@ -150,41 +197,55 @@ let workCenterName = ref("");
 function showCenterDetail(item: any) {
   workCenterId.value = item.work_center_id;
   workCenterName.value = item.work_center_name;
-  getCenterDetail();
+  getCenterProduce();
 }
-//获取工作中心的内容
-async function getCenterDetail() {
+//获取工作中心的工单工序内容
+async function getCenterProduce() {
   const data: any = await useHttp(
     "/ProductionRecode/M21ProductionRecodeList",
     "get",
     undefined,
     {
       PageIndex: 1,
-      PageSize: 10,
-      SortType: 1,
+      PageSize: 10000,
+      SortType: 0,
       SortedBy: "id",
       work_center_id: workCenterId.value,
     }
   );
   tabArr.value = tabArr1.value;
   tabArr.value = [...tabArr.value, ...data.data.pageList];
-  tempTabArr.value = tabArr.value.filter(
-    (_item: any) => _item.work_center_id === workCenterId.value
-  );
+  console.log(workCenterId.value);
+  tempTabArr.value = tabArr.value
+    .filter(
+      (_item: any) =>
+        (_item.work_center_id !== "" || _item.work_center_id !== null) &&
+        _item.work_center_id === workCenterId.value
+    )
+    .map((item: any) => {
+      item.planned_completion_time = item.planned_completion_time.substring(
+        0,
+        10
+      );
+      return item;
+    });
 }
 
 //确定保存
 async function updateCenterId() {
+  if (!tabArr1.value.length) {
+    return alert("你没有拖拽工单工序到对应的工作中心当中");
+  }
   await useHttp(
     "/ProductionRecode/M23UpdateProductionRecode",
     "put",
     tabArr.value
   );
+  //判断是否更改工单状态
   if (detailName.value !== "" && workDetailList.value.length === 0) {
     const workOrder = workOrderList.value.find(
       (item: any) => item.workorder_hid === detailName.value
     );
-    console.log(workOrder);
     workOrder.status = "已排产生产中";
     //修改当前工单的状态
     await useHttp(
@@ -195,16 +256,22 @@ async function updateCenterId() {
     getWorkOrder();
     detailName.value = "";
   }
-
   tabArr.value = [];
   tabArr1.value = [];
 }
 //取消添加工作中心
 function cancel() {
+  if (!tabArr1.value.length) {
+    return;
+  }
   tabArr1.value = [];
   tabArr.value = [];
-  getWorkOrderDetail();
 }
+//通过监听tabArr1的内容来更改工作中心详情的内容
+watch(tabArr1, async function () {
+  await getCenterProduce();
+  await getWorkProduce();
+});
 </script>
 <template>
   <v-row class="ma-2">
@@ -218,22 +285,23 @@ function cancel() {
       <v-card>
         <v-row>
           <v-col cols="2" class="bg-light-blue-lighten-5">
-            <v-card flat border>
+            <v-card flat border title="未排产工单">
               <v-list
                 v-for="(item, index) in workOrderList"
                 :key="index"
                 class="w-100"
               >
+                <v-divider :thickness="4"></v-divider>
                 <v-list-item
                   :title="item.workorder_hid"
                   :subtitle="item.workorder_type"
+                  class="bg-light-blue-lighten-5"
                   @click="showWorkOrderHid(item)"
                 >
                   <template v-slot:append>
                     <div>{{ item.planned_quantity }}{{ item.unit }}</div>
                   </template>
                 </v-list-item>
-                <v-divider :thickness="4"></v-divider>
               </v-list>
             </v-card>
           </v-col>
@@ -299,7 +367,55 @@ function cancel() {
             </v-card>
             <!-- 工作中心 -->
             <v-card class="bg-light-blue-lighten-5 mt-2" title="工作中心">
-              <v-row>
+              <v-row mx-2>
+                <v-col cols="4">
+                  <v-text-field
+                    label="工作中心名称"
+                    v-model="searchWorkCenterName"
+                    variant="outlined"
+                    density="compact"
+                    class="mt-3"
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="工作中心类型"
+                    v-model="searchType"
+                    variant="outlined"
+                    density="compact"
+                    class="mt-3"
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="工作中心地址"
+                    v-model="searchWorkCenterAddress"
+                    variant="outlined"
+                    density="compact"
+                    class="mt-3"
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="mt-3">
+                  <v-btn
+                    size="large"
+                    color="blue-darken-2"
+                    class="mr-3"
+                    prepend-icon="fa-solid fa-search"
+                    @click="searchWorkCenterList()"
+                    >条件查询</v-btn
+                  >
+                  <v-btn
+                    size="large"
+                    color="red"
+                    class="mr-3"
+                    prepend-icon="fa-solid fa-hourglass-start"
+                    @click="resetSearch()"
+                    >重置查询</v-btn
+                  >
+                </v-col>
                 <v-col cols="3" v-for="(item, index) in workCenterList">
                   <div
                     class="work-center-container mx-2"
