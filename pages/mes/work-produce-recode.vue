@@ -274,14 +274,14 @@ watch(tabArr1, async function () {
 });
 </script>
 <template>
-  <v-row class="ma-2">
-    <v-col cols="1" class="bg-light-blue-lighten-5">
+  <v-row no-gutters class="ma-2">
+    <v-col cols="1" class="bg-light-blue-lighten-5 mr-2">
       <v-tabs direction="vertical">
         <v-tab color="green"> 工单排产 </v-tab>
         <v-tab color="green"> 产能视图 </v-tab>
       </v-tabs>
     </v-col>
-    <v-col cols="11">
+    <v-col>
       <v-card>
         <v-row>
           <v-col cols="2" class="bg-light-blue-lighten-5">
@@ -417,9 +417,20 @@ watch(tabArr1, async function () {
                   >
                 </v-col>
                 <v-col cols="3" v-for="(item, index) in workCenterList">
-                  <div
-                    class="work-center-container mx-2"
-                    @click="showCenterDetail(item)"
+                  <v-card class="mx-2" @click="showCenterDetail(item)">
+                    <v-img src="/工作中心.jpg">
+                      <v-card-title>{{ item.work_center_name }}</v-card-title>
+                      <v-card-subtitle>类型：{{ item.type }}</v-card-subtitle>
+                      <v-card-subtitle
+                        >位置：{{ item.work_center_address }}</v-card-subtitle
+                      >
+                      <v-card-subtitle>
+                        编号：{{ item.work_center_id }}
+                      </v-card-subtitle>
+                    </v-img>
+                  </v-card>
+                  <!-- <div
+                    
                   >
                     {{ item.work_center_name }}
                     <span v-show="false">{{ item.work_center_id }}</span>
@@ -430,7 +441,7 @@ watch(tabArr1, async function () {
                         item.work_center_address
                       }}</span>
                     </div>
-                  </div>
+                  </div> -->
                 </v-col>
               </v-row>
               <div class="text-center pt-2">
@@ -518,16 +529,5 @@ watch(tabArr1, async function () {
 <style scoped>
 .inline-card {
   display: inline-flex;
-}
-.work-center-container {
-  background-image: url("/工作中心.jpg");
-  background-size: cover;
-  font-size: 36px;
-  color: black;
-  font-weight: 700;
-  height: 200px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>
