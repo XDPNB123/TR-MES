@@ -113,21 +113,29 @@ function onDragEnd(event: any, item: any) {
 
   // 获取鼠标所在位置的元素
   let element: any = document.elementFromPoint(x, y);
-  if (
-    !element?.children ||
-    !element?.children[1]?.innerText ||
-    element.children[1].innerText !== "工作中心"
-  )
-    return;
-  item.work_center_id = element.children[0].innerText;
-  workCenterId.value = element.children[0].innerText;
-  workCenterName.value = element.innerText;
+
+  console.log(element);
+
+  // 获取离该元素最近的 card 元素
+  let cardElement = element.closest(".v-responsive__content");
+
+  // 如果没有拖到工作中心容器内，则拖动无效
+  if (!cardElement || cardElement.children.length !== 4) return;
+
+  // 获取 card 元素的所有子元素
+  const cardChildren = cardElement.children;
+
+  item.work_center_id = cardChildren[3].innerText.substring(3);
+  workCenterId.value = cardChildren[3].innerText.substring(3);
+  workCenterName.value = cardChildren[0].innerText.substring(3);
 
   item.assignment_date = new Date().toISOString().split("T")[0];
   workDetailList.value.splice(workDetailList.value.indexOf(item), 1);
   tabArr.value.push(item);
   tabArr1.value.push(item);
   getCenterProduce();
+
+  console.log(tabArr.value);
 }
 
 //存储工作中心的集合
