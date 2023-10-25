@@ -19,6 +19,8 @@ definePageMeta({
   keepalive: true,
 });
 let detailName = ref<any>("");
+//多选
+let selected = ref<any[]>([]);
 let workOrderList = ref<any[]>([]);
 //获取工单数据
 async function getWorkOrder() {
@@ -34,20 +36,24 @@ async function getWorkOrder() {
         SortedBy: "id",
       }
     );
-    workOrderList.value = data.data.pageList.filter(
-      (item: any) => item.status === "已审核待排产"
-    );
+    workOrderList.value = data.data.pageList
+      .filter((item: any) => item.status === "已审核待排产")
+      .map((item: any) => {
+        item.finish_date = item.finish_date.substring(0, 10);
+        return item;
+      });
   } catch (error) {
     console.log(error);
   }
 }
-function showWorkOrderHid(item: any) {
+watch(selected, () => {
+  detailName.value = selected.value.join(",");
   if (tabArr1.value.length) {
     return alert("请你保存或者取消你当前的操作，才可以对其他的工单进行操作");
   }
-  detailName.value = item.workorder_hid;
   getWorkProduce();
-}
+});
+
 //工单工序操作
 let workDetailList = ref<any[]>([]);
 
@@ -292,16 +298,25 @@ watch(tabArr1, async function () {
                 class="w-100"
               >
                 <v-divider :thickness="4"></v-divider>
-                <v-list-item
-                  :title="item.workorder_hid"
-                  :subtitle="item.workorder_type"
-                  class="bg-light-blue-lighten-5"
-                  @click="showWorkOrderHid(item)"
-                >
-                  <template v-slot:append>
-                    <div>{{ item.planned_quantity }}{{ item.unit }}</div>
-                  </template>
-                </v-list-item>
+                <div class="bg-light-blue-lighten-5">
+                  <v-checkbox
+                    v-model="selected"
+                    :label="item.workorder_hid"
+                    :value="item.workorder_hid"
+                  ></v-checkbox>
+                  <v-list-item>
+                    <template v-slot:prepend>
+                      <div>完成日期：{{ item.finish_date }}</div>
+                    </template>
+                  </v-list-item>
+                  <v-list-item>
+                    <template v-slot:prepend>
+                      <div>
+                        数量：{{ item.planned_quantity }}{{ item.unit }}
+                      </div>
+                    </template>
+                  </v-list-item>
+                </div>
               </v-list>
             </v-card>
           </v-col>
