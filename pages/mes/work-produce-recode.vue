@@ -60,6 +60,9 @@ let workDetailList = ref<any[]>([]);
 //获取工单工序数据
 async function getWorkProduce() {
   try {
+    if (!detailName.value) {
+      workDetailList.value = [];
+    }
     const data: any = await useHttp(
       "/ProductionRecode/M21ProductionRecodeList",
       "get",
@@ -291,33 +294,37 @@ watch(tabArr1, async function () {
       <v-card>
         <v-row>
           <v-col cols="2" class="bg-light-blue-lighten-5">
-            <v-card flat border title="未排产工单">
-              <v-list
+            <v-card
+              flat
+              border
+              title="未排产工单"
+              class="bg-light-blue-lighten-5"
+            >
+              <div
                 v-for="(item, index) in workOrderList"
                 :key="index"
                 class="w-100"
               >
                 <v-divider :thickness="4"></v-divider>
-                <div class="bg-light-blue-lighten-5">
+                <div>
                   <v-checkbox
                     v-model="selected"
-                    :label="item.workorder_hid"
                     :value="item.workorder_hid"
+                    density="compact"
+                    hide-details
+                    class="ml-1"
                   ></v-checkbox>
-                  <v-list-item>
-                    <template v-slot:prepend>
-                      <div>完成日期：{{ item.finish_date }}</div>
-                    </template>
-                  </v-list-item>
-                  <v-list-item>
-                    <template v-slot:prepend>
-                      <div>
-                        数量：{{ item.planned_quantity }}{{ item.unit }}
-                      </div>
-                    </template>
-                  </v-list-item>
+                  <div class="mx-2 py-1 text-body-2">
+                    工单编号：{{ item.workorder_hid }}
+                  </div>
+                  <div class="mx-2 py-1 text-body-2">
+                    完成日期：{{ item.finish_date }}
+                  </div>
+                  <div class="mx-2 py-1 text-body-2">
+                    数量：{{ item.planned_quantity }}{{ item.unit }}
+                  </div>
                 </div>
-              </v-list>
+              </div>
             </v-card>
           </v-col>
           <v-col cols="10">
@@ -337,45 +344,31 @@ watch(tabArr1, async function () {
                   :key="index"
                   v-if="workDetailList.length"
                 >
-                  <v-list v-show="!element.work_center_id" density="compact">
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>工序顺序：{{ element.procedure_order_id }}</div>
-                      </template>
-                    </v-list-item>
+                  <div v-show="!element.work_center_id">
+                    <div class="px-2 py-1 text-body-2">
+                      工序顺序：{{ element.procedure_order_id }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>工序名称：{{ element.procedure_name }}</div>
-                      </template>
-                    </v-list-item>
+                    <div class="px-2 py-1 text-body-2">
+                      工序名称：{{ element.procedure_name }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>是否委外：{{ element.defaul_outsource }}</div>
-                      </template>
-                    </v-list-item>
+                    <div class="px-2 py-1 text-body-2">
+                      是否委外：{{ element.defaul_outsource }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>产出料：{{ element.material_name }}</div>
-                      </template>
-                    </v-list-item>
+                    <div class="px-2 py-1 text-body-2">
+                      产出料：{{ element.material_name }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>数量：{{ element.planned_quantity }}</div>
-                      </template>
-                    </v-list-item>
+                    <div class="px-2 py-1 text-body-2">
+                      数量：{{ element.planned_quantity }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>
-                          交付日期：{{ element.planned_completion_time }}
-                        </div>
-                      </template>
-                    </v-list-item>
-                  </v-list>
+                    <div class="px-2 py-1 text-body-2">
+                      交付日期：{{ element.planned_completion_time }}
+                    </div>
+                  </div>
                 </v-card>
                 <div v-else class="text-center">工单工序已分配完成</div>
               </div>
@@ -493,44 +486,31 @@ watch(tabArr1, async function () {
                   :key="index"
                   v-if="tempTabArr.length"
                 >
-                  <v-list>
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>工序顺序：{{ element.procedure_order_id }}</div>
-                      </template>
-                    </v-list-item>
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>工序名称：{{ element.procedure_name }}</div>
-                      </template>
-                    </v-list-item>
+                  <div>
+                    <div class="mx-2 py-1 text-body-2">
+                      工序顺序：{{ element.procedure_order_id }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>是否委外：{{ element.defaul_outsource }}</div>
-                      </template>
-                    </v-list-item>
+                    <div class="mx-2 py-1 text-body-2">
+                      工序名称：{{ element.procedure_name }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>产出料：{{ element.material_name }}</div>
-                      </template>
-                    </v-list-item>
+                    <div class="mx-2 py-1 text-body-2">
+                      是否委外：{{ element.defaul_outsource }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>数量：{{ element.planned_quantity }}</div>
-                      </template>
-                    </v-list-item>
+                    <div class="mx-2 py-1 text-body-2">
+                      产出料：{{ element.material_name }}
+                    </div>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div>
-                          交付日期：{{ element.planned_completion_time }}
-                        </div>
-                      </template>
-                    </v-list-item>
-                  </v-list>
+                    <div class="mx-2 py-1 text-body-2">
+                      数量：{{ element.planned_quantity }}
+                    </div>
+
+                    <div class="mx-2 py-1 text-body-2">
+                      交付日期：{{ element.planned_completion_time }}
+                    </div>
+                  </div>
                 </v-card>
                 <div v-else class="text-center">当前工作中心没有任务</div>
               </div>
