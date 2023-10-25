@@ -46,19 +46,19 @@ const list2 = ref([
 </script>
 
 <template>
+  <v-slide-group show-arrows>
+    <draggable :list="list1" group="people" itemKey="name">
+      <template #item="{ element, index }">
+        <v-card
+          class="inline-card mx-2"
+          :border="true"
+          :title="element.name + '>' + index"
+        >
+        </v-card>
+      </template>
+    </draggable>
+  </v-slide-group>
   <v-row class="mt-3">
-    <v-col cols="2">
-      <v-card width="200">
-        <draggable :list="list1" group="people" itemKey="name">
-          <template #item="{ element, index }">
-            <v-list-item
-              :border="true"
-              :title="element.name + '>' + index"
-            ></v-list-item>
-          </template>
-        </draggable>
-      </v-card>
-    </v-col>
     <v-col cols="2">
       <v-card width="200">
         <draggable :list="list2" group="people" itemKey="name">
@@ -74,4 +74,8 @@ const list2 = ref([
   </v-row>
 </template>
 
-<style scoped></style>
+<style scoped>
+.inline-card {
+  display: inline-flex;
+}
+</style>

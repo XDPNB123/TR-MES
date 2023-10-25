@@ -403,7 +403,7 @@ async function getProduce() {
         PageSize: 100,
       }
     );
-    chips.value = data.data.pageList.map((item: any) => item.procedure_name);
+    chips.value = data.data.pageList;
   } catch (error) {
     console.log(error);
   }
@@ -466,10 +466,10 @@ async function batchWork() {
         const workorderHids =
           innerTableSelectData.value[0].procedure.split(",");
         droppedChips.value = chips.value.filter((chip) =>
-          workorderHids.includes(chip)
+          workorderHids.includes(chip.procedure_name)
         );
         chips.value = chips.value.filter(
-          (chip) => !workorderHids.includes(chip)
+          (chip) => !workorderHids.includes(chip.procedure_name)
         );
       }
     } else {
@@ -503,9 +503,11 @@ async function showProcessDialog(item: any) {
     ) {
       const workorderHids = item.procedure.split(",");
       droppedChips.value = chips.value.filter((chip) =>
-        workorderHids.includes(chip)
+        workorderHids.includes(chip.procedure_name)
       );
-      chips.value = chips.value.filter((chip) => !workorderHids.includes(chip));
+      chips.value = chips.value.filter(
+        (chip) => !workorderHids.includes(chip.procedure_name)
+      );
     }
   } catch (error) {
     console.log(error);
@@ -523,7 +525,12 @@ function cancelProcess() {
 //保存为常用工序路线
 async function saveComUsedProduce() {
   try {
-    let names = droppedChips.value.join(",");
+    let names = droppedChips.value
+      .map((item: any) => item.procedure_name)
+      .join(",");
+    let ids = droppedChips.value
+      .map((item: any) => item.procedure_id)
+      .join(",");
     let isExist = produceGroups.value.some(
       (group: any) => group.rsv2 === names
     );
@@ -532,7 +539,7 @@ async function saveComUsedProduce() {
       return;
     }
     await useHttp("/MesWorkProcess/M48AddProcessBasis", "post", {
-      ids: "1,2,3",
+      ids: ids,
       names: names,
       describe: null,
     });
@@ -577,7 +584,9 @@ async function saveTicket() {
     }
     // 将选择的工序数组拼接成字符串
     innerTableSelectData.value.forEach((item) => {
-      item.procedure = droppedChips.value.map((item) => item).join(",");
+      item.procedure = droppedChips.value
+        .map((item) => item.procedure_name)
+        .join(",");
     });
     await useHttp(
       "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
@@ -585,6 +594,30 @@ async function saveTicket() {
       innerTableSelectData.value
     );
     getWorkOrderDetail();
+    let tabArr = ref<any[]>([]);
+    innerTableSelectData.value.forEach((item: any) => {
+      droppedChips.value.forEach((_item: any, index: number) => {
+        tabArr.value.push({
+          workorder_hid: detailName.value,
+          workorder_did: item.workorder_did,
+          procedure_id: _item.procedure_id,
+          material_name: item.mcode,
+          defaul_outsource: _item.defaul_outsource,
+          planned_quantity: item.planned_quantity,
+          planned_completion_time: item.estimated_delivery_date,
+          material_id: "5",
+          unit: item.unit,
+          procedure_order_id: index + 1,
+        });
+      });
+    });
+
+    //将维护的工序添加到工单明细工序分配数据库
+    await useHttp(
+      "/ProductionRecode/M22AddProductionRecode",
+      "post",
+      tabArr.value
+    );
     setSnackbar("green", "保存成功");
   } catch (error) {
     console.log(error);
@@ -599,9 +632,13 @@ async function saveTicket() {
 //点击常用工序流程
 async function commonProduce(item: any) {
   let array = item.rsv2.split(",");
-  droppedChips.value = array;
   await getProduce();
-  chips.value = chips.value.filter((chip) => !array.includes(chip));
+  droppedChips.value = chips.value.filter((chip) =>
+    array.includes(chip.procedure_name)
+  );
+  chips.value = chips.value.filter(
+    (chip) => !array.includes(chip.procedure_name)
+  );
 }
 
 // 工单表头搜索过滤
@@ -648,8 +685,7 @@ onMounted(async () => {
   getWorkOrder();
   getWorkOrderDetail();
 });
-//存储工单数据的所有工单编号
-let workorderId = ref<any[]>([]);
+
 //获取工单数据
 async function getWorkOrder() {
   try {
@@ -671,9 +707,6 @@ async function getWorkOrder() {
     );
     tableData.value = formatDate(data.data.pageList);
     tableDataLength.value = data.data.totalCount;
-    workorderId.value = data.data.pageList.map(
-      (item: any) => item.workorder_hid
-    );
   } catch (error) {
     setSnackbar("black", "获取数据失败");
     console.log(error);
@@ -1915,7 +1948,7 @@ const dateRule = ref<any>([
                 <template #item="{ element, index }">
                   <v-list-item
                     :border="true"
-                    :title="index + 1 + '.' + element"
+                    :title="index + 1 + '.' + element.procedure_name"
                   ></v-list-item>
                 </template>
               </draggable>
@@ -1928,7 +1961,10 @@ const dateRule = ref<any>([
 
               <draggable :list="chips" group="people" item-key="element">
                 <template #item="{ element, index }">
-                  <v-list-item :border="true" :title="element"></v-list-item>
+                  <v-list-item
+                    :border="true"
+                    :title="element.procedure_name"
+                  ></v-list-item>
                 </template>
               </draggable>
             </v-card>
