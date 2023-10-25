@@ -89,9 +89,9 @@ const pageMenus = ref<any[]>([
     ],
   },
   {
-    name: "基础信息",
+    name: "基础数据",
     path: "/work-basic",
-    icon: "fa-solid fa-database",
+    icon: "fa-solid fa-gear",
     children: [
       {
         parentName: "基础信息",
@@ -104,6 +104,31 @@ const pageMenus = ref<any[]>([
         name: "班组信息",
         path: "/work-basic/work-class",
         icon: "fa-solid fa-people-roof",
+      },
+    ],
+  },
+  {
+    name: "QMS",
+    path: "/qms",
+    icon: "fa-solid fa-list-check",
+    children: [
+      {
+        parentName: "QMS",
+        name: "质检单",
+        path: "/qms/quality-check-list",
+        icon: "fa-solid fa-clipboard-list",
+      },
+      {
+        parentName: "QMS",
+        name: "安东 Andon",
+        path: "/qms/andon",
+        icon: "fa-solid fa-bars-progress",
+      },
+      {
+        parentName: "QMS",
+        name: "良品统计",
+        path: "/qms/good-product-statistic",
+        icon: "fa-solid fa-square-poll-vertical",
       },
     ],
   },
