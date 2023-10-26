@@ -402,7 +402,10 @@ async function deleteCenter() {
                   title="未排产工单"
                 >
                 </v-toolbar>
-                <div style="height: calc(100vh - 20px)" class="overflow-y-auto">
+                <div
+                  style="height: calc(100vh - 158px)"
+                  class="overflow-y-auto"
+                >
                   <v-list
                     density="compact"
                     :lines="false"
