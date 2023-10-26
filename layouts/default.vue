@@ -89,25 +89,6 @@ const pageMenus = ref<any[]>([
     ],
   },
   {
-    name: "基础数据",
-    path: "/work-basic",
-    icon: "fa-solid fa-gear",
-    children: [
-      {
-        parentName: "基础信息",
-        name: "工作中心",
-        path: "/work-basic/work-center",
-        icon: "fa-solid fa-location-crosshairs",
-      },
-      {
-        parentName: "基础信息",
-        name: "班组信息",
-        path: "/work-basic/work-class",
-        icon: "fa-solid fa-people-roof",
-      },
-    ],
-  },
-  {
     name: "QMS",
     path: "/qms",
     icon: "fa-solid fa-list-check",
@@ -129,6 +110,25 @@ const pageMenus = ref<any[]>([
         name: "良品统计",
         path: "/qms/good-product-statistic",
         icon: "fa-solid fa-square-poll-vertical",
+      },
+    ],
+  },
+  {
+    name: "基础数据",
+    path: "/work-basic",
+    icon: "fa-solid fa-gear",
+    children: [
+      {
+        parentName: "基础信息",
+        name: "工作中心",
+        path: "/work-basic/work-center",
+        icon: "fa-solid fa-location-crosshairs",
+      },
+      {
+        parentName: "基础信息",
+        name: "班组信息",
+        path: "/work-basic/work-class",
+        icon: "fa-solid fa-people-roof",
       },
     ],
   },
