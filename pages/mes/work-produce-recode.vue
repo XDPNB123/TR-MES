@@ -310,7 +310,10 @@ watch(
 let deleteDialog = ref<boolean>(false);
 let workCenterInFo = ref<any>(null);
 //打开删除框
-
+function showDeleteCenter(item: any) {
+  workCenterInFo.value = item;
+  deleteDialog.value = true;
+}
 //确认删除
 async function deleteCenter() {
   //在当前工作中心中删除这一项任务
@@ -638,6 +641,21 @@ async function deleteCenter() {
                     v-for="(element, index) in tempTabArr"
                     :key="index"
                   >
+                    <div style="position: relative">
+                      <v-btn
+                        icon="fa-solid fa-x"
+                        variant="plain"
+                        size="x-small"
+                        style="
+                          position: absolute;
+                          right: 5px;
+                          top: -3px;
+                          z-index: 1000;
+                        "
+                        @click="showDeleteCenter(element)"
+                      >
+                      </v-btn>
+                    </div>
                     <v-list-item>
                       <template v-slot:default>
                         <div class="text-body-2">
@@ -646,13 +664,6 @@ async function deleteCenter() {
                             {{ element.procedure_order_id }}
                           </span>
                         </div>
-                      </template>
-                      <template v-slot:append>
-                        <v-btn
-                          icon="fa-solid fa-x"
-                          variant="plain"
-                          size="x-small"
-                        ></v-btn>
                       </template>
                     </v-list-item>
 
