@@ -232,7 +232,7 @@ async function getCenterProduce() {
 //确定保存
 async function updateCenterId() {
   if (!tabArr1.value.length) {
-    return alert("你没有拖拽工单工序到对应的工作中心当中");
+    return setSnackbar("black", "您并没有拖拽工单工序到对应的工作中心当中");
   }
   //添加工作中心编号
   await useHttp(
@@ -329,6 +329,8 @@ function deleteWorkCenter(item: any) {
 async function deleteCenter() {
   //在当前工作中心中删除这一项任务
   tempTabArr.value.splice(tempTabArr.value.indexOf(workCenterInFo.value), 1);
+  tabArr.value.splice(tabArr.value.indexOf(workCenterInFo.value), 1);
+  tabArr1.value.splice(tabArr1.value.indexOf(workCenterInFo.value), 1);
   //修改工单工序的工作中心编号
   workCenterInFo.value.work_center_id = null;
   //修改后的数据，通过接口修改数据库中内容
@@ -352,7 +354,7 @@ async function deleteCenter() {
     }
   );
   const workOrderInFo = data.data.pageList[0];
-  console.log(workOrderInFo.status);
+
   //如果工单状态是"已排产生产中"，调用接口更改为"已审核待排产"。
   if (workOrderInFo.status === "已排产生产中") {
     workOrderInFo.status = "已审核待排产";
@@ -372,7 +374,14 @@ async function deleteCenter() {
       //当前没有选择数据（selected这个数组为空）
     }
   }
-
+  setSnackbar(
+    "green",
+    "你成功从工作中心" +
+      workCenterName.value +
+      "撤销工单编号为" +
+      workHid +
+      "的这项任务"
+  );
   deleteDialog.value = false;
 }
 </script>
