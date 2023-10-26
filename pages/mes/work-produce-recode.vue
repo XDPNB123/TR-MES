@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import draggable from "vuedraggable";
+// 获取消息条对象
+const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
+  useSnackbar();
 // 搜索引擎优化
 useSeoMeta({
   // 该页面的标题
@@ -21,7 +23,15 @@ definePageMeta({
 let detailName = ref<any>("");
 //多选
 let selected = ref<any[]>([]);
+//通过改变选择的对象的工单编号来更改工单工序数据
+watch(selected, () => {
+  detailName.value = selected.value.join(",");
+  getWorkProduce();
+});
+let onDisabled = ref<boolean>(false);
+
 let workOrderList = ref<any[]>([]);
+
 //获取工单数据
 async function getWorkOrder() {
   try {
@@ -46,22 +56,15 @@ async function getWorkOrder() {
     console.log(error);
   }
 }
-watch(selected, () => {
-  detailName.value = selected.value.join(",");
-  if (tabArr1.value.length) {
-    return alert("请你保存或者取消你当前的操作，才可以对其他的工单进行操作");
-  }
-  getWorkProduce();
-});
 
-//工单工序操作
+//存储工单工序数据
 let workDetailList = ref<any[]>([]);
 
-//获取工单工序数据
+//根据工单编号来查询到工单工序数据
 async function getWorkProduce() {
   try {
     if (!detailName.value) {
-      workDetailList.value = [];
+      return (workDetailList.value = []);
     }
     const data: any = await useHttp(
       "/ProductionRecode/M21ProductionRecodeList",
@@ -102,6 +105,7 @@ async function getWorkProduce() {
   }
 }
 
+//存储拖拽到工作中心的数据
 let tabArr = ref<any[]>([]);
 let tabArr1 = ref<any[]>([]);
 
@@ -114,8 +118,6 @@ function onDragEnd(event: any, item: any) {
   // 获取鼠标所在位置的元素
   let element: any = document.elementFromPoint(x, y);
 
-  console.log(element);
-
   // 获取离该元素最近的 card 元素
   let cardElement = element.closest(".v-responsive__content");
 
@@ -127,30 +129,27 @@ function onDragEnd(event: any, item: any) {
 
   item.work_center_id = cardChildren[3].innerText.substring(3);
   workCenterId.value = cardChildren[3].innerText.substring(3);
-  workCenterName.value = cardChildren[0].innerText.substring(3);
+  workCenterName.value = cardChildren[0].innerText;
 
   item.assignment_date = new Date().toISOString().split("T")[0];
   workDetailList.value.splice(workDetailList.value.indexOf(item), 1);
+  console.log(workDetailList.value);
   tabArr.value.push(item);
   tabArr1.value.push(item);
   getCenterProduce();
-
-  console.log(tabArr.value);
 }
 
 //存储工作中心的集合
 let workCenterList = ref<any[]>([]);
-let workPage = ref<number>(1);
-watch(workPage, function () {
+
+//搜素
+let searchType = ref<string>("机加工");
+
+//通过更改searchType的值来筛选工作中心
+watch(searchType, function () {
   getWorkCenterList();
 });
 
-//搜素
-let searchWorkCenterName = ref<string>("");
-let searchType = ref<string>("");
-let searchWorkCenterAddress = ref<string>("");
-
-let workDetailCount = ref<number>(0);
 //获取工作中心数据
 async function getWorkCenterList() {
   const data = await useHttp(
@@ -158,34 +157,14 @@ async function getWorkCenterList() {
     "get",
     undefined,
     {
-      work_center_address: searchWorkCenterAddress.value,
-      work_center_name: searchWorkCenterName.value,
       type: searchType.value,
-      PageIndex: workPage.value,
-      PageSize: 4,
+      PageIndex: 1,
+      PageSize: 1000000,
       SortedBy: "id",
       SortType: 0,
     }
   );
   workCenterList.value = data.data.pageList;
-  workDetailCount.value = data.data.totalCount;
-}
-//工单工序的页数
-let tableDetailPageCount = computed(() => {
-  return Math.ceil(workDetailCount.value / 4);
-});
-//按条件搜素工作中心
-function searchWorkCenterList() {
-  workPage.value = 1;
-  getWorkCenterList();
-}
-//重置搜素
-function resetSearch() {
-  workPage.value = 1;
-  searchWorkCenterName.value = "";
-  searchType.value = "";
-  searchWorkCenterAddress.value = "";
-  getWorkCenterList();
 }
 
 onMounted(() => {
@@ -195,6 +174,7 @@ onMounted(() => {
 
 //用显示来工作中心中任务的数据
 let tempTabArr = ref<any[]>([]);
+//对工作中心的工单工序数据进行排序
 watch(tempTabArr, () => {
   tempTabArr.value.sort((a, b) => {
     if (a.procedure_order_id < b.procedure_order_id) {
@@ -210,13 +190,14 @@ watch(tempTabArr, () => {
 //存储工作中心编号
 let workCenterId = ref("");
 let workCenterName = ref("");
+
 //点击工作中心查看工作中心的任务
 function showCenterDetail(item: any) {
   workCenterId.value = item.work_center_id;
   workCenterName.value = item.work_center_name;
   getCenterProduce();
 }
-//获取工作中心的工单工序内容
+//根据工作中心编号来查找工单工序数据
 async function getCenterProduce() {
   const data: any = await useHttp(
     "/ProductionRecode/M21ProductionRecodeList",
@@ -232,7 +213,7 @@ async function getCenterProduce() {
   );
   tabArr.value = tabArr1.value;
   tabArr.value = [...tabArr.value, ...data.data.pageList];
-  console.log(workCenterId.value);
+
   tempTabArr.value = tabArr.value
     .filter(
       (_item: any) =>
@@ -253,29 +234,51 @@ async function updateCenterId() {
   if (!tabArr1.value.length) {
     return alert("你没有拖拽工单工序到对应的工作中心当中");
   }
+  //添加工作中心编号
   await useHttp(
     "/ProductionRecode/M23UpdateProductionRecode",
     "put",
     tabArr.value
   );
-  //判断是否更改工单状态
-  if (detailName.value !== "" && workDetailList.value.length === 0) {
+
+  await getWorkProduce();
+  let filteredSelected = selected.value.filter(
+    (selItem: any) =>
+      !workDetailList.value.some(
+        (workItem) => workItem.workorder_hid === selItem
+      )
+  );
+  let overWorkOrder = filteredSelected.join(",");
+  const workOrderDate = filteredSelected.map((item: any) => {
+    // 找到对应的工单
     const workOrder = workOrderList.value.find(
-      (item: any) => item.workorder_hid === detailName.value
+      (_item: any) => _item.workorder_hid === item
     );
-    workOrder.status = "已排产生产中";
-    //修改当前工单的状态
-    await useHttp(
-      "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
-      "put",
-      workOrder
-    );
-    getWorkOrder();
-    detailName.value = "";
-  }
-  tabArr.value = [];
+    // 如果找到了工单，更新它的状态并返回
+    if (workOrder) {
+      return { ...workOrder, status: "已排产生产中" };
+    }
+    // 如果没有找到工单，返回null或者其他默认值
+    return null;
+  });
+  //修改当前工单的状态;
+  await useHttp(
+    "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
+    "put",
+    workOrderDate
+  );
+
+  getWorkOrder();
+  detailName.value = "";
   tabArr1.value = [];
+  if (overWorkOrder) {
+    setSnackbar(
+      "green",
+      "工单编号为" + overWorkOrder + "的工单工序数据排产完成"
+    );
+  }
 }
+
 //取消添加工作中心
 function cancel() {
   if (!tabArr1.value.length) {
@@ -283,254 +286,234 @@ function cancel() {
   }
   tabArr1.value = [];
   tabArr.value = [];
+  getWorkProduce();
 }
+
 //通过监听tabArr1的内容来更改工作中心详情的内容
-watch(tabArr1, async function () {
-  await getCenterProduce();
-  await getWorkProduce();
-});
+watch(
+  tabArr1,
+  function () {
+    if (tabArr1.value.length) {
+      onDisabled.value = true;
+    } else {
+      onDisabled.value = false;
+    }
+    getCenterProduce();
+  },
+  { deep: true }
+);
 </script>
 <template>
-  <v-row no-gutters class="ma-2">
-    <v-col cols="1" class="bg-light-blue-lighten-5 mr-2">
+  <v-row no-gutters class="ma-3">
+    <v-col cols="1" class="bg-light-blue-lighten-5">
       <v-tabs direction="vertical">
         <v-tab color="green"> 工单排产 </v-tab>
         <v-tab color="green"> 产能视图 </v-tab>
       </v-tabs>
     </v-col>
-    <v-col>
-      <v-card>
-        <v-row>
-          <v-col cols="2" class="bg-light-blue-lighten-5">
+    <v-col cols="1" class="bg-light-blue-lighten-5">
+      <div>
+        <div class="text-h6 text-center mt-2 font-weight-bold">未排产工单</div>
+        <div
+          v-for="(item, index) in workOrderList"
+          :key="index"
+          class="w-100 mt-5"
+          v-if="workOrderList.length"
+        >
+          <v-divider :thickness="4"></v-divider>
+          <div>
+            <v-checkbox
+              v-model="selected"
+              :value="item.workorder_hid"
+              density="compact"
+              :disabled="onDisabled"
+              hide-details
+              class="ml-1"
+            ></v-checkbox>
+            <div class="mx-2 py-1 text-body-2">
+              工单编号：{{ item.workorder_hid }}
+            </div>
+            <div class="mx-2 py-1 text-body-2">
+              完成日期： {{ item.finish_date }}
+            </div>
+            <div class="mx-2 py-1 text-body-2">
+              数量：{{ item.planned_quantity }}{{ item.unit }}
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-center mt-5 text-captions">
+          (当前没有未排产的工单)
+        </div>
+      </div>
+    </v-col>
+    <v-col cols="10">
+      <v-card class="bg-light-blue-lighten-5 w-100" min-height="200px" flat>
+        <v-card-title v-if="detailName" class="font-weight-bold"
+          >({{ detailName }})工单工序</v-card-title
+        >
+        <v-card-title v-else class="font-weight-bold">工单工序</v-card-title>
+        <div class="overflow-x-auto w-100" style="white-space: nowrap">
+          <v-card
+            draggable="true"
+            @dragend="onDragEnd($event, element)"
+            class="mx-2"
+            style="display: inline-block"
+            :border="true"
+            v-for="(element, index) in workDetailList"
+            :key="index"
+            v-if="workDetailList.length"
+          >
+            <div v-show="!element.work_center_id">
+              <div class="px-2 py-1 text-body-2">
+                工序顺序：{{ element.procedure_order_id }}
+              </div>
+
+              <div class="px-2 py-1 text-body-2">
+                工序名称：{{ element.procedure_name }}
+              </div>
+
+              <div class="px-2 py-1 text-body-2">
+                是否委外：{{ element.defaul_outsource }}
+              </div>
+
+              <div class="px-2 py-1 text-body-2">
+                产出料：{{ element.material_name }}
+              </div>
+
+              <div class="px-2 py-1 text-body-2">
+                数量：{{ element.planned_quantity }}
+              </div>
+
+              <div class="px-2 py-1 text-body-2">
+                交付日期：{{ element.planned_completion_time }}
+              </div>
+            </div>
+          </v-card>
+          <div v-else class="text-center text-caption">
+            (工单工序已分配完成)
+          </div>
+        </div>
+      </v-card>
+      <!-- 工作中心 -->
+      <v-card class="bg-light-blue-lighten-5 mt-2" min-height="300px" flat>
+        <div class="d-flex justify-space-between my-3">
+          <div>
+            <v-card-title class="font-weight-bold">工作中心</v-card-title>
+          </div>
+          <div class="mr-2">
+            <v-select
+              label="工作中心类型"
+              v-model="searchType"
+              :items="['机加工', '装配']"
+              variant="outlined"
+              density="compact"
+              hide-details
+            ></v-select>
+          </div>
+        </div>
+        <div class="overflow-x-auto w-100 mt-4" style="white-space: nowrap">
+          <div
+            v-for="(item, index) in workCenterList"
+            v-if="workCenterList.length"
+            style="display: inline-block"
+          >
             <v-card
-              flat
-              border
-              title="未排产工单"
-              class="bg-light-blue-lighten-5"
+              class="mx-2"
+              @click="showCenterDetail(item)"
+              width="170"
+              height="170"
             >
-              <div
-                v-for="(item, index) in workOrderList"
-                :key="index"
-                class="w-100"
-              >
-                <v-divider :thickness="4"></v-divider>
-                <div>
-                  <v-checkbox
-                    v-model="selected"
-                    :value="item.workorder_hid"
-                    density="compact"
-                    hide-details
-                    class="ml-1"
-                  ></v-checkbox>
-                  <div class="mx-2 py-1 text-body-2">
-                    工单编号：{{ item.workorder_hid }}
-                  </div>
-                  <div class="mx-2 py-1 text-body-2">
-                    完成日期：{{ item.finish_date }}
-                  </div>
-                  <div class="mx-2 py-1 text-body-2">
-                    数量：{{ item.planned_quantity }}{{ item.unit }}
-                  </div>
-                </div>
-              </div>
-            </v-card>
-          </v-col>
-          <v-col cols="10">
-            <v-card class="bg-light-blue-lighten-5">
-              <v-card-title v-if="detailName"
-                >({{ detailName }})工单工序</v-card-title
-              >
-              <v-card-title v-else>工单工序</v-card-title>
-              <div class="overflow-x-auto" style="white-space: nowrap">
-                <v-card
-                  draggable="true"
-                  @dragend="onDragEnd($event, element)"
-                  class="mx-2"
-                  style="display: inline-block"
-                  :border="true"
-                  v-for="(element, index) in workDetailList"
-                  :key="index"
-                  v-if="workDetailList.length"
+              <v-img src="/工作中心.jpg" class="align-end">
+                <v-card-title>{{ item.work_center_name }}</v-card-title>
+                <v-card-subtitle>类型：{{ item.type }}</v-card-subtitle>
+                <v-card-subtitle
+                  >位置：{{ item.work_center_address }}</v-card-subtitle
                 >
-                  <div v-show="!element.work_center_id">
-                    <div class="px-2 py-1 text-body-2">
-                      工序顺序：{{ element.procedure_order_id }}
-                    </div>
-
-                    <div class="px-2 py-1 text-body-2">
-                      工序名称：{{ element.procedure_name }}
-                    </div>
-
-                    <div class="px-2 py-1 text-body-2">
-                      是否委外：{{ element.defaul_outsource }}
-                    </div>
-
-                    <div class="px-2 py-1 text-body-2">
-                      产出料：{{ element.material_name }}
-                    </div>
-
-                    <div class="px-2 py-1 text-body-2">
-                      数量：{{ element.planned_quantity }}
-                    </div>
-
-                    <div class="px-2 py-1 text-body-2">
-                      交付日期：{{ element.planned_completion_time }}
-                    </div>
-                  </div>
-                </v-card>
-                <div v-else class="text-center">工单工序已分配完成</div>
-              </div>
+                <v-card-subtitle>
+                  编号：{{ item.work_center_id }}
+                </v-card-subtitle>
+              </v-img>
             </v-card>
-            <!-- 工作中心 -->
-            <v-card class="bg-light-blue-lighten-5 mt-2" title="工作中心">
-              <v-row mx-2>
-                <v-col cols="4">
-                  <v-text-field
-                    label="工作中心名称"
-                    v-model="searchWorkCenterName"
-                    variant="outlined"
-                    density="compact"
-                    class="mt-3"
-                    hide-details
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="4">
-                  <v-text-field
-                    label="工作中心类型"
-                    v-model="searchType"
-                    variant="outlined"
-                    density="compact"
-                    class="mt-3"
-                    hide-details
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="4">
-                  <v-text-field
-                    label="工作中心地址"
-                    v-model="searchWorkCenterAddress"
-                    variant="outlined"
-                    density="compact"
-                    class="mt-3"
-                    hide-details
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" class="mt-3">
-                  <v-btn
-                    size="large"
-                    color="blue-darken-2"
-                    class="mr-3"
-                    prepend-icon="fa-solid fa-search"
-                    @click="searchWorkCenterList()"
-                    >条件查询</v-btn
-                  >
-                  <v-btn
-                    size="large"
-                    color="red"
-                    class="mr-3"
-                    prepend-icon="fa-solid fa-hourglass-start"
-                    @click="resetSearch()"
-                    >重置查询</v-btn
-                  >
-                </v-col>
-                <v-col cols="3" v-for="(item, index) in workCenterList">
-                  <v-card class="mx-2" @click="showCenterDetail(item)">
-                    <v-img src="/工作中心.jpg">
-                      <v-card-title>{{ item.work_center_name }}</v-card-title>
-                      <v-card-subtitle>类型：{{ item.type }}</v-card-subtitle>
-                      <v-card-subtitle
-                        >位置：{{ item.work_center_address }}</v-card-subtitle
-                      >
-                      <v-card-subtitle>
-                        编号：{{ item.work_center_id }}
-                      </v-card-subtitle>
-                    </v-img>
-                  </v-card>
-                  <!-- <div
-                    
-                  >
-                    {{ item.work_center_name }}
-                    <span v-show="false">{{ item.work_center_id }}</span>
-                    <span v-show="false">工作中心</span>
-                    <div class="text-bottom">
-                      <span class="text-subtitle-1">{{ item.type }}</span>
-                      <span class="text-subtitle-1">{{
-                        item.work_center_address
-                      }}</span>
-                    </div>
-                  </div> -->
-                </v-col>
-              </v-row>
-              <div class="text-center pt-2">
-                <v-pagination
-                  v-model="workPage"
-                  :length="tableDetailPageCount"
-                ></v-pagination>
+          </div>
+          <div v-else class="text-center text-caption">
+            (工作中心为空，可能是网络断开了)
+          </div>
+        </div>
+        <div class="d-flex justify-end mr-6 my-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="updateCenterId()"
+          >
+            保存信息
+          </v-btn>
+          <v-btn color="grey" size="large" @click="cancel"> 取消 </v-btn>
+        </div>
+      </v-card>
+
+      <!-- 工作详情 -->
+      <v-card class="bg-blue-lighten-5 mt-2" min-height="200px" flat>
+        <v-card-title v-if="workCenterName" class="font-weight-bold">
+          ({{ workCenterName }})工作中心详情
+        </v-card-title>
+        <v-card-title v-else class="font-weight-bold"
+          >工作中心详情</v-card-title
+        >
+        <div class="overflow-x-auto" style="white-space: nowrap">
+          <v-card
+            class="mx-2"
+            style="display: inline-block"
+            :border="true"
+            v-for="(element, index) in tempTabArr"
+            :key="index"
+            v-if="tempTabArr.length"
+          >
+            <div>
+              <div class="mx-2 py-1 text-body-2">
+                工序顺序：{{ element.procedure_order_id }}
               </div>
-              <div class="d-flex justify-end mr-6 my-4">
-                <v-btn
-                  color="blue-darken-2"
-                  size="large"
-                  class="mr-2"
-                  @click="updateCenterId()"
-                >
-                  保存信息
-                </v-btn>
-                <v-btn color="grey" size="large" @click="cancel"> 取消 </v-btn>
+
+              <div class="mx-2 py-1 text-body-2">
+                工序名称：{{ element.procedure_name }}
               </div>
-            </v-card>
 
-            <!-- 工作详情 -->
-            <v-card class="bg-blue-lighten-5 mt-2">
-              <v-card-title v-if="workCenterName">
-                ({{ workCenterName }})工作中心详情
-              </v-card-title>
-              <v-card-title v-else>工作中心详情</v-card-title>
-              <div class="overflow-x-auto" style="white-space: nowrap">
-                <v-card
-                  class="mx-2"
-                  style="display: inline-block"
-                  :border="true"
-                  v-for="(element, index) in tempTabArr"
-                  :key="index"
-                  v-if="tempTabArr.length"
-                >
-                  <div>
-                    <div class="mx-2 py-1 text-body-2">
-                      工序顺序：{{ element.procedure_order_id }}
-                    </div>
-
-                    <div class="mx-2 py-1 text-body-2">
-                      工序名称：{{ element.procedure_name }}
-                    </div>
-
-                    <div class="mx-2 py-1 text-body-2">
-                      是否委外：{{ element.defaul_outsource }}
-                    </div>
-
-                    <div class="mx-2 py-1 text-body-2">
-                      产出料：{{ element.material_name }}
-                    </div>
-
-                    <div class="mx-2 py-1 text-body-2">
-                      数量：{{ element.planned_quantity }}
-                    </div>
-
-                    <div class="mx-2 py-1 text-body-2">
-                      交付日期：{{ element.planned_completion_time }}
-                    </div>
-                  </div>
-                </v-card>
-                <div v-else class="text-center">当前工作中心没有任务</div>
+              <div class="mx-2 py-1 text-body-2">
+                是否委外：{{ element.defaul_outsource }}
               </div>
-            </v-card>
-          </v-col>
-        </v-row>
+
+              <div class="mx-2 py-1 text-body-2">
+                产出料：{{ element.material_name }}
+              </div>
+
+              <div class="mx-2 py-1 text-body-2">
+                数量：{{ element.planned_quantity }}
+              </div>
+
+              <div class="mx-2 py-1 text-body-2">
+                交付日期：{{ element.planned_completion_time }}
+              </div>
+            </div>
+          </v-card>
+          <div v-else class="text-center text-caption">
+            (当前工作中心没有任务)
+          </div>
+        </div>
       </v-card>
     </v-col>
   </v-row>
+  <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
+    {{ snackbarText }}
+    <template v-slot:actions>
+      <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
+    </template>
+  </v-snackbar>
 </template>
 <style scoped>
 .inline-card {
   display: inline-flex;
+}
+.v-col {
+  border-right: 1px solid #0c476f;
 }
 </style>

@@ -908,7 +908,7 @@ async function editTicket() {
     const data: any = await useHttp(
       "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
       "put",
-      operatingTicket.value
+      [operatingTicket.value]
     );
     getWorkOrder();
     if (data.code === 200) {
@@ -930,7 +930,7 @@ async function auditTicket() {
     const data: any = await useHttp(
       "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
       "put",
-      operatingTicket.value
+      [operatingTicket.value]
     );
     getWorkOrder();
   } catch (error) {
