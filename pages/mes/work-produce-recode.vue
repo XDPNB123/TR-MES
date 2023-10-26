@@ -269,13 +269,15 @@ async function updateCenterId() {
   );
 
   getWorkOrder();
-  detailName.value = "";
+  selected.value = [];
   tabArr1.value = [];
   if (overWorkOrder) {
     setSnackbar(
       "green",
       "工单编号为" + overWorkOrder + "的工单工序数据排产完成"
     );
+  } else {
+    setSnackbar("green", "已选工单工序数据排产完成");
   }
 }
 
@@ -302,22 +304,93 @@ watch(
   },
   { deep: true }
 );
+//切换页面
+let showWork = ref<boolean>(true);
+let showPaper = ref<boolean>(false);
+function showWorkPage() {
+  showWork.value = true;
+  showPaper.value = false;
+}
+function showViewPage() {
+  showWork.value = false;
+  showPaper.value = true;
+}
+
+//删除工作中心中的任务
+//删除弹框
+let deleteDialog = ref<boolean>(false);
+let workCenterInFo = ref<any>(null);
+//打开删除框
+function deleteWorkCenter(item: any) {
+  deleteDialog.value = true;
+  workCenterInFo.value = item;
+}
+//确认删除
+async function deleteCenter() {
+  //在当前工作中心中删除这一项任务
+  tempTabArr.value.splice(tempTabArr.value.indexOf(workCenterInFo.value), 1);
+  //修改工单工序的工作中心编号
+  workCenterInFo.value.work_center_id = null;
+  //修改后的数据，通过接口修改数据库中内容
+  await useHttp("/ProductionRecode/M23UpdateProductionRecode", "put", [
+    workCenterInFo.value,
+  ]);
+  //判断在这个工作中心删除的这个数据的工单编号的工单的状态是什么
+  //拿到当前工单工序的工单编号
+  const workHid = workCenterInFo.value.workorder_hid;
+  //拿到这个工单编号的工单数据
+  const data: any = await useHttp(
+    "/MesWorkOrder/M01GetWorkOrderList",
+    "get",
+    undefined,
+    {
+      workorder_hid: workHid,
+      PageIndex: 1,
+      PageSize: 10,
+      SortedBy: "id",
+      SortType: 0,
+    }
+  );
+  const workOrderInFo = data.data.pageList[0];
+  console.log(workOrderInFo.status);
+  //如果工单状态是"已排产生产中"，调用接口更改为"已审核待排产"。
+  if (workOrderInFo.status === "已排产生产中") {
+    workOrderInFo.status = "已审核待排产";
+    await useHttp("/MesWorkOrder/M03PartiallyUpdateWorkOrder", "put", [
+      workOrderInFo,
+    ]);
+    getWorkOrder();
+  } else {
+    //判断当前有无选择工单数据（selected）
+    if (selected.value.length) {
+      //当前选择的有工单编号
+      //判断当前删除的这个数据的工单编号是否属于当前选择的这些工单编号
+      if (selected.value.includes(workHid)) {
+        workDetailList.value.push(workCenterInFo.value);
+      }
+    } else {
+      //当前没有选择数据（selected这个数组为空）
+    }
+  }
+
+  deleteDialog.value = false;
+}
 </script>
 <template>
   <v-row no-gutters class="ma-3">
-    <v-col cols="1" class="bg-light-blue-lighten-5">
+    <v-col cols="1">
       <v-tabs direction="vertical">
-        <v-tab color="green"> 工单排产 </v-tab>
-        <v-tab color="green"> 产能视图 </v-tab>
+        <v-tab color="green" @click="showWorkPage"> 工单排产 </v-tab>
+        <v-tab color="green" @click="showViewPage"> 产能视图 </v-tab>
       </v-tabs>
     </v-col>
-    <v-col cols="1" class="bg-light-blue-lighten-5">
-      <div>
-        <div class="text-h6 text-center mt-2 font-weight-bold">未排产工单</div>
+    <v-col cols="1" v-show="showWork">
+      <div class="text-h6 text-center mt-2 font-weight-bold">未排产工单</div>
+      <div style="height: 800px; overflow: auto">
         <div
           v-for="(item, index) in workOrderList"
           :key="index"
-          class="w-100 mt-5"
+          class="w-100 mt-5 overflow-y-auto"
           v-if="workOrderList.length"
         >
           <v-divider :thickness="4"></v-divider>
@@ -346,8 +419,8 @@ watch(
         </div>
       </div>
     </v-col>
-    <v-col cols="10">
-      <v-card class="bg-light-blue-lighten-5 w-100" min-height="200px" flat>
+    <v-col cols="10" v-show="showWork">
+      <v-card class="w-100" min-height="200px">
         <v-card-title v-if="detailName" class="font-weight-bold"
           >({{ detailName }})工单工序</v-card-title
         >
@@ -395,7 +468,7 @@ watch(
         </div>
       </v-card>
       <!-- 工作中心 -->
-      <v-card class="bg-light-blue-lighten-5 mt-2" min-height="300px" flat>
+      <v-card class="mt-2" min-height="300px">
         <div class="d-flex justify-space-between my-3">
           <div>
             <v-card-title class="font-weight-bold">工作中心</v-card-title>
@@ -453,7 +526,7 @@ watch(
       </v-card>
 
       <!-- 工作详情 -->
-      <v-card class="bg-blue-lighten-5 mt-2" min-height="200px" flat>
+      <v-card class="mt-2" min-height="200px">
         <v-card-title v-if="workCenterName" class="font-weight-bold">
           ({{ workCenterName }})工作中心详情
         </v-card-title>
@@ -468,10 +541,18 @@ watch(
             v-for="(element, index) in tempTabArr"
             :key="index"
             v-if="tempTabArr.length"
+            density="compact"
           >
             <div>
               <div class="mx-2 py-1 text-body-2">
                 工序顺序：{{ element.procedure_order_id }}
+                <v-btn
+                  icon="fa-solid fa-x"
+                  variant="plain"
+                  size="x-small"
+                  class="ml-13"
+                  @click="deleteWorkCenter(element)"
+                ></v-btn>
               </div>
 
               <div class="mx-2 py-1 text-body-2">
@@ -496,12 +577,44 @@ watch(
             </div>
           </v-card>
           <div v-else class="text-center text-caption">
-            (当前工作中心没有任务)
+            (当前工作中心没有分配任务)
           </div>
         </div>
       </v-card>
     </v-col>
+    <v-col cols="11" v-show="showPaper"></v-col>
   </v-row>
+
+  <!-- 删除常用工序流程 -->
+  <v-dialog v-model="deleteDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 删除常用工序流程 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="deleteDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+
+      <v-card-text class="mt-4 text-center text-red text-h6">
+        您确认要移除这条数据吗？
+      </v-card-text>
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          class="mr-2"
+          @click="deleteCenter()"
+        >
+          确认删除
+        </v-btn>
+        <v-btn color="grey" size="large" @click="deleteDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+
   <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
     {{ snackbarText }}
     <template v-slot:actions>
@@ -509,11 +622,4 @@ watch(
     </template>
   </v-snackbar>
 </template>
-<style scoped>
-.inline-card {
-  display: inline-flex;
-}
-.v-col {
-  border-right: 1px solid #0c476f;
-}
-</style>
+<style scoped></style>
