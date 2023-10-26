@@ -381,7 +381,8 @@ async function deleteCenter() {
     <v-col cols="1" class="pa-3">
       <!-- h-100 表示占 col 的整个内容区高度 -->
       <v-card class="h-100 rounded-lg elevation-3">
-        <v-toolbar density="compact" color="blue-darken-2" title="页面">
+        <v-toolbar density="compact" color="blue">
+          <v-toolbar-title class="text-center ml-0">页面</v-toolbar-title>
         </v-toolbar>
         <v-tabs color="blue" direction="vertical" v-model="showingTab">
           <v-tab value="工单排产"> 工单排产 </v-tab>
@@ -396,11 +397,10 @@ async function deleteCenter() {
           <v-row no-gutters>
             <v-col cols="2">
               <v-card class="rounded-lg elevation-3 ml-1">
-                <v-toolbar
-                  density="compact"
-                  color="blue-darken-2"
-                  title="未排产工单"
-                >
+                <v-toolbar density="compact" color="blue">
+                  <v-toolbar-title class="text-center ml-0"
+                    >未排产工单</v-toolbar-title
+                  >
                 </v-toolbar>
                 <div
                   style="height: calc(100vh - 158px)"
@@ -409,53 +409,57 @@ async function deleteCenter() {
                   <v-list
                     density="compact"
                     :lines="false"
-                    class="ma-2 elevation-3 rounded-lg"
+                    class="ma-2 elevation-3 rounded-lg d-flex align-center"
                     v-for="(item, index) in workOrderList"
                     :key="index"
                     v-if="workOrderList.length"
                   >
                     <v-checkbox
+                      style="max-width: 30px"
                       density="compact"
                       hide-details
-                      color="blue-darken-2"
+                      color="blue"
                       class="ml-3"
                       v-model="selected"
                       :value="item.workorder_hid"
                       :disabled="onDisabled"
-                    ></v-checkbox>
+                    >
+                    </v-checkbox>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div class="text-body-2">
-                          工单编号：
-                          <span class="text-grey font-weight-medium">
-                            {{ item.workorder_hid }}
-                          </span>
-                        </div>
-                      </template>
-                    </v-list-item>
+                    <div>
+                      <v-list-item>
+                        <template v-slot:default>
+                          <div class="text-body-2">
+                            工单编号：
+                            <span class="text-grey font-weight-medium">
+                              {{ item.workorder_hid }}
+                            </span>
+                          </div>
+                        </template>
+                      </v-list-item>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div class="text-body-2">
-                          完成日期：
-                          <span class="text-grey font-weight-medium">
-                            {{ item.finish_date }}
-                          </span>
-                        </div>
-                      </template>
-                    </v-list-item>
+                      <v-list-item>
+                        <template v-slot:default>
+                          <div class="text-body-2">
+                            完成日期：
+                            <span class="text-grey font-weight-medium">
+                              {{ item.finish_date }}
+                            </span>
+                          </div>
+                        </template>
+                      </v-list-item>
 
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div class="text-body-2">
-                          数量：
-                          <span class="text-grey font-weight-medium">
-                            {{ item.planned_quantity }}{{ item.unit }}
-                          </span>
-                        </div>
-                      </template>
-                    </v-list-item>
+                      <v-list-item>
+                        <template v-slot:default>
+                          <div class="text-body-2">
+                            数量：
+                            <span class="text-grey font-weight-medium">
+                              {{ item.planned_quantity }}{{ item.unit }}
+                            </span>
+                          </div>
+                        </template>
+                      </v-list-item>
+                    </div>
                   </v-list>
                   <div class="font-weight-bold text-h6" v-else>
                     当前没有未排产的工单
@@ -466,7 +470,7 @@ async function deleteCenter() {
 
             <v-col cols="10" class="px-3">
               <v-card class="mb-3 elevation-3 rounded-lg">
-                <v-toolbar density="compact" color="blue-darken-2">
+                <v-toolbar density="compact" color="blue">
                   <v-toolbar-title v-if="detailName"
                     >({{ detailName }})工单工序</v-toolbar-title
                   >
@@ -561,11 +565,7 @@ async function deleteCenter() {
 
               <!-- 工作中心 -->
               <v-card class="mb-3 elevation-3 rounded-lg">
-                <v-toolbar
-                  density="compact"
-                  color="blue-darken-2"
-                  title="工作中心"
-                >
+                <v-toolbar density="compact" color="blue" title="工作中心">
                   <template v-slot:append>
                     <v-select
                       variant="solo"
@@ -588,7 +588,7 @@ async function deleteCenter() {
                     :key="index"
                   >
                     <v-img src="/工作中心.jpg">
-                      <v-card-title class="text-blue-darken-2">{{
+                      <v-card-title class="text-blue">{{
                         item.work_center_name
                       }}</v-card-title>
                       <v-card-subtitle>类型：{{ item.type }}</v-card-subtitle>
@@ -610,11 +610,7 @@ async function deleteCenter() {
                 </div>
 
                 <div class="text-right my-3">
-                  <v-btn
-                    class="mr-2"
-                    color="blue-darken-2"
-                    @click="updateCenterId()"
-                  >
+                  <v-btn class="mr-2" color="blue" @click="updateCenterId()">
                     保存信息
                   </v-btn>
                   <v-btn class="mr-2" color="grey" @click="cancel">
@@ -625,7 +621,7 @@ async function deleteCenter() {
 
               <!-- 工作详情 -->
               <v-card class="elevation-3 rounded-lg">
-                <v-toolbar density="compact" color="blue-darken-2">
+                <v-toolbar density="compact" color="blue">
                   <v-toolbar-title v-if="workCenterName"
                     >({{ workCenterName }})工作中心详情</v-toolbar-title
                   >
@@ -759,12 +755,7 @@ async function deleteCenter() {
         您确认要删除这条数据吗？
       </v-card-text>
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn
-          color="blue-darken-2"
-          size="large"
-          class="mr-2"
-          @click="deleteCenter()"
-        >
+        <v-btn color="blue" size="large" class="mr-2" @click="deleteCenter()">
           确认删除
         </v-btn>
         <v-btn color="grey" size="large" @click="deleteDialog = false">
