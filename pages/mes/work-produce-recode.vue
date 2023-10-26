@@ -325,74 +325,79 @@ watch(
     <v-col cols="11" class="py-3 pr-3">
       <v-window v-model="showingTab">
         <v-window-item value="工单排产">
-          <div class="d-flex">
-            <v-card class="rounded-lg elevation-3 ml-1">
-              <v-toolbar
-                density="compact"
-                color="blue-darken-2"
-                title="未排产工单"
-              >
-              </v-toolbar>
-              <div style="height: calc(100vh - 158px)" class="overflow-y-auto">
-                <v-list
+          <v-row no-gutters>
+            <v-col cols="2">
+              <v-card class="rounded-lg elevation-3 ml-1">
+                <v-toolbar
                   density="compact"
-                  :lines="false"
-                  class="ma-2 elevation-3 rounded-lg"
-                  v-for="(item, index) in workOrderList"
-                  :key="index"
-                  v-if="workOrderList.length"
+                  color="blue-darken-2"
+                  title="未排产工单"
                 >
-                  <v-checkbox
+                </v-toolbar>
+                <div
+                  style="height: calc(100vh - 158px)"
+                  class="overflow-y-auto"
+                >
+                  <v-list
                     density="compact"
-                    hide-details
-                    color="blue-darken-2"
-                    class="ml-3"
-                    v-model="selected"
-                    :value="item.workorder_hid"
-                    :disabled="onDisabled"
-                  ></v-checkbox>
+                    :lines="false"
+                    class="ma-2 elevation-3 rounded-lg"
+                    v-for="(item, index) in workOrderList"
+                    :key="index"
+                    v-if="workOrderList.length"
+                  >
+                    <v-checkbox
+                      density="compact"
+                      hide-details
+                      color="blue-darken-2"
+                      class="ml-3"
+                      v-model="selected"
+                      :value="item.workorder_hid"
+                      :disabled="onDisabled"
+                    ></v-checkbox>
 
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="text-caption">
-                        工单编号：
-                        <span class="text-grey font-weight-medium">
-                          {{ item.workorder_hid }}
-                        </span>
-                      </div>
-                    </template>
-                  </v-list-item>
+                    <v-list-item>
+                      <template v-slot:default>
+                        <div class="text-body-2">
+                          工单编号：
+                          <span class="text-grey font-weight-medium">
+                            {{ item.workorder_hid }}
+                          </span>
+                        </div>
+                      </template>
+                    </v-list-item>
 
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="text-caption">
-                        完成日期：
-                        <span class="text-grey font-weight-medium">
-                          {{ item.finish_date }}
-                        </span>
-                      </div>
-                    </template>
-                  </v-list-item>
+                    <v-list-item>
+                      <template v-slot:default>
+                        <div class="text-body-2">
+                          完成日期：
+                          <span class="text-grey font-weight-medium">
+                            {{ item.finish_date }}
+                          </span>
+                        </div>
+                      </template>
+                    </v-list-item>
 
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="text-caption">
-                        数量：
-                        <span class="text-grey font-weight-medium">
-                          {{ item.planned_quantity }}{{ item.unit }}
-                        </span>
-                      </div>
-                    </template>
-                  </v-list-item>
-                </v-list>
-                <div class="font-weight-bold text-h6" v-else>
-                  当前没有未排产的工单
+                    <v-list-item>
+                      <template v-slot:default>
+                        <div class="text-body-2">
+                          数量：
+                          <span class="text-grey font-weight-medium">
+                            {{ item.planned_quantity }}{{ item.unit }}
+                          </span>
+                        </div>
+                      </template>
+                    </v-list-item>
+                  </v-list>
+                  <div class="font-weight-bold text-h6" v-else>
+                    当前没有未排产的工单
+                  </div>
                 </div>
-              </div>
-            </v-card>
+              </v-card>
+            </v-col>
 
-            <div class="flex-grow-1 pl-3">
-              <v-card class="mb-3 elevation-3 rounded-lg" width="78vw">
+            <v-col cols="10" class="px-3">
+              <v-card class="mb-3 elevation-3 rounded-lg">
                 <v-toolbar density="compact" color="blue-darken-2">
                   <v-toolbar-title v-if="detailName"
                     >({{ detailName }})工单工序</v-toolbar-title
@@ -400,6 +405,7 @@ watch(
                   <v-toolbar-title v-else>工单工序</v-toolbar-title>
                 </v-toolbar>
 
+                <!-- cols="10" 确定了宽度，此处的 w-100 百分比就生效了 -->
                 <div class="overflow-x-auto w-100" style="white-space: nowrap">
                   <v-list
                     class="mx-2 mt-3 mb-1 elevation-3 rounded-lg"
@@ -414,7 +420,7 @@ watch(
                   >
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           工序顺序：
                           <span class="text-grey font-weight-medium">
                             {{ element.procedure_order_id }}
@@ -425,7 +431,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           工序名称：
                           <span class="text-grey font-weight-medium">
                             {{ element.procedure_name }}
@@ -436,7 +442,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           是否委外：
                           <span class="text-grey font-weight-medium">
                             {{ element.defaul_outsource }}
@@ -447,7 +453,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           产出料：
                           <span class="text-grey font-weight-medium">
                             {{ element.material_name }}
@@ -458,7 +464,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           数量：
                           <span class="text-grey font-weight-medium">
                             {{ element.planned_quantity }}
@@ -469,7 +475,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           交付日期：
                           <span class="text-grey font-weight-medium">
                             {{ element.planned_completion_time }}
@@ -486,7 +492,7 @@ watch(
               </v-card>
 
               <!-- 工作中心 -->
-              <v-card class="mb-3 elevation-3 rounded-lg" width="78vw">
+              <v-card class="mb-3 elevation-3 rounded-lg">
                 <v-toolbar
                   density="compact"
                   color="blue-darken-2"
@@ -550,7 +556,7 @@ watch(
               </v-card>
 
               <!-- 工作详情 -->
-              <v-card class="elevation-3 rounded-lg" width="78vw">
+              <v-card class="elevation-3 rounded-lg">
                 <v-toolbar density="compact" color="blue-darken-2">
                   <v-toolbar-title v-if="workCenterName"
                     >({{ workCenterName }})工作中心详情</v-toolbar-title
@@ -569,7 +575,7 @@ watch(
                   >
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           工序顺序：
                           <span class="text-grey font-weight-medium">
                             {{ element.procedure_order_id }}
@@ -580,7 +586,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           工序名称：
                           <span class="text-grey font-weight-medium">
                             {{ element.procedure_name }}
@@ -591,7 +597,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           是否委外：
                           <span class="text-grey font-weight-medium">
                             {{ element.defaul_outsource }}
@@ -602,7 +608,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           产出料：
                           <span class="text-grey font-weight-medium">
                             {{ element.material_name }}
@@ -613,7 +619,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           数量：
                           <span class="text-grey font-weight-medium">
                             {{ element.planned_quantity }}
@@ -624,7 +630,7 @@ watch(
 
                     <v-list-item>
                       <template v-slot:default>
-                        <div class="text-caption">
+                        <div class="text-body-2">
                           交付日期：
                           <span class="text-grey font-weight-medium">
                             {{ element.planned_completion_time }}
@@ -641,8 +647,8 @@ watch(
                   </div>
                 </div>
               </v-card>
-            </div>
-          </div>
+            </v-col>
+          </v-row>
         </v-window-item>
 
         <v-window-item value="产能视图"> 这里是产能视图 </v-window-item>
