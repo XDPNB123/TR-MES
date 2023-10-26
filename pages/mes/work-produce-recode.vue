@@ -305,6 +305,71 @@ watch(
   },
   { deep: true }
 );
+
+//删除工作中心的任务
+let deleteDialog = ref<boolean>(false);
+let workCenterInFo = ref<any>(null);
+//打开删除框
+
+//确认删除
+async function deleteCenter() {
+  //在当前工作中心中删除这一项任务
+  tempTabArr.value.splice(tempTabArr.value.indexOf(workCenterInFo.value), 1);
+  tabArr.value.splice(tabArr.value.indexOf(workCenterInFo.value), 1);
+  tabArr1.value.splice(tabArr1.value.indexOf(workCenterInFo.value), 1);
+  //修改工单工序的工作中心编号
+  workCenterInFo.value.work_center_id = null;
+  //修改后的数据，通过接口修改数据库中内容
+  await useHttp("/ProductionRecode/M23UpdateProductionRecode", "put", [
+    workCenterInFo.value,
+  ]);
+  //判断在这个工作中心删除的这个数据的工单编号的工单的状态是什么
+  //拿到当前工单工序的工单编号
+  const workHid = workCenterInFo.value.workorder_hid;
+  //拿到这个工单编号的工单数据
+  const data: any = await useHttp(
+    "/MesWorkOrder/M01GetWorkOrderList",
+    "get",
+    undefined,
+    {
+      workorder_hid: workHid,
+      PageIndex: 1,
+      PageSize: 10,
+      SortedBy: "id",
+      SortType: 0,
+    }
+  );
+  const workOrderInFo = data.data.pageList[0];
+
+  //如果工单状态是"已排产生产中"，调用接口更改为"已审核待排产"。
+  if (workOrderInFo.status === "已排产生产中") {
+    workOrderInFo.status = "已审核待排产";
+    await useHttp("/MesWorkOrder/M03PartiallyUpdateWorkOrder", "put", [
+      workOrderInFo,
+    ]);
+    getWorkOrder();
+  } else {
+    //判断当前有无选择工单数据（selected）
+    if (selected.value.length) {
+      //当前选择的有工单编号
+      //判断当前删除的这个数据的工单编号是否属于当前选择的这些工单编号
+      if (selected.value.includes(workHid)) {
+        workDetailList.value.push(workCenterInFo.value);
+      }
+    } else {
+      //当前没有选择数据（selected这个数组为空）
+    }
+  }
+  setSnackbar(
+    "green",
+    "你成功从工作中心" +
+      workCenterName.value +
+      "撤销工单编号为" +
+      workHid +
+      "的这项任务"
+  );
+  deleteDialog.value = false;
+}
 </script>
 
 <template>
@@ -582,6 +647,13 @@ watch(
                           </span>
                         </div>
                       </template>
+                      <template v-slot:append>
+                        <v-btn
+                          icon="fa-solid fa-x"
+                          variant="plain"
+                          size="x-small"
+                        ></v-btn>
+                      </template>
                     </v-list-item>
 
                     <v-list-item>
@@ -661,5 +733,34 @@ watch(
       <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
     </template>
   </v-snackbar>
+  <!-- 删除工作中心中任务 -->
+  <v-dialog v-model="deleteDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 删除常用工序流程 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="deleteDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+
+      <v-card-text class="mt-4 text-center text-red text-h6">
+        您确认要删除这条数据吗？
+      </v-card-text>
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          class="mr-2"
+          @click="deleteCenter()"
+        >
+          确认删除
+        </v-btn>
+        <v-btn color="grey" size="large" @click="deleteDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
 </template>
 <style scoped></style>
