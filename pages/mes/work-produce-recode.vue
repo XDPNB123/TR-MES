@@ -302,16 +302,27 @@ watch(
   },
   { deep: true }
 );
+//切换页面
+let showWork = ref<boolean>(true);
+let showPaper = ref<boolean>(false);
+function showWorkPage() {
+  showWork.value = true;
+  showPaper.value = false;
+}
+function showViewPage() {
+  showWork.value = false;
+  showPaper.value = true;
+}
 </script>
 <template>
   <v-row no-gutters class="ma-3">
     <v-col cols="1" class="bg-light-blue-lighten-5">
       <v-tabs direction="vertical">
-        <v-tab color="green"> 工单排产 </v-tab>
-        <v-tab color="green"> 产能视图 </v-tab>
+        <v-tab color="green" @click="showWorkPage"> 工单排产 </v-tab>
+        <v-tab color="green" @click="showViewPage"> 产能视图 </v-tab>
       </v-tabs>
     </v-col>
-    <v-col cols="1" class="bg-light-blue-lighten-5">
+    <v-col cols="1" class="bg-light-blue-lighten-5" v-show="showWork">
       <div>
         <div class="text-h6 text-center mt-2 font-weight-bold">未排产工单</div>
         <div
@@ -346,7 +357,7 @@ watch(
         </div>
       </div>
     </v-col>
-    <v-col cols="10">
+    <v-col cols="10" v-show="showWork">
       <v-card class="bg-light-blue-lighten-5 w-100" min-height="200px" flat>
         <v-card-title v-if="detailName" class="font-weight-bold"
           >({{ detailName }})工单工序</v-card-title
@@ -501,6 +512,7 @@ watch(
         </div>
       </v-card>
     </v-col>
+    <v-col cols="11" v-show="showPaper"></v-col>
   </v-row>
   <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
     {{ snackbarText }}
