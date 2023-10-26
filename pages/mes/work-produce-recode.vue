@@ -384,9 +384,9 @@ async function deleteCenter() {
         <v-tab color="green" @click="showViewPage"> 产能视图 </v-tab>
       </v-tabs>
     </v-col>
-    <v-col cols="1" v-show="showWork">
-      <div class="text-h6 text-center mt-2 font-weight-bold">未排产工单</div>
-      <div style="height: 800px; overflow: auto">
+    <v-col cols="1" class="bg-light-blue-lighten-5">
+      <div>
+        <div class="text-h6 text-center mt-2 font-weight-bold">未排产工单</div>
         <div
           v-for="(item, index) in workOrderList"
           :key="index"
@@ -419,8 +419,8 @@ async function deleteCenter() {
         </div>
       </div>
     </v-col>
-    <v-col cols="10" v-show="showWork">
-      <v-card class="w-100" min-height="200px">
+    <v-col cols="10">
+      <v-card class="bg-light-blue-lighten-5 w-100" min-height="200px" flat>
         <v-card-title v-if="detailName" class="font-weight-bold"
           >({{ detailName }})工单工序</v-card-title
         >
