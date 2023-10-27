@@ -352,7 +352,7 @@ async function deleteCenter() {
   const workOrderInFo = data.data.pageList[0];
 
   //如果工单状态是"已排产生产中"，调用接口更改为"已审核待排产"。
-  if (workOrderInFo.status === "已排产生产中") {
+  if (workOrderInFo.status === "已排产待执行") {
     workOrderInFo.status = "已审核待排产";
     await useHttp("/MesWorkOrder/M03PartiallyUpdateWorkOrder", "put", [
       workOrderInFo,
@@ -715,11 +715,14 @@ async function deleteCenter() {
                     :class="{
                       'bg-light-blue-lighten-5':
                         element.status === '已审核待排产',
-                      '': element.status !== '已审核待排产',
+                      '': element.status === '已排产待执行',
+                      'bg-red-lighten-4':
+                        element.status === '已扫描在排产',
                     }"
                   >
                     <div style="position: relative">
                       <v-btn
+                        v-show="element.status !== '已扫描在排产'"
                         icon="fa-solid fa-x"
                         variant="plain"
                         size="x-small"
@@ -794,6 +797,17 @@ async function deleteCenter() {
                           交付日期：
                           <span class="text-grey font-weight-medium">
                             {{ element.planned_completion_time }}
+                          </span>
+                        </div>
+                      </template>
+                    </v-list-item>
+
+                    <v-list-item>
+                      <template v-slot:default>
+                        <div class="text-body-2">
+                          当前状态：
+                          <span class="text-grey font-weight-medium">
+                            {{ element.status }}
                           </span>
                         </div>
                       </template>
