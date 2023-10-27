@@ -130,10 +130,10 @@ function onDragEnd(event: any, item: any) {
   // 获取 card 元素的所有子元素
   const cardChildren = cardElement.children;
 
-  item.work_center_id = cardChildren[3].innerText.substring(3);
+  item.work_center_id = cardChildren[5].innerText.substring(3);
 
-  workCenterId.value = cardChildren[3].innerText.substring(3);
-  workCenterName.value = cardChildren[0].innerText;
+  workCenterId.value = cardChildren[5].innerText.substring(3);
+  workCenterName.value = cardChildren[2].innerText;
 
   item.assignment_date = new Date().toISOString().split("T")[0];
   workDetailList.value.splice(workDetailList.value.indexOf(item), 1);
@@ -486,7 +486,7 @@ async function deleteCenter() {
                 <!-- cols="10" 确定了宽度，此处的 w-100 百分比就生效了 -->
                 <div class="overflow-x-auto w-100" style="white-space: nowrap">
                   <v-list
-                    class="mx-2 mt-3 mb-1 elevation-2 rounded-lg"
+                    class="mx-2 mt-3 mb-1 elevation-2 rounded-lg bg-light-blue-lighten-5"
                     style="display: inline-block; cursor: move"
                     :lines="false"
                     density="compact"
@@ -683,7 +683,6 @@ async function deleteCenter() {
                     density="compact"
                     v-for="(element, index) in tempTabArr"
                     :key="index"
-                    color="bg-light-blue-lighten-5"
                     :class="{
                       'bg-light-blue-lighten-5':
                         element.status === '已审核待排产',
