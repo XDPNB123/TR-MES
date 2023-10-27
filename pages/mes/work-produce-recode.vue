@@ -590,6 +590,7 @@ async function deleteCenter() {
                   >
                     <v-tooltip activator="parent" location="bottom">
                       <div>
+                        设备：
                         {{
                           item.machineinfo
                             .reduce(
@@ -602,6 +603,7 @@ async function deleteCenter() {
                         }}
                       </div>
                       <div>
+                        工位：
                         {{
                           item.workstationinfo
                             .reduce(
