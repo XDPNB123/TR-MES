@@ -283,6 +283,8 @@ async function updateCenterId() {
       "green",
       "工单编号为" + overWorkOrder + "的工单工序数据排产完成"
     );
+  } else {
+    setSnackbar("green", "您操作的工单工序数据已排产");
   }
 }
 
