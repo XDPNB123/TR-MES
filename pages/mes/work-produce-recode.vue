@@ -251,6 +251,10 @@ async function updateCenterId() {
         (workItem) => workItem.workorder_hid === selItem
       )
   );
+  //当这个工单编号的工单工序的内容为空的时候，selected选择的工单编号也应该去除
+  selected.value = selected.value.filter(
+    (selItem: any) => !filteredSelected.some((workItem) => workItem === selItem)
+  );
   let overWorkOrder = filteredSelected.join(",");
   const workOrderDate = filteredSelected.map((item: any) => {
     // 找到对应的工单
@@ -273,7 +277,6 @@ async function updateCenterId() {
 
   getWorkOrder();
   getWorkCenterList();
-  detailName.value = "";
   tabArr1.value = [];
   if (overWorkOrder) {
     setSnackbar(
