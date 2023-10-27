@@ -389,8 +389,10 @@ async function deleteCenter() {
     <v-col cols="1" class="py-3 pl-3 pr-2">
       <!-- h-100 表示占 col 的整个内容区高度 -->
       <v-card class="h-100 rounded-lg elevation-2">
-        <v-toolbar density="compact" color="blue">
-          <v-toolbar-title class="text-center ml-0">页面</v-toolbar-title>
+        <v-toolbar density="compact">
+          <v-toolbar-title class="text-center ml-0 text-blue font-weight-bold"
+            >页面</v-toolbar-title
+          >
         </v-toolbar>
         <v-tabs color="blue" direction="vertical" v-model="showingTab">
           <v-tab value="工单排产"> 工单排产 </v-tab>
@@ -405,8 +407,9 @@ async function deleteCenter() {
           <v-row no-gutters>
             <v-col cols="2">
               <v-card class="rounded-lg elevation-2 ml-1">
-                <v-toolbar density="compact" color="blue">
-                  <v-toolbar-title class="text-center ml-0"
+                <v-toolbar density="compact">
+                  <v-toolbar-title
+                    class="text-center ml-0 text-blue font-weight-bold"
                     >未排产工单</v-toolbar-title
                   >
                 </v-toolbar>
@@ -478,11 +481,15 @@ async function deleteCenter() {
 
             <v-col cols="10" class="px-3">
               <v-card class="mb-3 elevation-2 rounded-lg">
-                <v-toolbar density="compact" color="blue">
-                  <v-toolbar-title v-if="detailName"
+                <v-toolbar density="compact">
+                  <v-toolbar-title
+                    v-if="detailName"
+                    class="text-blue font-weight-bold"
                     >【{{ detailName }}】工单工序</v-toolbar-title
                   >
-                  <v-toolbar-title v-else>工单工序</v-toolbar-title>
+                  <v-toolbar-title v-else class="text-blue font-weight-bold"
+                    >工单工序</v-toolbar-title
+                  >
                 </v-toolbar>
 
                 <!-- cols="10" 确定了宽度，此处的 w-100 百分比就生效了 -->
@@ -573,7 +580,10 @@ async function deleteCenter() {
 
               <!-- 工作中心 -->
               <v-card class="mb-3 elevation-2 rounded-lg">
-                <v-toolbar density="compact" color="blue" title="工作中心">
+                <v-toolbar density="compact">
+                  <v-toolbar-title class="text-blue font-weight-bold"
+                    >工作中心</v-toolbar-title
+                  >
                   <template v-slot:append>
                     <v-select
                       variant="solo"
@@ -588,7 +598,7 @@ async function deleteCenter() {
 
                 <div class="overflow-x-auto w-100" style="white-space: nowrap">
                   <v-card
-                    class="mx-2 mt-3 mb-1 elevation-2 rounded-lg px-6 py-3 bg-blue-grey text-white"
+                    class="mx-2 mt-3 mb-1 elevation-2 rounded-lg px-6 py-3 bg-green-lighten-5"
                     style="display: inline-block"
                     @click="showCenterDetail(item)"
                     v-for="(item, index) in workCenterList"
@@ -624,7 +634,7 @@ async function deleteCenter() {
                     </v-tooltip>
                     <div style="position: relative">
                       <v-badge
-                        color="green"
+                        color="amber"
                         style="
                           position: absolute;
                           right: -12px;
@@ -635,15 +645,17 @@ async function deleteCenter() {
                       >
                       </v-badge>
                     </div>
-                    <div class="text-h6 font-weight-medium">
+                    <div class="text-h6 mb-3 font-weight-medium">
                       {{ item.work_center_name }}
                     </div>
 
-                    <div class="my-1 text-body-2">类型：{{ item.type }}</div>
-                    <div class="my-1 text-body-2">
+                    <div class="my-1 text-body-2 text-grey font-weight-medium">
+                      类型：{{ item.type }}
+                    </div>
+                    <div class="my-1 text-body-2 text-grey font-weight-medium">
                       位置：{{ item.work_center_address }}
                     </div>
-                    <div class="my-1 text-body-2">
+                    <div class="my-1 text-body-2 text-grey font-weight-medium">
                       编号：{{ item.work_center_id }}
                     </div>
                   </v-card>
@@ -656,25 +668,40 @@ async function deleteCenter() {
                   </div>
                 </div>
 
-                <div class="text-right my-3">
-                  <v-btn class="mr-2" color="blue" @click="updateCenterId()">
-                    保存信息
-                  </v-btn>
-                  <v-btn class="mr-2" color="grey" @click="cancel">
-                    取消
-                  </v-btn>
+                <div class="d-flex justify-space-between my-3">
+                  <div>
+                    <span
+                      v-if="tabArr1.length"
+                      class="text-center text-h6 ml-3 text-grey"
+                    >
+                      您已经进行了操作，如果想重新操作，请点击右边的取消按钮
+                    </span>
+                  </div>
+
+                  <div>
+                    <v-btn class="mr-2" color="blue" @click="updateCenterId()">
+                      保存信息
+                    </v-btn>
+                    <v-btn class="mr-2" color="grey" @click="cancel">
+                      取消
+                    </v-btn>
+                  </div>
                 </div>
               </v-card>
 
               <!-- 工作详情 -->
               <v-card class="elevation-2 rounded-lg">
-                <v-toolbar density="compact" color="blue">
-                  <v-toolbar-title v-if="workCenterName"
+                <v-toolbar density="compact">
+                  <v-toolbar-title
+                    class="font-weight-bold text-blue"
+                    v-if="workCenterName"
                     >【{{ workCenterName }}】工作中心详情【{{
                       tempTabArr.length
                     }}】</v-toolbar-title
                   >
-                  <v-toolbar-title v-else>工作中心详情</v-toolbar-title>
+                  <v-toolbar-title class="font-weight-bold text-blue" v-else
+                    >工作中心详情</v-toolbar-title
+                  >
                 </v-toolbar>
 
                 <div class="overflow-x-auto w-100" style="white-space: nowrap">
