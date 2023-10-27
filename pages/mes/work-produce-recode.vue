@@ -157,18 +157,16 @@ watch(searchType, function () {
 //获取工作中心数据
 async function getWorkCenterList() {
   const data = await useHttp(
-    "/WorkCenter/M13WorkCenterList",
+    "/WorkCenter/M62WorkCenterList",
     "get",
     undefined,
     {
-      type: searchType.value,
-      PageIndex: 1,
-      PageSize: 1000000,
-      SortedBy: "id",
-      SortType: 0,
+      centertype: searchType.value,
     }
   );
-  workCenterList.value = data.data.pageList;
+  workCenterList.value = data.data;
+
+  console.log(workCenterList.value);
 }
 
 onMounted(() => {
@@ -590,6 +588,45 @@ async function deleteCenter() {
                     v-for="(item, index) in workCenterList"
                     :key="index"
                   >
+                    <v-tooltip activator="parent" location="bottom">
+                      <div>
+                        {{
+                          item.machineinfo
+                            .reduce(
+                              (oldItem: any, newItem: any, index: any) => {
+                                return oldItem + "," + newItem.machine_name;
+                              },
+                              ""
+                            )
+                            .substring(1)
+                        }}
+                      </div>
+                      <div>
+                        {{
+                          item.workstationinfo
+                            .reduce(
+                              (oldItem: any, newItem: any, index: any) => {
+                                return oldItem + "," + newItem.station_name;
+                              },
+                              ""
+                            )
+                            .substring(1)
+                        }}
+                      </div>
+                    </v-tooltip>
+                    <div style="position: reactive">
+                      <v-badge
+                        color="green"
+                        style="
+                          position: absolute;
+                          right: 1vw;
+                          top: 1vw;
+                          z-index: 1000;
+                        "
+                        :content="item.count"
+                      >
+                      </v-badge>
+                    </div>
                     <v-img src="/工作中心.jpg">
                       <v-card-title class="text-blue">{{
                         item.work_center_name
