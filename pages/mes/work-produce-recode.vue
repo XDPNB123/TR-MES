@@ -272,6 +272,7 @@ async function updateCenterId() {
   );
 
   getWorkOrder();
+  getWorkCenterList();
   detailName.value = "";
   tabArr1.value = [];
   if (overWorkOrder) {
@@ -373,6 +374,7 @@ async function deleteCenter() {
       "的这项任务"
   );
   deleteDialog.value = false;
+  getWorkCenterList();
 }
 </script>
 
