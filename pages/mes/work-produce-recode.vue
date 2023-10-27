@@ -234,7 +234,7 @@ async function getCenterProduce() {
 //确定保存
 async function updateCenterId() {
   if (!tabArr1.value.length) {
-    return alert("你没有拖拽工单工序到对应的工作中心当中");
+    return setSnackbar("black", "您没有拖拽工单工序到对应的工作中心当中");
   }
   tabArr.value.map((item: any) => (item.status = "已排产在执行"));
   //添加工作中心编号
