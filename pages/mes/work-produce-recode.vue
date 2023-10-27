@@ -125,7 +125,7 @@ function onDragEnd(event: any, item: any) {
   let cardElement = element.closest(".v-card");
 
   // 如果没有拖到工作中心容器内，则拖动无效
-  if (!cardElement || cardElement.children.length !== 7) return;
+  if (!cardElement || cardElement.children.length !== 8) return;
 
   // 获取 card 元素的所有子元素
   const cardChildren = cardElement.children;
@@ -620,13 +620,13 @@ async function deleteCenter() {
                         }}
                       </div>
                     </v-tooltip>
-                    <div style="position: reactive">
+                    <div style="position: relative">
                       <v-badge
                         color="green"
                         style="
                           position: absolute;
-                          right: 1vw;
-                          top: 1vw;
+                          right: -12px;
+                          top: 0px;
                           z-index: 1000;
                         "
                         :content="item.count"
