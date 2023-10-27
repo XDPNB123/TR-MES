@@ -131,12 +131,13 @@ function onDragEnd(event: any, item: any) {
   const cardChildren = cardElement.children;
 
   item.work_center_id = cardChildren[3].innerText.substring(3);
+
   workCenterId.value = cardChildren[3].innerText.substring(3);
   workCenterName.value = cardChildren[0].innerText;
 
   item.assignment_date = new Date().toISOString().split("T")[0];
   workDetailList.value.splice(workDetailList.value.indexOf(item), 1);
-  console.log(workDetailList.value);
+
   tabArr.value.push(item);
   tabArr1.value.push(item);
   getCenterProduce();
@@ -237,6 +238,7 @@ async function updateCenterId() {
   if (!tabArr1.value.length) {
     return alert("你没有拖拽工单工序到对应的工作中心当中");
   }
+  tabArr.value.map((item: any) => (item.status = "已排产在执行"));
   //添加工作中心编号
   await useHttp(
     "/ProductionRecode/M23UpdateProductionRecode",
@@ -322,6 +324,7 @@ async function deleteCenter() {
   tabArr1.value.splice(tabArr1.value.indexOf(workCenterInFo.value), 1);
   //修改工单工序的工作中心编号
   workCenterInFo.value.work_center_id = null;
+  workCenterInFo.value.status = "已审核待排产";
   //修改后的数据，通过接口修改数据库中内容
   await useHttp("/ProductionRecode/M23UpdateProductionRecode", "put", [
     workCenterInFo.value,
@@ -476,7 +479,7 @@ async function deleteCenter() {
                 <!-- cols="10" 确定了宽度，此处的 w-100 百分比就生效了 -->
                 <div class="overflow-x-auto w-100" style="white-space: nowrap">
                   <v-list
-                    class="mx-2 mt-3 mb-1 elevation-3 rounded-lg"
+                    class="mx-2 mt-3 mb-1 elevation-3 rounded-lg bg-light-blue-lighten-5"
                     style="display: inline-block"
                     :lines="false"
                     density="compact"
@@ -627,7 +630,9 @@ async function deleteCenter() {
               <v-card class="elevation-3 rounded-lg">
                 <v-toolbar density="compact" color="blue-darken-2">
                   <v-toolbar-title v-if="workCenterName"
-                    >({{ workCenterName }})工作中心详情</v-toolbar-title
+                    >({{ workCenterName }})工作中心详情({{
+                      tempTabArr.length
+                    }})</v-toolbar-title
                   >
                   <v-toolbar-title v-else>工作中心详情</v-toolbar-title>
                 </v-toolbar>
@@ -640,6 +645,12 @@ async function deleteCenter() {
                     density="compact"
                     v-for="(element, index) in tempTabArr"
                     :key="index"
+                    color="bg-light-blue-lighten-5"
+                    :class="{
+                      'bg-light-blue-lighten-5':
+                        element.status === '已审核待排产',
+                      '': element.status !== '已审核待排产',
+                    }"
                   >
                     <div style="position: relative">
                       <v-btn
@@ -748,7 +759,7 @@ async function deleteCenter() {
   <v-dialog v-model="deleteDialog" min-width="400px" width="560px">
     <v-card>
       <v-toolbar color="blue">
-        <v-toolbar-title> 删除常用工序流程 </v-toolbar-title>
+        <v-toolbar-title>删除工作中心任务 </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon @click="deleteDialog = false">
           <v-icon>fa-solid fa-close</v-icon>
@@ -756,7 +767,7 @@ async function deleteCenter() {
       </v-toolbar>
 
       <v-card-text class="mt-4 text-center text-red text-h6">
-        您确认要删除这条数据吗？
+        是否移除工作中心{{ workCenterName }}中的这项任务
       </v-card-text>
       <div class="d-flex justify-end mr-6 mb-4">
         <v-btn

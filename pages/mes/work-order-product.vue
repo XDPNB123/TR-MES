@@ -608,6 +608,7 @@ async function saveTicket() {
           material_id: "5",
           unit: item.unit,
           procedure_order_id: index + 1,
+          status:"已审核待排产"
         });
       });
     });
