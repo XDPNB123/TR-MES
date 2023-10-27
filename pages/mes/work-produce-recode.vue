@@ -220,7 +220,8 @@ async function getCenterProduce() {
     .filter(
       (_item: any) =>
         (_item.work_center_id !== "" || _item.work_center_id !== null) &&
-        _item.work_center_id === workCenterId.value
+        _item.work_center_id === workCenterId.value &&
+        _item.status !== "明细行已完成"
     )
     .map((item: any) => {
       item.planned_completion_time = item.planned_completion_time.substring(
@@ -236,7 +237,7 @@ async function updateCenterId() {
   if (!tabArr1.value.length) {
     return setSnackbar("black", "您没有拖拽工单工序到对应的工作中心当中");
   }
-  tabArr.value.map((item: any) => (item.status = "已排产在执行"));
+  tabArr.value.map((item: any) => (item.status = "已排产待执行"));
   //添加工作中心编号
   await useHttp(
     "/ProductionRecode/M23UpdateProductionRecode",
@@ -352,7 +353,7 @@ async function deleteCenter() {
   const workOrderInFo = data.data.pageList[0];
 
   //如果工单状态是"已排产生产中"，调用接口更改为"已审核待排产"。
-  if (workOrderInFo.status === "已排产待执行") {
+  if (workOrderInFo.status === "已排产生产中") {
     workOrderInFo.status = "已审核待排产";
     await useHttp("/MesWorkOrder/M03PartiallyUpdateWorkOrder", "put", [
       workOrderInFo,
@@ -716,13 +717,12 @@ async function deleteCenter() {
                       'bg-light-blue-lighten-5':
                         element.status === '已审核待排产',
                       '': element.status === '已排产待执行',
-                      'bg-red-lighten-4':
-                        element.status === '已扫描在排产',
+                      'bg-red-lighten-4': element.status === '已扫描在执行',
                     }"
                   >
                     <div style="position: relative">
                       <v-btn
-                        v-show="element.status !== '已扫描在排产'"
+                        v-show="element.status !== '已扫描在执行'"
                         icon="fa-solid fa-x"
                         variant="plain"
                         size="x-small"
