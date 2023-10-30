@@ -1,4 +1,7 @@
 <script setup lang="ts">
+//引入生成二维码工具
+import VueQr from "vue-qr/src/packages/vue-qr.vue";
+
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
   useSnackbar();
@@ -474,7 +477,7 @@ async function deleteCenter() {
                     </div>
                   </v-list>
                   <div class="text-center text-h6 my-3 text-grey" v-else>
-                    当前没有未排产的工单
+                    当前没有已审核未排产的工单
                   </div>
                 </div>
               </v-card>

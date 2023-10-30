@@ -30,52 +30,54 @@ onMounted(() => {
   <div class="initial-animation">这是个人信息页面</div>
 </template> -->
 
-<script setup lang="ts">
-import draggable from "vuedraggable";
-const list1 = ref([
-  { name: "John", id: 1 },
-  { name: "Joao", id: 2 },
-  { name: "Jean", id: 3 },
-  { name: "Gerard", id: 4 },
-]);
-const list2 = ref([
-  { name: "Juan", id: 5 },
-  { name: "Edgard", id: 6 },
-  { name: "Johnson", id: 7 },
-]);
-</script>
-
 <template>
-  <v-slide-group show-arrows>
-    <draggable :list="list1" group="people" itemKey="name">
-      <template #item="{ element, index }">
-        <v-card
-          class="inline-card mx-2"
-          :border="true"
-          :title="element.name + '>' + index"
-        >
-        </v-card>
-      </template>
-    </draggable>
-  </v-slide-group>
-  <v-row class="mt-3">
-    <v-col cols="2">
-      <v-card width="200">
-        <draggable :list="list2" group="people" itemKey="name">
-          <template #item="{ element, index }">
-            <v-list-item
-              :border="true"
-              :title="element.name + '>' + index"
-            ></v-list-item>
-          </template>
-        </draggable>
-      </v-card>
-    </v-col>
-  </v-row>
+  <div>
+    <div class="print-area">
+      <qrcode-vue :value="myData" id="qr-code"></qrcode-vue>
+    </div>
+    <v-btn @click="printQrCode">打印二维码</v-btn>
+  </div>
 </template>
 
-<style scoped>
-.inline-card {
-  display: inline-flex;
+<script setup lang="ts">
+import QrcodeVue from "qrcode.vue";
+
+const myData = ref("123");
+
+function printQrCode() {
+  const qrCode = document.getElementById("qr-code") as HTMLCanvasElement;
+  const image = new Image();
+
+  image.width = 100;
+  image.height = 100;
+  image.src = qrCode?.toDataURL("image/png");
+
+  image.onload = function () {
+    document.body.innerHTML = "";
+    document.body.appendChild(image);
+    window.print();
+    window.location.reload();
+  };
 }
-</style>
+
+// await nextTick();
+
+// let printContents = document.getElementById("printArea")?.innerHTML;
+
+// let printFrame = document.getElementById("printFrame") as HTMLIFrameElement;
+// let doc = printFrame.contentWindow?.document;
+// doc?.open();
+// doc?.write(`
+//   <html>
+//     <head>
+//       <title>Print Page</title>
+//     </head>
+//     <body>
+//       ${printContents}
+//     </body>
+//   </html>
+// `);
+// doc?.close();
+
+// printFrame.contentWindow?.print();
+</script>
