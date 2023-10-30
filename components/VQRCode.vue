@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import QrcodeVue from "qrcode.vue";
 
+interface Props {
+  text: string;
+  value: string;
+}
+
 const props = defineProps<{
-  data: any[];
+  data: Props[];
 }>();
 
 const showQrCode = ref<boolean>(false);
