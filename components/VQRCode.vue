@@ -9,12 +9,11 @@ const showQrCode = ref<boolean>(false);
 
 function printQrCode() {
   props.data.forEach((item, index) => {
-    const qrCode = document.getElementById(`__${index}`) as HTMLCanvasElement;
+    const qrCode = document.getElementById(item.text) as HTMLCanvasElement;
+
     const image = new Image();
-
-    image.style.width = "30%";
-
-    image.src = qrCode?.toDataURL(`image__${index}/png`);
+    image.style.width = "33%";
+    image.src = qrCode?.toDataURL(`${item.text}/png`);
 
     // 图片确认渲染完毕后的回调
     image.onload = function () {
@@ -48,6 +47,6 @@ function printQrCode() {
     :key="index"
     v-show="showQrCode"
     :value="item.value"
-    :id="`__${index}`"
+    :id="item.text"
   ></qrcode-vue>
 </template>
