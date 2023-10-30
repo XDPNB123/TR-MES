@@ -12,7 +12,8 @@ function printQrCode() {
     const qrCode = document.getElementById(`__${index}`) as HTMLCanvasElement;
     const image = new Image();
 
-    image.style.width = "100%";
+    image.style.width = "30%";
+
     image.src = qrCode?.toDataURL(`image__${index}/png`);
 
     // 图片确认渲染完毕后的回调
@@ -21,9 +22,14 @@ function printQrCode() {
 
       const div = document.createElement("div");
       div.innerText = item.text;
-      div.style.fontSize = "36px";
+      div.style.fontSize = "12px";
       div.style.pageBreakAfter = "always";
-      document.body.appendChild(image);
+      div.style.display = "flex";
+      div.style.justifyContent = "center";
+      div.style.alignItems = "center";
+      div.style.flexDirection = "column-reverse";
+      div.style.gap = "10px";
+      div.appendChild(image);
       document.body.appendChild(div);
 
       if (index === props.data.length - 1) {
