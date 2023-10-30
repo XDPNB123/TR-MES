@@ -31,53 +31,18 @@ onMounted(() => {
 </template> -->
 
 <template>
-  <div>
-    <div class="print-area">
-      <qrcode-vue :value="myData" id="qr-code"></qrcode-vue>
-    </div>
-    <v-btn @click="printQrCode">打印二维码</v-btn>
-  </div>
+  <VQRCode :data="data"></VQRCode>
 </template>
 
 <script setup lang="ts">
-import QrcodeVue from "qrcode.vue";
-
-const myData = ref("123");
-
-function printQrCode() {
-  const qrCode = document.getElementById("qr-code") as HTMLCanvasElement;
-  const image = new Image();
-
-  image.width = 100;
-  image.height = 100;
-  image.src = qrCode?.toDataURL("image/png");
-
-  image.onload = function () {
-    document.body.innerHTML = "";
-    document.body.appendChild(image);
-    window.print();
-    window.location.reload();
-  };
-}
-
-// await nextTick();
-
-// let printContents = document.getElementById("printArea")?.innerHTML;
-
-// let printFrame = document.getElementById("printFrame") as HTMLIFrameElement;
-// let doc = printFrame.contentWindow?.document;
-// doc?.open();
-// doc?.write(`
-//   <html>
-//     <head>
-//       <title>Print Page</title>
-//     </head>
-//     <body>
-//       ${printContents}
-//     </body>
-//   </html>
-// `);
-// doc?.close();
-
-// printFrame.contentWindow?.print();
+const data = ref<any[]>([
+  {
+    text: "你好",
+    value: "nihao",
+  },
+  {
+    text: "你不好",
+    value: "nibuhao",
+  },
+]);
 </script>
