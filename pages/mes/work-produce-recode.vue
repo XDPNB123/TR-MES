@@ -245,6 +245,15 @@ async function updateCenterId() {
     return setSnackbar("black", "您没有拖拽工单工序到对应的工作中心当中");
   }
   tabArr.value.map((item: any) => (item.status = "已排产待执行"));
+
+  //添加工作中心编号
+  const data: any = await useHttp(
+    "/ProductionRecode/M63PutProductionRecodeCreateDOId",
+    "put",
+    tabArr.value
+  );
+  tabArr.value = data.data;
+  console.log(data);
   tabArr.value.map((item: any) =>
     dataCode.value.push({
       project: item.project_code,
@@ -252,17 +261,11 @@ async function updateCenterId() {
       produce: item.procedure_name,
       date: item.planned_completion_time,
       number: item.planned_quantity,
-      unit: item.value,
+      unit: item.unit,
       value: item.dispatch_order,
     })
   );
-  //添加工作中心编号
-  await useHttp(
-    "/ProductionRecode/M63PutProductionRecodeCreateDOId",
-    "put",
-    tabArr.value
-  );
-
+  console.log(dataCode.value);
   // 是否打印
   if (checkbox.value) {
     qrCodeIns.value.printQrCode();
@@ -353,6 +356,7 @@ async function deleteCenter() {
   //修改工单工序的工作中心编号
   workCenterInFo.value.work_center_id = null;
   workCenterInFo.value.status = "已审核待排产";
+  workCenterInFo.value.dispatch_order = null;
   //修改后的数据，通过接口修改数据库中内容
   await useHttp("/ProductionRecode/M23UpdateProductionRecode", "put", [
     workCenterInFo.value,
@@ -714,7 +718,6 @@ async function deleteCenter() {
                           color="blue"
                           :data="dataCode"
                           ref="qrCodeIns"
-                          @click="updateCenterId()"
                         ></VQRCode>
                         <v-btn class="mr-2" color="grey" @click="cancel">
                           取消

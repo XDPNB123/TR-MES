@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 // 搜索引擎优化
 useSeoMeta({
   // 该页面的标题
@@ -28,4 +28,39 @@ onMounted(() => {
 
 <template>
   <div class="initial-animation">这是个人信息页面</div>
+</template> -->
+
+<script setup lang="ts">
+let dataCode = ref<any[]>([
+  {
+    project: "123123",
+    mcode: "手机",
+    produce: "打磨",
+    date: "2023 - 10 - 11",
+    number: 12,
+    unit: "个",
+    value: "123",
+  },
+  {
+    project: "2312",
+    mcode: "电脑",
+    produce: "达摩尔",
+    date: "2023 - 10 - 11",
+    number: 12,
+    unit: "个",
+    value: "123",
+  },
+  {
+    project: "2312",
+    mcode: "电脑",
+    produce: "达摩尔",
+    date: "2023 - 10 - 11",
+    number: 12,
+    unit: "个",
+    value: "123",
+  },
+]);
+</script>
+<template>
+  <VQRCode class="mr-2" color="blue" :data="dataCode" ref="qrCodeIns"></VQRCode>
 </template>

@@ -1,3 +1,4 @@
+dd
 <script setup lang="ts">
 import QrcodeVue from "qrcode.vue";
 
@@ -19,20 +20,88 @@ function printQrCode() {
       if (index === 0) document.body.innerHTML = "";
 
       document.write(`
-   
-      <div style="display: flex;">
-  <div style="margin-right: 20px;"><img src="${image.src}" style="height:50px !important;"></div>
-  <div style="display: flex; flex-direction: column; justify-content: space-between;
-  border: 1px solid black;
-  ">
-    <div style="font-size:8px !important">项目号：${item.project}</div>
-    <div style="font-size:8px !important">产出料：${item.mcode}</div>
-    <div style="font-size:8px !important">工序：${item.produce}</div>
-    <div style="font-size:8px !important">交付日期：${item.date}</div>
-    <div style="font-size:8px !important">数量：${item.number}</div>
-    <div style="font-size:8px !important">单位：${item.number}</div>
+
+<div
+    style="
+      display: flex;
+      justify: start;
+      flex-direction: column;
+      page-break-before: always;
+      padding: 0 18px;
+    "
+  >
+  <div style="display: flex;justify:start">
+    <img src="${image.src}" style="height: 50px"  />
+
+    <div style=" 
+      display: flex;
+      justify: start;
+      flex-direction: column;">
+    <div style="font-family: 'KaiTi';font-size:18px">昆山同日工业自动化有限公司</div>
+    <div style="font-family: 'KaiTi';text-align:center;">扫描此处获取派工单号</div>
   </div>
-</div> 
+  </div>
+  
+
+    <div style="display: flex; justify-content: space-between;margin-bottom:10px">
+      <div style="font-family: 'KaiTi';">项目号:<span
+          style="
+            text-decoration: underline;
+          "
+          >
+          ${item.project}
+          </span>
+      </div>
+      <div style="font-family: 'KaiTi';">产出料:
+        <span
+          style="
+            text-decoration: underline;
+          "
+          >
+        ${item.mcode}
+        </span>
+      </div>
+    </div>
+
+    <div style="margin-bottom:10px;font-family: 'KaiTi';">交付日期:<span
+          style="
+            text-decoration: underline;
+          "
+          >
+          ${item.date}
+          </span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between;margin-bottom:10px">
+      <div style="font-family: 'KaiTi';">工序:<span
+              style="
+                text-decoration: underline;
+              "
+              >
+              ${item.produce}
+              </span>
+              </div>
+      <div style="font-family: 'KaiTi';">数量:
+        <span
+              style="
+                text-decoration: underline;
+              "
+              >
+        ${item.number}
+        </span>
+        </div>
+      <div style="font-family: 'KaiTi';">单位:
+        <span
+           style="
+              text-decoration: underline;
+              "
+              >
+        ${item.unit}
+        </span>
+        </div>
+    </div>
+  </div>
+
 `);
 
       if (index === props.data.length - 1) {
@@ -47,13 +116,13 @@ defineExpose({ printQrCode });
 </script>
 
 <template>
-  <v-btn v-show="showQrCode" color="blue" @click="printQrCode()"
+  <v-btn color="blue" v-show="showQrCode" @click="printQrCode()"
     >保存并打印</v-btn
   >
   <qrcode-vue
     v-for="(item, index) in props.data"
-    :key="index"
     v-show="showQrCode"
+    :key="index"
     :value="item.value"
     :id="`__${index}`"
   ></qrcode-vue>
