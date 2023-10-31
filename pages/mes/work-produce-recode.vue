@@ -64,7 +64,10 @@ async function getWorkOrder() {
 
 //存储工单工序数据
 let workDetailList = ref<any[]>([]);
-
+//未派工单的对象
+let workDetailInfo = ref<any>(null);
+//修改弹框的的
+let editDialog = ref<boolean>(false);
 //根据工单编号来查询到工单工序数据
 async function getWorkProduce() {
   try {
@@ -108,6 +111,26 @@ async function getWorkProduce() {
   } catch (error) {
     console.log(error);
   }
+}
+
+//打开修改未派工单的时间的弹框
+function showUpDateWork(item: any) {
+  workDetailInfo.value = { ...item };
+  editDialog.value = true;
+}
+//确认修改这个对象
+async function editDetail() {
+  await useHttp("/ProductionRecode/M23UpdateProductionRecode", "put", [
+    workDetailInfo.value,
+  ]);
+  editDialog.value = false;
+  setSnackbar(
+    "green",
+    workDetailInfo.value.material_name +
+      workDetailInfo.value.procedure_name +
+      "日期修改成功"
+  );
+  getWorkProduce();
 }
 
 //存储拖拽到工作中心的数据
@@ -416,6 +439,14 @@ async function deleteCenter() {
   deleteDialog.value = false;
   getWorkCenterList();
 }
+
+//日期规则
+const dateRule = ref<any>([
+  (v: any) =>
+    /^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$/.test(
+      v
+    ) || "日期格式如“2023-10-01”",
+]);
 </script>
 
 <template>
@@ -498,6 +529,17 @@ async function deleteCenter() {
                       <v-list-item>
                         <template v-slot:default>
                           <div class="text-body-2">
+                            类型：
+                            <span class="text-grey font-weight-medium">
+                              {{ item.workorder_type }}
+                            </span>
+                          </div>
+                        </template>
+                      </v-list-item>
+
+                      <v-list-item>
+                        <template v-slot:default>
+                          <div class="text-body-2">
                             数量：
                             <span class="text-grey font-weight-medium">
                               {{ item.planned_quantity }}{{ item.unit }}
@@ -520,10 +562,10 @@ async function deleteCenter() {
                   <v-toolbar-title
                     v-if="detailName"
                     class="text-blue font-weight-bold"
-                    >【{{ detailName }}】工单工序</v-toolbar-title
+                    >【{{ detailName }}】未派工单</v-toolbar-title
                   >
                   <v-toolbar-title v-else class="text-blue font-weight-bold"
-                    >工单工序</v-toolbar-title
+                    >未派工单</v-toolbar-title
                   >
                 </v-toolbar>
 
@@ -540,6 +582,23 @@ async function deleteCenter() {
                     :key="index"
                     v-if="workDetailList.length"
                   >
+                    <div style="position: relative">
+                      <v-btn
+                        v-show="element.status !== '已扫描在执行'"
+                        icon="fa-solid fa-pen"
+                        variant="plain"
+                        size="x-small"
+                        style="
+                          position: absolute;
+                          right: 5px;
+                          top: -3px;
+                          z-index: 1000;
+                        "
+                        @click="showUpDateWork(element)"
+                      >
+                      </v-btn>
+                    </div>
+
                     <v-list-item>
                       <template v-slot:default>
                         <div class="text-body-2">
@@ -700,7 +759,13 @@ async function deleteCenter() {
                       v-if="tabArr1.length"
                       class="text-center text-h6 ml-3 text-grey"
                     >
-                      您已经进行了操作，如果想重新操作，请点击右边的取消按钮
+                      您已经进行了操作，如果想重新操作，请点击右边的取消按钮。
+                      <span
+                        v-if="checkbox"
+                        class="text-center text-h6 text-red"
+                      >
+                        请设置打印页面为无边距属性,大小为新卷80x50
+                      </span>
                     </span>
                   </v-col>
 
@@ -894,6 +959,40 @@ async function deleteCenter() {
           确认删除
         </v-btn>
         <v-btn color="grey" size="large" @click="deleteDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+
+  <!-- 修改未派工单时间 -->
+  <v-dialog v-model="editDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 修改未派工单时间 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="editDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-card-text class="mt-4">
+        <v-text-field
+          v-model="workDetailInfo.planned_completion_time"
+          :rules="dateRule"
+          label="交付日期"
+        ></v-text-field>
+      </v-card-text>
+
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          class="mr-2"
+          @click="editDetail()"
+        >
+          确认修改
+        </v-btn>
+        <v-btn color="grey" size="large" @click="editDialog = false">
           取消
         </v-btn>
       </div>
