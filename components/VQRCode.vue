@@ -1,4 +1,3 @@
-dd
 <script setup lang="ts">
 import QrcodeVue from "qrcode.vue";
 
@@ -18,9 +17,7 @@ function printQrCode() {
     // 图片确认渲染完毕后的回调
     image.onload = function () {
       if (index === 0) document.body.innerHTML = "";
-
       document.write(`
-
 <div
     style="
       display: flex;

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-//引入生成二维码工具
-import VueQr from "vue-qr/src/packages/vue-qr.vue";
+//tabArr和tabArr1的作用，tabArr1全程存储拖拽的数据，tabArr作为中间值，在代码里面有很多使用，因此他的值变化的很快，tabArr1的值是全程都是存储拖拽的工单任务的。
 
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
@@ -143,7 +142,7 @@ function onDragEnd(event: any, item: any) {
 
   tabArr.value.push(item);
   tabArr1.value.push(item);
-  console.log(tabArr.value);
+
   getCenterProduce();
 }
 
@@ -244,17 +243,17 @@ async function updateCenterId() {
   if (!tabArr1.value.length) {
     return setSnackbar("black", "您没有拖拽工单工序到对应的工作中心当中");
   }
-  tabArr.value.map((item: any) => (item.status = "已排产待执行"));
+  tabArr1.value.map((item: any) => (item.status = "已排产待执行"));
 
   //添加工作中心编号
   const data: any = await useHttp(
     "/ProductionRecode/M63PutProductionRecodeCreateDOId",
     "put",
-    tabArr.value
+    tabArr1.value
   );
-  tabArr.value = data.data;
-  console.log(data);
-  tabArr.value.map((item: any) =>
+  tabArr1.value = data.data;
+
+  tabArr1.value.map((item: any) =>
     dataCode.value.push({
       project: item.project_code,
       mcode: item.material_name,
@@ -265,10 +264,12 @@ async function updateCenterId() {
       value: item.dispatch_order,
     })
   );
-  console.log(dataCode.value);
+
   // 是否打印
   if (checkbox.value) {
-    qrCodeIns.value.printQrCode();
+    nextTick(() => {
+      qrCodeIns.value.printQrCode();
+    });
   }
 
   await getWorkProduce();
@@ -325,7 +326,7 @@ function cancel() {
   getWorkProduce();
 }
 
-//通过监听tabArr1的内容来更改工作中心详情的内容
+//通过监听tabArr1的内容来更改工作中心详情的内容，有值的时候，左边的工单就无法继续选择了
 watch(
   tabArr1,
   function () {
@@ -713,12 +714,7 @@ async function deleteCenter() {
                         >
                           保存派工单
                         </v-btn>
-                        <VQRCode
-                          class="mr-2"
-                          color="blue"
-                          :data="dataCode"
-                          ref="qrCodeIns"
-                        ></VQRCode>
+                        <VQRCode :data="dataCode" ref="qrCodeIns"></VQRCode>
                         <v-btn class="mr-2" color="grey" @click="cancel">
                           取消
                         </v-btn>
