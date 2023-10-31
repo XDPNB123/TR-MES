@@ -37,12 +37,31 @@ onMounted(() => {
 <script setup lang="ts">
 const data = ref<any[]>([
   {
-    text: "你好",
-    value: "nihao",
+    project: "1234",
+    mcode: "椅子",
+    produce: "打磨",
+    date: "2023-10-01",
+    number: "120",
+    unit: "个",
+    value: "123",
   },
   {
-    text: "你不好",
-    value: "nibuhao",
+    project: "12222234",
+    mcode: "桌子",
+    produce: "清洗",
+    date: "2023-10-01",
+    number: "12",
+    unit: "个",
+    value: "123",
+  },
+  {
+    project: "23123",
+    mcode: "衣服",
+    produce: "缝纫",
+    date: "2023-10-01",
+    number: "200",
+    unit: "件",
+    value: "123",
   },
 ]);
 </script>

@@ -12,25 +12,28 @@ function printQrCode() {
     const qrCode = document.getElementById(`__${index}`) as HTMLCanvasElement;
     const image = new Image();
 
-    image.style.width = "30%";
-
     image.src = qrCode?.toDataURL(`image__${index}/png`);
 
     // 图片确认渲染完毕后的回调
     image.onload = function () {
       if (index === 0) document.body.innerHTML = "";
 
-      const div = document.createElement("div");
-      div.innerText = item.text;
-      div.style.fontSize = "12px";
-      div.style.pageBreakAfter = "always";
-      div.style.display = "flex";
-      div.style.justifyContent = "center";
-      div.style.alignItems = "center";
-      div.style.flexDirection = "column-reverse";
-      div.style.gap = "10px";
-      div.appendChild(image);
-      document.body.appendChild(div);
+      document.write(`
+   
+      <div style="display: flex;">
+  <div style="margin-right: 20px;"><img src="${image.src}" style="height:50px !important;"></div>
+  <div style="display: flex; flex-direction: column; justify-content: space-between;
+  border: 1px solid black;
+  ">
+    <div style="font-size:8px !important">项目号：${item.project}</div>
+    <div style="font-size:8px !important">产出料：${item.mcode}</div>
+    <div style="font-size:8px !important">工序：${item.produce}</div>
+    <div style="font-size:8px !important">交付日期：${item.date}</div>
+    <div style="font-size:8px !important">数量：${item.number}</div>
+    <div style="font-size:8px !important">单位：${item.number}</div>
+  </div>
+</div> 
+`);
 
       if (index === props.data.length - 1) {
         window.print();
@@ -42,7 +45,7 @@ function printQrCode() {
 </script>
 
 <template>
-  <v-btn color="blue" @click="printQrCode()">打印</v-btn>
+  <v-btn color="blue" class="mr-2" @click="printQrCode()">保存并打印</v-btn>
   <qrcode-vue
     v-for="(item, index) in props.data"
     :key="index"

@@ -143,6 +143,7 @@ function onDragEnd(event: any, item: any) {
 
   tabArr.value.push(item);
   tabArr1.value.push(item);
+  console.log(tabArr.value);
   getCenterProduce();
 }
 
@@ -168,8 +169,6 @@ async function getWorkCenterList() {
     }
   );
   workCenterList.value = data.data;
-
-  console.log(workCenterList.value);
 }
 
 onMounted(() => {
@@ -235,15 +234,29 @@ async function getCenterProduce() {
     });
 }
 
+//是否打印的复选框
+let checkbox = ref<boolean>(false);
+let dataCode = ref<any[]>([]);
 //确定保存
 async function updateCenterId() {
   if (!tabArr1.value.length) {
     return setSnackbar("black", "您没有拖拽工单工序到对应的工作中心当中");
   }
   tabArr.value.map((item: any) => (item.status = "已排产待执行"));
+  tabArr.value.map((item: any) =>
+    dataCode.value.push({
+      project: item.project_code,
+      mcode: item.material_name,
+      produce: item.procedure_name,
+      date: item.planned_completion_time,
+      number: item.planned_quantity,
+      unit: item.value,
+      value: item.dispatch_order,
+    })
+  );
   //添加工作中心编号
   await useHttp(
-    "/ProductionRecode/M23UpdateProductionRecode",
+    "/ProductionRecode/M63PutProductionRecodeCreateDOId",
     "put",
     tabArr.value
   );
@@ -523,9 +536,11 @@ async function deleteCenter() {
                     <v-list-item>
                       <template v-slot:default>
                         <div class="text-body-2">
-                          工序名称：
+                          产出料工序：
                           <span class="text-grey font-weight-medium">
-                            {{ element.procedure_name }}
+                            {{ element.material_name }}：{{
+                              element.procedure_name
+                            }}
                           </span>
                         </div>
                       </template>
@@ -537,17 +552,6 @@ async function deleteCenter() {
                           是否委外：
                           <span class="text-grey font-weight-medium">
                             {{ element.defaul_outsource }}
-                          </span>
-                        </div>
-                      </template>
-                    </v-list-item>
-
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div class="text-body-2">
-                          产出料：
-                          <span class="text-grey font-weight-medium">
-                            {{ element.material_name }}
                           </span>
                         </div>
                       </template>
@@ -672,25 +676,47 @@ async function deleteCenter() {
                   </div>
                 </div>
 
-                <div class="d-flex justify-space-between my-3">
-                  <div>
+                <v-row class="mt-3">
+                  <v-col cols="6">
                     <span
                       v-if="tabArr1.length"
                       class="text-center text-h6 ml-3 text-grey"
                     >
                       您已经进行了操作，如果想重新操作，请点击右边的取消按钮
                     </span>
-                  </div>
+                  </v-col>
 
-                  <div>
-                    <v-btn class="mr-2" color="blue" @click="updateCenterId()">
-                      保存信息
-                    </v-btn>
-                    <v-btn class="mr-2" color="grey" @click="cancel">
-                      取消
-                    </v-btn>
-                  </div>
-                </div>
+                  <v-col cols="6">
+                    <div class="d-flex justify-end">
+                      <div class="mr-6">
+                        <v-checkbox
+                          label="派单并打印"
+                          v-model="checkbox"
+                        ></v-checkbox>
+                      </div>
+                      <div class="mt-3">
+                        <v-btn
+                          class="mr-2"
+                          color="blue"
+                          v-if="!checkbox"
+                          @click="updateCenterId()"
+                        >
+                          保存派工单
+                        </v-btn>
+                        <VQRCode
+                          v-else
+                          class="mr-2"
+                          color="blue"
+                          :data="dataCode"
+                          @click="updateCenterId()"
+                        ></VQRCode>
+                        <v-btn class="mr-2" color="grey" @click="cancel">
+                          取消
+                        </v-btn>
+                      </div>
+                    </div>
+                  </v-col>
+                </v-row>
               </v-card>
 
               <!-- 工作详情 -->
