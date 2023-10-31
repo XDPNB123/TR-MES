@@ -45,7 +45,7 @@ function printQrCode() {
 </script>
 
 <template>
-  <v-btn color="blue" class="mr-2" @click="printQrCode()">保存并打印</v-btn>
+  <v-btn color="blue" @click="printQrCode()">保存并打印</v-btn>
   <qrcode-vue
     v-for="(item, index) in props.data"
     :key="index"
