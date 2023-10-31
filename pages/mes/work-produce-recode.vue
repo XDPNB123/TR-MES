@@ -234,6 +234,8 @@ async function getCenterProduce() {
     });
 }
 
+// 二维码实例
+const qrCodeIns = ref<any>(null);
 //是否打印的复选框
 let checkbox = ref<boolean>(false);
 let dataCode = ref<any[]>([]);
@@ -260,6 +262,11 @@ async function updateCenterId() {
     "put",
     tabArr.value
   );
+
+  // 是否打印
+  if (checkbox.value) {
+    qrCodeIns.value.printQrCode();
+  }
 
   await getWorkProduce();
   let filteredSelected = selected.value.filter(
@@ -698,16 +705,15 @@ async function deleteCenter() {
                         <v-btn
                           class="mr-2"
                           color="blue"
-                          v-if="!checkbox"
                           @click="updateCenterId()"
                         >
                           保存派工单
                         </v-btn>
                         <VQRCode
-                          v-else
                           class="mr-2"
                           color="blue"
                           :data="dataCode"
+                          ref="qrCodeIns"
                           @click="updateCenterId()"
                         ></VQRCode>
                         <v-btn class="mr-2" color="grey" @click="cancel">
