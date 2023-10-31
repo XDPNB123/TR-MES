@@ -251,7 +251,13 @@ async function updateCenterId() {
     "put",
     tabArr1.value
   );
-  tabArr1.value = data.data;
+  tabArr1.value = data.data.map((item: any) => {
+    item.planned_completion_time = item.planned_completion_time.substring(
+      0,
+      10
+    );
+    return item;
+  });
 
   tabArr1.value.map((item: any) =>
     dataCode.value.push({
