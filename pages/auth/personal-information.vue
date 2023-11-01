@@ -34,12 +34,14 @@ onMounted(() => {
 let dataCode = ref<any[]>([
   {
     project: "123123",
-    mcode: "手机",
+    mcode: "固定架支板的脚手架的螺丝",
     produce: "打磨",
     date: "2023 - 10 - 11",
     number: 12,
     unit: "个",
     value: "123",
+    centerName: "折弯车间3",
+    outsource: "N",
   },
   {
     project: "2312",
@@ -49,6 +51,8 @@ let dataCode = ref<any[]>([
     number: 12,
     unit: "个",
     value: "123",
+    centerName: "折弯车间1",
+    outsource: "N",
   },
   {
     project: "2312",
@@ -58,6 +62,8 @@ let dataCode = ref<any[]>([
     number: 12,
     unit: "个",
     value: "123",
+    centerName: "折弯车间2",
+    outsource: "N",
   },
 ]);
 </script>

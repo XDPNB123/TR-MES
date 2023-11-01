@@ -279,9 +279,10 @@ async function updateCenterId() {
       0,
       10
     );
+    item.defaul_outsource=item.defaul_outsource = item.defaul_outsource === 'Y' ? '是' : '否';
     return item;
   });
-
+  console.log(data.data);
   tabArr1.value.map((item: any) =>
     dataCode.value.push({
       project: item.project_code,
@@ -291,9 +292,11 @@ async function updateCenterId() {
       number: item.planned_quantity,
       unit: item.unit,
       value: item.dispatch_order,
+      centerName: item.work_center_name,
+      outsource: item.defaul_outsource,
     })
   );
-
+  console.log(dataCode.value);
   // 是否打印
   if (checkbox.value) {
     nextTick(() => {
@@ -461,7 +464,7 @@ const dateRule = ref<any>([
           >
         </v-toolbar>
         <v-tabs color="blue" direction="vertical" v-model="showingTab">
-          <v-tab value="工单排产"> 工单排产 </v-tab>
+          <v-tab value="未派工单"> 未派工单 </v-tab>
           <v-tab value="产能视图"> 产能视图 </v-tab>
         </v-tabs>
       </v-card>
@@ -469,7 +472,7 @@ const dateRule = ref<any>([
 
     <v-col cols="11" class="py-3 pr-3">
       <v-window v-model="showingTab">
-        <v-window-item value="工单排产">
+        <v-window-item value="未派工单">
           <v-row no-gutters>
             <v-col cols="2">
               <v-card class="rounded-lg elevation-2 ml-1">

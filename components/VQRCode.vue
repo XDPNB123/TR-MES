@@ -24,23 +24,36 @@ function printQrCode() {
       justify: start;
       flex-direction: column;
       page-break-before: always;
-      padding: 0 18px;
+      padding: 0 20px;
     "
   >
-  <div style="display: flex;justify:start">
+  
+  <div style="display: flex;justify-content: space-between;padding-top:5px">
+    
     <img src="${image.src}" style="height: 50px"  />
 
     <div style=" 
       display: flex;
       justify: start;
-      flex-direction: column;">
-    <div style="font-family: 'KaiTi';font-size:18px">昆山同日工业自动化有限公司</div>
-    <div style="font-family: 'KaiTi';text-align:center;">扫描此处获取派工单号</div>
-  </div>
+      flex-direction: column; margin-right:10px;margin-left:10px">
+      <div style="font-family: 'KaiTi';font-size:14px">昆山同日派工单标识卡</div>
+
+        <div style="font-family: 'KaiTi';text-align:center;">派工单号:<span
+          style="
+            text-decoration: underline;
+          "
+          > ${item.value}
+          </span>
+        </div>
+        
+    </div>
+    
+    <img src="${image.src}" style="height: 60px"  />
+  
   </div>
   
 
-    <div style="display: flex; justify-content: space-between;margin-bottom:10px">
+   
       <div style="font-family: 'KaiTi';">项目号:<span
           style="
             text-decoration: underline;
@@ -49,7 +62,9 @@ function printQrCode() {
           ${item.project}
           </span>
       </div>
-      <div style="font-family: 'KaiTi';">产出料:
+    
+    
+    <div style="font-family: 'KaiTi';margin-top:5px">产出料:
         <span
           style="
             text-decoration: underline;
@@ -58,9 +73,9 @@ function printQrCode() {
         ${item.mcode}
         </span>
       </div>
-    </div>
 
-    <div style="margin-bottom:10px;font-family: 'KaiTi';">交付日期:<span
+
+    <div style="font-family: 'KaiTi';margin-top:5px">计划交付日期:<span
           style="
             text-decoration: underline;
           "
@@ -69,7 +84,29 @@ function printQrCode() {
           </span>
     </div>
 
-    <div style="display: flex; justify-content: space-between;margin-bottom:10px">
+    <div style="display: flex; justify-content: space-between;margin-top:5px">
+       
+      <div style="font-family: 'KaiTi';">工作中心:<span
+          style="
+            text-decoration: underline;
+          "
+          >
+          ${item.centerName}
+          </span>
+      </div>
+       
+      <div style="font-family: 'KaiTi';">是否委外:<span
+          style="
+            text-decoration: underline;
+          "
+          >
+          ${item.outsource}
+          </span>
+      </div>
+
+      </div>
+
+    <div style="display: flex; justify-content: space-between;margin-top:5px">
       <div style="font-family: 'KaiTi';">工序:<span
               style="
                 text-decoration: underline;
