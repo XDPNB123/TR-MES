@@ -1,7 +1,17 @@
 <template>
   <v-card>
     <v-row class="ma-2">
-      <v-col cols="6">
+      <v-col cols="4">
+        <v-text-field
+          label="明细编号"
+          variant="outlined"
+          density="compact"
+          hide-details
+          v-model="searchWorkDid"
+        ></v-text-field>
+      </v-col>
+
+      <v-col cols="4">
         <v-text-field
           label="物料编号"
           variant="outlined"
@@ -11,7 +21,7 @@
         ></v-text-field>
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="4">
         <v-text-field
           label="物料名称"
           variant="outlined"
@@ -122,7 +132,12 @@
           ></v-text-field>
         </v-card-text>
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addCertain()">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="addCertain()"
+          >
             确认
           </v-btn>
           <v-btn color="grey" size="large" @click="dialogAdd = false">
@@ -188,7 +203,12 @@
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn color="blue-darken-2" size="large" class="mr-2" @click="editCertain()">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="editCertain()"
+          >
             确认修改
           </v-btn>
           <v-btn color="grey" size="large" @click="editDialog = false">
@@ -219,6 +239,7 @@ let dialogDelete = ref(false);
 let editDialog = ref(false);
 
 let searchWorkId = ref("");
+let searchWorkDid = ref("");
 let searchMaterialName = ref("");
 // 表格初始页
 let tablePage = ref<number>(1);
@@ -273,10 +294,13 @@ async function filterTableData() {
 
 // 重置搜索
 function resetFilter() {
-  (searchWorkId.value = ""), (searchMaterialName.value = ""), getBomList();
+  (searchWorkId.value = ""),
+    (searchMaterialName.value = ""),
+    (searchWorkDid.value = ""),
+    getBomList();
 }
 let route = useRoute();
-let workorder_did = route.query.workorder_did;
+searchWorkDid.value = route.query.workorder_did as string;
 //获取bom物料数据
 async function getBomList() {
   const data: any = await useHttp(
@@ -284,7 +308,7 @@ async function getBomList() {
     "get",
     undefined,
     {
-      workorder_did: workorder_did,
+      workorder_did: searchWorkDid.value,
       material_id: searchWorkId.value,
       material_name: searchMaterialName.value,
       PageIndex: tablePage.value,
@@ -303,7 +327,7 @@ onMounted(() => {
 //新增前重置conference对象内容
 function showDialogAdd() {
   conference.value = {
-    workorder_did: workorder_did,
+    workorder_did: searchWorkDid.value,
     material_id: "",
     material_name: "",
     required_quantity: "",

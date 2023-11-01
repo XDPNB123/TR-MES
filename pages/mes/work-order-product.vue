@@ -608,7 +608,7 @@ async function saveTicket() {
           material_id: "5",
           unit: item.unit,
           procedure_order_id: index + 1,
-          status:"已审核待排产"
+          status: "已审核待排产",
         });
       });
     });
@@ -1205,6 +1205,7 @@ const productPageCount = computed(() => {
 //根据产品的项目号来筛选新增的产出料
 async function showMcodeDialog() {
   try {
+    selectedRows.value = [];
     productLength.value = 0;
     searchName.value = "";
     productList();

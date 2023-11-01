@@ -42,6 +42,7 @@ let dataCode = ref<any[]>([
     value: "123",
     centerName: "折弯车间3",
     outsource: "N",
+    code: "88.216.1/PGD23110100005",
   },
   {
     project: "2312",
@@ -53,6 +54,7 @@ let dataCode = ref<any[]>([
     value: "123",
     centerName: "折弯车间1",
     outsource: "N",
+    code: "88.216.1/PGD23110100005",
   },
   {
     project: "2312",
@@ -64,6 +66,7 @@ let dataCode = ref<any[]>([
     value: "123",
     centerName: "折弯车间2",
     outsource: "N",
+    code: "88.216.1/PGD23110100005",
   },
 ]);
 </script>

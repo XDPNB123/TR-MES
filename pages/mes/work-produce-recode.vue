@@ -279,7 +279,8 @@ async function updateCenterId() {
       0,
       10
     );
-    item.defaul_outsource=item.defaul_outsource = item.defaul_outsource === 'Y' ? '是' : '否';
+    item.defaul_outsource = item.defaul_outsource =
+      item.defaul_outsource === "Y" ? "是" : "否";
     return item;
   });
   console.log(data.data);
@@ -294,6 +295,7 @@ async function updateCenterId() {
       value: item.dispatch_order,
       centerName: item.work_center_name,
       outsource: item.defaul_outsource,
+      code: "88.216.1/PGD23110100005",
     })
   );
   console.log(dataCode.value);
@@ -450,6 +452,9 @@ const dateRule = ref<any>([
       v
     ) || "日期格式如“2023-10-01”",
 ]);
+
+//产能视图的数据
+let deliverList = ref<any[]>([]);
 </script>
 
 <template>
@@ -933,7 +938,16 @@ const dateRule = ref<any>([
           </v-row>
         </v-window-item>
 
-        <v-window-item value="产能视图"> 这里是产能视图 </v-window-item>
+        <v-window-item value="产能视图">
+          <v-card class="rounded-lg elevation-2 ml-1">
+            <v-toolbar density="compact">
+              <v-toolbar-title
+                class="text-center ml-0 text-blue font-weight-bold"
+                >产能视图</v-toolbar-title
+              >
+            </v-toolbar>
+          </v-card>
+        </v-window-item>
       </v-window>
     </v-col>
   </v-row>

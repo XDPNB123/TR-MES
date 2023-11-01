@@ -9,13 +9,16 @@ const showQrCode = ref<boolean>(false);
 
 function printQrCode() {
   props.data.forEach((item, index) => {
-    const qrCode = document.getElementById(`__${index}`) as HTMLCanvasElement;
-    const image = new Image();
+    const qrCode1 = document.getElementById(`${index}1`) as HTMLCanvasElement;
+    const qrCode2 = document.getElementById(`${index}2`) as HTMLCanvasElement;
+    const image1 = new Image(); //派工单二维码
+    const image2 = new Image(); //标识二维码
 
-    image.src = qrCode?.toDataURL(`image__${index}/png`);
+    image1.src = qrCode1?.toDataURL(`image__${index}/png`);
+    image2.src = qrCode2?.toDataURL(`image2___${index}/png`);
 
     // 图片确认渲染完毕后的回调
-    image.onload = function () {
+    image1.onload = function () {
       if (index === 0) document.body.innerHTML = "";
       document.write(`
 <div
@@ -28,33 +31,32 @@ function printQrCode() {
     "
   >
   
-  <div style="display: flex;justify-content: space-between;padding-top:5px">
-    
-    <img src="${image.src}" style="height: 50px"  />
-
+  <div style="display: flex;justify:start;padding-top:5px">
+    <div style="margin-left:3px">
+    <img src="${image2.src}" style="height: 55px"  />
+  </div>
     <div style=" 
       display: flex;
-      justify: start;
-      flex-direction: column; margin-right:10px;margin-left:10px">
-      <div style="font-family: 'KaiTi';font-size:14px">昆山同日派工单标识卡</div>
+      justify-content: space-between;
+      flex-direction: column;">
+      <div style="font-family: 'SongTi';font-size:15px;text-align:center">昆山同日派工标识卡</div>
 
-        <div style="font-family: 'KaiTi';text-align:center;">派工单号:<span
-          style="
-            text-decoration: underline;
-          "
-          > ${item.value}
-          </span>
+        <div style="font-family: 'SongTi';text-align:center;font-size:14px">  
+           ${item.value}
+        </div>
+        <div style="font-family: 'SongTi';font-size:12px;margin:0 10px;white-space: nowrap;">  
+          ${item.code}
         </div>
         
     </div>
-    
-    <img src="${image.src}" style="height: 60px"  />
-  
+    <div style="padding-right:5px">
+    <img src="${image1.src}" style="height: 55px"  />
+      </div>
   </div>
   
 
    
-      <div style="font-family: 'KaiTi';">项目号:<span
+      <div style="font-family: 'SongTi';font-size:12px;margin-top:10px">项目号:<span
           style="
             text-decoration: underline;
           "
@@ -64,7 +66,7 @@ function printQrCode() {
       </div>
     
     
-    <div style="font-family: 'KaiTi';margin-top:5px">产出料:
+    <div style="font-family: 'SongTi';margin-top:5px;font-size:12px">产出料:
         <span
           style="
             text-decoration: underline;
@@ -75,7 +77,7 @@ function printQrCode() {
       </div>
 
 
-    <div style="font-family: 'KaiTi';margin-top:5px">计划交付日期:<span
+    <div style="font-family: 'SongTi';margin-top:5px;font-size:12px">计划交付日期:<span
           style="
             text-decoration: underline;
           "
@@ -86,16 +88,17 @@ function printQrCode() {
 
     <div style="display: flex; justify-content: space-between;margin-top:5px">
        
-      <div style="font-family: 'KaiTi';">工作中心:<span
+      <div style="font-family: 'SongTi';font-size:12px">工作中心:<span
           style="
             text-decoration: underline;
+            
           "
           >
           ${item.centerName}
           </span>
       </div>
        
-      <div style="font-family: 'KaiTi';">是否委外:<span
+      <div style="font-family: 'SongTi';font-size:12px">是否委外:<span
           style="
             text-decoration: underline;
           "
@@ -107,7 +110,7 @@ function printQrCode() {
       </div>
 
     <div style="display: flex; justify-content: space-between;margin-top:5px">
-      <div style="font-family: 'KaiTi';">工序:<span
+      <div style="font-family: 'SongTi';font-size:12px">工序:<span
               style="
                 text-decoration: underline;
               "
@@ -115,7 +118,7 @@ function printQrCode() {
               ${item.produce}
               </span>
               </div>
-      <div style="font-family: 'KaiTi';">数量:
+      <div style="font-family: 'SongTi';font-size:12px">数量:
         <span
               style="
                 text-decoration: underline;
@@ -124,7 +127,7 @@ function printQrCode() {
         ${item.number}
         </span>
         </div>
-      <div style="font-family: 'KaiTi';">单位:
+      <div style="font-family: 'SongTi';font-size:12px">单位:
         <span
            style="
               text-decoration: underline;
@@ -158,6 +161,13 @@ defineExpose({ printQrCode });
     v-show="showQrCode"
     :key="index"
     :value="item.value"
-    :id="`__${index}`"
+    :id="`${index}1`"
+  ></qrcode-vue>
+  <qrcode-vue
+    v-for="(item, index) in props.data"
+    v-show="showQrCode"
+    :key="index"
+    :value="item.code"
+    :id="`${index}2`"
   ></qrcode-vue>
 </template>
