@@ -1,156 +1,42 @@
-<script setup lang="ts">
-let designDemo = ref<any[]>([
-  {
-    id: 1,
-    name: "RGV小车",
-    code: "M-RGV01",
-    value: "rgv01-00",
-  },
-  {
-    id: 2,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-  {
-    id: 3,
-    name: "称重模块",
-    code: "M-CZJ01",
-    value: "cz01-00",
-  },
-]);
-let partList = ref<any[]>([
-  {
-    id: 1,
-    name: "封板",
-    value: "rgv01-00",
-  },
-  {
-    id: 2,
-    name: "滚筒输送组",
-    value: "rgv01-00",
-  },
-  {
-    id: 3,
-    name: "台车大梁",
-    value: "rgv01-00",
-  },
-  {
-    id: 4,
-    name: "电机止转架",
-    value: "rgv01-00",
-  },
-  {
-    id: 5,
-    name: "称重支腿",
-    value: "cz01-00",
-  },
-  {
-    id: 6,
-    name: "底座",
-    value: "cz01-00",
-  },
-  {
-    id: 7,
-    name: "安装板",
-    value: "cz01-00",
-  },
-  {
-    id: 8,
-    name: "称重拉杆",
-    value: "cz01-00",
-  },
-]);
-let designInfo = ref<any[]>([]);
-function showDesign(item: any) {
-  designInfo.value = partList.value.filter((_item: any) => {
-    return _item.value === item.value;
-  });
-}
-</script>
 <template>
-  <v-row class="ma-3">
-    <v-col cols="12">
-      <div class="overflow-x-auto w-100" style="white-space: nowrap">
-        <v-card
-          class="mx-2 mt-3 mb-1 elevation-2 rounded-lg px-6 py-3 bg-green-lighten-5"
-          v-for="(item, index) in designDemo"
-          :key="index"
-          style="display: inline-block"
-          :title="item.name"
-          @click="showDesign(item)"
-        >
-        </v-card>
-      </div>
-    </v-col>
-    <v-col cols="12">
-      <v-card title="组装的零部件">
-        <v-list v-for="(item, index) in designInfo" :key="index">
-          <v-list-item :title="item.name" :subtitle="item.value">
-            <template v-slot:append>
-              <v-icon color="blue" size="small" class="mr-2">
-                fa-solid fa-pen
-              </v-icon>
+  <v-text-field
+    v-model="search"
+    label="请输入搜索内容"
+    @keydown.enter="filter"
+  ></v-text-field>
 
-              <v-icon color="red" size="small"> fa-solid fa-trash </v-icon>
-            </template>
-          </v-list-item>
-        </v-list>
-      </v-card>
-    </v-col>
-  </v-row>
+  <vue3-tree-org ref="tree" :data="data" />
 </template>
+<script setup lang="ts">
+const search = ref<string>("");
+const data = ref<any>({
+  id: 1,
+  label: "xxx科技有限公司",
+  children: [
+    {
+      id: 2,
+      pid: 1,
+      label: "产品研发部",
+      style: { color: "#fff", background: "#108ffe" },
+      children: [
+        { id: 6, pid: 2, label: "禁止编辑节点", disabled: true },
+        { id: 8, pid: 2, label: "禁止拖拽节点", noDragging: true },
+        { id: 10, pid: 2, label: "测试" },
+      ],
+    },
+    {
+      id: 3,
+      pid: 1,
+      label: "客服部",
+      children: [
+        { id: 11, pid: 3, label: "客服一部" },
+        { id: 12, pid: 3, label: "客服二部" },
+      ],
+    },
+    { id: 4, pid: 1, label: "业务部" },
+  ],
+});
+
+function filter() {}
+</script>
+<style scoped></style>

@@ -23,6 +23,9 @@ dependencies:
   vue3-lottie:
     specifier: ^3.1.0
     version: 3.1.0(vue@3.3.4)
+  vue3-tree-org:
+    specifier: ^4.2.2
+    version: 4.2.2(vue@3.3.4)
   vuedraggable:
     specifier: ^4.1.0
     version: 4.1.0(vue@3.3.4)
@@ -2374,6 +2377,11 @@ packages:
   /cookie-es@1.0.0:
     resolution: {integrity: sha512-mWYvfOLrfEc996hlKcdABeIiPHUPC6DM2QYZdGGOvhOTbA3tjm2eBwqlJpoFdjC89NI4Qt6h0Pu06Mp+1Pj5OQ==}
     dev: true
+
+  /core-js@3.33.2:
+    resolution: {integrity: sha512-XeBzWI6QL3nJQiHmdzbAOiMYqjrb7hwU7A39Qhvd/POSa/t9E1AeZyEZx3fNvp/vtM8zXwhoL0FsiS0hD0pruQ==}
+    requiresBuild: true
+    dev: false
 
   /core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
@@ -6073,6 +6081,15 @@ packages:
     dependencies:
       lodash-es: 4.17.21
       lottie-web: 5.12.2
+      vue: 3.3.4
+    dev: false
+
+  /vue3-tree-org@4.2.2(vue@3.3.4):
+    resolution: {integrity: sha512-AG2SykyD6dw0jIyqBm8iuF9j9GWli6KrwudxR1RjULCCBTDFsoNm7MmP/weKT7wowN/sPk+e2RsnvEJMw2OJMw==}
+    peerDependencies:
+      vue: ^3.0.0
+    dependencies:
+      core-js: 3.33.2
       vue: 3.3.4
     dev: false
 
