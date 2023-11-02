@@ -30,6 +30,7 @@
           hide-details
         ></v-text-field>
       </v-col>
+
       <v-col cols="12"
         ><v-btn
           color="blue-darken-2"
@@ -50,6 +51,7 @@
         </v-btn>
         <v-btn color="blue-darken-2" size="large" class="mr-2"> 导入 </v-btn>
       </v-col>
+      <div class="text-h5 align-center">{{ mcodeName }}的物料清单</div>
       <v-col cols="12">
         <v-data-table
           :items-per-page="10"
@@ -125,11 +127,12 @@
             v-model="conference.required_quantity"
             clearable
           ></v-text-field>
-          <v-text-field
+          <v-select
             label="物料单位"
             v-model="conference.unit"
+            :items="units"
             clearable
-          ></v-text-field>
+          ></v-select>
         </v-card-text>
         <div class="d-flex justify-end mr-6 mb-4">
           <v-btn
@@ -234,6 +237,37 @@ useSeoMeta({
   ogImage: "/同日图标.png",
 });
 
+//单位
+let units = ref<string[]>([
+  "PCS",
+  "米",
+  "毫米",
+  "张",
+  "KG",
+  "瓶（通）",
+  "盒（包）",
+  "双（对）",
+  "平方米",
+  "卷",
+  "台",
+  "套",
+  "件",
+  "根",
+  "个",
+  "袋",
+  "立方",
+  "升",
+  "支",
+  "箱",
+  "盒",
+  "节",
+  "把",
+  "片",
+  "公斤",
+  "干公斤",
+  "包",
+  "本",
+]);
 let dialogAdd = ref(false);
 let dialogDelete = ref(false);
 let editDialog = ref(false);
@@ -301,6 +335,9 @@ function resetFilter() {
 }
 let route = useRoute();
 searchWorkDid.value = route.query.workorder_did as string;
+//存储跳转传输过来的名称
+let mcodeName = ref("");
+mcodeName.value = route.query.mcodeName as string;
 //获取bom物料数据
 async function getBomList() {
   const data: any = await useHttp(

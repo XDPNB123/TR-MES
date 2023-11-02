@@ -73,6 +73,12 @@ const pageMenus = ref<any[]>([
         path: "/mes/bom-list",
         icon: "fa-solid fa-list",
       },
+      {
+        parentName: "MES",
+        name: "常用BOM清单",
+        path: "/mes/bom-design",
+        icon: "fa-solid fa-list",
+      },
     ],
   },
   {

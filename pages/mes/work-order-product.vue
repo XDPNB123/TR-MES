@@ -1015,7 +1015,7 @@ function handleBlueprintClick(item: any) {
 function handleBomClick(item: any) {
   router.push({
     path: "/mes/bom-list",
-    query: { workorder_did: item.workorder_did },
+    query: { workorder_did: item.workorder_did, mcodeName: item.mcode },
   });
 }
 
