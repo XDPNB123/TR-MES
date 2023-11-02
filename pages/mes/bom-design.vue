@@ -4,8 +4,15 @@
     label="请输入搜索内容"
     @keydown.enter="filter"
   ></v-text-field>
-
-  <vue3-tree-org ref="tree" :data="data" />
+  
+  <vue3-tree-org
+    v-for="(item, index) in bomData"
+    ref="tree"
+    :data="item"
+    toolBar="false"
+    draggable="false"
+    collapsable="true"
+  />
 </template>
 <script setup lang="ts">
 const search = ref<string>("");
@@ -37,6 +44,34 @@ const data = ref<any>({
   ],
 });
 
+let bomData = ref<any[]>([]);
+async function getBomList() {
+  const data: any = await useHttp(
+    "/DesignBom/M68GetMesDesignBomList",
+    "get",
+    undefined,
+    {
+      material_id: "",
+      material_name: "",
+      superior_id: "",
+      PageIndex: 1,
+      PageSize: 10,
+      SortedBy: "id",
+      SortType: 0,
+    }
+  );
+  data.data.pageList.map((item: any) =>
+    bomData.value.push({
+      id: item.id,
+      label: item.material_name,
+      children: [],
+    })
+  );
+  console.log(bomData.value);
+}
+onMounted(() => {
+  getBomList();
+});
 function filter() {}
 </script>
 <style scoped></style>
