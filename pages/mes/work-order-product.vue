@@ -107,6 +107,7 @@ let searchTicketType = ref("");
 let searchOutputs = ref<string>("");
 let searchProduct = ref<any>("");
 let searchName = ref("");
+
 // 正在操作的工单
 let operatingTicket = ref<any>({
   workorder_type: "",
@@ -586,7 +587,8 @@ async function saveTicket() {
     innerTableSelectData.value.forEach((item) => {
       item.procedure = droppedChips.value
         .map((item) => item.procedure_name)
-        .join(",");
+        .join(","),
+        item.status="已分配待排产"
     });
     await useHttp(
       "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
@@ -1117,7 +1119,7 @@ function saveProduct() {
       //当选择的是自制件的类型
       if (productTypeName.value === "自制件") {
         //将选择的自制件数据的总装物件名拼接成字符串
-        productString = selectedData.totalName;
+        productString = selectedData.totalName+","+selectedData.partName;
       }
       if (productTypeName.value === "标准外购件") {
         //将选择的标准外购件数据的零件名拼接成字符串
@@ -2145,6 +2147,7 @@ const dateRule = ref<any>([
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>
             </v-col>
+
             <v-col cols="6">
               <v-select
                 variant="outlined"

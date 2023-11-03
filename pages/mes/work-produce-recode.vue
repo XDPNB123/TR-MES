@@ -300,7 +300,7 @@ async function updateCenterId() {
       code: "88.216.1/PGD23110100005",
     })
   );
-
+  //排序
   dataCode.value.sort((a: any, b: any) => {
     // 只关心名称是否相等
     if (a.mcode < b.mcode) {

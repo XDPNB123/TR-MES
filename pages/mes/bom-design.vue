@@ -36,48 +36,50 @@ let units = ref<string[]>([
 ]);
 //零部件对象
 let bomInfo = ref<any>(null);
-let search = ref<string>("");
+//搜素
+let searchType = ref<string>("装配");
+watch(searchType, async function () {
+  await getBomList();
+  materialId.value = bomData.value[0].material_id;
+  materialName.value = bomData.value[0].material_name;
+});
+let searchName = ref<string>("");
+let searchId = ref<string>("");
 //树形结构数据
 const dataInfo = ref<any>({
   id: 1,
-  label: "xxx科技有限公司",
+  label: "昆山同日云联",
   children: [
     {
       id: 2,
       pid: 1,
-      label: "产品研发部",
-      children: [
-        { id: 6, pid: 2, label: "禁止编辑节点", disabled: true },
-        { id: 8, pid: 2, label: "禁止拖拽节点", noDragging: true },
-        { id: 10, pid: 2, label: "测试" },
-      ],
+      label: "网络发生错误",
+      children: [],
     },
     {
       id: 3,
       pid: 1,
-      label: "客服部",
-      children: [
-        { id: 11, pid: 3, label: "客服一部" },
-        { id: 12, pid: 3, label: "客服二部" },
-      ],
+      label: "出现此页面为数据获取不到",
+      children: [],
     },
-    { id: 4, pid: 1, label: "业务部" },
   ],
 });
 
 let bomData = ref<any[]>([]);
 //获取总转数据
 async function getBomList() {
+  bomData.value = [];
   const data: any = await useHttp(
     "/DesignBom/M68GetMesDesignBomList",
     "get",
     undefined,
     {
-      material_id: "",
-      material_name: "",
+      material_id: searchId.value,
+      material_name: searchName.value,
+      reserved01: searchType.value,
       superior_id: "",
       PageIndex: 1,
-      PageSize: 10,
+      PageSize: 100000,
       SortedBy: "id",
       SortType: 0,
     }
@@ -92,16 +94,30 @@ async function getBomList() {
   );
   console.log(bomData.value);
 }
-onMounted(() => {
-  getBomList();
+onMounted(async () => {
+  await getBomList();
+  materialId.value = bomData.value[0].material_id;
+  materialName.value = bomData.value[0].material_name;
 });
-function filter() {}
+
+//搜索
+function filter() {
+  getBomList();
+}
+//重置搜索
+function restFilter() {
+  (searchId.value = ""), (searchName.value = ""), getBomList();
+}
 let materialId = ref("");
+let materialName = ref("");
 //点击获取物料Id赋值给materialId
 function showBomInfo(item: any) {
   materialId.value = item.material_id;
-  getBomInfo();
+  materialName.value = item.material_name;
 }
+watch(materialId, function () {
+  getBomInfo();
+});
 //获取到当前的加工件的零部件
 async function getBomInfo() {
   const data: any = await useHttp(
@@ -125,14 +141,28 @@ function addBomINfo(node: any) {
     bom_grade: node.bom_grade + 1,
     material_quantity: "",
     unit: "件",
+    reserved01: "装配",
   };
   nodeBom.value = node;
+  addBomDialog.value = true;
+}
+//新增设备
+function showAdd() {
+  bomInfo.value = {
+    material_name: "",
+    superior_id: "0",
+    bom_grade: 1,
+    material_quantity: "",
+    unit: "件",
+    reserved01: "装配",
+  };
   addBomDialog.value = true;
 }
 //确认新增
 async function addBomInfo() {
   await useHttp("/DesignBom/M70AddMesDesignBom", "post", [bomInfo.value]);
   getBomInfo();
+  getBomList();
   addBomDialog.value = false;
 }
 
@@ -147,8 +177,8 @@ function editBomINfo(node: any) {
     bom_grade: node.bom_grade,
     material_quantity: node.material_quantity,
     unit: node.unit,
+    reserved01: node.reserved01,
     reserved03: null,
-    reserved01: null,
     reserved02: null,
   };
   editBomDialog.value = true;
@@ -162,8 +192,11 @@ async function editBomInfo() {
 //删除
 //删除的id
 let delId = ref<string>("");
+//存储删除时的名称
+let delName = ref<string>("");
 function delBomINfo(node: any) {
   delId.value = node.id;
+  delName.value = node.material_name;
   delBomDialog.value = true;
 }
 //确认删除
@@ -183,40 +216,75 @@ function clg(node: any) {
   <v-row class="ma-2">
     <v-col cols="4">
       <v-text-field
-        v-model="search"
-        label="请输入搜索内容"
+        v-model="searchId"
+        label="物料编号"
+        variant="outlined"
+        density="compact"
         @keydown.enter="filter"
       ></v-text-field>
     </v-col>
     <v-col cols="4">
       <v-text-field
-        v-model="search"
-        label="请输入搜索内容"
+        v-model="searchName"
+        label="名称"
+        variant="outlined"
+        density="compact"
         @keydown.enter="filter"
       ></v-text-field>
     </v-col>
     <v-col cols="4">
-      <v-text-field
-        v-model="search"
-        label="请输入搜索内容"
+      <v-select
+        v-model="searchType"
+        label="类型"
+        :items="['装配', '机加工']"
+        variant="outlined"
+        density="compact"
         @keydown.enter="filter"
-      ></v-text-field>
+      ></v-select>
     </v-col>
+
+    <v-col cols="12">
+      <v-btn color="blue-darken-2" class="mr-2" size="large" @click="filter()"
+        >查询</v-btn
+      >
+      <v-btn color="red" class="mr-2" size="large" @click="restFilter">
+        重置查询
+      </v-btn>
+      <v-btn color="blue-darken-2" class="mr-2" size="large" @click="showAdd">
+        新增设备物料
+      </v-btn>
+    </v-col>
+
     <v-col clos="12">
-      <div class="overflow-x-auto w-100" style="white-space: nowrap">
-        <v-card
-          class="mx-2 mt-3 mb-1 elevation-2 rounded-lg px-6 py-3 bg-green-lighten-5"
-          v-for="(item, index) in bomData"
-          :key="index"
-          style="display: inline-block"
-          :title="item.material_name"
-          @click="showBomInfo(item)"
-        >
-        </v-card>
-      </div>
+      <v-card>
+        <v-toolbar density="compact">
+          <v-toolbar-title class="text-blue font-weight-bold"
+            >设备名称</v-toolbar-title
+          >
+        </v-toolbar>
+        <div class="overflow-x-auto w-100" style="white-space: nowrap">
+          <v-card
+            class="mx-2 mt-3 mb-1 elevation-2 rounded-lg px-6 py-3 bg-green-lighten-5"
+            v-for="(item, index) in bomData"
+            :key="index"
+            style="display: inline-block"
+            :title="item.material_name"
+            @click="showBomInfo(item)"
+          >
+          </v-card>
+        </div>
+      </v-card>
     </v-col>
   </v-row>
   <v-divider :thickness="4"></v-divider>
+  <v-toolbar density="compact">
+    <v-toolbar-title class="text-blue font-weight-bold" v-if="materialName"
+      >设备【{{ materialName }}】物料详情</v-toolbar-title
+    >
+    <v-toolbar-title class="text-blue font-weight-bold" v-else
+      >设备物料详情</v-toolbar-title
+    >
+  </v-toolbar>
   <vue3-tree-org
     ref="tree"
     :data="dataInfo"
@@ -230,9 +298,15 @@ function clg(node: any) {
     :node-delete="delBomINfo"
   >
     <template v-slot="{ node }">
-      <div>名称：{{ node.$$data.label }}</div>
-      <div>数量：{{ node.$$data.material_quantity }}{{ node.$$data.unit }}</div>
-      <div>型号：{{ node.$$data.reserved01 }}</div>
+      <div style="padding: 10px 10px">
+        <div>名称：{{ node.$$data.label }}</div>
+        <div v-show="node.$$data.material_quantity">
+          数量：{{ node.$$data.material_quantity }}{{ node.$$data.unit }}
+        </div>
+        <div v-show="node.$$data.reserved01">
+          类型：{{ node.$$data.reserved01 }}
+        </div>
+      </div>
     </template>
   </vue3-tree-org>
 
@@ -259,6 +333,11 @@ function clg(node: any) {
         ></v-text-field>
 
         <v-select label="单位" :items="units" v-model="bomInfo.unit"></v-select>
+        <v-select
+          label="类型"
+          :items="['装配', '机加工']"
+          v-model="bomInfo.reserved01"
+        ></v-select>
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
@@ -299,6 +378,11 @@ function clg(node: any) {
         ></v-text-field>
 
         <v-select label="单位" :items="units" v-model="bomInfo.unit"></v-select>
+        <v-select
+          label="类型"
+          :items="['装配', '机加工']"
+          v-model="bomInfo.reserved01"
+        ></v-select>
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
@@ -327,7 +411,9 @@ function clg(node: any) {
         </v-btn>
       </v-toolbar>
 
-      <v-card-text class="mt-4"> 您是否确认要删除这个零部件？ </v-card-text>
+      <v-card-text class="mt-4 text-red">
+        您是否确认要删除【{{ delName }}】这个设备或零部件？
+      </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
         <v-btn
