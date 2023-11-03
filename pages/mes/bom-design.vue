@@ -64,7 +64,8 @@ const dataInfo = ref<any>({
     },
   ],
 });
-
+//设置背景颜色
+let styleTree = ref("bg-color-orange");
 let bomData = ref<any[]>([]);
 //获取总转数据
 async function getBomList() {
@@ -92,7 +93,6 @@ async function getBomList() {
       children: [],
     })
   );
-  console.log(bomData.value);
 }
 onMounted(async () => {
   await getBomList();
@@ -129,7 +129,6 @@ async function getBomInfo() {
     }
   );
   dataInfo.value = data.data;
-  console.log(dataInfo.value);
 }
 
 let nodeBom = ref<any>(null);
@@ -285,30 +284,33 @@ function clg(node: any) {
       >设备物料详情</v-toolbar-title
     >
   </v-toolbar>
-  <vue3-tree-org
-    ref="tree"
-    :data="dataInfo"
-    :toolBar="false"
-    :draggable="false"
-    :collapsable="true"
-    default-expand-level="5"
-    center
-    :node-add="addBomINfo"
-    :node-edit="editBomINfo"
-    :node-delete="delBomINfo"
-  >
-    <template v-slot="{ node }">
-      <div style="padding: 10px 10px">
-        <div>名称：{{ node.$$data.label }}</div>
-        <div v-show="node.$$data.material_quantity">
-          数量：{{ node.$$data.material_quantity }}{{ node.$$data.unit }}
+  <client-only>
+    <vue3-tree-org
+      ref="tree"
+      :data="dataInfo"
+      :toolBar="false"
+      :draggable="false"
+      :collapsable="true"
+      :default-expand-level="5"
+      center
+      :node-add="addBomINfo"
+      :node-edit="editBomINfo"
+      :node-delete="delBomINfo"
+      :label-class-name="styleTree"
+    >
+      <template v-slot="{ node }">
+        <div style="padding: 10px 10px">
+          <div>名称：{{ node.$$data.label }}</div>
+          <div v-show="node.$$data.material_quantity">
+            数量：{{ node.$$data.material_quantity }}{{ node.$$data.unit }}
+          </div>
+          <div v-show="node.$$data.reserved01">
+            类型：{{ node.$$data.reserved01 }}
+          </div>
         </div>
-        <div v-show="node.$$data.reserved01">
-          类型：{{ node.$$data.reserved01 }}
-        </div>
-      </div>
-    </template>
-  </vue3-tree-org>
+      </template>
+    </vue3-tree-org>
+  </client-only>
 
   <!-- 新增零部件对象 -->
   <v-dialog v-model="addBomDialog" min-width="400px" width="560px">
@@ -431,3 +433,9 @@ function clg(node: any) {
     </v-card>
   </v-dialog>
 </template>
+<style>
+.bg-color-orange {
+  color: black;
+  background-color: orange;
+}
+</style>
