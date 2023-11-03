@@ -64,8 +64,7 @@ const dataInfo = ref<any>({
     },
   ],
 });
-//设置背景颜色
-let styleTree = ref("bg-color-orange");
+
 let bomData = ref<any[]>([]);
 //获取总转数据
 async function getBomList() {
@@ -296,10 +295,9 @@ function clg(node: any) {
       :node-add="addBomINfo"
       :node-edit="editBomINfo"
       :node-delete="delBomINfo"
-      :label-class-name="styleTree"
     >
       <template v-slot="{ node }">
-        <div style="padding: 10px 10px">
+        <div class="text-start pa-3 bg-orange" style="border-radius: 10px">
           <div>名称：{{ node.$$data.label }}</div>
           <div v-show="node.$$data.material_quantity">
             数量：{{ node.$$data.material_quantity }}{{ node.$$data.unit }}
@@ -433,9 +431,3 @@ function clg(node: any) {
     </v-card>
   </v-dialog>
 </template>
-<style>
-.bg-color-orange {
-  color: black;
-  background-color: orange;
-}
-</style>
