@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  css: ["vuetify/styles", "vue3-tree-org/lib/vue3-tree-org.css"],
+  css: ["vuetify/styles"],
   build: {
     transpile: ["vuetify"],
   },

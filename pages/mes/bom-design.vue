@@ -283,6 +283,7 @@ function clg(node: any) {
       >设备物料详情</v-toolbar-title
     >
   </v-toolbar>
+  <!-- 确保仅在客户端渲染 -->
   <client-only>
     <vue3-tree-org
       ref="tree"
