@@ -86,6 +86,7 @@ async function getBomList() {
     bomData.value.push({
       material_id: item.material_id,
       material_name: item.material_name,
+      material_quantity: item.material_quantity,
       children: [],
     })
   );
@@ -137,7 +138,7 @@ async function addBomInfo() {
 
 //修改
 function editBomINfo(node: any) {
-  console.log(node);
+  console.log(node.material_quantity);
   bomInfo.value = {
     id: node.id,
     material_name: node.material_name,
@@ -172,6 +173,9 @@ async function delBomInfo() {
   });
   getBomInfo();
   delBomDialog.value = false;
+}
+function clg(node: any) {
+  console.log(node);
 }
 </script>
 
@@ -225,6 +229,11 @@ async function delBomInfo() {
     :node-edit="editBomINfo"
     :node-delete="delBomINfo"
   >
+    <template v-slot="{ node }">
+      <div>名称：{{ node.$$data.label }}</div>
+      <div>数量：{{ node.$$data.material_quantity }}{{ node.$$data.unit }}</div>
+      <div>型号：{{ node.$$data.reserved01 }}</div>
+    </template>
   </vue3-tree-org>
 
   <!-- 新增零部件对象 -->

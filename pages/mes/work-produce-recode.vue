@@ -46,7 +46,7 @@ async function getWorkOrder() {
       undefined,
       {
         PageIndex: 1,
-        PageSize: 10,
+        PageSize: 100000,
         SortType: 0,
         SortedBy: "id",
       }
@@ -86,6 +86,7 @@ async function getWorkProduce() {
         workorder_hid: detailName.value,
       }
     );
+
     workDetailList.value = data.data.pageList
       .map((item: any) => {
         item.planned_completion_time = item.planned_completion_time.substring(
@@ -283,12 +284,13 @@ async function updateCenterId() {
       item.defaul_outsource === "Y" ? "是" : "否";
     return item;
   });
-  console.log(data.data);
+  dataCode.value = [];
   tabArr1.value.map((item: any) =>
     dataCode.value.push({
       project: item.project_code,
       mcode: item.material_name,
       produce: item.procedure_name,
+      produce_order: item.procedure_order_id,
       date: item.planned_completion_time,
       number: item.planned_quantity,
       unit: item.unit,
@@ -298,6 +300,18 @@ async function updateCenterId() {
       code: "88.216.1/PGD23110100005",
     })
   );
+
+  dataCode.value.sort((a: any, b: any) => {
+    // 只关心名称是否相等
+    if (a.mcode < b.mcode) {
+      return -1;
+    }
+    if (a.mcode > b.mcode) {
+      return 1;
+    }
+
+    return a.produce_order - b.produce_order;
+  });
   console.log(dataCode.value);
   // 是否打印
   if (checkbox.value) {
@@ -305,7 +319,7 @@ async function updateCenterId() {
       qrCodeIns.value.printQrCode();
     });
   }
-
+  tabArr1.value = [];
   await getWorkProduce();
   let filteredSelected = selected.value.filter(
     (selItem: any) =>
@@ -313,6 +327,7 @@ async function updateCenterId() {
         (workItem) => workItem.workorder_hid === selItem
       )
   );
+
   //当这个工单编号的工单工序的内容为空的时候，selected选择的工单编号也应该去除
   selected.value = selected.value.filter(
     (selItem: any) => !filteredSelected.some((workItem) => workItem === selItem)
@@ -330,6 +345,7 @@ async function updateCenterId() {
     // 如果没有找到工单，返回null或者其他默认值
     return null;
   });
+
   //修改当前工单的状态;
   await useHttp(
     "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
@@ -339,7 +355,7 @@ async function updateCenterId() {
 
   getWorkOrder();
   getWorkCenterList();
-  tabArr1.value = [];
+
   if (overWorkOrder) {
     setSnackbar(
       "green",

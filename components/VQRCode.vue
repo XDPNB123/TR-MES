@@ -98,26 +98,6 @@ function printQrCode() {
           </span>
       </div>
        
-      <div style="font-family: 'SongTi';font-size:12px">是否委外:<span
-          style="
-            text-decoration: underline;
-          "
-          >
-          ${item.outsource}
-          </span>
-      </div>
-
-      </div>
-
-    <div style="display: flex; justify-content: space-between;margin-top:5px">
-      <div style="font-family: 'SongTi';font-size:12px">工序:<span
-              style="
-                text-decoration: underline;
-              "
-              >
-              ${item.produce}
-              </span>
-              </div>
       <div style="font-family: 'SongTi';font-size:12px">数量:
         <span
               style="
@@ -136,6 +116,39 @@ function printQrCode() {
         ${item.unit}
         </span>
         </div>
+
+     
+
+      </div>
+
+    <div style="display: flex; justify-content: space-between;margin-top:5px">
+      <div style="font-family: 'SongTi';font-size:12px">工序:<span
+              style="
+                text-decoration: underline;
+              "
+              >
+              ${item.produce}
+              </span>
+              </div>
+
+      <div style="font-family: 'SongTi';font-size:12px">当前工序顺序:<span
+          style="
+            text-decoration: underline;
+          "
+          >
+          ${item.produce_order}
+          </span>
+        </div>
+
+    <div style="font-family: 'SongTi';font-size:12px">是否委外:<span
+          style="
+            text-decoration: underline;
+          "
+          >
+          ${item.outsource}
+          </span>
+      </div>
+     
     </div>
   </div>
 
