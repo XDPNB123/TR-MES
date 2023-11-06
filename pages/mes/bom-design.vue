@@ -140,12 +140,12 @@ function showAddBomInfo(node: any) {
     material_quantity: "",
     unit: "件",
     reserved01: node.reserved01,
-    reserved02: node.reserved02,
+    reserved02: "",
   };
   nodeBom.value = node;
   addBomDialog.value = true;
 }
-//新增设备
+//新增序列
 function showAdd() {
   bomInfo.value = {
     material_name: "",
@@ -183,7 +183,6 @@ async function addBomInfo() {
 
 //修改
 function showEditBomInfo(node: any) {
-  console.log(node.material_quantity);
   bomInfo.value = {
     id: node.id,
     material_name: node.material_name,
@@ -398,7 +397,6 @@ async function delBomInfo() {
         ></v-text-field>
 
         <v-select label="单位" :items="units" v-model="bomInfo.unit"></v-select>
-        <v-text-field label="系列" v-model="bomInfo.reserved01"></v-text-field>
         <v-text-field label="型号" v-model="bomInfo.reserved02"></v-text-field>
       </v-card-text>
 
