@@ -37,14 +37,13 @@ let units = ref<string[]>([
 //零部件对象
 let bomInfo = ref<any>(null);
 //搜素
-let searchType = ref<string>("装配");
+let searchType = ref<string>("");
 watch(searchType, async function () {
   await getBomList();
   materialId.value = bomData.value[0].material_id;
   materialName.value = bomData.value[0].material_name;
 });
-let searchName = ref<string>("");
-let searchId = ref<string>("");
+
 //树形结构数据
 const dataInfo = ref<any>({
   id: 1,
@@ -66,47 +65,34 @@ const dataInfo = ref<any>({
 });
 
 let bomData = ref<any[]>([]);
-//获取总转数据
+let groupedBomData = ref<any[]>([]);
+//获取总装数据
 async function getBomList() {
-  bomData.value = [];
   const data: any = await useHttp(
     "/DesignBom/M68GetMesDesignBomList",
     "get",
     undefined,
     {
-      material_id: searchId.value,
-      material_name: searchName.value,
       reserved01: searchType.value,
-      superior_id: "",
       PageIndex: 1,
       PageSize: 100000,
       SortedBy: "id",
       SortType: 0,
     }
   );
-  data.data.pageList.map((item: any) =>
-    bomData.value.push({
-      material_id: item.material_id,
-      material_name: item.material_name,
-      material_quantity: item.material_quantity,
-      children: [],
-    })
-  );
+  bomData.value = data.data.pageList;
+  groupedBomData.value = bomData.value.reduce((result, item) => {
+    (result[item.reserved01] = result[item.reserved01] || []).push(item);
+    return result;
+  }, {});
 }
+
 onMounted(async () => {
   await getBomList();
   materialId.value = bomData.value[0].material_id;
   materialName.value = bomData.value[0].material_name;
 });
 
-//搜索
-function filter() {
-  getBomList();
-}
-//重置搜索
-function restFilter() {
-  (searchId.value = ""), (searchName.value = ""), getBomList();
-}
 let materialId = ref("");
 let materialName = ref("");
 //点击获取物料Id赋值给materialId
@@ -139,7 +125,8 @@ function addBomINfo(node: any) {
     bom_grade: node.bom_grade + 1,
     material_quantity: "",
     unit: "件",
-    reserved01: "装配",
+    reserved01: node.reserved01,
+    reserved02: node.reserved02,
   };
   nodeBom.value = node;
   addBomDialog.value = true;
@@ -152,7 +139,8 @@ function showAdd() {
     bom_grade: 1,
     material_quantity: "",
     unit: "件",
-    reserved01: "装配",
+    reserved01: "",
+    reserved02: "",
   };
   addBomDialog.value = true;
 }
@@ -177,7 +165,7 @@ function editBomINfo(node: any) {
     unit: node.unit,
     reserved01: node.reserved01,
     reserved03: null,
-    reserved02: null,
+    reserved02: node.reserved02,
   };
   editBomDialog.value = true;
 }
@@ -212,110 +200,103 @@ function clg(node: any) {
 
 <template>
   <v-row class="ma-2">
-    <v-col cols="4">
-      <v-text-field
-        v-model="searchId"
-        label="物料编号"
-        variant="outlined"
-        density="compact"
-        @keydown.enter="filter"
-      ></v-text-field>
-    </v-col>
-    <v-col cols="4">
-      <v-text-field
-        v-model="searchName"
-        label="名称"
-        variant="outlined"
-        density="compact"
-        @keydown.enter="filter"
-      ></v-text-field>
-    </v-col>
-    <v-col cols="4">
-      <v-select
-        v-model="searchType"
-        label="类型"
-        :items="['装配', '机加工']"
-        variant="outlined"
-        density="compact"
-        @keydown.enter="filter"
-      ></v-select>
-    </v-col>
-
-    <v-col cols="12">
-      <v-btn color="blue-darken-2" class="mr-2" size="large" @click="filter()"
-        >查询</v-btn
-      >
-      <v-btn color="red" class="mr-2" size="large" @click="restFilter">
-        重置查询
-      </v-btn>
-      <v-btn color="blue-darken-2" class="mr-2" size="large" @click="showAdd">
-        新增设备物料
-      </v-btn>
-    </v-col>
-
-    <v-col clos="12">
-      <v-card>
-        <v-toolbar density="compact">
-          <v-toolbar-title class="text-blue font-weight-bold"
-            >设备名称</v-toolbar-title
+    <v-col cols="3">
+      <v-toolbar density="compact">
+        <v-toolbar-title class="text-blue font-weight-bold"
+          >设备名称</v-toolbar-title
+        >
+      </v-toolbar>
+      <v-col cols="12">
+        <div class="d-flex justify-space-between">
+          <v-text-field
+            v-model="searchType"
+            label="序列"
+            variant="outlined"
+            density="compact"
+            hide-details
+            clearable
+          ></v-text-field>
+          <v-btn
+            color="blue-darken-2"
+            class="mx-2"
+            size="large"
+            @click="showAdd"
           >
-        </v-toolbar>
-        <div class="overflow-x-auto w-100" style="white-space: nowrap">
-          <v-card
-            class="mx-2 mt-3 mb-1 elevation-2 rounded-lg px-6 py-3 bg-green-lighten-5"
-            v-for="(item, index) in bomData"
-            :key="index"
-            style="display: inline-block"
-            :title="item.material_name"
-            @click="showBomInfo(item)"
-          >
-          </v-card>
+            新增设备物料
+          </v-btn>
         </div>
-      </v-card>
+      </v-col>
+
+      <v-col clos="12">
+        <v-expansion-panels variant="accordion">
+          <v-expansion-panel
+            v-for="(group, title) in groupedBomData"
+            :key="title"
+            :title="title.toString()"
+          >
+            <v-expansion-panel-text v-for="(item, index) in group" :key="index">
+              <v-list-item
+                :title="item.material_name"
+                hide-details
+                @click="showBomInfo(item)"
+              >
+              </v-list-item>
+              <v-divider :thickness="3"></v-divider>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-col>
+    </v-col>
+
+    <v-col cols="9">
+      <v-toolbar density="compact">
+        <v-toolbar-title class="text-blue font-weight-bold" v-if="materialName"
+          >设备【{{ materialName }}】物料详情</v-toolbar-title
+        >
+        <v-toolbar-title class="text-blue font-weight-bold" v-else
+          >设备物料详情</v-toolbar-title
+        >
+      </v-toolbar>
+      <!-- 确保仅在客户端渲染 -->
+      <div style="height: 400px">
+        <client-only>
+          <vue3-tree-org
+            ref="tree"
+            :data="dataInfo"
+            :toolBar="false"
+            :draggable="false"
+            :collapsable="true"
+            :default-expand-level="5"
+            center
+            :node-add="addBomINfo"
+            :node-edit="editBomINfo"
+            :node-delete="delBomINfo"
+          >
+            <template v-slot="{ node }">
+              <div
+                class="text-start pa-3 bg-orange"
+                style="border-radius: 10px"
+              >
+                <div>名称：{{ node.$$data.label }}</div>
+                <div v-show="node.$$data.material_quantity">
+                  数量：{{ node.$$data.material_quantity
+                  }}{{ node.$$data.unit }}
+                </div>
+                <div v-show="node.$$data.reserved02">
+                  型号：{{ node.$$data.reserved02 }}
+                </div>
+              </div>
+            </template>
+          </vue3-tree-org>
+        </client-only>
+      </div>
     </v-col>
   </v-row>
-  <v-divider :thickness="4"></v-divider>
-  <v-toolbar density="compact">
-    <v-toolbar-title class="text-blue font-weight-bold" v-if="materialName"
-      >设备【{{ materialName }}】物料详情</v-toolbar-title
-    >
-    <v-toolbar-title class="text-blue font-weight-bold" v-else
-      >设备物料详情</v-toolbar-title
-    >
-  </v-toolbar>
-  <!-- 确保仅在客户端渲染 -->
-  <client-only>
-    <vue3-tree-org
-      ref="tree"
-      :data="dataInfo"
-      :toolBar="false"
-      :draggable="false"
-      :collapsable="true"
-      :default-expand-level="5"
-      center
-      :node-add="addBomINfo"
-      :node-edit="editBomINfo"
-      :node-delete="delBomINfo"
-    >
-      <template v-slot="{ node }">
-        <div class="text-start pa-3 bg-orange" style="border-radius: 10px">
-          <div>名称：{{ node.$$data.label }}</div>
-          <div v-show="node.$$data.material_quantity">
-            数量：{{ node.$$data.material_quantity }}{{ node.$$data.unit }}
-          </div>
-          <div v-show="node.$$data.reserved01">
-            类型：{{ node.$$data.reserved01 }}
-          </div>
-        </div>
-      </template>
-    </vue3-tree-org>
-  </client-only>
-
   <!-- 新增零部件对象 -->
   <v-dialog v-model="addBomDialog" min-width="400px" width="560px">
     <v-card>
       <v-toolbar color="blue">
-        <v-toolbar-title> 新增零部件对象 </v-toolbar-title>
+        <v-toolbar-title> 新增设备或零部件对象 </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon @click="addBomDialog = false">
           <v-icon>fa-solid fa-close</v-icon>
@@ -334,11 +315,8 @@ function clg(node: any) {
         ></v-text-field>
 
         <v-select label="单位" :items="units" v-model="bomInfo.unit"></v-select>
-        <v-select
-          label="类型"
-          :items="['装配', '机加工']"
-          v-model="bomInfo.reserved01"
-        ></v-select>
+        <v-text-field label="系列" v-model="bomInfo.reserved01"></v-text-field>
+        <v-text-field label="型号" v-model="bomInfo.reserved02"></v-text-field>
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
@@ -379,11 +357,8 @@ function clg(node: any) {
         ></v-text-field>
 
         <v-select label="单位" :items="units" v-model="bomInfo.unit"></v-select>
-        <v-select
-          label="类型"
-          :items="['装配', '机加工']"
-          v-model="bomInfo.reserved01"
-        ></v-select>
+        <v-text-field label="系列" v-model="bomInfo.reserved01"></v-text-field>
+        <v-text-field label="型号" v-model="bomInfo.reserved02"></v-text-field>
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
