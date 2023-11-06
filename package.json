@@ -27,6 +27,7 @@
     "vue3-lottie": "^3.1.0",
     "vue3-tree-org": "^4.2.2",
     "vuedraggable": "^4.1.0",
-    "vuetify": "^3.3.17"
+    "vuetify": "^3.3.17",
+    "xlsx": "^0.18.5"
   }
 }

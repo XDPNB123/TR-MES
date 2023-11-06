@@ -1,46 +1,31 @@
 <script setup lang="ts">
-let dataCode = ref<any[]>([
-  {
-    project: "123123",
-    mcode: "固定架支板的脚手架的螺丝",
-    produce: "打磨",
-    produce_order: "1",
-    date: "2023 - 10 - 11",
-    number: 12,
-    unit: "个",
-    value: "123",
-    centerName: "折弯车间3",
-    outsource: "N",
-    code: "88.216.1/PGD23110100005",
-  },
-  {
-    project: "2312",
-    mcode: "电脑",
-    produce: "达摩尔",
-    produce_order: "2",
-    date: "2023 - 10 - 11",
-    number: 12,
-    unit: "个",
-    value: "123",
-    centerName: "折弯车间1",
-    outsource: "N",
-    code: "88.216.1/PGD23110100005",
-  },
-  {
-    project: "2312",
-    mcode: "电脑",
-    produce: "达摩尔",
-    produce_order: "3",
-    date: "2023 - 10 - 11",
-    number: 12,
-    unit: "个",
-    value: "123",
-    centerName: "折弯车间2",
-    outsource: "N",
-    code: "88.216.1/PGD23110100005",
-  },
-]);
+import * as XLSX from "xlsx";
+
+function handleFileUpload(event: Event) {
+  const inputElement = event.target as HTMLInputElement;
+  if (inputElement.files && inputElement.files.length > 0) {
+    const file = inputElement.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const data = event.target?.result;
+      console.log(data); // 打印原始的二进制数据
+      const workbook = XLSX.read(data, { type: "binary" });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const parsedData = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+      });
+      console.log(parsedData); // 打印解析后的数据
+    };
+    reader.readAsBinaryString(file);
+  }
+}
 </script>
+
 <template>
-  <VQRCode :data="dataCode"></VQRCode>
+  <v-file-input
+    label="请选择上传的excel"
+    id="fileInput"
+    accept=".xlsx,xls"
+    @change="handleFileUpload"
+  ></v-file-input>
 </template>
