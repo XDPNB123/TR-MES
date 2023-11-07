@@ -51,6 +51,15 @@ let units = ref<string[]>([
   "包",
   "本",
 ]);
+//工单类型
+let workType = ref<any[]>([
+  "机加",
+  "钣金",
+  "电器装配",
+  "单机装配",
+  "总装",
+  "其他",
+]);
 //工单表头的状态
 let workStatus = ref([
   "新建未审核",
@@ -1314,7 +1323,7 @@ const dateRule = ref<any>([
               variant="outlined"
               density="compact"
               v-model="searchTicketType"
-              :items="['机加工', '装配']"
+              :items="workType"
               hide-details
               @keydown.enter="filterTableData()"
             ></v-select>
@@ -1653,7 +1662,7 @@ const dateRule = ref<any>([
           ></v-text-field>
           <v-select
             label="工单类型"
-            :items="['装配', '机加工']"
+            :items="workType"
             v-model="operatingTicket.workorder_type"
           ></v-select>
           <v-text-field
@@ -1712,7 +1721,7 @@ const dateRule = ref<any>([
         <v-card-text class="mt-4">
           <v-select
             label="工单类型"
-            :items="['装配', '机加工']"
+            :items="workType"
             v-model="operatingTicket.workorder_type"
           ></v-select>
           <v-text-field

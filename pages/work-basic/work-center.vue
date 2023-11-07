@@ -12,6 +12,14 @@ useSeoMeta({
   // 社交媒体分享该页面时显示的图片
   ogImage: "/同日图标.png",
 });
+
+let workCenterType = ref<any[]>([
+  "钣金车间",
+  "机加工车间",
+  "模组装配车间",
+  "电气装配车间",
+  "总装车间",
+]);
 // 表格所有数据
 let workCenterList = ref<any[]>([]);
 // 表格当前页
@@ -413,14 +421,16 @@ function cancelDialog() {
       ></v-text-field>
     </v-col>
     <v-col cols="4">
-      <v-text-field
+      <v-select
         label="工作中心类型"
         v-model="searchType"
+        :items="workCenterType"
         variant="outlined"
         density="compact"
         class="mt-3"
+        clearable
         hide-details
-      ></v-text-field>
+      ></v-select>
     </v-col>
     <v-col cols="4">
       <v-text-field
@@ -889,11 +899,14 @@ function cancelDialog() {
           v-model="operateRow.work_center_id"
           label="工作中心编号"
         ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateRow.type"
+        <v-text-field variant="outlined" label="工作中心类型"></v-text-field>
+        <v-select
           label="工作中心类型"
-        ></v-text-field>
+          v-model="operateRow.type"
+          :items="workCenterType"
+          variant="outlined"
+          clearable
+        ></v-select>
         <v-text-field
           variant="outlined"
           v-model="operateRow.work_center_name"
@@ -931,11 +944,13 @@ function cancelDialog() {
           v-model="operateRow.work_center_id"
           label="工作中心编号"
         ></v-text-field>
-        <v-text-field
-          variant="outlined"
-          v-model="operateRow.type"
+        <v-select
           label="工作中心类型"
-        ></v-text-field>
+          v-model="operateRow.type"
+          :items="workCenterType"
+          variant="outlined"
+          clearable
+        ></v-select>
         <v-text-field
           variant="outlined"
           v-model="operateRow.work_center_name"
