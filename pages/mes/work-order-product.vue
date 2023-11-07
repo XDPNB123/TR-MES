@@ -95,6 +95,7 @@ let auditDialog = ref(false);
 let processDialog = ref(false);
 let mcodeDialog = ref(false);
 let deleteProduceDialog = ref(false);
+let dialog = ref(false);
 // 工单搜索
 let searchTicketNumber = ref<string>("");
 let searchProjectNumber = ref<string>("");
@@ -413,9 +414,10 @@ async function getProduce() {
 async function getUsedProduce() {
   try {
     const newData: any = await useHttp(
-      "/MesWorkProcess/M47GetProcessBasisConfig",
+      "/SysConfig/M47GetProcessBasisConfig",
       "get",
-      undefined
+      undefined,
+      { configtype: "常用工序路线" }
     );
 
     produceGroups.value = newData.data;
@@ -539,10 +541,10 @@ async function saveComUsedProduce() {
       setSnackbar("black", "该工序路线已存在，无法重复添加");
       return;
     }
-    await useHttp("/MesWorkProcess/M48AddProcessBasis", "post", {
-      ids: ids,
-      names: names,
-      describe: null,
+    await useHttp("/SysConfig/M48AddProcessBasis", "post", {
+      config_code: "process_basis",
+      rsv1: ids,
+      rsv2: names,
     });
     setSnackbar("green", "保存成功");
     getUsedProduce();
@@ -585,10 +587,10 @@ async function saveTicket() {
     }
     // 将选择的工序数组拼接成字符串
     innerTableSelectData.value.forEach((item) => {
-      item.procedure = droppedChips.value
+      (item.procedure = droppedChips.value
         .map((item) => item.procedure_name)
-        .join(","),
-        item.status="已分配待排产"
+        .join(",")),
+        (item.status = "已分配待排产");
     });
     await useHttp(
       "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
@@ -1119,7 +1121,7 @@ function saveProduct() {
       //当选择的是自制件的类型
       if (productTypeName.value === "自制件") {
         //将选择的自制件数据的总装物件名拼接成字符串
-        productString = selectedData.totalName+","+selectedData.partName;
+        productString = selectedData.totalName + "," + selectedData.partName;
       }
       if (productTypeName.value === "标准外购件") {
         //将选择的标准外购件数据的零件名拼接成字符串
@@ -1268,6 +1270,16 @@ const dateRule = ref<any>([
 </script>
 
 <template>
+  <div
+    style="
+      display: absolute;
+      z-index: 99999;
+      width: 100vw;
+      hight: 100vh;
+      top: 0px;
+      left: 0px;
+    "
+  ></div>
   <v-row class="ma-2">
     <!-- 左边工单表格 -->
     <v-col cols="6">
@@ -1351,7 +1363,16 @@ const dateRule = ref<any>([
             >
               新增工单
             </v-btn>
-            <v-btn color="blue-darken-2" class="mr-2" size="large">导出</v-btn>
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2"
+              size="large"
+              @click="
+                (dialog = true),
+                  router.push({ path: '/mes/work-order-product/bom-design' })
+              "
+              >导出</v-btn
+            >
           </v-col>
 
           <v-col cols="12">
@@ -2317,6 +2338,19 @@ const dateRule = ref<any>([
             取消
           </v-btn>
         </div>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialog">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 删除常用工序流程 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="dialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <nuxt-page> </nuxt-page>
       </v-card>
     </v-dialog>
   </v-row>

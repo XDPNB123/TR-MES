@@ -1,4 +1,16 @@
 <script setup lang="ts">
+useSeoMeta({
+  // 该页面的标题
+  title: "常用BOM设计",
+  // 社交媒体分享该页面时显示的标题
+  ogTitle: "工单排产",
+  // 该页面的描述
+  description: "同日 MES 系统,常用BOM设计",
+  // 社交媒体分享该页面时显示的描述
+  ogDescription: "同日 MES 系统,常用BOM设计",
+  // 社交媒体分享该页面时显示的图片
+  ogImage: "/同日图标.png",
+});
 //弹框
 let addBomDialog = ref<boolean>(false);
 let addDialog = ref<boolean>(false);
@@ -49,10 +61,7 @@ let bomInfo = ref<any>(null);
 //搜素
 let searchType = ref<string>("");
 watch(searchType, async function () {
-  await getBomList();
-  materialId.value = bomData.value[0].material_id;
-  materialName.value = bomData.value[0].material_name;
-  materialModel.value = bomData.value[0].reserved02;
+  await getMaterialList();
 });
 
 //树形结构数据
@@ -76,15 +85,36 @@ const dataInfo = ref<any>({
 });
 
 let bomData = ref<any[]>([]);
-let groupedBomData = ref<any[]>([]);
-//获取总装数据
+let materialList = ref<any[]>([]);
+
+//获取设备系列数据
+async function getMaterialList() {
+  const data: any = await useHttp(
+    "/SysConfig/M47GetProcessBasisConfig",
+    "get",
+    undefined,
+    {
+      config_type: "常用Bom组系列",
+      rsv2: searchType.value,
+    }
+  );
+  materialList.value = data.data;
+}
+
+let reserved01 = ref<any>(null);
+//点击获取当前系列的设备数据
+function showDevice(item: any) {
+  reserved01.value = item.rsv2;
+  getBomList();
+}
+//获取设备数据
 async function getBomList() {
   const data: any = await useHttp(
     "/DesignBom/M68GetMesDesignBomList",
     "get",
     undefined,
     {
-      reserved01: searchType.value,
+      reserved01: reserved01.value,
       PageIndex: 1,
       PageSize: 100000,
       SortedBy: "id",
@@ -92,13 +122,10 @@ async function getBomList() {
     }
   );
   bomData.value = data.data.pageList;
-  groupedBomData.value = bomData.value.reduce((result, item) => {
-    (result[item.reserved01] = result[item.reserved01] || []).push(item);
-    return result;
-  }, {});
 }
 
 onMounted(async () => {
+  await getMaterialList();
   await getBomList();
   materialId.value = bomData.value[0].material_id;
   materialName.value = bomData.value[0].material_name;
@@ -141,22 +168,26 @@ function showAddBomInfo(node: any) {
     unit: "件",
     reserved01: node.reserved01,
     reserved02: "",
+    reserved03: "",
+    reserved04: "是",
   };
   nodeBom.value = node;
   addBomDialog.value = true;
 }
-//新增序列
+let rsv2 = ref<any>(null);
+//新增系列
 function showAdd() {
-  bomInfo.value = {
-    material_name: "",
-    superior_id: "0",
-    bom_grade: 1,
-    material_quantity: "1",
-    unit: "件",
-    reserved01: "",
-    reserved02: "",
-  };
+  rsv2.value = "";
   addDialog.value = true;
+}
+//确认新增系列
+async function addRsv2() {
+  await useHttp("/SysConfig/M48AddProcessBasis", "post", {
+    config_code: "design_bom_type",
+    rsv2: rsv2.value,
+  });
+  addDialog.value = false;
+  getMaterialList();
 }
 //新增设备
 function showAddModel(item: any) {
@@ -164,9 +195,9 @@ function showAddModel(item: any) {
     material_name: "",
     superior_id: "0",
     bom_grade: 1,
-    material_quantity: "1",
+    material_quantity: "0",
     unit: "件",
-    reserved01: item,
+    reserved01: item.rsv2,
     reserved02: "",
   };
   addModelDialog.value = true;
@@ -177,7 +208,6 @@ async function addBomInfo() {
   getBomInfo();
   getBomList();
   addBomDialog.value = false;
-  addDialog.value = false;
   addModelDialog.value = false;
 }
 
@@ -192,8 +222,9 @@ function showEditBomInfo(node: any) {
     material_quantity: node.material_quantity,
     unit: node.unit,
     reserved01: node.reserved01,
-    reserved03: null,
     reserved02: node.reserved02,
+    reserved03: node.reserved03,
+    reserved04: node.reserved04,
   };
   editBomDialog.value = true;
 }
@@ -208,7 +239,6 @@ function showUpdateBomInfo(node: any) {
     material_quantity: node.material_quantity,
     unit: node.unit,
     reserved01: node.reserved01,
-    reserved03: null,
     reserved02: node.reserved02,
   };
   editDialog.value = true;
@@ -257,7 +287,7 @@ async function delBomInfo() {
         <div class="d-flex justify-space-between">
           <v-text-field
             v-model="searchType"
-            label="序列"
+            label="系列"
             variant="outlined"
             density="compact"
             hide-details
@@ -269,7 +299,7 @@ async function delBomInfo() {
             size="large"
             @click="showAdd"
           >
-            新增序列
+            新增设备系列
           </v-btn>
         </div>
       </v-col>
@@ -277,9 +307,10 @@ async function delBomInfo() {
       <v-col clos="12">
         <v-expansion-panels variant="accordion">
           <v-expansion-panel
-            v-for="(group, title) in groupedBomData"
-            :key="title"
-            :title="title.toString()"
+            v-for="(item, index) in materialList"
+            :key="index"
+            :title="item.rsv2"
+            @click="showDevice(item)"
           >
             <v-expansion-panel-text>
               <v-row>
@@ -289,24 +320,27 @@ async function delBomInfo() {
                       color="blue-darken-2"
                       class="mx-2"
                       size="large"
-                      @click="showAddModel(group[0].reserved01)"
+                      @click="showAddModel(item)"
                     >
                       新增设备
                     </v-btn>
                   </div>
                 </v-col>
-                <v-col cols="12" v-for="(item, index) in group" :key="index">
+                <v-col cols="12">
+                  <v-divider :thickness="3"></v-divider>
                   <v-list-item
-                    :title="item.material_name"
+                    v-for="(_item, _index) in bomData"
+                    :key="_index"
+                    :title="_item.material_name"
                     hide-details
-                    @click="showBomInfo(item)"
+                    @click="showBomInfo(_item)"
                   >
                     <template v-slot:append>
                       <v-icon
                         color="blue"
                         size="small"
                         class="mr-3"
-                        @click.stop="showUpdateBomInfo(item)"
+                        @click.stop="showUpdateBomInfo(_item)"
                       >
                         fa-solid fa-pen
                       </v-icon>
@@ -314,7 +348,7 @@ async function delBomInfo() {
                       <v-icon
                         color="red"
                         size="small"
-                        @click.stop="showDel(item)"
+                        @click.stop="showDel(_item)"
                       >
                         fa-solid fa-trash
                       </v-icon>
@@ -361,11 +395,20 @@ async function delBomInfo() {
               <div
                 class="text-start pa-3 bg-orange"
                 style="border-radius: 10px"
+                :class="
+                  node.$$data.reserved04 === '否' ? 'bg-grey' : 'bg-orange'
+                "
               >
                 <div>名称：{{ node.$$data.label }}</div>
                 <div v-show="node.$$data.material_quantity">
                   数量：{{ node.$$data.material_quantity
                   }}{{ node.$$data.unit }}
+                </div>
+                <div v-show="node.$$data.reserved03">
+                  零部件编号：{{ node.$$data.reserved03 }}
+                </div>
+                <div v-show="node.$$data.reserved04">
+                  是否必须：{{ node.$$data.reserved04 }}
                 </div>
               </div>
             </template>
@@ -386,18 +429,52 @@ async function delBomInfo() {
       </v-toolbar>
 
       <v-card-text class="mt-4">
-        <v-text-field
-          v-model="bomInfo.material_name"
-          label="名称"
-        ></v-text-field>
-
-        <v-text-field
-          v-model="bomInfo.material_quantity"
-          label="数量"
-        ></v-text-field>
-
-        <v-select label="单位" :items="units" v-model="bomInfo.unit"></v-select>
-        <v-text-field label="型号" v-model="bomInfo.reserved02"></v-text-field>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              label="零件编号"
+              v-model="bomInfo.reserved03"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              v-model="bomInfo.material_name"
+              label="名称"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field
+              v-model="bomInfo.material_quantity"
+              label="数量"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-select
+              label="单位"
+              :items="units"
+              v-model="bomInfo.unit"
+              hide-details
+            ></v-select>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              label="型号"
+              v-model="bomInfo.reserved02"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-select
+              label="是否必须"
+              v-model="bomInfo.reserved04"
+              :items="['是', '否']"
+              hide-details
+            ></v-select>
+          </v-col>
+        </v-row>
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
@@ -427,21 +504,11 @@ async function delBomInfo() {
       </v-toolbar>
 
       <v-card-text class="mt-4">
-        <v-text-field label="系列" v-model="bomInfo.reserved01"></v-text-field>
-        <v-text-field label="型号" v-model="bomInfo.reserved02"></v-text-field>
-        <v-text-field
-          v-model="bomInfo.material_name"
-          label="设备名称"
-        ></v-text-field>
+        <v-text-field label="系列" v-model="rsv2"></v-text-field>
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn
-          color="blue-darken-2"
-          size="large"
-          class="mr-2"
-          @click="addBomInfo"
-        >
+        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addRsv2">
           确认新增
         </v-btn>
         <v-btn color="grey" size="large" @click="addDialog = false">
@@ -496,18 +563,52 @@ async function delBomInfo() {
       </v-toolbar>
 
       <v-card-text class="mt-4">
-        <v-text-field
-          v-model="bomInfo.material_name"
-          label="名称"
-        ></v-text-field>
-
-        <v-text-field
-          v-model="bomInfo.material_quantity"
-          label="数量"
-        ></v-text-field>
-
-        <v-select label="单位" :items="units" v-model="bomInfo.unit"></v-select>
-        <v-text-field label="型号" v-model="bomInfo.reserved02"></v-text-field>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              label="零件编号"
+              v-model="bomInfo.reserved03"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              v-model="bomInfo.material_name"
+              label="名称"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field
+              v-model="bomInfo.material_quantity"
+              label="数量"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-select
+              label="单位"
+              :items="units"
+              v-model="bomInfo.unit"
+              hide-details
+            ></v-select>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              label="型号"
+              v-model="bomInfo.reserved02"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-select
+              label="是否必须"
+              v-model="bomInfo.reserved04"
+              :items="['是', '否']"
+              hide-details
+            ></v-select>
+          </v-col>
+        </v-row>
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">

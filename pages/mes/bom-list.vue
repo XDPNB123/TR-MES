@@ -51,7 +51,7 @@
         </v-btn>
         <v-btn color="blue-darken-2" size="large" class="mr-2"> 导入 </v-btn>
       </v-col>
-      <div class="text-h5 align-center">{{ mcodeName }}的物料清单</div>
+      <div class="text-h5 align-center"></div>
       <v-col cols="12">
         <v-data-table
           :items-per-page="10"
@@ -96,6 +96,7 @@
         </v-data-table>
       </v-col>
     </v-row>
+
     <!-- 增加物料 -->
     <v-dialog v-model="dialogAdd" min-width="400px" width="560px">
       <v-card>
