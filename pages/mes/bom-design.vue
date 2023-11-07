@@ -525,7 +525,7 @@ async function delBomInfo() {
   <v-dialog v-model="addDialog" min-width="400px" width="560px">
     <v-card>
       <v-toolbar color="blue">
-        <v-toolbar-title> 新增序列 </v-toolbar-title>
+        <v-toolbar-title> 新增设备系列 </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon @click="addDialog = false">
           <v-icon>fa-solid fa-close</v-icon>
@@ -546,7 +546,7 @@ async function delBomInfo() {
       </div>
     </v-card>
   </v-dialog>
-  <!-- 新增序列内容设备-->
+  <!-- 新增设备-->
   <v-dialog v-model="addModelDialog" min-width="400px" width="560px">
     <v-card>
       <v-toolbar color="blue">
