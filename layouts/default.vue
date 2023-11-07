@@ -61,22 +61,11 @@ const pageMenus = ref<any[]>([
         path: "/mes/work-produce-recode",
         icon: "fa-solid fa-list-ol",
       },
-      {
-        parentName: "MES",
-        name: "常用工序",
-        path: "/mes/process-maintenance",
-        icon: "fa-solid fa-screwdriver-wrench",
-      },
+
       {
         parentName: "MES",
         name: "BOM清单",
         path: "/mes/bom-list",
-        icon: "fa-solid fa-list",
-      },
-      {
-        parentName: "MES",
-        name: "常用BOM清单",
-        path: "/mes/bom-design",
         icon: "fa-solid fa-list",
       },
     ],
@@ -135,6 +124,18 @@ const pageMenus = ref<any[]>([
         name: "班组信息",
         path: "/work-basic/work-class",
         icon: "fa-solid fa-people-roof",
+      },
+      {
+        parentName: "MES",
+        name: "常用BOM清单",
+        path: "/work-basic/bom-design",
+        icon: "fa-solid fa-list",
+      },
+      {
+        parentName: "MES",
+        name: "常用工序",
+        path: "/work-basic/process-maintenance",
+        icon: "fa-solid fa-screwdriver-wrench",
       },
     ],
   },
