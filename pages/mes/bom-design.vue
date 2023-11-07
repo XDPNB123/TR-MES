@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// 获取消息条对象
+const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
+  useSnackbar();
 useSeoMeta({
   // 该页面的标题
   title: "常用BOM设计",
@@ -18,6 +21,7 @@ let addModelDialog = ref<boolean>(false);
 let editBomDialog = ref<boolean>(false);
 let editDialog = ref<boolean>(false);
 let delBomDialog = ref<boolean>(false);
+let delDialog = ref<boolean>(false);
 //单位
 let units = ref<string[]>([
   "PCS",
@@ -60,8 +64,12 @@ let menusDefine = ref<any[]>([
 let bomInfo = ref<any>(null);
 //搜素
 let searchType = ref<string>("");
+let searchName = ref<string>("");
 watch(searchType, async function () {
   await getMaterialList();
+});
+watch(searchName, async function () {
+  await getBomList();
 });
 
 //树形结构数据
@@ -115,6 +123,7 @@ async function getBomList() {
     undefined,
     {
       reserved01: reserved01.value,
+      material_name: searchName.value,
       PageIndex: 1,
       PageSize: 100000,
       SortedBy: "id",
@@ -193,10 +202,7 @@ async function addRsv2() {
 function showAddModel(item: any) {
   bomInfo.value = {
     material_name: "",
-    superior_id: "0",
     bom_grade: 1,
-    material_quantity: "0",
-    unit: "件",
     reserved01: item.rsv2,
     reserved02: "",
   };
@@ -226,7 +232,11 @@ function showEditBomInfo(node: any) {
     reserved03: node.reserved03,
     reserved04: node.reserved04,
   };
-  editBomDialog.value = true;
+  if (node.bom_grade === 1) {
+    return setSnackbar("black", "很抱歉，您不能在此处修改当前项！");
+  } else {
+    editBomDialog.value = true;
+  }
 }
 //修改设备信息
 function showUpdateBomInfo(node: any) {
@@ -259,7 +269,17 @@ let delName = ref<string>("");
 function showDel(node: any) {
   delId.value = node.id;
   delName.value = node.material_name;
-  delBomDialog.value = true;
+  if (node.bom_grade === 1) {
+    return setSnackbar("black", "很抱歉，您不能在此处删除当前项！");
+  } else {
+    delBomDialog.value = true;
+  }
+}
+//删除设备
+function showDel2(node: any) {
+  delId.value = node.id;
+  delName.value = node.material_name;
+  delDialog.value = true;
 }
 //确认删除
 async function delBomInfo() {
@@ -272,6 +292,7 @@ async function delBomInfo() {
   materialName.value = bomData.value[0].material_name;
   materialModel.value = bomData.value[0].reserved02;
   delBomDialog.value = false;
+  delDialog.value = false;
 }
 </script>
 
@@ -287,7 +308,7 @@ async function delBomInfo() {
         <div class="d-flex justify-space-between">
           <v-text-field
             v-model="searchType"
-            label="系列"
+            label="系列搜索"
             variant="outlined"
             density="compact"
             hide-details
@@ -315,7 +336,15 @@ async function delBomInfo() {
             <v-expansion-panel-text>
               <v-row>
                 <v-col cols="12">
-                  <div class="d-flex justify-end">
+                  <div class="d-flex justify-space-between">
+                    <v-text-field
+                      v-model="searchName"
+                      label="设备名称搜索"
+                      variant="outlined"
+                      density="compact"
+                      hide-details
+                      clearable
+                    ></v-text-field>
                     <v-btn
                       color="blue-darken-2"
                       class="mx-2"
@@ -348,7 +377,7 @@ async function delBomInfo() {
                       <v-icon
                         color="red"
                         size="small"
-                        @click.stop="showDel(_item)"
+                        @click.stop="showDel2(_item)"
                       >
                         fa-solid fa-trash
                       </v-icon>
@@ -399,13 +428,13 @@ async function delBomInfo() {
                   node.$$data.reserved04 === '否' ? 'bg-grey' : 'bg-orange'
                 "
               >
+                <div v-show="node.$$data.reserved03">
+                  编号：{{ node.$$data.reserved03 }}
+                </div>
                 <div>名称：{{ node.$$data.label }}</div>
                 <div v-show="node.$$data.material_quantity">
                   数量：{{ node.$$data.material_quantity
                   }}{{ node.$$data.unit }}
-                </div>
-                <div v-show="node.$$data.reserved03">
-                  零部件编号：{{ node.$$data.reserved03 }}
                 </div>
                 <div v-show="node.$$data.reserved04">
                   是否必须：{{ node.$$data.reserved04 }}
@@ -672,7 +701,7 @@ async function delBomInfo() {
       </v-toolbar>
 
       <v-card-text class="mt-4 text-red">
-        您是否确认要删除【{{ delName }}】这个设备或零部件？
+        您是否确认要删除【{{ delName }}】这个零部件？
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
@@ -690,4 +719,40 @@ async function delBomInfo() {
       </div>
     </v-card>
   </v-dialog>
+  <!-- 删除设备对象 -->
+  <v-dialog v-model="delDialog" min-width="400px" width="560px">
+    <v-card>
+      <v-toolbar color="blue">
+        <v-toolbar-title> 删除设备对象 </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="delDialog = false">
+          <v-icon>fa-solid fa-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+
+      <v-card-text class="mt-4 text-red">
+        您是否确认要删除【{{ delName }}】这个设备？
+      </v-card-text>
+
+      <div class="d-flex justify-end mr-6 mb-4">
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          class="mr-2"
+          @click="delBomInfo"
+        >
+          确认新增
+        </v-btn>
+        <v-btn color="grey" size="large" @click="delDialog = false">
+          取消
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
+  <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
+    {{ snackbarText }}
+    <template v-slot:actions>
+      <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
+    </template>
+  </v-snackbar>
 </template>
