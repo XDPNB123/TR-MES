@@ -22,7 +22,14 @@ useSeoMeta({
 definePageMeta({
   keepalive: true,
 });
-
+//工作中心类型
+let workCenterType = ref<any[]>([
+  "钣金车间",
+  "机加工车间",
+  "模组装配车间",
+  "电气装配车间",
+  "总装车间",
+]);
 // 正在选中的 tab 页
 let showingTab = ref<any>(null);
 let detailName = ref<any>("");
@@ -174,7 +181,7 @@ function onDragEnd(event: any, item: any) {
 let workCenterList = ref<any[]>([]);
 
 //搜素
-let searchType = ref<string>("机加工");
+let searchType = ref<string>("机加工车间");
 
 //通过更改searchType的值来筛选工作中心
 watch(searchType, function () {
@@ -700,7 +707,7 @@ let deliverList = ref<any[]>([]);
                       hide-details
                       prefix="工作中心类型："
                       v-model="searchType"
-                      :items="['机加工', '装配']"
+                      :items="workCenterType"
                     ></v-select>
                   </template>
                 </v-toolbar>

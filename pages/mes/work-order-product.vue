@@ -60,6 +60,7 @@ let workType = ref<any[]>([
   "总装",
   "其他",
 ]);
+
 //工单表头的状态
 let workStatus = ref([
   "新建未审核",
@@ -119,33 +120,9 @@ let searchProduct = ref<any>("");
 let searchName = ref("");
 
 // 正在操作的工单
-let operatingTicket = ref<any>({
-  workorder_type: "",
-  planned_completion_time: "",
-  unit: "",
-  planned_quantity: "",
-  product_id: "",
-  product_description: "",
-  start_date: "",
-  finish_date: "",
-  status: "",
-});
+let operatingTicket = ref<any>(null);
 //正在操作的工单明细
-let operatingTicketDetail = ref<any>({
-  mcode: "",
-  estimated_delivery_date: "",
-  blueprint_id: "",
-  project_code: "",
-  standard_time: "",
-  actual_time: "",
-  procedure: "",
-  planned_quantity: "",
-  reported_quantity: "",
-  unit: "",
-  workorder_hid: "",
-  actual_delivery_date: "",
-  status: "",
-});
+let operatingTicketDetail = ref<any>(null);
 //工单表按照开始时间进行降序排序
 // 展示的工单表格数据
 let tableData = ref<any[]>([]);
@@ -195,13 +172,12 @@ let tableHeaders = ref<any[]>([
     filterable: true,
   },
   {
-    title: "计划开始日期",
-    key: "start_date",
+    title: "计划开始时间",
+    key: "scheduled_start_date",
     align: "center",
-    sortable: true,
+    sortable: false,
     filterable: true,
   },
-
   {
     title: "计划完成时间",
     key: "planned_completion_time",
@@ -209,7 +185,20 @@ let tableHeaders = ref<any[]>([
     sortable: false,
     filterable: true,
   },
-
+  {
+    title: "开始日期",
+    key: "start_date",
+    align: "center",
+    sortable: true,
+    filterable: true,
+  },
+  {
+    title: "完成日期",
+    key: "finish_date",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
   {
     title: "工单状态",
     key: "status",
@@ -420,10 +409,11 @@ async function getUsedProduce() {
       "/SysConfig/M47GetProcessBasisConfig",
       "get",
       undefined,
-      { configtype: "常用工序路线" }
+      { config_type: "常用工序组合" }
     );
 
     produceGroups.value = newData.data;
+    console.log(produceGroups.value);
   } catch (error) {
     console.log(error);
   }
@@ -528,6 +518,27 @@ function cancelProcess() {
   processDialog.value = false;
 }
 
+//控制保存常用工序数据
+let addPG = ref<boolean>(false);
+//暂时存储chips和droppedChips俩个数组
+let arrOne = ref<any[]>([]);
+let arrTwo = ref<any[]>([]);
+//暂存当前工序
+let procedureItem = ref<any>(null);
+//添加常用工序组
+async function addProcedureGroup(item: any) {
+  arrOne.value = chips.value;
+  arrTwo.value = droppedChips.value;
+  procedureItem.value = item;
+  await getProduce();
+  droppedChips.value = [];
+  droppedChips.value.push(item);
+  chips.value = chips.value.filter(
+    (chip: any) => chip.procedure_name !== item.procedure_name
+  );
+  addPG.value = true;
+}
+
 //保存为常用工序路线
 async function saveComUsedProduce() {
   try {
@@ -551,10 +562,27 @@ async function saveComUsedProduce() {
     });
     setSnackbar("green", "保存成功");
     getUsedProduce();
+    cancelComUsedProduce();
+    chips.value.push(procedureItem.value);
+    //新的对象数组
+    let newItem = {
+      procedure_name: names,
+    };
+    droppedChips.value = droppedChips.value.map((item) =>
+      item === procedureItem.value ? newItem : item
+    );
   } catch (error) {
     console.log(error);
     setSnackbar("black", "保存失败");
+    cancelComUsedProduce();
   }
+}
+
+//取消保存为常用工序路线
+async function cancelComUsedProduce() {
+  addPG.value = false;
+  chips.value = arrOne.value;
+  droppedChips.value = arrTwo.value;
 }
 
 //删除时传第参数
@@ -564,17 +592,12 @@ function deleteProduce(item: any) {
   deleteProduceDialog.value = true;
 }
 
-//删除常用工序路线
+//删除常用工序组合
 async function deleteComUsedProduce() {
   try {
-    await useHttp(
-      "/MesWorkProcess/M50DeleteProcessBasis",
-      "delete",
-      undefined,
-      {
-        config_code: produceItem.value.config_code,
-      }
-    );
+    await useHttp("/SysConfig/M50DeleteProcessBasis", "delete", undefined, {
+      config_code: produceItem.value.config_code,
+    });
     setSnackbar("red", "删除成功");
     deleteProduceDialog.value = false;
     getUsedProduce();
@@ -616,6 +639,8 @@ async function saveTicket() {
           unit: item.unit,
           procedure_order_id: index + 1,
           status: "已审核待排产",
+          employee_id: "",
+          employee_name: "",
         });
       });
     });
@@ -637,16 +662,16 @@ async function saveTicket() {
   droppedChips.value = [];
 }
 
-//点击常用工序流程
+//点击常用工序组
 async function commonProduce(item: any) {
-  let array = item.rsv2.split(",");
-  await getProduce();
-  droppedChips.value = chips.value.filter((chip) =>
-    array.includes(chip.procedure_name)
-  );
-  chips.value = chips.value.filter(
-    (chip) => !array.includes(chip.procedure_name)
-  );
+  let newItem = {
+    procedure_name: item.rsv2,
+  };
+  droppedChips.value.push(newItem);
+}
+//移除选择的常用工序组
+function removeProceDureGroup(item: any) {
+  droppedChips.value.splice(droppedChips.value.indexOf(item), 1);
 }
 
 // 工单表头搜索过滤
@@ -745,6 +770,9 @@ function formatDate(data: any) {
           10
         );
       }
+      if (item.scheduled_start_date) {
+        item.scheduled_start_date = item.scheduled_start_date.substring(0, 10);
+      }
     });
     return data;
   } catch (error) {
@@ -821,12 +849,11 @@ watch(detailName, () => {
 // 新增工单前重置新增对话框
 function resetAddDialog() {
   operatingTicket.value = {
-    workorder_type: "机加工",
+    workorder_type: "机加",
     product_id: "",
     product_description: "",
-    start_date: "",
-
-    unit: "件",
+    scheduled_start_date: "",
+    unit: "套",
     status: "新建未审核",
   };
   addDialog.value = true;
@@ -1273,16 +1300,6 @@ const dateRule = ref<any>([
 </script>
 
 <template>
-  <div
-    style="
-      display: absolute;
-      z-index: 99999;
-      width: 100vw;
-      hight: 100vh;
-      top: 0px;
-      left: 0px;
-    "
-  ></div>
   <v-row class="ma-2">
     <!-- 左边工单表格 -->
     <v-col cols="6">
@@ -1673,7 +1690,7 @@ const dateRule = ref<any>([
           <v-text-field
             label="计划开始日期"
             :rules="dateRule"
-            v-model="operatingTicket.start_date"
+            v-model="operatingTicket.scheduled_start_date"
           />
 
           <v-text-field
@@ -1731,11 +1748,10 @@ const dateRule = ref<any>([
             v-model="operatingTicket.unit"
           ></v-select>
           <v-text-field
-            v-model="operatingTicket.start_date"
+            v-model="operatingTicket.scheduled_start_date"
             :rules="dateRule"
             label="计划开始日期"
           ></v-text-field>
-
           <v-text-field
             v-model="operatingTicket.planned_completion_time"
             :rules="dateRule"
@@ -1959,23 +1975,7 @@ const dateRule = ref<any>([
         </v-toolbar>
 
         <v-row class="ma-3">
-          <v-col cols="1"></v-col>
-          <v-col cols="6">
-            <v-card height="350px" style="overflow-y: auto">
-              <v-card-subtitle>已选工序</v-card-subtitle>
-
-              <draggable :list="droppedChips" group="people" item-key="element">
-                <template #item="{ element, index }">
-                  <v-list-item
-                    :border="true"
-                    :title="index + 1 + '.' + element.procedure_name"
-                  ></v-list-item>
-                </template>
-              </draggable>
-            </v-card>
-          </v-col>
-          <v-col cols="1"></v-col>
-          <v-col cols="3">
+          <v-col cols="5">
             <v-card flat height="350px" style="overflow-y: auto">
               <v-card-subtitle>可选工序</v-card-subtitle>
 
@@ -1989,8 +1989,8 @@ const dateRule = ref<any>([
               </draggable>
             </v-card>
           </v-col>
-          <v-col cols="12">
-            <v-card height="350px" style="overflow-y: auto">
+          <v-col cols="7">
+            <v-card height="350px" style="overflow-y: auto" flat>
               <v-card-subtitle>常用工艺路线</v-card-subtitle>
               <v-list>
                 <v-list-item
@@ -2009,18 +2009,54 @@ const dateRule = ref<any>([
               </v-list>
             </v-card>
           </v-col>
+          <v-col cols="12">
+            <v-card height="350px" style="overflow-y: auto">
+              <v-card-subtitle>已选工序</v-card-subtitle>
+              <draggable :list="droppedChips" group="people" item-key="element">
+                <template #item="{ element, index }">
+                  <v-list-item
+                    :border="true"
+                    :title="index + 1 + '.' + element.procedure_name"
+                  >
+                    <template v-slot:append>
+                      <v-icon
+                        v-if="element.procedure_id"
+                        v-show="!addPG"
+                        @click="addProcedureGroup(element)"
+                      >
+                        fa-solid fa-add
+                      </v-icon>
+                      <v-icon v-else @click="removeProceDureGroup(element)">
+                        fa-solid fa-xmark
+                      </v-icon>
+                    </template>
+                  </v-list-item>
+                </template>
+              </draggable>
+            </v-card>
+          </v-col>
         </v-row>
 
         <div class="d-flex justify-end mr-6 mb-4">
           <v-btn
             color="blue-darken-2"
-            v-if="droppedChips.length !== 0"
+            v-if="addPG"
             size="large"
             class="mr-6"
             @click="saveComUsedProduce()"
           >
             <v-icon class="mr-1">fa-solid fa-plus</v-icon>
-            常用工序路线
+            常用工序组合
+          </v-btn>
+          <v-btn
+            color="grey"
+            v-if="addPG"
+            size="large"
+            class="mr-6"
+            @click="cancelComUsedProduce()"
+          >
+            <v-icon class="mr-1">fa-solid fa-minus</v-icon>
+            取消常用工序组合
           </v-btn>
           <v-btn
             color="blue-darken-2"
@@ -2280,10 +2316,9 @@ const dateRule = ref<any>([
           ></v-text-field>
           <v-text-field
             readonly
-            v-model="operatingTicket.start_date"
-            label="开始日期"
+            v-model="operatingTicket.scheduled_start_date"
+            label="计划开始日期"
           ></v-text-field>
-
           <v-text-field
             v-model="operatingTicket.planned_completion_time"
             label="计划完成日期"
@@ -2335,7 +2370,7 @@ const dateRule = ref<any>([
         </div>
       </v-card>
     </v-dialog>
-
+    <!--  -->
     <v-dialog v-model="dialog">
       <v-card>
         <v-toolbar color="blue">
