@@ -195,19 +195,13 @@ let tableHeaders = ref<any[]>([
     filterable: true,
   },
   {
-    title: "开始日期",
+    title: "计划开始日期",
     key: "start_date",
     align: "center",
     sortable: true,
     filterable: true,
   },
-  {
-    title: "完成日期",
-    key: "finish_date",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
+
   {
     title: "计划完成时间",
     key: "planned_completion_time",
@@ -831,7 +825,7 @@ function resetAddDialog() {
     product_id: "",
     product_description: "",
     start_date: "",
-    finish_date: "",
+
     unit: "件",
     status: "新建未审核",
   };
@@ -1677,15 +1671,11 @@ const dateRule = ref<any>([
             v-model="operatingTicket.unit"
           ></v-select>
           <v-text-field
-            label="开始日期"
+            label="计划开始日期"
             :rules="dateRule"
             v-model="operatingTicket.start_date"
           />
-          <v-text-field
-            label="完成日期"
-            :rules="dateRule"
-            v-model="operatingTicket.finish_date"
-          ></v-text-field>
+
           <v-text-field
             label="计划完成日期"
             :rules="dateRule"
@@ -1743,13 +1733,9 @@ const dateRule = ref<any>([
           <v-text-field
             v-model="operatingTicket.start_date"
             :rules="dateRule"
-            label="开始日期"
+            label="计划开始日期"
           ></v-text-field>
-          <v-text-field
-            v-model="operatingTicket.finish_date"
-            :rules="dateRule"
-            label="完成日期"
-          ></v-text-field>
+
           <v-text-field
             v-model="operatingTicket.planned_completion_time"
             :rules="dateRule"
