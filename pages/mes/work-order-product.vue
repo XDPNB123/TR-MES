@@ -435,7 +435,7 @@ async function batchWork() {
     if (selected.value.length === 0) {
       return setSnackbar("black", "请选择需要工序维护的产料");
     }
-
+    addPG.value = false;
     //获取到当前选择的数据
     innerTableSelectData.value = tableDataDetail.value.filter((item: any) =>
       selected.value.includes(item.id)
@@ -484,6 +484,7 @@ async function batchWork() {
 //工序维护
 async function showProcessDialog(item: any) {
   try {
+    addPG.value = false;
     await getProduce();
     //常用工序流程
     await getUsedProduce();
@@ -611,6 +612,7 @@ async function saveTicket() {
     if (droppedChips.value.length === 0) {
       return setSnackbar("black", "请你至少选择一个工序");
     }
+
     // 将选择的工序数组拼接成字符串
     innerTableSelectData.value.forEach((item) => {
       (item.procedure = droppedChips.value
