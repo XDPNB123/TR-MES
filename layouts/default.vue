@@ -61,7 +61,12 @@ const pageMenus = ref<any[]>([
         path: "/mes/work-produce-recode",
         icon: "fa-solid fa-list-ol",
       },
-
+      {
+        parentName: "MES",
+        name: "工单进度",
+        path: "/mes/work-progress",
+        icon: "fa-solid fa-chart-line",
+      },
       {
         parentName: "MES",
         name: "BOM清单",

@@ -817,7 +817,6 @@ function formatDateDetail(data: any) {
 //点击表单显示表单明细
 async function showTicketDetail(item: any, obj: any) {
   detailName.value = obj.item.raw.workorder_hid;
-  productName.value = obj.item.raw.product_id.slice(-9); //点击存储当前行的项目号
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
@@ -1260,6 +1259,7 @@ async function saveMcodeProduct() {
     operatingTicketDetail.value.mcode = selectedRows.value
       .map((item) => item.partName)
       .join(",");
+
     mcodeDialog.value = false;
   } catch (error) {
     console.log(error);
