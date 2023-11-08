@@ -301,7 +301,7 @@ async function delBomInfo() {
     <v-col cols="3">
       <v-toolbar density="compact">
         <v-toolbar-title class="text-blue font-weight-bold"
-          >设备名称</v-toolbar-title
+          >产品系列名称</v-toolbar-title
         >
       </v-toolbar>
       <v-col cols="12">
@@ -320,7 +320,7 @@ async function delBomInfo() {
             size="large"
             @click="showAdd"
           >
-            新增设备系列
+            新增产品系列
           </v-btn>
         </div>
       </v-col>
@@ -339,7 +339,7 @@ async function delBomInfo() {
                   <div class="d-flex justify-space-between">
                     <v-text-field
                       v-model="searchName"
-                      label="设备名称搜索"
+                      label="型号名称搜索"
                       variant="outlined"
                       density="compact"
                       hide-details
@@ -351,7 +351,7 @@ async function delBomInfo() {
                       size="large"
                       @click="showAddModel(item)"
                     >
-                      新增设备
+                      新增型号
                     </v-btn>
                   </div>
                 </v-col>
