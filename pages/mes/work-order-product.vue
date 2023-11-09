@@ -539,6 +539,9 @@ let clickIndex = ref<number>(-1);
 async function addName(item: any, _index: number) {
   clickIndex.value = _index;
   procedureItem.value = item.rsv2;
+
+  await getProduce();
+  chips.value = chips.value.filter((_item: any) => _item.rsv2 !== item.rsv2);
 }
 
 //保存为常用工序路线
@@ -1964,15 +1967,18 @@ const dateRule = ref<any>([
           <v-col cols="5">
             <v-card flat height="350px" style="overflow-y: auto">
               <v-card-subtitle>单工序</v-card-subtitle>
-
-              <v-list v-for="(item, index) in chips" :key="index">
-                <v-list-item
-                  :title="item.rsv2"
-                  @click="reduceProcedure(item)"
+              <div class="d-flex flex-wrap">
+                <v-chip
+                  v-for="(item, index) in chips"
+                  :key="index"
+                  class="px-6 py-3 ma-1"
                   :class="{ 'list-item-active': clickIndex >= 0 }"
-                ></v-list-item>
-                <v-divider></v-divider>
-              </v-list>
+                  text-color="white"
+                  @click="reduceProcedure(item)"
+                >
+                  {{ item.rsv2 }}
+                </v-chip>
+              </div>
             </v-card>
           </v-col>
           <v-col cols="7">
@@ -2041,7 +2047,7 @@ const dateRule = ref<any>([
             class="mr-2"
             @click="saveTicket()"
           >
-            保存工序
+            保存工艺路线
           </v-btn>
           <v-btn color="grey" size="large" @click="cancelProcess()">
             取消
@@ -2355,7 +2361,7 @@ const dateRule = ref<any>([
   background-color: #ebe9e9;
 }
 .list-item-active {
-  background-image: linear-gradient(25deg, #00bd5b, #32822c, #3a6346, #43554d);
-  color: white !important;
+  background-image: linear-gradient(25deg, #bbdefb, #bbdefb, #bbdefb, #bbdefb);
+  color: black !important;
 }
 </style>
