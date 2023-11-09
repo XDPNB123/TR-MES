@@ -1350,7 +1350,7 @@ const dateRule = ref<any>([
           </v-col>
           <v-col cols="6">
             <v-text-field
-              label="最早开始日期"
+              label="最早计划 开始日期"
               variant="outlined"
               density="compact"
               v-model="startDate"
@@ -1362,7 +1362,7 @@ const dateRule = ref<any>([
           </v-col>
           <v-col cols="6">
             <v-text-field
-              label="最晚开始日期"
+              label="最晚计划开始日期"
               type="date"
               variant="outlined"
               density="compact"

@@ -68,7 +68,10 @@ async function getWorkOrder() {
       }
     );
     workOrderList.value = data.data.pageList.map((item: any) => {
-      item.finish_date = item.finish_date.substring(0, 10);
+      item.planned_completion_time = item.planned_completion_time.substring(
+        0,
+        10
+      );
       return item;
     });
   } catch (error) {
@@ -516,21 +519,19 @@ let deliverList = ref<any[]>([]);
                     class="text-center ml-0 text-blue font-weight-bold"
                     >未排产工单</v-toolbar-title
                   >
-                  <template v-slot:append>
-                    <v-select
-                      variant="solo"
-                      density="compact"
-                      hide-details
-                      prefix="工单类型："
-                      v-model="workOrderType"
-                      :items="workType"
-                    ></v-select>
-                  </template>
                 </v-toolbar>
                 <div
                   style="height: calc(100vh - 158px)"
                   class="overflow-y-auto"
                 >
+                  <v-select
+                    variant="solo"
+                    density="compact"
+                    hide-details
+                    prefix="工单类型："
+                    v-model="workOrderType"
+                    :items="workType"
+                  ></v-select>
                   <v-list
                     density="compact"
                     :lines="false"
@@ -566,9 +567,9 @@ let deliverList = ref<any[]>([]);
                       <v-list-item>
                         <template v-slot:default>
                           <div class="text-body-2">
-                            完成日期：
+                            计划完成日期：
                             <span class="text-grey font-weight-medium">
-                              {{ item.finish_date }}
+                              {{ item.planned_completion_time }}
                             </span>
                           </div>
                         </template>

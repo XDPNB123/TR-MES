@@ -40,7 +40,7 @@ let workCenterId = ref<string>("");
 let workCenterName = ref<string>("");
 
 let searchWorkCenterName = ref<string>("");
-let searchType = ref<string>("机加工");
+let searchType = ref<string>("");
 let searchWorkCenterAddress = ref<string>("");
 
 //获取数据
