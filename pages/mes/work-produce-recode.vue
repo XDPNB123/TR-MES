@@ -296,7 +296,7 @@ async function updateCenterId() {
     dataCode.value.push({
       project: item.project_code,
       mcode: item.material_name,
-      produce: item.procedure_name,
+      produce: item.procedure_description,
       produce_order: item.procedure_order_id,
       date: item.planned_completion_time,
       number: item.planned_quantity,
@@ -644,16 +644,23 @@ let deliverList = ref<any[]>([]);
                     <v-list-item>
                       <template v-slot:default>
                         <div class="text-body-2">
-                          产出料工序：
+                          产出料：
                           <span class="text-grey font-weight-medium">
-                            {{ element.material_name }}：{{
-                              element.procedure_name
-                            }}
+                            {{ element.material_name }}
                           </span>
                         </div>
                       </template>
                     </v-list-item>
-
+                    <v-list-item>
+                      <template v-slot:default>
+                        <div class="text-body-2">
+                          工序描述：
+                          <span class="text-grey font-weight-medium">
+                            {{ element.procedure_description }}
+                          </span>
+                        </div>
+                      </template>
+                    </v-list-item>
                     <v-list-item>
                       <template v-slot:default>
                         <div class="text-body-2">
@@ -886,9 +893,9 @@ let deliverList = ref<any[]>([]);
                     <v-list-item>
                       <template v-slot:default>
                         <div class="text-body-2">
-                          工序名称：
+                          工序描述：
                           <span class="text-grey font-weight-medium">
-                            {{ element.procedure_name }}
+                            {{ element.procedure_description }}
                           </span>
                         </div>
                       </template>

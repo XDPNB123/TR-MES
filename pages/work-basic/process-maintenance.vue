@@ -32,12 +32,7 @@ let selectedRows = ref<any[]>([]);
 let searchProcessNumber = ref<string>("");
 let searchProcessName = ref<string>("");
 // 操作的工序
-let operateProcess = ref({
-  procedure_id: "",
-  procedure_name: "",
-  procedure_description: "",
-  defaul_outsource: "",
-});
+let operateProcess = ref<any>(null);
 let operate = ref();
 
 let tableHeaders = ref<any[]>([
@@ -48,30 +43,18 @@ let tableHeaders = ref<any[]>([
     sortable: false,
     filterable: true,
   },
-  {
-    title: "工序编号",
-    key: "procedure_id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
+
   {
     title: "工序名称",
-    key: "procedure_name",
+    key: "rsv2",
     align: "center",
     sortable: false,
     filterable: true,
   },
-  {
-    title: "工序说明",
-    key: "procedure_description",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
+
   {
     title: "是否委外",
-    key: "defaul_outsource",
+    key: "rsv1",
     align: "center",
     sortable: false,
     filterable: true,
@@ -87,17 +70,7 @@ let tableHeaders = ref<any[]>([
 
 //表格显示数据
 let tableData = ref<any[]>([]);
-// 当前页
-let tablePage = ref<number>(1);
-//查询到的数据条数
-let tableDateCount = ref<number>(0);
-// 表格有多少页
-let tablePageCount = computed(() => {
-  return Math.ceil(tableDateCount.value / 10);
-});
-watch(tablePage, () => {
-  getWorkOrder();
-});
+
 //获取工序数据
 onMounted(() => {
   getWorkOrder();
@@ -107,20 +80,14 @@ onMounted(() => {
 async function getWorkOrder() {
   try {
     const data: any = await useHttp(
-      "/MesWorkProcess/M09GetProcedureData",
+      "/SysConfig/M47GetProcessBasisConfig",
       "get",
       undefined,
       {
-        SortedBy: "id",
-        PageIndex: tablePage.value,
-        SortType: 0,
-        procedure_name: searchProcessName.value,
-        procedure_id: searchProcessNumber.value,
-        PageSize: 10,
+        config_type: "单工序",
       }
     );
-    tableData.value = data.data.pageList;
-    tableDateCount.value = data.data.totalCount;
+    tableData.value = data.data;
   } catch (error) {
     console.log(error);
   }
@@ -140,10 +107,9 @@ function resetFilter() {
 function resetAddDialog() {
   // 清空文本框
   operateProcess.value = {
-    procedure_id: "",
-    procedure_name: "",
-    procedure_description: "",
-    defaul_outsource: "N",
+    config_code: "single_process",
+    rsv2: "",
+    rsv1: "N",
   };
   addDialog.value = true;
 }
@@ -151,7 +117,7 @@ function resetAddDialog() {
 async function addProcess() {
   try {
     const data: any = await useHttp(
-      "/MesWorkProcess/M11AddProcedure",
+      "/SysConfig/M48AddProcessBasis",
       "post",
       operateProcess.value
     );
@@ -165,7 +131,7 @@ async function addProcess() {
 async function editProcess() {
   try {
     const data: any = await useHttp(
-      "/MesWorkProcess/M10ProcedureMaintenance",
+      "/SysConfig/M49UpdateProcessBasis",
       "put",
       operateProcess.value
     );
@@ -179,10 +145,10 @@ async function editProcess() {
 async function deleteProcess() {
   try {
     const data: any = await useHttp(
-      "/MesWorkProcess/M12DeleteProcedure",
+      "/SysConfig/M50DeleteProcessBasis",
       "delete",
       undefined,
-      { ids: [operate.value.id] }
+      { config_code: operate.value.config_code }
     );
     getWorkOrder();
   } catch (error) {
@@ -350,15 +316,6 @@ async function delProduceGroup() {
               fa-solid fa-trash
             </v-icon>
           </template>
-
-          <template v-slot:bottom>
-            <div class="text-center pt-2">
-              <v-pagination
-                v-model="tablePage"
-                :length="tablePageCount"
-              ></v-pagination>
-            </div>
-          </template>
         </v-data-table>
       </v-col>
     </v-col>
@@ -426,21 +383,13 @@ async function delProduceGroup() {
 
       <v-card-text class="mt-4">
         <v-text-field
-          v-model="operateProcess.procedure_id"
-          label="工序编号"
-        ></v-text-field>
-        <v-text-field
-          v-model="operateProcess.procedure_name"
+          v-model="operateProcess.rsv2"
           label="工序名称"
-        ></v-text-field>
-        <v-text-field
-          v-model="operateProcess.procedure_description"
-          label="工序说明"
         ></v-text-field>
         <v-select
           label="是否委外"
           :items="['Y', 'N']"
-          v-model="operateProcess.defaul_outsource"
+          v-model="operateProcess.rsv1"
         ></v-select>
       </v-card-text>
 
@@ -471,21 +420,13 @@ async function delProduceGroup() {
       </v-toolbar>
       <v-card-text class="mt-4">
         <v-text-field
-          v-model="operateProcess.procedure_id"
-          label="工序编号"
-        ></v-text-field>
-        <v-text-field
-          v-model="operateProcess.procedure_name"
+          v-model="operateProcess.rsv2"
           label="工序名称"
-        ></v-text-field>
-        <v-text-field
-          v-model="operateProcess.procedure_description"
-          label="工序说明"
         ></v-text-field>
         <v-select
           label="是否委外"
           :items="['Y', 'N']"
-          v-model="operateProcess.defaul_outsource"
+          v-model="operateProcess.rsv1"
         ></v-select>
       </v-card-text>
 

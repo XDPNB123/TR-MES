@@ -385,25 +385,20 @@ let produceGroups = ref(); //常用工艺路线
 async function getProduce() {
   try {
     const data: any = await useHttp(
-      "/MesWorkProcess/M09GetProcedureData",
+      "/SysConfig/M47GetProcessBasisConfig",
       "get",
       undefined,
       {
-        SortedBy: "id",
-        PageIndex: 1,
-        SortType: 1,
-        procedure_name: "",
-        procedure_id: "",
-        PageSize: 100,
+        config_type: "单工序",
       }
     );
-    chips.value = data.data.pageList;
+    chips.value = data.data;
   } catch (error) {
     console.log(error);
   }
 }
-//获取常用工序流程
-async function getUsedProduce() {
+//获取常用工序组
+async function getProduceGroup() {
   try {
     const newData: any = await useHttp(
       "/SysConfig/M47GetProcessBasisConfig",
@@ -413,7 +408,6 @@ async function getUsedProduce() {
     );
 
     produceGroups.value = newData.data;
-    console.log(produceGroups.value);
   } catch (error) {
     console.log(error);
   }
@@ -435,7 +429,7 @@ async function batchWork() {
     if (selected.value.length === 0) {
       return setSnackbar("black", "请选择需要工序维护的产料");
     }
-    addPG.value = false;
+
     //获取到当前选择的数据
     innerTableSelectData.value = tableDataDetail.value.filter((item: any) =>
       selected.value.includes(item.id)
@@ -453,7 +447,7 @@ async function batchWork() {
       // 所有选中的数据都有相同的工序属性
       await getProduce();
       //常用工序流程
-      await getUsedProduce();
+      await getProduceGroup();
       //过滤出已选工序和未选工序
       if (
         innerTableSelectData.value[0] &&
@@ -462,10 +456,10 @@ async function batchWork() {
         const workorderHids =
           innerTableSelectData.value[0].procedure.split(",");
         droppedChips.value = chips.value.filter((chip) =>
-          workorderHids.includes(chip.procedure_name)
+          workorderHids.includes(chip.rsv2)
         );
         chips.value = chips.value.filter(
-          (chip) => !workorderHids.includes(chip.procedure_name)
+          (chip) => !workorderHids.includes(chip.rsv2)
         );
       }
     } else {
@@ -484,10 +478,9 @@ async function batchWork() {
 //工序维护
 async function showProcessDialog(item: any) {
   try {
-    addPG.value = false;
     await getProduce();
     //常用工序流程
-    await getUsedProduce();
+    await getProduceGroup();
     //将点击的哪行数据存到选择数据中
     innerTableSelectData.value.push(item);
     mcodeName.value = innerTableSelectData.value
@@ -498,12 +491,19 @@ async function showProcessDialog(item: any) {
       innerTableSelectData.value[0] &&
       innerTableSelectData.value[0].procedure
     ) {
-      const workorderHids = item.procedure.split(",");
-      droppedChips.value = chips.value.filter((chip) =>
-        workorderHids.includes(chip.procedure_name)
+      const workorderHids = item.procedure
+        .slice(1, -1)
+        .split("],[")
+        .map((item: any) => item.split(","));
+
+      let combinedArray = [...chips.value, ...produceGroups.value];
+
+      droppedChips.value = combinedArray.filter((chip: any) =>
+        workorderHids.some((item: any) => chip.rsv2 === item.toString())
       );
       chips.value = chips.value.filter(
-        (chip) => !workorderHids.includes(chip.procedure_name)
+        (chip) =>
+          !workorderHids.some((item: any) => chip.rsv2 === item.toString())
       );
     }
   } catch (error) {
@@ -519,36 +519,33 @@ function cancelProcess() {
   processDialog.value = false;
 }
 
-//控制保存常用工序数据
-let addPG = ref<boolean>(false);
-//暂时存储chips和droppedChips俩个数组
-let arrOne = ref<any[]>([]);
-let arrTwo = ref<any[]>([]);
-//暂存当前工序
+//点击当前行数据从chips中剔除
+function reduceProcedure(item: any) {
+  if (clickIndex.value < 0) {
+    chips.value.splice(chips.value.indexOf(item), 1);
+    droppedChips.value.push(item);
+  } else {
+    chips.value.splice(chips.value.indexOf(item), 1);
+    droppedChips.value[clickIndex.value].rsv2 =
+      droppedChips.value[clickIndex.value].rsv2 + "," + item.rsv2;
+  }
+}
+
+//存储将单工序修改为工序组的数据
 let procedureItem = ref<any>(null);
-//添加常用工序组
-async function addProcedureGroup(item: any) {
-  arrOne.value = chips.value;
-  arrTwo.value = droppedChips.value;
-  procedureItem.value = item;
-  await getProduce();
-  droppedChips.value = [];
-  droppedChips.value.push(item);
-  chips.value = chips.value.filter(
-    (chip: any) => chip.procedure_name !== item.procedure_name
-  );
-  addPG.value = true;
+//123
+let clickIndex = ref<number>(-1);
+//将当前的单工序修改为工序组
+async function addName(item: any, _index: number) {
+  clickIndex.value = _index;
+  procedureItem.value = item.rsv2;
 }
 
 //保存为常用工序路线
 async function saveComUsedProduce() {
   try {
-    let names = droppedChips.value
-      .map((item: any) => item.procedure_name)
-      .join(",");
-    let ids = droppedChips.value
-      .map((item: any) => item.procedure_id)
-      .join(",");
+    let names = droppedChips.value[clickIndex.value].rsv2;
+
     let isExist = produceGroups.value.some(
       (group: any) => group.rsv2 === names
     );
@@ -558,54 +555,38 @@ async function saveComUsedProduce() {
     }
     await useHttp("/SysConfig/M48AddProcessBasis", "post", {
       config_code: "process_basis",
-      rsv1: ids,
       rsv2: names,
+      rsv1: "N",
     });
     setSnackbar("green", "保存成功");
-    getUsedProduce();
-    cancelComUsedProduce();
-    chips.value.push(procedureItem.value);
-    //新的对象数组
-    let newItem = {
-      procedure_name: names,
-    };
-    droppedChips.value = droppedChips.value.map((item) =>
-      item === procedureItem.value ? newItem : item
+    await getProduceGroup();
+    await getProduce();
+    //保存成功后重新过滤chips里的数据
+    chips.value = chips.value.filter(
+      (item: any) =>
+        !droppedChips.value.some((_item: any) => _item.rsv2 === item.rsv2)
     );
+    //将当前对象替换为常用工序组合，去掉修改标记
+    droppedChips.value[clickIndex.value] =
+      produceGroups.value[produceGroups.value.length - 1];
+    clickIndex.value = -1;
   } catch (error) {
     console.log(error);
     setSnackbar("black", "保存失败");
-    cancelComUsedProduce();
   }
 }
 
-//取消保存为常用工序路线
-async function cancelComUsedProduce() {
-  addPG.value = false;
-  chips.value = arrOne.value;
-  droppedChips.value = arrTwo.value;
+//取消保存为常用工序
+async function cancel() {
+  droppedChips.value[clickIndex.value].rsv2 = procedureItem.value;
+  await getProduce();
+  chips.value = chips.value.filter(
+    (item: any) =>
+      !droppedChips.value.some((_item: any) => _item.rsv2 === item.rsv2)
+  );
+  clickIndex.value = -1;
 }
 
-//删除时传第参数
-let produceItem = ref();
-function deleteProduce(item: any) {
-  produceItem.value = item;
-  deleteProduceDialog.value = true;
-}
-
-//删除常用工序组合
-async function deleteComUsedProduce() {
-  try {
-    await useHttp("/SysConfig/M50DeleteProcessBasis", "delete", undefined, {
-      config_code: produceItem.value.config_code,
-    });
-    setSnackbar("red", "删除成功");
-    deleteProduceDialog.value = false;
-    getUsedProduce();
-  } catch (error) {
-    console.log(error);
-  }
-}
 //保存工序
 async function saveTicket() {
   try {
@@ -616,7 +597,7 @@ async function saveTicket() {
     // 将选择的工序数组拼接成字符串
     innerTableSelectData.value.forEach((item) => {
       (item.procedure = droppedChips.value
-        .map((item) => item.procedure_name)
+        .map((item) => `[${item.rsv2}]`)
         .join(",")),
         (item.status = "已分配待排产");
     });
@@ -625,19 +606,20 @@ async function saveTicket() {
       "put",
       innerTableSelectData.value
     );
+    console.log(innerTableSelectData.value);
     getWorkOrderDetail();
     let tabArr = ref<any[]>([]);
     innerTableSelectData.value.forEach((item: any) => {
       droppedChips.value.forEach((_item: any, index: number) => {
         tabArr.value.push({
-          workorder_hid: detailName.value,
+          workorder_hid: item.workorder_hid,
           workorder_did: item.workorder_did,
-          procedure_id: _item.procedure_id,
+          procedure_id: _item.config_code,
           material_name: item.mcode,
-          defaul_outsource: _item.defaul_outsource,
+          defaul_outsource: _item.rsv1,
           planned_quantity: item.planned_quantity,
           planned_completion_time: item.estimated_delivery_date,
-          material_id: "5",
+          material_id: "",
           unit: item.unit,
           procedure_order_id: index + 1,
           status: "已审核待排产",
@@ -646,7 +628,7 @@ async function saveTicket() {
         });
       });
     });
-
+    console.log(tabArr.value);
     //将维护的工序添加到工单明细工序分配数据库
     await useHttp(
       "/ProductionRecode/M22AddProductionRecode",
@@ -666,14 +648,16 @@ async function saveTicket() {
 
 //点击常用工序组
 async function commonProduce(item: any) {
-  let newItem = {
-    procedure_name: item.rsv2,
-  };
-  droppedChips.value.push(newItem);
+  droppedChips.value.push(item);
 }
 //移除选择的常用工序组
 function removeProceDureGroup(item: any) {
-  droppedChips.value.splice(droppedChips.value.indexOf(item), 1);
+  if (item.config_type === "单工序") {
+    droppedChips.value.splice(droppedChips.value.indexOf(item), 1);
+    chips.value.push(item);
+  } else {
+    droppedChips.value.splice(droppedChips.value.indexOf(item), 1);
+  }
 }
 
 // 工单表头搜索过滤
@@ -1979,21 +1963,21 @@ const dateRule = ref<any>([
         <v-row class="ma-3">
           <v-col cols="5">
             <v-card flat height="350px" style="overflow-y: auto">
-              <v-card-subtitle>可选工序</v-card-subtitle>
+              <v-card-subtitle>单工序</v-card-subtitle>
 
-              <draggable :list="chips" group="people" item-key="element">
-                <template #item="{ element, index }">
-                  <v-list-item
-                    :border="true"
-                    :title="element.procedure_name"
-                  ></v-list-item>
-                </template>
-              </draggable>
+              <v-list v-for="(item, index) in chips" :key="index">
+                <v-list-item
+                  :title="item.rsv2"
+                  @click="reduceProcedure(item)"
+                  :class="{ 'list-item-active': clickIndex >= 0 }"
+                ></v-list-item>
+                <v-divider></v-divider>
+              </v-list>
             </v-card>
           </v-col>
           <v-col cols="7">
             <v-card height="350px" style="overflow-y: auto" flat>
-              <v-card-subtitle>常用工艺路线</v-card-subtitle>
+              <v-card-subtitle>常用工序组合</v-card-subtitle>
               <v-list>
                 <v-list-item
                   v-for="(item, index) in produceGroups"
@@ -2002,64 +1986,55 @@ const dateRule = ref<any>([
                   @click="commonProduce(item)"
                 >
                   {{ index + 1 }}. {{ item.rsv2 }}
-                  <template v-slot:append>
-                    <v-icon @click.stop="deleteProduce(item)" size="small"
-                      >fa-solid fa-xmark</v-icon
-                    ></template
-                  >
                 </v-list-item>
               </v-list>
             </v-card>
           </v-col>
+
           <v-col cols="12">
+            <div class="d-flex justify-end mr-6 mb-4" v-if="clickIndex >= 0">
+              <v-btn
+                color="blue-darken-2"
+                size="large"
+                class="mr-2"
+                @click="saveComUsedProduce()"
+              >
+                保存工序组
+              </v-btn>
+              <v-btn color="grey" size="large" @click="cancel()"> 取消 </v-btn>
+            </div>
             <v-card height="350px" style="overflow-y: auto">
-              <v-card-subtitle>已选工序</v-card-subtitle>
-              <draggable :list="droppedChips" group="people" item-key="element">
-                <template #item="{ element, index }">
-                  <v-list-item
-                    :border="true"
-                    :title="index + 1 + '.' + element.procedure_name"
-                  >
-                    <template v-slot:append>
-                      <v-icon
-                        v-if="element.procedure_id"
-                        v-show="!addPG"
-                        @click="addProcedureGroup(element)"
-                      >
-                        fa-solid fa-add
-                      </v-icon>
-                      <v-icon v-else @click="removeProceDureGroup(element)">
-                        fa-solid fa-xmark
-                      </v-icon>
-                    </template>
-                  </v-list-item>
-                </template>
-              </draggable>
+              <v-card-subtitle>已选的工艺路线</v-card-subtitle>
+
+              <v-list>
+                <v-list-item
+                  v-for="(item, index) in droppedChips"
+                  :key="index"
+                  :title="index + 1 + '.' + item.rsv2"
+                  :class="{ 'list-item-active': clickIndex === index }"
+                >
+                  <template v-slot:append>
+                    <v-icon
+                      v-if="item.config_type === '单工序'"
+                      v-show="clickIndex < 0"
+                      @click="addName(item, index)"
+                      >fa-solid fa-pen-to-square
+                    </v-icon>
+                    <v-icon
+                      v-show="clickIndex < 0"
+                      @click="removeProceDureGroup(item)"
+                      class="ml-2"
+                    >
+                      fa-solid fa-xmark
+                    </v-icon>
+                  </template>
+                </v-list-item>
+              </v-list>
             </v-card>
           </v-col>
         </v-row>
 
         <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn
-            color="blue-darken-2"
-            v-if="addPG"
-            size="large"
-            class="mr-6"
-            @click="saveComUsedProduce()"
-          >
-            <v-icon class="mr-1">fa-solid fa-plus</v-icon>
-            常用工序组合
-          </v-btn>
-          <v-btn
-            color="grey"
-            v-if="addPG"
-            size="large"
-            class="mr-6"
-            @click="cancelComUsedProduce()"
-          >
-            <v-icon class="mr-1">fa-solid fa-minus</v-icon>
-            取消常用工序组合
-          </v-btn>
           <v-btn
             color="blue-darken-2"
             size="large"
@@ -2343,35 +2318,7 @@ const dateRule = ref<any>([
         </div>
       </v-card>
     </v-dialog>
-    <!-- 删除常用工序流程 -->
-    <v-dialog v-model="deleteProduceDialog" min-width="400px" width="560px">
-      <v-card>
-        <v-toolbar color="blue">
-          <v-toolbar-title> 删除常用工序流程 </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="deleteProduceDialog = false">
-            <v-icon>fa-solid fa-close</v-icon>
-          </v-btn>
-        </v-toolbar>
 
-        <v-card-text class="mt-4 text-center text-red text-h6">
-          您确认要删除这条数据吗？
-        </v-card-text>
-        <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn
-            color="blue-darken-2"
-            size="large"
-            class="mr-2"
-            @click="deleteComUsedProduce()"
-          >
-            确认删除
-          </v-btn>
-          <v-btn color="grey" size="large" @click="deleteProduceDialog = false">
-            取消
-          </v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
     <!--  -->
     <v-dialog v-model="dialog">
       <v-card>
@@ -2406,5 +2353,9 @@ const dateRule = ref<any>([
   border-bottom: 0.5px solid;
   width: 100%;
   background-color: #ebe9e9;
+}
+.list-item-active {
+  background-image: linear-gradient(25deg, #00bd5b, #32822c, #3a6346, #43554d);
+  color: white !important;
 }
 </style>

@@ -34,64 +34,79 @@ function printQrCode() {
   <div style="display: flex;justify:start;padding-top:5px">
     <div style="margin-left:3px">
     <img src="${image2.src}" style="height: 55px"  />
-  </div>
+    </div>
     <div style=" 
       display: flex;
       justify-content: space-between;
       flex-direction: column;">
       <div style="font-family: 'SongTi';font-size:15px;text-align:center">昆山同日派工标识卡</div>
 
-        <div style="font-family: 'SongTi';text-align:center;font-size:14px">  
+      <div style="font-family: 'SongTi';text-align:center;font-size:14px">  
            ${item.value}
-        </div>
-        <div style="font-family: 'SongTi';font-size:12px;margin:0 10px;white-space: nowrap;">  
+      </div>
+      <div style="font-family: 'SongTi';font-size:12px;margin:0 10px;white-space: nowrap;">  
           ${item.code}
-        </div>
+      </div>
         
     </div>
     <div style="padding-right:5px">
     <img src="${image1.src}" style="height: 55px"  />
-      </div>
+   </div>
   </div>
   
 
    
-      <div style="font-family: 'SongTi';font-size:12px;margin-top:10px">项目号:<span
+  <div style="font-family: 'SongTi';font-size:12px;margin-top:10px">项目号:<span
           style="
             text-decoration: underline;
           "
           >
           ${item.project}
           </span>
-      </div>
+  </div>
     
-    
-    <div style="font-family: 'SongTi';margin-top:5px;font-size:12px">产出料:
-        <span
-          style="
-            text-decoration: underline;
-          "
-          >
-        ${item.mcode}
-        </span>
-      </div>
-
-
-    <div style="font-family: 'SongTi';margin-top:5px;font-size:12px">计划交付日期:<span
+  <div style="font-family: 'SongTi';margin-top:5px;font-size:12px">计划交付日期:<span
           style="
             text-decoration: underline;
           "
           >
           ${item.date}
           </span>
-    </div>
+  </div>
 
-    <div style="display: flex; justify-content: space-between;margin-top:5px">
-       
+  <div style="display: flex; justify-content: space-between;margin-top:5px">
+        <div style="font-family: 'SongTi';font-size:12px">产出料:<span
+          style="text-decoration: underline;">
+          ${item.mcode}
+          </span>
+        </div>
+
+        <div style="font-family: 'SongTi';font-size:12px">工序:<span
+              style=" text-decoration: underline; " >
+              ${item.produce}
+              </span>
+              </div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between;margin-top:5px">
+      <div style="font-family: 'SongTi';font-size:12px">当前工序顺序:<span
+          style="text-decoration: underline;">
+          ${item.produce_order}
+          </span>
+        </div>
+
+    <div style="font-family: 'SongTi';font-size:12px">是否委外:<span
+          style="text-decoration: underline;">
+          ${item.outsource}
+          </span>
+      </div> 
+  </div>
+
+
+  <div style="display: flex; justify-content: space-between;margin-top:5px">
       <div style="font-family: 'SongTi';font-size:12px">工作中心:<span
           style="
             text-decoration: underline;
-            
           "
           >
           ${item.centerName}
@@ -99,58 +114,18 @@ function printQrCode() {
       </div>
        
       <div style="font-family: 'SongTi';font-size:12px">数量:
-        <span
-              style="
-                text-decoration: underline;
-              "
-              >
+        <span style=" text-decoration: underline;" >
         ${item.number}
         </span>
         </div>
       <div style="font-family: 'SongTi';font-size:12px">单位:
-        <span
-           style="
-              text-decoration: underline;
-              "
-              >
+        <span style="text-decoration: underline;" >
         ${item.unit}
         </span>
         </div>
-
-     
-
-      </div>
-
-    <div style="display: flex; justify-content: space-between;margin-top:5px">
-      <div style="font-family: 'SongTi';font-size:12px">工序:<span
-              style="
-                text-decoration: underline;
-              "
-              >
-              ${item.produce}
-              </span>
-              </div>
-
-      <div style="font-family: 'SongTi';font-size:12px">当前工序顺序:<span
-          style="
-            text-decoration: underline;
-          "
-          >
-          ${item.produce_order}
-          </span>
-        </div>
-
-    <div style="font-family: 'SongTi';font-size:12px">是否委外:<span
-          style="
-            text-decoration: underline;
-          "
-          >
-          ${item.outsource}
-          </span>
-      </div>
-     
-    </div>
   </div>
+ 
+</div>
 
 `);
 
