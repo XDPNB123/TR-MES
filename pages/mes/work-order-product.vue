@@ -186,6 +186,13 @@ let tableHeaders = ref<any[]>([
     filterable: true,
   },
   {
+    title: "审核日期",
+    key: "approve_date",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
     title: "开始日期",
     key: "start_date",
     align: "center",
@@ -453,13 +460,19 @@ async function batchWork() {
         innerTableSelectData.value[0] &&
         innerTableSelectData.value[0].procedure
       ) {
-        const workorderHids =
-          innerTableSelectData.value[0].procedure.split(",");
-        droppedChips.value = chips.value.filter((chip) =>
-          workorderHids.includes(chip.rsv2)
+        const workorderHids = innerTableSelectData.value[0].procedure
+          .slice(1, -1)
+          .split("],[")
+          .map((item: any) => item.split(","));
+
+        let combinedArray = [...chips.value, ...produceGroups.value];
+
+        droppedChips.value = combinedArray.filter((chip: any) =>
+          workorderHids.some((item: any) => chip.rsv2 === item.toString())
         );
         chips.value = chips.value.filter(
-          (chip) => !workorderHids.includes(chip.rsv2)
+          (chip) =>
+            !workorderHids.some((item: any) => chip.rsv2 === item.toString())
         );
       }
     } else {
@@ -539,6 +552,9 @@ let clickIndex = ref<number>(-1);
 async function addName(item: any, _index: number) {
   clickIndex.value = _index;
   procedureItem.value = item.rsv2;
+
+  await getProduce();
+  chips.value = chips.value.filter((_item: any) => _item.rsv2 !== item.rsv2);
 }
 
 //保存为常用工序路线
@@ -606,7 +622,7 @@ async function saveTicket() {
       "put",
       innerTableSelectData.value
     );
-    console.log(innerTableSelectData.value);
+
     getWorkOrderDetail();
     let tabArr = ref<any[]>([]);
     innerTableSelectData.value.forEach((item: any) => {
@@ -758,6 +774,12 @@ function formatDate(data: any) {
       }
       if (item.scheduled_start_date) {
         item.scheduled_start_date = item.scheduled_start_date.substring(0, 10);
+      }
+      if (item.scheduled_start_date) {
+        item.scheduled_start_date = item.scheduled_start_date.substring(0, 10);
+      }
+      if (item.approve_date) {
+        item.approve_date = item.approve_date.substring(0, 10);
       }
     });
     return data;
@@ -947,6 +969,7 @@ async function editTicket() {
 async function auditTicket() {
   try {
     operatingTicket.value.status = "已审核待排产";
+    operatingTicket.value.approve_date = new Date().toISOString().slice(0, 10);
     const data: any = await useHttp(
       "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
       "put",
@@ -1964,15 +1987,18 @@ const dateRule = ref<any>([
           <v-col cols="5">
             <v-card flat height="350px" style="overflow-y: auto">
               <v-card-subtitle>单工序</v-card-subtitle>
-
-              <v-list v-for="(item, index) in chips" :key="index">
-                <v-list-item
-                  :title="item.rsv2"
-                  @click="reduceProcedure(item)"
+              <div class="d-flex flex-wrap">
+                <v-chip
+                  v-for="(item, index) in chips"
+                  :key="index"
+                  class="px-6 py-3 ma-1"
                   :class="{ 'list-item-active': clickIndex >= 0 }"
-                ></v-list-item>
-                <v-divider></v-divider>
-              </v-list>
+                  text-color="white"
+                  @click="reduceProcedure(item)"
+                >
+                  {{ item.rsv2 }}
+                </v-chip>
+              </div>
             </v-card>
           </v-col>
           <v-col cols="7">
@@ -2041,7 +2067,7 @@ const dateRule = ref<any>([
             class="mr-2"
             @click="saveTicket()"
           >
-            保存工序
+            保存工艺路线
           </v-btn>
           <v-btn color="grey" size="large" @click="cancelProcess()">
             取消
@@ -2355,7 +2381,7 @@ const dateRule = ref<any>([
   background-color: #ebe9e9;
 }
 .list-item-active {
-  background-image: linear-gradient(25deg, #00bd5b, #32822c, #3a6346, #43554d);
-  color: white !important;
+  background-image: linear-gradient(25deg, #bbdefb, #bbdefb, #bbdefb, #bbdefb);
+  color: black !important;
 }
 </style>

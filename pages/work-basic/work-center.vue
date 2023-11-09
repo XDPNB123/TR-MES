@@ -13,13 +13,7 @@ useSeoMeta({
   ogImage: "/同日图标.png",
 });
 
-let workCenterType = ref<any[]>([
-  "钣金车间",
-  "机加工车间",
-  "模组装配车间",
-  "电气装配车间",
-  "总装车间",
-]);
+let workCenterType = ref<any[]>(["钣金", "机加工", "装配", "其他"]);
 // 表格所有数据
 let workCenterList = ref<any[]>([]);
 // 表格当前页
@@ -46,7 +40,7 @@ let workCenterId = ref<string>("");
 let workCenterName = ref<string>("");
 
 let searchWorkCenterName = ref<string>("");
-let searchType = ref<string>("");
+let searchType = ref<string>("机加工");
 let searchWorkCenterAddress = ref<string>("");
 
 //获取数据
@@ -75,6 +69,7 @@ async function getWorkCenterList() {
     }
     return item;
   });
+  console.log(workCenterList.value);
   totalPageCount.value = data.data.totalCount;
 }
 onMounted(function () {
@@ -410,7 +405,7 @@ function cancelDialog() {
 </script>
 <template>
   <v-row class="ma-3">
-    <v-col cols="4">
+    <v-col cols="6">
       <v-text-field
         label="工作中心名称"
         v-model="searchWorkCenterName"
@@ -420,7 +415,7 @@ function cancelDialog() {
         hide-details
       ></v-text-field>
     </v-col>
-    <v-col cols="4">
+    <v-col cols="6">
       <v-select
         label="工作中心类型"
         v-model="searchType"
@@ -432,16 +427,7 @@ function cancelDialog() {
         hide-details
       ></v-select>
     </v-col>
-    <v-col cols="4">
-      <v-text-field
-        label="工作中心地址"
-        v-model="searchWorkCenterAddress"
-        variant="outlined"
-        density="compact"
-        class="mt-3"
-        hide-details
-      ></v-text-field>
-    </v-col>
+
     <v-col cols="12" class="mt-3">
       <v-btn
         size="large"
@@ -899,7 +885,7 @@ function cancelDialog() {
           v-model="operateRow.work_center_id"
           label="工作中心编号"
         ></v-text-field>
-        <v-text-field variant="outlined" label="工作中心类型"></v-text-field>
+
         <v-select
           label="工作中心类型"
           v-model="operateRow.type"

@@ -199,6 +199,7 @@ async function addProcessGroup() {
   await useHttp("/SysConfig/M48AddProcessBasis", "post", {
     config_code: "process_basis",
     rsv2: produceGroupInfo.value,
+    rsv1: "N",
   });
   //添加成功后，清空selectedRows，更新工序组数据
   selectedRows.value = [];
@@ -229,15 +230,15 @@ async function delProduceGroup() {
 }
 </script>
 <template>
-  <v-row class="ma-2">
-    <v-col cols="6">
-      <v-toolbar density="compact">
-        <v-toolbar-title class="ml-3 text-blue font-weight-bold"
-          >常用工序</v-toolbar-title
-        >
-      </v-toolbar>
-      <v-col cols="12">
-        <v-row>
+  <v-row class="ma-2" style="height: 90vh">
+    <v-col cols="6" class="h-100">
+      <v-card class="h-100">
+        <v-toolbar density="compact">
+          <v-toolbar-title class="ml-3 text-blue font-weight-bold"
+            >常用工序</v-toolbar-title
+          >
+        </v-toolbar>
+        <v-row class="pa-3">
           <v-col cols="6">
             <v-text-field
               label="工序编号"
@@ -257,86 +258,92 @@ async function delProduceGroup() {
               hide-details
             ></v-text-field>
           </v-col>
-        </v-row>
-      </v-col>
-      <v-col cols="12">
-        <v-btn
-          color="blue-darken-2"
-          class="mr-2"
-          size="large"
-          @click="filterTableData()"
-          >查询</v-btn
-        >
-        <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
-          重置
-        </v-btn>
-        <v-btn
-          color="blue-darken-2"
-          class="mr-2"
-          size="large"
-          @click="resetAddDialog"
-        >
-          新增工序
-        </v-btn>
-      </v-col>
-      <v-col cols="12">
-        <v-divider></v-divider>
-        <v-data-table
-          :headers="tableHeaders"
-          :items="tableData"
-          :items-per-page="10"
-          v-model="selectedRows"
-          return-object
-          show-select
-        >
-          <template v-slot:item.id="{ index }">
-            {{ index + 1 }}
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-icon
-              color="blue"
-              size="small"
-              class="mr-3"
-              @click.stop="
-                operateProcess = { ...item.raw };
-                editDialog = true;
-              "
+          <v-col cols="12">
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2"
+              size="large"
+              @click="filterTableData()"
+              >查询</v-btn
             >
-              fa-solid fa-pen
-            </v-icon>
+            <v-btn color="red" class="mr-2" size="large" @click="resetFilter()">
+              重置
+            </v-btn>
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2"
+              size="large"
+              @click="resetAddDialog"
+            >
+              新增工序
+            </v-btn>
+          </v-col>
+          <v-col cols="12">
+            <v-divider></v-divider>
+            <v-data-table
+              :headers="tableHeaders"
+              :items="tableData"
+              :items-per-page="10"
+              v-model="selectedRows"
+              return-object
+              show-select
+            >
+              <template v-slot:item.id="{ index }">
+                {{ index + 1 }}
+              </template>
+              <template v-slot:item.actions="{ item }">
+                <v-icon
+                  color="blue"
+                  size="small"
+                  class="mr-3"
+                  @click.stop="
+                    operateProcess = { ...item.raw };
+                    editDialog = true;
+                  "
+                >
+                  fa-solid fa-pen
+                </v-icon>
 
-            <v-icon
-              color="red"
-              size="small"
-              @click.stop="
-                operate = { ...item.raw };
-                deleteDialog = true;
-              "
-            >
-              fa-solid fa-trash
-            </v-icon>
-          </template>
-        </v-data-table>
-      </v-col>
+                <v-icon
+                  color="red"
+                  size="small"
+                  @click.stop="
+                    operate = { ...item.raw };
+                    deleteDialog = true;
+                  "
+                >
+                  fa-solid fa-trash
+                </v-icon>
+              </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
+      </v-card>
     </v-col>
-    <v-col cols="6">
-      <v-toolbar density="compact">
-        <v-toolbar-title class="ml-3 text-blue font-weight-bold"
-          >常用工序组</v-toolbar-title
-        >
-      </v-toolbar>
-      <v-col cols="12">
+    <v-col cols="6" class="h-100">
+      <v-card class="h-100">
+        <v-toolbar density="compact">
+          <v-toolbar-title class="ml-3 text-blue font-weight-bold"
+            >常用工序组</v-toolbar-title
+          >
+        </v-toolbar>
+
         <v-btn
           color="blue-darken-2"
-          class="mr-2"
+          class="ml-3 my-3"
           size="large"
           @click="showAddDialog"
         >
           新增工序组
         </v-btn>
-      </v-col>
-      <v-col cols="12">
-        <v-card height="700px" class="overflow-y-auto">
+
+        <div
+          style="
+            height: calc(90vh - 114px);
+            overflow-y: auto;
+            border-top: solid 0.6px rgb(128, 128, 128, 0.3);
+          "
+        >
           <v-list v-for="(item, index) in produceGroup" :key="index">
             <v-list-item :title="item.rsv2">
               <template v-slot:append>
@@ -364,10 +371,9 @@ async function delProduceGroup() {
                 </v-icon>
               </template>
             </v-list-item>
-            <v-divider :thickness="3"></v-divider>
           </v-list>
-        </v-card>
-      </v-col>
+        </div>
+      </v-card>
     </v-col>
   </v-row>
   <!-- 新增工序 -->

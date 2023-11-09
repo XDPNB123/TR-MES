@@ -23,12 +23,15 @@ definePageMeta({
   keepalive: true,
 });
 //工作中心类型
-let workCenterType = ref<any[]>([
-  "钣金车间",
-  "机加工车间",
-  "模组装配车间",
-  "电气装配车间",
-  "总装车间",
+let workCenterType = ref<any[]>(["钣金", "机加工", "装配", "其他"]);
+//工单类型
+let workType = ref<any[]>([
+  "机加",
+  "钣金",
+  "电器装配",
+  "单机装配",
+  "总装",
+  "其他",
 ]);
 // 正在选中的 tab 页
 let showingTab = ref<any>(null);
@@ -41,9 +44,13 @@ watch(selected, () => {
   getWorkProduce();
 });
 let onDisabled = ref<boolean>(false);
-
+//存储已审核未排产工单
 let workOrderList = ref<any[]>([]);
-
+//存储工单类型
+let workOrderType = ref<any>("机加");
+watch(workOrderType, function () {
+  getWorkOrder();
+});
 //获取工单数据
 async function getWorkOrder() {
   try {
@@ -52,18 +59,18 @@ async function getWorkOrder() {
       "get",
       undefined,
       {
+        status: "已审核待排产",
+        workorder_type: workOrderType.value,
         PageIndex: 1,
         PageSize: 100000,
         SortType: 0,
         SortedBy: "id",
       }
     );
-    workOrderList.value = data.data.pageList
-      .filter((item: any) => item.status === "已审核待排产")
-      .map((item: any) => {
-        item.finish_date = item.finish_date.substring(0, 10);
-        return item;
-      });
+    workOrderList.value = data.data.pageList.map((item: any) => {
+      item.finish_date = item.finish_date.substring(0, 10);
+      return item;
+    });
   } catch (error) {
     console.log(error);
   }
@@ -181,7 +188,7 @@ function onDragEnd(event: any, item: any) {
 let workCenterList = ref<any[]>([]);
 
 //搜素
-let searchType = ref<string>("机加工车间");
+let searchType = ref<string>("装配");
 
 //通过更改searchType的值来筛选工作中心
 watch(searchType, function () {
@@ -509,6 +516,16 @@ let deliverList = ref<any[]>([]);
                     class="text-center ml-0 text-blue font-weight-bold"
                     >未排产工单</v-toolbar-title
                   >
+                  <template v-slot:append>
+                    <v-select
+                      variant="solo"
+                      density="compact"
+                      hide-details
+                      prefix="工单类型："
+                      v-model="workOrderType"
+                      :items="workType"
+                    ></v-select>
+                  </template>
                 </v-toolbar>
                 <div
                   style="height: calc(100vh - 158px)"

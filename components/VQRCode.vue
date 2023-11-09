@@ -55,36 +55,42 @@ function printQrCode() {
   </div>
   
 
-   
-  <div style="font-family: 'SongTi';font-size:12px;margin-top:10px">项目号:<span
+  <div style="font-family: 'SongTi';margin-top:5px;font-size:12px">
+    产出料:<span
+          style="text-decoration: underline;">
+          ${item.mcode}
+          </span>
+  </div>
+
+  <div style="font-family: 'SongTi';font-size:12px;margin-top:10px">
+    工序:<span
+              style=" text-decoration: underline; " >
+              ${item.produce}
+              </span>
+  </div>
+    
+  
+
+  <div style="display: flex; justify-content: space-between;margin-top:5px">
+        <div style="font-family: 'SongTi';font-size:12px">
+          计划日期:<span
+          style="
+            text-decoration: underline;
+          "
+          >
+          ${item.date}
+          </span> 
+        </div>
+
+        <div style="font-family: 'SongTi';font-size:12px">
+          项目号:<span
           style="
             text-decoration: underline;
           "
           >
           ${item.project}
           </span>
-  </div>
-    
-  <div style="font-family: 'SongTi';margin-top:5px;font-size:12px">计划交付日期:<span
-          style="
-            text-decoration: underline;
-          "
-          >
-          ${item.date}
-          </span>
-  </div>
-
-  <div style="display: flex; justify-content: space-between;margin-top:5px">
-        <div style="font-family: 'SongTi';font-size:12px">产出料:<span
-          style="text-decoration: underline;">
-          ${item.mcode}
-          </span>
-        </div>
-
-        <div style="font-family: 'SongTi';font-size:12px">工序:<span
-              style=" text-decoration: underline; " >
-              ${item.produce}
-              </span>
+          
               </div>
   </div>
 
