@@ -278,7 +278,7 @@ async function delProduceGroup() {
               新增工序
             </v-btn>
           </v-col>
-          <v-col cols="12">
+          <v-col cols="12" style="height: calc(90vh - 200px); overflow-y: auto">
             <v-divider></v-divider>
             <v-data-table
               :headers="tableHeaders"
@@ -339,7 +339,7 @@ async function delProduceGroup() {
 
         <div
           style="
-            height: calc(90vh - 114px);
+            height: calc(90vh - 150px);
             overflow-y: auto;
             border-top: solid 0.6px rgb(128, 128, 128, 0.3);
           "
