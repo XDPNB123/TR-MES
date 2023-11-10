@@ -26,6 +26,9 @@ dependencies:
   vue3-lottie:
     specifier: ^3.1.0
     version: 3.1.0(vue@3.3.4)
+  vue3-progress-bar:
+    specifier: 0.0.1-dev7
+    version: 0.0.1-dev7
   vue3-tree-org:
     specifier: ^4.2.2
     version: 4.2.2(vue@3.3.4)
@@ -6127,6 +6130,13 @@ packages:
     dependencies:
       lodash-es: 4.17.21
       lottie-web: 5.12.2
+      vue: 3.3.4
+    dev: false
+
+  /vue3-progress-bar@0.0.1-dev7:
+    resolution: {integrity: sha512-DCzcIpOM5jR28EHN8Zm5h+lmSQe6AIF6gGX7QdHlwQRGkUy01vaF3ggvHhoJWf+TCIf8d4vAsHYN6byoQxiKlg==}
+    requiresBuild: true
+    dependencies:
       vue: 3.3.4
     dev: false
 

@@ -182,7 +182,7 @@ function showAddDialog() {
     return setSnackbar("black", "最少选取两个工序");
   }
   produceGroupInfo.value = selectedRows.value
-    .map((item: any) => item.procedure_name)
+    .map((item: any) => item.rsv2)
     .join(",");
 
   const isSome = produceGroup.value.some(

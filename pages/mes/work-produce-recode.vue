@@ -485,9 +485,129 @@ const dateRule = ref<any>([
       v
     ) || "日期格式如“2023-10-01”",
 ]);
-
+//表头数据
+let headers = ref<any[]>([
+  {
+    title: "序号",
+    key: "id",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "产出料",
+    key: "material_name",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工作中心",
+    key: "work_center_name",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "派工单号",
+    key: "dispatch_order",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工序描述",
+    key: "procedure_description",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工序顺序",
+    key: "procedure_order_id",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "进度",
+    key: "reported_quantity",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+]);
+//选择的数据
+let selectedRows = ref<any[]>([]);
+//搜索的数据
+let searchName = ref<any>(null);
+let searchDO = ref<any>(null);
 //产能视图的数据
 let deliverList = ref<any[]>([]);
+async function getDeliverList() {
+  const data: any = await useHttp(
+    "/ProductionRecode/M21ProductionRecodeList",
+    "get",
+    undefined,
+    {
+      material_name: searchName.value,
+      dispatch_order: searchDO.value,
+      PageIndex: 1,
+      PageSize: 10000,
+      SortType: 1,
+      SortedBy: "dispatch_order",
+    }
+  );
+  deliverList.value = data.data.pageList
+    .filter(
+      (item: any) => item.dispatch_order !== null && item.dispatch_order !== ""
+    )
+    .map((_item: any) => {
+      _item.reported_quantity =
+        Math.round((_item.reported_quantity / _item.planned_quantity) * 100) +
+        "%";
+      _item.planned_completion_time = _item.planned_completion_time.substring(
+        0,
+        10
+      );
+      _item.defaul_outsource = _item.defaul_outsource === "Y" ? "是" : "否";
+      return _item;
+    });
+  console.log(deliverList.value);
+}
+//搜索
+function searchList() {
+  getDeliverList();
+}
+//重置搜索
+function resetSearch() {
+  (searchName.value = ""), (searchDO.value = "");
+  getDeliverList();
+}
+//打印派工单
+function dyDispatchOrder() {
+  if (!selectedRows.value.length) {
+    return alert("请您选择需要打印的派工单");
+  }
+  selectedRows.value.map((item: any) =>
+    dataCode.value.push({
+      project: item.project_code,
+      mcode: item.material_name,
+      produce: item.procedure_description,
+      produce_order: item.procedure_order_id,
+      date: item.planned_completion_time,
+      number: item.planned_quantity,
+      unit: item.unit,
+      value: item.dispatch_order,
+      centerName: item.work_center_name,
+      outsource: item.defaul_outsource,
+      code: "88.216.1/PGD23110100005",
+    })
+  );
+  nextTick(() => {
+    qrCodeIns.value.printQrCode();
+  });
+}
 </script>
 
 <template>
@@ -503,7 +623,7 @@ let deliverList = ref<any[]>([]);
         </v-toolbar>
         <v-tabs color="blue" direction="vertical" v-model="showingTab">
           <v-tab value="未派工单"> 未派工单 </v-tab>
-          <v-tab value="产能视图"> 产能视图 </v-tab>
+          <v-tab value="产能视图" @click="getDeliverList"> 产能视图 </v-tab>
         </v-tabs>
       </v-card>
     </v-col>
@@ -994,6 +1114,77 @@ let deliverList = ref<any[]>([]);
                 >产能视图</v-toolbar-title
               >
             </v-toolbar>
+            <v-row class="ma-2">
+              <v-col cols="6">
+                <v-text-field
+                  label="物料名称"
+                  v-model="searchName"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="6">
+                <v-text-field
+                  label="派工单号"
+                  variant="outlined"
+                  density="compact"
+                  v-model="searchDO"
+                  hide-details
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12">
+                <v-btn
+                  color="blue-darken-2"
+                  class="mr-2"
+                  size="large"
+                  @click="searchList"
+                  >查询</v-btn
+                >
+                <v-btn
+                  color="red"
+                  class="mr-2"
+                  size="large"
+                  @click="resetSearch"
+                >
+                  重置查询
+                </v-btn>
+                <v-btn
+                  color="blue-darken-2"
+                  class="mr-2"
+                  size="large"
+                  @click="dyDispatchOrder"
+                  >打印派工单号</v-btn
+                ></v-col
+              >
+              <v-col cols="12">
+                <v-data-table
+                  :headers="headers"
+                  :items="deliverList"
+                  hover
+                  style="overflow-x: auto; white-space: nowrap"
+                  fixed-footer
+                  fixed-header
+                  height="610"
+                  no-data-text="没有找到符合的数据"
+                  v-model="selectedRows"
+                  return-object
+                  show-select
+                >
+                  <template v-slot:item.reported_quantity="{ item }">
+                    <v-progress-circular
+                      :model-value="item.raw.reported_quantity"
+                      :size="42"
+                      color="deep-orange-lighten-2"
+                    >
+                      {{ item.raw.reported_quantity }}
+                    </v-progress-circular>
+                  </template>
+                </v-data-table>
+              </v-col>
+            </v-row>
           </v-card>
         </v-window-item>
       </v-window>
