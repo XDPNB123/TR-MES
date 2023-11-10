@@ -27,5 +27,6 @@ function handleFileUpload(event: Event) {
     id="fileInput"
     accept=".xlsx,xls"
     @change="handleFileUpload"
-  ></v-file-input>
+    ></v-file-input
+  >
 </template>
