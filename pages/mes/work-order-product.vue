@@ -118,6 +118,7 @@ let searchTicketType = ref("");
 let searchOutputs = ref<string>("");
 let searchProduct = ref<any>("");
 let searchName = ref("");
+let searchProject = ref("");
 
 // 正在操作的工单
 let operatingTicket = ref<any>(null);
@@ -432,6 +433,7 @@ let mcodeName = ref();
 //批量工序维护
 async function batchWork() {
   try {
+    clickIndex.value = -1;
     //判断是否选择数据
     if (selected.value.length === 0) {
       return setSnackbar("black", "请选择需要工序维护的产料");
@@ -491,6 +493,7 @@ async function batchWork() {
 //工序维护
 async function showProcessDialog(item: any) {
   try {
+    clickIndex.value = -1;
     await getProduce();
     //常用工序流程
     await getProduceGroup();
@@ -561,7 +564,9 @@ async function addName(item: any, _index: number) {
 async function saveComUsedProduce() {
   try {
     let names = droppedChips.value[clickIndex.value].rsv2;
-
+    if (names === procedureItem.value) {
+      return cancel();
+    }
     let isExist = produceGroups.value.some(
       (group: any) => group.rsv2 === names
     );
@@ -1226,7 +1231,7 @@ async function productList() {
         PageSize: productPerPage.value,
         SortType: 1,
         SortedBy: "_id",
-        projectCode: productName.value,
+        projectCode: searchProject.value,
         partName: searchName.value,
       }
     );
@@ -1271,6 +1276,7 @@ async function filterNameProduct() {
 //重置搜素
 function resetFilterNameProduct() {
   searchName.value = "";
+  searchProject.value = "";
   productPage.value = 1;
   productList();
 }
@@ -2192,7 +2198,7 @@ const dateRule = ref<any>([
         </v-toolbar>
         <v-card>
           <v-row class="ma-2">
-            <v-col cols="6">
+            <v-col cols="4">
               <v-text-field
                 label="零件名查询"
                 variant="outlined"
@@ -2203,7 +2209,18 @@ const dateRule = ref<any>([
               ></v-text-field>
             </v-col>
 
-            <v-col cols="6">
+            <v-col cols="4">
+              <v-text-field
+                label="项目号查询"
+                variant="outlined"
+                density="compact"
+                v-model="searchProject"
+                hide-details
+                @keydown.enter="filterNameProduct()"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="4">
               <v-select
                 variant="outlined"
                 density="compact"
@@ -2345,11 +2362,11 @@ const dateRule = ref<any>([
       </v-card>
     </v-dialog>
 
-    <!--  -->
+    <!-- 备用 -->
     <v-dialog v-model="dialog">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 删除常用工序流程 </v-toolbar-title>
+          <v-toolbar-title> 备用 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="dialog = false">
             <v-icon>fa-solid fa-close</v-icon>

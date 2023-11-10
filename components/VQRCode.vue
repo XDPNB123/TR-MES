@@ -55,21 +55,34 @@ function printQrCode() {
   </div>
   
 
-  <div style="font-family: 'SongTi';margin-top:5px;font-size:12px">
-    产出料:<span
+  <div style="font-family: 'SongTi';margin-top:5px;font-size:12px; display: flex; align-items: center;">
+  <span>产出料:</span>
+  <div style="flex-grow: 1; border-bottom: 1px solid;text-align:center ">
+    ${item.mcode}
+  </div>
+</div>
+
+<div style="font-family: 'SongTi';margin-top:5px;font-size:12px; display: flex; align-items: center;">
+  <span>工序:</span>
+  <div style="flex-grow: 1; border-bottom: 1px solid;text-align:center ">
+     ${item.produce}
+  </div>
+</div>
+
+<div style="display: flex; justify-content: space-between;margin-top:5px">
+      <div style="font-family: 'SongTi';font-size:12px">当前工序顺序:<span
           style="text-decoration: underline;">
-          ${item.mcode}
+          ${item.produce_order}
           </span>
+        </div>
+
+    <div style="font-family: 'SongTi';font-size:12px">是否委外:<span
+          style="text-decoration: underline;">
+          ${item.outsource}
+          </span>
+      </div> 
   </div>
 
-  <div style="font-family: 'SongTi';font-size:12px;margin-top:10px">
-    工序:<span
-              style=" text-decoration: underline; " >
-              ${item.produce}
-              </span>
-  </div>
-    
-  
 
   <div style="display: flex; justify-content: space-between;margin-top:5px">
         <div style="font-family: 'SongTi';font-size:12px">
@@ -94,20 +107,7 @@ function printQrCode() {
               </div>
   </div>
 
-  <div style="display: flex; justify-content: space-between;margin-top:5px">
-      <div style="font-family: 'SongTi';font-size:12px">当前工序顺序:<span
-          style="text-decoration: underline;">
-          ${item.produce_order}
-          </span>
-        </div>
-
-    <div style="font-family: 'SongTi';font-size:12px">是否委外:<span
-          style="text-decoration: underline;">
-          ${item.outsource}
-          </span>
-      </div> 
-  </div>
-
+  
 
   <div style="display: flex; justify-content: space-between;margin-top:5px">
       <div style="font-family: 'SongTi';font-size:12px">工作中心:<span

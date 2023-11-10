@@ -524,17 +524,7 @@ function cancelDialog() {
               </div>
             </template>
           </v-list-item>
-          <v-divider></v-divider>
-          <v-list-item>
-            <template v-slot:prepend>
-              <v-icon class="mr-5">fa-solid fa-location-dot</v-icon>
-              <div>
-                地址：<span class="text-body-2 text-grey-darken-2">{{
-                  item.work_center_address
-                }}</span>
-              </div>
-            </template>
-          </v-list-item>
+         
         </v-list>
       </v-card>
     </v-col>
