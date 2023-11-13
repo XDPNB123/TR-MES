@@ -601,7 +601,7 @@ function dyDispatchOrder() {
       value: item.dispatch_order,
       centerName: item.work_center_name,
       outsource: item.defaul_outsource,
-      code: "88.216.1/PGD23110100015",
+      code: "88.216.1/PGD2311010005",
     })
   );
   nextTick(() => {
