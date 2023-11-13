@@ -126,6 +126,7 @@ async function getWorkProduce() {
         }
         return 0;
       });
+    console.log(data.data.pageList);
   } catch (error) {
     console.log(error);
   }

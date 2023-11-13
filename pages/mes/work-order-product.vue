@@ -235,7 +235,7 @@ let headers = ref<any[]>([
   {
     title: "产出料",
     align: "center",
-    key: "mcode",
+    key: "mdescription",
     sortable: false,
     filterable: true,
   },
@@ -636,11 +636,11 @@ async function saveTicket() {
           workorder_hid: item.workorder_hid,
           workorder_did: item.workorder_did,
           procedure_id: _item.config_code,
-          material_name: item.mcode,
+          material_name: item.mdescription,
           defaul_outsource: _item.rsv1,
           planned_quantity: item.planned_quantity,
           planned_completion_time: item.estimated_delivery_date,
-          material_id: "",
+          material_id: item.mcode,
           unit: item.unit,
           procedure_order_id: index + 1,
           status: "已审核待排产",
@@ -915,7 +915,8 @@ async function addTicketDetail() {
     const tableArr: any[] = [];
     selectedRows.value.forEach((item: any) => {
       tableArr.push({
-        mcode: item.partName,
+        mdescription: item.partName,
+        mcode: item.resultCode,
         estimated_delivery_date:
           operatingTicketDetail.value.estimated_delivery_date,
         blueprint_id: operatingTicketDetail.value.blueprint_id,
@@ -1113,6 +1114,7 @@ async function getMaterialData(searchProduct: any) {
 async function showProductDialog() {
   try {
     getHomeData(searchProduct);
+    selectedRows.value = [];
     productTypeName.value = "自制件";
     searchProduct.value = "";
   } catch (error) {
@@ -1292,10 +1294,12 @@ async function saveMcodeProduct() {
     if (selectedRows.value.length === 0) {
       return setSnackbar("black", "请选择产出料，创建工单明细");
     }
-    operatingTicketDetail.value.mcode = selectedRows.value
+    operatingTicketDetail.value.mdescription = selectedRows.value
       .map((item) => item.partName)
       .join(",");
-
+    operatingTicketDetail.value.mcode = selectedRows.value
+      .map((item) => item.resultCode)
+      .join(",");
     mcodeDialog.value = false;
   } catch (error) {
     console.log(error);
@@ -1837,7 +1841,7 @@ const dateRule = ref<any>([
 
         <v-card-text class="mt-4">
           <v-text-field
-            v-model="operatingTicketDetail.mcode"
+            v-model="operatingTicketDetail.mdescription"
             label="产出料"
             append-inner-icon="fa-regular fa-hand-pointer"
             @click:append-inner="showMcodeDialog"

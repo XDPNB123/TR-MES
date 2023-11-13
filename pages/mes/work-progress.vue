@@ -41,21 +41,38 @@ async function getProjectCode() {
   );
   projectCodeList.value = data.data;
 }
-//存储工单明细数据
-let workDetailList = ref<any[]>([]);
-
 //获取工单明细数据
-async function getWorkDetail(item: any, _item: any) {
+async function getWorkDetail() {
   const data: any = await useHttp(
     "/MesWorkOrderDetail/M76Getprogress",
     "get",
     undefined,
     {
-      type: _item,
-      projectCode: item,
+      type: workType.value,
+      projectCode: workProject.value,
     }
   );
   workDetailList.value = data.data;
+}
+//点击项目号获取当前项目进度
+//暂存项目号
+let workProject = ref<any>(null);
+//暂存工单类型
+let workType = ref<any>(null);
+function showProgress(item: any) {
+  workProject.value = item;
+  workType.value = workTypeList.value[0];
+  tab2.value = 0;
+  getWorkDetail();
+}
+
+//存储工单明细数据
+let workDetailList = ref<any[]>([]);
+
+//获取工单明细数据
+async function showWorkDetail(item: any, _item: any) {
+  (workProject.value = item), (workType.value = _item);
+  getWorkDetail();
 }
 let productList = ref<any[]>([]);
 //获取排产数据
@@ -79,38 +96,50 @@ async function getProductList(item: any) {
 
 <template>
   <v-row class="ma-2">
-    <v-col cols="12">
-      <v-card>
+    <!-- 左侧的项目号 -->
+    <v-col cols="2">
+      <v-card height="85vh" elevation="2">
         <v-toolbar density="compact">
-          <v-toolbar-title class="ml-2 text-blue font-weight-bold"
-            >项目号</v-toolbar-title
-          >
+          <v-toolbar-title class="ml-2">项目号</v-toolbar-title>
         </v-toolbar>
-
-        <v-tabs v-model="tab1" grow color="primary" show-arrows>
+        <v-tabs
+          v-model="tab1"
+          grow
+          color="blue"
+          direction="vertical"
+          show-arrows
+        >
           <v-tab
             v-for="(item, index) in projectCodeList"
             :key="index"
-            :value="item"
-            border
+            :value="index"
+            @click="showProgress(item)"
             >{{ item }}</v-tab
           >
         </v-tabs>
+      </v-card>
+    </v-col>
+    <!-- 右侧的工单进度 -->
+    <v-col cols="10" height="85vh" elevation="2">
+      <v-card>
+        <v-toolbar density="compact">
+          <v-toolbar-title class="ml-2">工单进度</v-toolbar-title>
+        </v-toolbar>
         <v-card-text>
           <!-- 每个tab对应相应的value -->
           <v-window v-model="tab1">
             <v-window-item
               v-for="(item, index) in projectCodeList"
               :key="index"
-              :value="item"
+              :value="index"
             >
               <!-- 工单类型 -->
-              <v-tabs v-model="tab2" grow color="primary">
+              <v-tabs v-model="tab2" grow color="blue">
                 <v-tab
                   v-for="(_item, index) in workTypeList"
                   :key="index"
-                  :value="_item"
-                  @click="getWorkDetail(item, _item)"
+                  :value="index"
+                  @click="showWorkDetail(item, _item)"
                   >{{ _item }}</v-tab
                 >
               </v-tabs>
@@ -119,7 +148,7 @@ async function getProductList(item: any) {
                   <v-window-item
                     v-for="(_item, index) in workTypeList"
                     :key="index"
-                    :value="_item"
+                    :value="index"
                   >
                     <v-expansion-panels>
                       <v-expansion-panel
@@ -130,13 +159,15 @@ async function getProductList(item: any) {
                       >
                         <v-expansion-panel-title>
                           <!-- 工单明细编号 -->
-                          <div style="flex-basis: 13%">
+                          <div style="flex-basis: 20%">
                             工单明细编号：
                             {{ element.mes_workorderdetaildata.workorder_did }}
                           </div>
                           <!-- 产出料 -->
-                          <div style="flex-basis: 13%">
-                            产出料：{{ element.mes_workorderdetaildata.mcode }}
+                          <div style="flex-basis: 20%">
+                            产出料：{{
+                              element.mes_workorderdetaildata.mdescription
+                            }}
                           </div>
 
                           <!-- 计划产出料数量 -->
@@ -201,25 +232,31 @@ async function getProductList(item: any) {
                                 </div>
 
                                 <div
-                                  style="flex-basis: 10%"
+                                  style="flex-basis: 13%"
                                   v-if="item_.dispatch_order"
                                 >
                                   派工单号：{{ item_.dispatch_order }}
                                 </div>
-                                <div style="flex-basis: 10%" v-else>
+                                <div style="flex-basis: 13%" v-else>
                                   派工单号：任务未派工
-                                </div>
-                                <div style="flex-basis: 15%">
-                                  工序描述：{{ item_.procedure_description }}
                                 </div>
                                 <div style="flex-basis: 10%">
                                   工序顺序：{{ item_.procedure_order_id }}
                                 </div>
+                                <div style="flex-basis: 20%">
+                                  工序描述：{{ item_.procedure_description }}
+                                </div>
+                                <div style="flex-basis: 20%">
+                                  是否委外：{{ item_.defaul_outsource }}
+                                </div>
                                 <div
-                                  style="flex-basis: 10%"
-                                  v-show="item_.dispatch_order"
+                                  style="flex-basis: 13%"
+                                  v-if="item_.work_center_name"
                                 >
                                   工作中心：{{ item_.work_center_name }}
+                                </div>
+                                <div style="flex-basis: 13%" v-else>
+                                  工作中心：未分配工作中心
                                 </div>
                               </div>
                             </template>

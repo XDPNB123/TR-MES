@@ -29,7 +29,6 @@ let addDialog2 = ref(false);
 let selectedRows = ref<any[]>([]);
 
 // 工单搜索
-let searchProcessNumber = ref<string>("");
 let searchProcessName = ref<string>("");
 // 操作的工序
 let operateProcess = ref<any>(null);
@@ -85,6 +84,7 @@ async function getWorkOrder() {
       undefined,
       {
         config_type: "单工序",
+        rsv2: searchProcessName.value,
       }
     );
     tableData.value = data.data;
@@ -99,7 +99,6 @@ async function filterTableData() {
 // 重置搜索
 function resetFilter() {
   searchProcessName.value = "";
-  searchProcessNumber.value = "";
   getWorkOrder();
 }
 // 新增工序前重置对话框
@@ -157,6 +156,8 @@ async function deleteProcess() {
   deleteDialog.value = false;
 }
 
+//搜素
+let searchGroupName = ref<any>(null);
 //常用工序组
 let produceGroup = ref<any[]>([]);
 //获取工序组
@@ -167,11 +168,19 @@ async function getProduceGroup() {
     undefined,
     {
       config_type: "常用工序组合",
+      rsv2: searchGroupName.value,
     }
   );
   produceGroup.value = data.data;
 }
-
+//搜素工序组、
+function filterGroupData() {
+  getProduceGroup();
+}
+//重置查询
+function resetGroupFilter() {
+  (searchGroupName.value = ""), getProduceGroup();
+}
 //工序组名称
 let produceGroupInfo = ref<any>(null);
 //新增工序组
@@ -239,17 +248,7 @@ async function delProduceGroup() {
           >
         </v-toolbar>
         <v-row class="pa-3">
-          <v-col cols="6">
-            <v-text-field
-              label="工序编号"
-              variant="outlined"
-              density="compact"
-              v-model="searchProcessNumber"
-              hide-details
-            ></v-text-field>
-          </v-col>
-
-          <v-col cols="6">
+          <v-col cols="12">
             <v-text-field
               label="工序名称"
               variant="outlined"
@@ -327,16 +326,43 @@ async function delProduceGroup() {
             >常用工序组</v-toolbar-title
           >
         </v-toolbar>
+        <v-row class="pa-3">
+          <v-col cols="12">
+            <v-text-field
+              label="工序组名称"
+              variant="outlined"
+              density="compact"
+              v-model="searchGroupName"
+              hide-details
+            ></v-text-field>
+          </v-col>
 
-        <v-btn
-          color="blue-darken-2"
-          class="ml-3 my-3"
-          size="large"
-          @click="showAddDialog"
-        >
-          新增工序组
-        </v-btn>
-
+          <v-col cols="12">
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2"
+              size="large"
+              @click="filterGroupData()"
+              >查询</v-btn
+            >
+            <v-btn
+              color="red"
+              class="mr-2"
+              size="large"
+              @click="resetGroupFilter()"
+            >
+              重置
+            </v-btn>
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2"
+              size="large"
+              @click="showAddDialog"
+            >
+              新增工序组
+            </v-btn>
+          </v-col>
+        </v-row>
         <div
           style="
             height: calc(90vh - 150px);
