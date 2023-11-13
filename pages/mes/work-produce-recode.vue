@@ -20,7 +20,7 @@ useSeoMeta({
 
 // 页面缓存
 definePageMeta({
-  keepalive: true,
+  keepalive: false,
 });
 //工作中心类型
 let workCenterType = ref<any[]>(["钣金", "机加工", "装配", "其他"]);
@@ -489,14 +489,14 @@ const dateRule = ref<any>([
 //表头数据
 let headers = ref<any[]>([
   {
-    title: "序号",
-    key: "id",
+    title: "派工单号",
+    key: "dispatch_order",
     align: "center",
     sortable: false,
     filterable: true,
   },
   {
-    title: "产出料",
+    title: "物料",
     key: "material_name",
     align: "center",
     sortable: false,
@@ -510,8 +510,8 @@ let headers = ref<any[]>([
     filterable: true,
   },
   {
-    title: "派工单号",
-    key: "dispatch_order",
+    title: "是否委外",
+    key: "defaul_outsource",
     align: "center",
     sortable: false,
     filterable: true,
@@ -588,7 +588,7 @@ function resetSearch() {
 //打印派工单
 function dyDispatchOrder() {
   if (!selectedRows.value.length) {
-    return alert("请您选择需要打印的派工单");
+    return setSnackbar("black", "请您选择需要打印的派工单");
   }
   selectedRows.value.map((item: any) =>
     dataCode.value.push({
@@ -1174,6 +1174,9 @@ function dyDispatchOrder() {
                   return-object
                   show-select
                 >
+                  <template v-slot:item.id="{ index }">
+                    {{ index + 1 }}
+                  </template>
                   <template v-slot:item.reported_quantity="{ item }">
                     <v-progress-circular
                       :model-value="item.raw.reported_quantity"
