@@ -130,24 +130,24 @@ async function getProductList(item: any) {
                       >
                         <v-expansion-panel-title>
                           <!-- 工单明细编号 -->
-                          <div>
+                          <div style="flex-basis: 13%">
                             工单明细编号：
                             {{ element.mes_workorderdetaildata.workorder_did }}
                           </div>
                           <!-- 产出料 -->
-                          <div class="ml-6">
+                          <div style="flex-basis: 13%">
                             产出料：{{ element.mes_workorderdetaildata.mcode }}
                           </div>
 
                           <!-- 计划产出料数量 -->
-                          <div class="ml-6">
+                          <div style="flex-basis: 10%">
                             计划数量：
                             {{
                               element.mes_workorderdetaildata.planned_quantity
                             }}
                           </div>
                           <!-- 进度 -->
-                          <div class="ml-6">
+                          <div style="flex-basis: 10%">
                             当前进度:
                             <v-progress-circular
                               :model-value="
@@ -174,46 +174,53 @@ async function getProductList(item: any) {
                         </v-expansion-panel-title>
                         <v-expansion-panel-text>
                           <v-list-item v-for="(item_, index_) in productList">
-                            <template v-slot:prepend>
-                              <div class="d-flex justify-space-around">
-                                <div v-if="item_.dispatch_order">
-                                  派工单号：{{ item_.dispatch_order }}
-                                </div>
-                                <div v-else>派工单号：任务未派工</div>
-                                <div class="ml-4">
-                                  工序描述：{{ item_.procedure_description }}
-                                </div>
-                                <div class="ml-4">
-                                  工序顺序：{{ item_.procedure_order_id }}
-                                </div>
-                                <div class="ml-4" v-show="item_.dispatch_order">
-                                  工作中心：{{ item_.work_center_name }}
-                                </div>
-                              </div>
-                            </template>
-                            <template v-slot:append>
-                              <div>
-                                进度：<v-progress-circular
-                                  :model-value="
-                                    Math.round(
-                                      (item_.reported_quantity /
-                                        item_.planned_quantity) *
-                                        100
-                                    ) + '%'
-                                  "
-                                  :size="38"
-                                  color="deep-orange-lighten-2"
-                                >
-                                  <span style="font-size: 12px">
-                                    {{
+                            <template v-slot:default>
+                              <div class="d-flex align-center">
+                                <div style="flex-basis: 7%">
+                                  进度：<v-progress-circular
+                                    :model-value="
                                       Math.round(
                                         (item_.reported_quantity /
                                           item_.planned_quantity) *
                                           100
-                                      ) + "%"
-                                    }}</span
+                                      ) + '%'
+                                    "
+                                    :size="38"
+                                    color="deep-orange-lighten-2"
                                   >
-                                </v-progress-circular>
+                                    <span style="font-size: 12px">
+                                      {{
+                                        Math.round(
+                                          (item_.reported_quantity /
+                                            item_.planned_quantity) *
+                                            100
+                                        ) + "%"
+                                      }}</span
+                                    >
+                                  </v-progress-circular>
+                                </div>
+
+                                <div
+                                  style="flex-basis: 10%"
+                                  v-if="item_.dispatch_order"
+                                >
+                                  派工单号：{{ item_.dispatch_order }}
+                                </div>
+                                <div style="flex-basis: 10%" v-else>
+                                  派工单号：任务未派工
+                                </div>
+                                <div style="flex-basis: 15%">
+                                  工序描述：{{ item_.procedure_description }}
+                                </div>
+                                <div style="flex-basis: 10%">
+                                  工序顺序：{{ item_.procedure_order_id }}
+                                </div>
+                                <div
+                                  style="flex-basis: 10%"
+                                  v-show="item_.dispatch_order"
+                                >
+                                  工作中心：{{ item_.work_center_name }}
+                                </div>
                               </div>
                             </template>
                           </v-list-item>
