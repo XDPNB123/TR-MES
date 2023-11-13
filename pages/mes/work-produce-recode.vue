@@ -1177,7 +1177,7 @@ function dyDispatchOrder() {
                   <template v-slot:item.reported_quantity="{ item }">
                     <v-progress-circular
                       :model-value="item.raw.reported_quantity"
-                      :size="42"
+                      :size="45"
                       color="deep-orange-lighten-2"
                     >
                       {{ item.raw.reported_quantity }}
