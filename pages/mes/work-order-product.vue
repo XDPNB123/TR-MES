@@ -858,19 +858,21 @@ watch(detailName, () => {
   tableDetailPage.value = 1;
   getWorkOrderDetail();
 });
-
+let date = new Date();
 // 新增工单前重置新增对话框
 function resetAddDialog() {
   operatingTicket.value = {
     workorder_type: "机加",
     product_id: "",
     product_description: "",
-    scheduled_start_date: "",
+    scheduled_start_date: new Date().toISOString().slice(0, 10),
+    planned_completion_time: "",
     unit: "套",
     status: "新建未审核",
   };
   addDialog.value = true;
 }
+
 // 新增工单
 async function addTicket() {
   try {
@@ -895,7 +897,7 @@ async function addTicket() {
 // 新增工单明细前重置新增对话框
 function resetAddDetailDialog() {
   operatingTicketDetail.value = {
-    estimated_delivery_date: "",
+    estimated_delivery_date: new Date().toISOString().slice(0, 10),
     blueprint_id: "",
     standard_time: "",
     actual_time: 0,
