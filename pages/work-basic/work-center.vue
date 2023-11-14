@@ -473,7 +473,7 @@ function cancelDialog() {
           gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.3)"
         >
           <div class="d-flex justify-space-between">
-            <v-card-title class="text-white">{{
+            <v-card-title class="text-white text-h5">{{
               item.work_center_name
             }}</v-card-title>
             <div class="align-self-center" style="opacity: 0.8">
@@ -524,7 +524,6 @@ function cancelDialog() {
               </div>
             </template>
           </v-list-item>
-         
         </v-list>
       </v-card>
     </v-col>

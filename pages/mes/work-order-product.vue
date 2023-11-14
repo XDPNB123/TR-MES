@@ -100,6 +100,7 @@ let deleteDialog = ref(false);
 let addDetailDialog = ref(false);
 let deleteDetailDialog = ref(false);
 let editDetailDialog = ref(false);
+let splitDetailDialog = ref(false);
 let productDialog = ref(false);
 let auditDialog = ref(false);
 let processDialog = ref(false);
@@ -444,7 +445,7 @@ async function batchWork() {
       selected.value.includes(item.id)
     );
     mcodeName.value = innerTableSelectData.value
-      .map((item: any) => item.mcode)
+      .map((item: any) => item.mdescription)
       .join(",");
     //判断选择的数据他们的工序是否一致
     let isSameProcedure = innerTableSelectData.value.every(
@@ -500,7 +501,7 @@ async function showProcessDialog(item: any) {
     //将点击的哪行数据存到选择数据中
     innerTableSelectData.value.push(item);
     mcodeName.value = innerTableSelectData.value
-      .map((item: any) => item.mcode)
+      .map((item: any) => item.mdescription)
       .join(",");
     //过滤出已选工序和未选工序
     if (
@@ -644,11 +645,13 @@ async function saveTicket() {
           unit: item.unit,
           procedure_order_id: index + 1,
           status: "已审核待排产",
+          required_inspection: _item.rsv3,
           employee_id: "",
           employee_name: "",
         });
       });
     });
+
     console.log(tabArr.value);
     //将维护的工序添加到工单明细工序分配数据库
     await useHttp(
@@ -988,6 +991,77 @@ async function auditTicket() {
     console.log(error);
   }
   auditDialog.value = false;
+}
+//拆分明细行数据，新增一个明细行数据
+//剩余的数量和委外的数量
+let nowData = ref<number>(0);
+let oldData = ref<number>(0);
+async function splitTicket() {
+  if (
+    Number(nowData.value) + Number(oldData.value) !==
+    operatingTicketDetail.value.planned_quantity
+  ) {
+    return setSnackbar(
+      "black",
+      "请你确保剩余数量和委外数量相加与初始任务数量一致"
+    );
+  }
+  //修改当前明细行数据的数量
+  operatingTicketDetail.value.planned_quantity = oldData.value;
+  await useHttp("/MesWorkOrderDetail/M07UpdateWorkOrderDetail", "put", [
+    operatingTicketDetail.value,
+  ]);
+  //修改当前明细编号下的排产数据的每条的数据
+  const data: any = await useHttp(
+    "/ProductionRecode/M21ProductionRecodeList",
+    "get",
+    undefined,
+    {
+      workorder_did: operatingTicketDetail.value.workorder_did,
+      PageIndex: 1,
+      PageSize: 100000,
+      SortedBy: "id",
+      SortType: "0",
+    }
+  );
+  //存储当前明细编号下的所有排产数据
+  let productionData: any = data.data.pageList;
+  console.log(productionData);
+  productionData = productionData.map((item: any) => {
+    item.planned_quantity = oldData.value;
+    return item;
+  });
+
+  //调用排产数据修改的接口进行修改
+  await useHttp(
+    "/ProductionRecode/M23UpdateProductionRecode",
+    "put",
+    productionData
+  );
+  //新增一个委外的工单明细对象
+  const newDetailData = {
+    estimated_delivery_date:
+      operatingTicketDetail.value.estimated_delivery_date,
+    blueprint_id: operatingTicketDetail.value.blueprint_id,
+    standard_time: operatingTicketDetail.value.standard_time,
+    actual_time: operatingTicketDetail.value.actual_time,
+    procedure: null,
+    planned_quantity: nowData.value,
+    reported_quantity: 0,
+    unit: operatingTicketDetail.value.unit,
+    workorder_hid: operatingTicketDetail.value.workorder_hid,
+    actual_delivery_date: operatingTicketDetail.value.actual_delivery_date,
+    status: operatingTicketDetail.value.status,
+    mcode: operatingTicketDetail.value.mcode,
+    mdescription: operatingTicketDetail.value.mdescription + "-委外",
+    project_code: operatingTicketDetail.value.project_code,
+  };
+  await useHttp("/MesWorkOrderDetail/M06AddWorkOrderDetails", "post", [
+    newDetailData,
+  ]);
+  setSnackbar("green", "拆批成功");
+  getWorkOrderDetail();
+  splitDetailDialog.value = false;
 }
 
 //修改工单明细行
@@ -1609,6 +1683,17 @@ const dateRule = ref<any>([
                   class="mr-2"
                   @click="
                     operatingTicketDetail = { ...item.raw };
+                    splitDetailDialog = true;
+                  "
+                >
+                  fa-solid fa-network-wired
+                </v-icon>
+                <v-icon
+                  color="blue"
+                  size="small"
+                  class="mr-2"
+                  @click="
+                    operatingTicketDetail = { ...item.raw };
                     editDetailDialog = true;
                   "
                 >
@@ -2048,23 +2133,54 @@ const dateRule = ref<any>([
                 <v-list-item
                   v-for="(item, index) in droppedChips"
                   :key="index"
-                  :title="index + 1 + '.' + item.rsv2"
                   :class="{ 'list-item-active': clickIndex === index }"
                 >
+                  <v-list-item-title
+                    ><template v-slot:default>
+                      <div class="d-flex">
+                        <div style="flex-basis: 30%">
+                          {{ index + 1 + "." + item.rsv2 }}
+                        </div>
+
+                        <div style="flex-basis: 20%">
+                          是否委外：
+                          <v-switch
+                            v-model="item.rsv1"
+                            hide-details
+                            color="red"
+                            true-value="Y"
+                            false-value="N"
+                          ></v-switch>
+                        </div>
+                        <div style="flex-basis: 20%">
+                          是否质检：
+                          <v-switch
+                            v-model="item.rsv3"
+                            hide-details
+                            color="red"
+                            true-value="Y"
+                            false-value="N"
+                          ></v-switch>
+                        </div>
+                      </div> </template
+                  ></v-list-item-title>
+                  <v-divider :thickness="1"></v-divider>
                   <template v-slot:append>
-                    <v-icon
-                      v-if="item.config_type === '单工序'"
-                      v-show="clickIndex < 0"
-                      @click="addName(item, index)"
-                      >fa-solid fa-pen-to-square
-                    </v-icon>
-                    <v-icon
-                      v-show="clickIndex < 0"
-                      @click="removeProceDureGroup(item)"
-                      class="ml-2"
-                    >
-                      fa-solid fa-xmark
-                    </v-icon>
+                    <div class="d-flex">
+                      <v-icon
+                        v-if="item.config_type === '单工序'"
+                        v-show="clickIndex < 0"
+                        @click="addName(item, index)"
+                        >fa-solid fa-pen-to-square
+                      </v-icon>
+                      <v-icon
+                        v-show="clickIndex < 0"
+                        @click="removeProceDureGroup(item)"
+                        class="ml-2"
+                      >
+                        fa-solid fa-xmark
+                      </v-icon>
+                    </div>
                   </template>
                 </v-list-item>
               </v-list>
@@ -2379,6 +2495,56 @@ const dateRule = ref<any>([
           </v-btn>
         </v-toolbar>
         <nuxt-page> </nuxt-page>
+      </v-card>
+    </v-dialog>
+    <!-- 拆分明细数据 -->
+    <v-dialog v-model="splitDetailDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 拆分明细数据 </v-toolbar-title>
+          <v-spacer></v-spacer>
+
+          <v-btn icon @click="splitDetailDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                label="当前明细行总数量"
+                readonly
+                v-model="operatingTicketDetail.planned_quantity"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="oldData"
+                label="拆分后剩余数量"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="nowData"
+                label="委外明细行数量"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="splitTicket()"
+          >
+            保存
+          </v-btn>
+          <v-btn color="grey" size="large" @click="splitDetailDialog = false">
+            取消
+          </v-btn>
+        </div>
       </v-card>
     </v-dialog>
   </v-row>
