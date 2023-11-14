@@ -57,7 +57,7 @@ let workType = ref<any[]>([
   "钣金",
   "电器装配",
   "单机装配",
-  "总装",
+  "模块装配",
   "其他",
 ]);
 
@@ -470,9 +470,11 @@ async function batchWork() {
 
         let combinedArray = [...chips.value, ...produceGroups.value];
 
-        droppedChips.value = combinedArray.filter((chip: any) =>
-          workorderHids.some((item: any) => chip.rsv2 === item.toString())
-        );
+        droppedChips.value = workorderHids
+          .map((chip: any) =>
+            combinedArray.find((item: any) => chip.toString() === item.rsv2)
+          )
+          .filter(Boolean);
         chips.value = chips.value.filter(
           (chip) =>
             !workorderHids.some((item: any) => chip.rsv2 === item.toString())
@@ -515,9 +517,14 @@ async function showProcessDialog(item: any) {
 
       let combinedArray = [...chips.value, ...produceGroups.value];
 
-      droppedChips.value = combinedArray.filter((chip: any) =>
-        workorderHids.some((item: any) => chip.rsv2 === item.toString())
-      );
+      // droppedChips.value = combinedArray.filter((chip: any) =>
+      //   workorderHids.some((item: any) => chip.rsv2 === item.toString())
+      // );
+      droppedChips.value = workorderHids
+        .map((chip: any) =>
+          combinedArray.find((item: any) => chip.toString() === item.rsv2)
+        )
+        .filter(Boolean);
       chips.value = chips.value.filter(
         (chip) =>
           !workorderHids.some((item: any) => chip.rsv2 === item.toString())

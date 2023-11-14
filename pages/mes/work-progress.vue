@@ -23,12 +23,17 @@ let workTypeList = ref<any[]>([
   "钣金",
   "电器装配",
   "单机装配",
-  "总装",
+  "模块装配",
   "其他",
 ]);
 let tab1 = ref<any>(null);
 let tab2 = ref<any>(null);
 onMounted(() => {
+  getProjectCode();
+});
+//项目号搜素
+let projectCode = ref<any>(null);
+watch(projectCode, function () {
   getProjectCode();
 });
 //获取项目号
@@ -37,7 +42,10 @@ async function getProjectCode() {
   const data: any = await useHttp(
     "/MesWorkOrderDetail/M75GetProjectCode",
     "get",
-    undefined
+    undefined,
+    {
+      code: projectCode.value,
+    }
   );
   projectCodeList.value = data.data;
 }
@@ -102,6 +110,13 @@ async function getProductList(item: any) {
         <v-toolbar density="compact">
           <v-toolbar-title class="ml-2">项目号</v-toolbar-title>
         </v-toolbar>
+        <v-text-field
+          label="项目号"
+          variant="outlined"
+          density="compact"
+          hide-details
+          v-model="projectCode"
+        ></v-text-field>
         <v-tabs
           v-model="tab1"
           grow

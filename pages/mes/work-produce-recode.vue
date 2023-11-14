@@ -30,7 +30,7 @@ let workType = ref<any[]>([
   "钣金",
   "电器装配",
   "单机装配",
-  "总装",
+  "模块装配",
   "其他",
 ]);
 // 正在选中的 tab 页
@@ -192,7 +192,7 @@ function onDragEnd(event: any, item: any) {
 let workCenterList = ref<any[]>([]);
 
 //搜素
-let searchType = ref<string>("装配");
+let searchType = ref<string>("机加工");
 
 //通过更改searchType的值来筛选工作中心
 watch(searchType, function () {

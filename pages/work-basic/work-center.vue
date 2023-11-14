@@ -465,12 +465,10 @@ function cancelDialog() {
       class="mt-4"
     >
       <v-card rounded="lg" @click="showWorkCenter(item)">
-        <v-img
-          src="/工作中心.jpg"
-          height="150px"
+        <div
           cover
           class="align-end"
-          gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.3)"
+          style="background: rgb(42, 146, 92); height: 80px"
         >
           <div class="d-flex justify-space-between">
             <v-card-title class="text-white text-h5">{{
@@ -499,7 +497,7 @@ function cancelDialog() {
               >
             </div>
           </div>
-        </v-img>
+        </div>
         <v-list class="w-100">
           <v-list-item>
             <template v-slot:prepend>
