@@ -1665,8 +1665,16 @@ const dateRule = ref<any>([
                       >
                         类型：
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class=" font-weight-bold"
                           style="text-decoration: underline"
+                          :class="{
+                            'text-blue': item.workorder_type === '机加',
+                            'text-red': item.workorder_type === '钣金',
+                            'text-yellow': item.workorder_type === '电器装配',
+                            'text-green': item.workorder_type === '模组装配',
+                            'text-black': item.workorder_type === '总装',
+                            'text-orange': item.workorder_type === '其他',
+                          }"
                         >
                           {{ item.workorder_type }}
                         </span>
