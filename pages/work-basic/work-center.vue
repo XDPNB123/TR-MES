@@ -465,15 +465,15 @@ function cancelDialog() {
       class="mt-4"
     >
       <v-card rounded="lg" @click="showWorkCenter(item)">
-        <div cover class="align-end" style="background: #90caf9; height: 80px">
+        <div cover class="align-end" style="background: #cfd8dc; height: 80px">
           <div class="d-flex justify-space-between">
-            <v-card-title class="text-white text-h5">{{
+            <v-card-title class="text-blue text-h6">{{
               item.work_center_name
             }}</v-card-title>
             <div class="align-self-center" style="opacity: 0.8">
               <v-icon
                 size="small"
-                color="white"
+                color="blue"
                 class="mr-3"
                 @click.stop="
                   dialogUpdate = true;
@@ -483,7 +483,7 @@ function cancelDialog() {
               >
               <v-icon
                 size="small"
-                color="white"
+                color="blue"
                 class="mr-3"
                 @click.stop="
                   dialogDelete = true;

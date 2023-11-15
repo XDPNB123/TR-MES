@@ -56,8 +56,8 @@ let workType = ref<any[]>([
   "机加",
   "钣金",
   "电器装配",
-  "单机装配",
-  "模块装配",
+  "模组装配",
+  "总装",
   "其他",
 ]);
 
@@ -658,8 +658,6 @@ async function saveTicket() {
         });
       });
     });
-
-    console.log(tabArr.value);
     //将维护的工序添加到工单明细工序分配数据库
     await useHttp(
       "/ProductionRecode/M22AddProductionRecode",
@@ -1015,6 +1013,8 @@ async function splitTicket() {
   }
   //修改当前明细行数据的数量
   operatingTicketDetail.value.planned_quantity = oldData.value;
+  operatingTicketDetail.value.mdescription =
+    operatingTicketDetail.value.mdescription + "(已拆批)";
   await useHttp("/MesWorkOrderDetail/M07UpdateWorkOrderDetail", "put", [
     operatingTicketDetail.value,
   ]);
@@ -1033,12 +1033,17 @@ async function splitTicket() {
   );
   //存储当前明细编号下的所有排产数据
   let productionData: any = data.data.pageList;
-  console.log(productionData);
   productionData = productionData.map((item: any) => {
     item.planned_quantity = oldData.value;
+    item.material_name = operatingTicketDetail.value.planned_quantity;
+    if (
+      item.reported_quantity >= operatingTicketDetail.value.planned_quantity
+    ) {
+      item.reported_quantity = operatingTicketDetail.value.planned_quantity;
+    }
     return item;
   });
-
+  console.log(productionData);
   //调用排产数据修改的接口进行修改
   await useHttp(
     "/ProductionRecode/M23UpdateProductionRecode",
@@ -1060,7 +1065,7 @@ async function splitTicket() {
     actual_delivery_date: operatingTicketDetail.value.actual_delivery_date,
     status: operatingTicketDetail.value.status,
     mcode: operatingTicketDetail.value.mcode,
-    mdescription: operatingTicketDetail.value.mdescription + "-委外",
+    mdescription: operatingTicketDetail.value.mdescription + "(批次工单)",
     project_code: operatingTicketDetail.value.project_code,
   };
   await useHttp("/MesWorkOrderDetail/M06AddWorkOrderDetails", "post", [

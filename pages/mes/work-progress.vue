@@ -18,14 +18,8 @@ definePageMeta({
   keepalive: true,
 });
 //工单类型
-let workTypeList = ref<any[]>([
-  "机加",
-  "钣金",
-  "电器装配",
-  "单机装配",
-  "模块装配",
-  "其他",
-]);
+let workTypeList = ref<any[]>([]);
+let workTypeInFo = ref<string>("机加,钣金,电器装配,模组装配,总装,其他");
 let tab1 = ref<any>(null);
 let tab2 = ref<any>(null);
 onMounted(() => {
@@ -60,16 +54,32 @@ async function getWorkDetail() {
       projectCode: workProject.value,
     }
   );
-  workDetailList.value = data.data;
+  workDetailList.value = data.data.map((item: any) => {
+    item.mes_workorderdetaildata.estimated_delivery_date =
+      item.mes_workorderdetaildata.estimated_delivery_date.substring(0, 10);
+    return item;
+  });
+  console.log(workDetailList.value);
 }
 //点击项目号获取当前项目进度
 //暂存项目号
 let workProject = ref<any>(null);
 //暂存工单类型
 let workType = ref<any>(null);
-function showProgress(item: any) {
+//获取当前项目号下的工单类型和明细
+async function showProgress(item: any) {
+  const data: any = await useHttp(
+    "/MesWorkOrderDetail/M77GetWorkOrderType",
+    "get",
+    undefined,
+    {
+      typeList: workTypeInFo.value,
+      projectCode: item,
+    }
+  );
+  workTypeList.value = data.data;
   workProject.value = item;
-  workType.value = workTypeList.value[0];
+  workType.value = workTypeList.value[0].typename;
   tab2.value = 0;
   getWorkDetail();
 }
@@ -79,7 +89,7 @@ let workDetailList = ref<any[]>([]);
 
 //获取工单明细数据
 async function showWorkDetail(item: any, _item: any) {
-  (workProject.value = item), (workType.value = _item);
+  (workProject.value = item), (workType.value = _item.typename);
   getWorkDetail();
 }
 let productList = ref<any[]>([]);
@@ -97,8 +107,13 @@ async function getProductList(item: any) {
       SortType: 0,
     }
   );
-  productList.value = data.data.pageList;
-  console.log(productList.value);
+  productList.value = data.data.pageList.map((item: any) => {
+    item.planned_completion_time = item.planned_completion_time.substring(
+      0,
+      10
+    );
+    return item;
+  });
 }
 </script>
 
@@ -155,7 +170,7 @@ async function getProductList(item: any) {
                   :key="index"
                   :value="index"
                   @click="showWorkDetail(item, _item)"
-                  >{{ _item }}</v-tab
+                  >{{ _item.typename }}({{ _item.totalcount }})</v-tab
                 >
               </v-tabs>
               <div>
@@ -190,6 +205,14 @@ async function getProductList(item: any) {
                             计划数量：
                             {{
                               element.mes_workorderdetaildata.planned_quantity
+                            }}
+                          </div>
+                          <!-- 计划交付日期 -->
+                          <div style="flex-basis: 20%">
+                            计划日期：
+                            {{
+                              element.mes_workorderdetaildata
+                                .estimated_delivery_date
                             }}
                           </div>
                           <!-- 进度 -->
@@ -259,16 +282,21 @@ async function getProductList(item: any) {
                                   工序顺序：{{ item_.procedure_order_id }}
                                 </div>
                                 <div style="flex-basis: 20%">
-                                  工序描述：{{ item_.procedure_description }}
+                                  计划日期：{{ item_.planned_completion_time }}
                                 </div>
                                 <div style="flex-basis: 20%">
-                                  是否委外：{{ item_.defaul_outsource }}
+                                  工序：[{{ item_.procedure_description }}]
+                                </div>
+                                <div style="flex-basis: 20%">
+                                  是否委外：{{
+                                    item_.defaul_outsource === "N" ? "否" : "是"
+                                  }}
                                 </div>
                                 <div
                                   style="flex-basis: 13%"
                                   v-if="item_.work_center_name"
                                 >
-                                  工作中心：{{ item_.work_center_name }}
+                                  @{{ item_.work_center_name }}
                                 </div>
                                 <div style="flex-basis: 13%" v-else>
                                   工作中心：未分配工作中心
