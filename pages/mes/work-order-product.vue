@@ -1860,51 +1860,7 @@ const dateRule = ref<any>([
                       </div>
                     </template>
                   </v-list-item>
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="d-flex">
-                        <div class="text-body-2" style="flex-basis: 30%">
-                          工序：
-                          <span>
-                            <v-btn
-                              @click="showProcessDialog(item)"
-                              :color="item.procedure ? 'green' : 'grey'"
-                              >{{ item.procedure ? "可维护" : "未维护" }}
-                              <v-tooltip activator="parent" location="top">{{
-                                item.procedure
-                              }}</v-tooltip>
-                            </v-btn>
-                          </span>
-                        </div>
-                        <div class="text-body-2" style="flex-basis: 35%">
-                          BOM清单：
-                          <span>
-                            <v-btn
-                              @click="handleBomClick(item)"
-                              :color="item.bomdata ? 'green' : 'grey'"
-                              >{{ item.bomdata ? "可维护" : "未维护" }}
-                              <v-tooltip activator="parent" location="top">{{
-                                item.bomdata
-                              }}</v-tooltip>
-                            </v-btn></span
-                          >
-                        </div>
-                        <div class="text-body-2" style="flex-basis: 35%">
-                          图纸号：
-                          <span>
-                            <v-btn
-                              @click="handleBlueprintClick(item)"
-                              :color="item.blueprint_id ? 'green' : 'grey'"
-                              >{{ item.blueprint_id ? "可维护" : "未维护" }}
-                              <v-tooltip activator="parent" location="top">{{
-                                item.blueprint_id
-                              }}</v-tooltip>
-                            </v-btn>
-                          </span>
-                        </div>
-                      </div>
-                    </template>
-                  </v-list-item>
+
                   <v-list-item>
                     <template v-slot:default>
                       <div class="d-flex">
@@ -1984,6 +1940,54 @@ const dateRule = ref<any>([
                             style="text-decoration: underline"
                           >
                             {{ item.actual_time }}
+                          </span>
+                        </div>
+                      </div>
+                    </template>
+                  </v-list-item>
+                  <v-list-item>
+                    <template v-slot:default>
+                      <div class="d-flex">
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          工序：
+                          <span>
+                            <v-btn
+                              size="small"
+                              @click="showProcessDialog(item)"
+                              :color="item.procedure ? 'green' : 'grey'"
+                              >{{ item.procedure ? "可维护" : "未维护" }}
+                              <v-tooltip activator="parent" location="top">{{
+                                item.procedure
+                              }}</v-tooltip>
+                            </v-btn>
+                          </span>
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          BOM清单：
+                          <span>
+                            <v-btn
+                              size="small"
+                              @click="handleBomClick(item)"
+                              :color="item.bomdata ? 'green' : 'grey'"
+                              >{{ item.bomdata ? "可维护" : "未维护" }}
+                              <v-tooltip activator="parent" location="top">{{
+                                item.bomdata
+                              }}</v-tooltip>
+                            </v-btn></span
+                          >
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 35%">
+                          图纸号：
+                          <span>
+                            <v-btn
+                              size="small"
+                              @click="handleBlueprintClick(item)"
+                              :color="item.blueprint_id ? 'green' : 'grey'"
+                              >{{ item.blueprint_id ? "可维护" : "未维护" }}
+                              <v-tooltip activator="parent" location="top">{{
+                                item.blueprint_id
+                              }}</v-tooltip>
+                            </v-btn>
                           </span>
                         </div>
                       </div>
