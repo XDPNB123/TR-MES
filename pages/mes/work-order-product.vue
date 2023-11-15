@@ -1671,7 +1671,6 @@ const dateRule = ref<any>([
                     </div>
                   </template>
                 </v-list-item>
-                <v-divider :thickness="3"></v-divider>
               </v-list>
             </v-card>
             <div class="text-center pt-2">
@@ -1826,7 +1825,7 @@ const dateRule = ref<any>([
                               color="blue"
                               size="small"
                               class="mr-4"
-                              v-show="item.mdescription"
+                              v-show="!item.mdescription.includes('已拆批')"
                               @click="
                                 operatingTicketDetail = { ...item };
                                 splitDetailDialog = true;
@@ -1877,7 +1876,7 @@ const dateRule = ref<any>([
                             </v-btn>
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 30%">
+                        <div class="text-body-2" style="flex-basis: 35%">
                           BOM清单：
                           <span>
                             <v-btn
@@ -1890,7 +1889,7 @@ const dateRule = ref<any>([
                             </v-btn></span
                           >
                         </div>
-                        <div class="text-body-2" style="flex-basis: 30%">
+                        <div class="text-body-2" style="flex-basis: 35%">
                           图纸号：
                           <span>
                             <v-btn
@@ -1918,7 +1917,7 @@ const dateRule = ref<any>([
                             {{ item.status }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 30%">
+                        <div class="text-body-2" style="flex-basis: 35%">
                           预计交付日期：
                           <span
                             class="text-teal-darken-1 font-weight-bold"
