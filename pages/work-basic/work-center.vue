@@ -465,11 +465,7 @@ function cancelDialog() {
       class="mt-4"
     >
       <v-card rounded="lg" @click="showWorkCenter(item)">
-        <div
-          cover
-          class="align-end"
-          style="background: rgb(42, 146, 92); height: 80px"
-        >
+        <div cover class="align-end" style="background: #90caf9; height: 80px">
           <div class="d-flex justify-space-between">
             <v-card-title class="text-white text-h5">{{
               item.work_center_name
