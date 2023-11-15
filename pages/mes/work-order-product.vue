@@ -93,6 +93,7 @@ let details = ref<any>({});
 // 路由
 const router = useRouter();
 let selected = ref<any[]>([]);
+
 // 工单新增、修改、删除对话框
 let addDialog = ref(false);
 let editDialog = ref(false);
@@ -441,9 +442,8 @@ async function batchWork() {
     }
 
     //获取到当前选择的数据
-    innerTableSelectData.value = tableDataDetail.value.filter((item: any) =>
-      selected.value.includes(item.id)
-    );
+    innerTableSelectData.value = [...selected.value];
+
     mcodeName.value = innerTableSelectData.value
       .map((item: any) => item.mdescription)
       .join(",");
@@ -858,8 +858,8 @@ function formatDateDetail(data: any) {
   }
 }
 //点击表单显示表单明细
-async function showTicketDetail(item: any, obj: any) {
-  detailName.value = obj.item.raw.workorder_hid;
+async function showTicketDetail(item: any) {
+  detailName.value = item.workorder_hid;
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
@@ -1503,74 +1503,183 @@ const dateRule = ref<any>([
           </v-col>
 
           <v-col cols="12">
-            <v-divider></v-divider>
+            <v-divider :thickness="3"></v-divider>
+
             <!-- 工单表头表格 -->
-            <v-data-table
-              :headers="tableHeaders"
-              :items="tableData"
-              :items-per-page="tablePerPage"
-              hover
-              style="overflow-x: auto; white-space: nowrap"
-              fixed-footer
-              fixed-header
-              height="610"
-              no-data-text="没有找到符合的数据"
-              @click:row="showTicketDetail"
-            >
-              <template v-slot:item.id="{ index }">
-                {{ index + 1 }}
-              </template>
-              <template v-slot:item.actions="{ item }">
-                <!-- 未审核 -->
-                <v-icon
-                  color="green"
-                  size="small"
-                  class="mr-3"
-                  v-if="item.raw.status === '新建未审核'"
-                  @click.stop="
-                    operatingTicket = { ...item.raw };
-                    auditDialog = true;
-                  "
-                >
-                  fa-solid fa-eye
-                </v-icon>
-                <!-- 已审核 -->
-                <v-icon color="black" size="small" class="mr-3" v-else>
-                  fa-solid fa-eye-slash
-                </v-icon>
-                <v-icon
-                  color="blue"
-                  size="small"
-                  class="mr-3"
-                  @click.stop="
-                    operatingTicket = { ...item.raw };
-                    editDialog = true;
-                  "
-                >
-                  fa-solid fa-pen
-                </v-icon>
+            <v-card style="overflow: auto; white-space: nowrap" height="610px">
+              <v-list
+                density="compact"
+                v-for="(item, index) in tableData"
+                :key="index"
+                @click="showTicketDetail(item)"
+                class="ma-2 elevation-2 rounded-lg"
+              >
+                <v-list-item>
+                  <template v-slot:default>
+                    <div class="d-flex">
+                      <div class="text-body-2" style="flex-basis: 70%">
+                        产品描述：
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.product_description }}
+                        </span>
+                      </div>
 
-                <v-icon
-                  color="red"
-                  size="small"
-                  @click.stop="
-                    operatingTicket = { ...item.raw };
-                    deleteDialog = true;
-                  "
-                >
-                  fa-solid fa-trash
-                </v-icon>
-              </template>
+                      <div class="text-body-2" style="flex-basis: 30%">
+                        <div class="d-flex justify-end">
+                          <v-icon
+                            color="green"
+                            size="small"
+                            class="mr-3"
+                            v-if="item.status === '新建未审核'"
+                            @click.stop="
+                              operatingTicket = { ...item };
+                              auditDialog = true;
+                            "
+                          >
+                            fa-solid fa-eye
+                          </v-icon>
+                          <!-- 已审核 -->
+                          <v-icon
+                            color="black"
+                            size="small"
+                            class="mr-3"
+                            v-else
+                          >
+                            fa-solid fa-eye-slash
+                          </v-icon>
+                          <v-icon
+                            color="blue"
+                            size="small"
+                            class="mr-3"
+                            @click.stop="
+                              operatingTicket = { ...item };
+                              editDialog = true;
+                            "
+                          >
+                            fa-solid fa-pen
+                          </v-icon>
 
-              <template v-slot:bottom>
-                <div class="text-center pt-2">
-                  <v-pagination
-                    v-model="tablePage"
-                    :length="tablePageCount"
-                  ></v-pagination>
-                </div>
-              </template>
-            </v-data-table>
+                          <v-icon
+                            color="red"
+                            size="small"
+                            @click.stop="
+                              operatingTicket = { ...item };
+                              deleteDialog = true;
+                            "
+                          >
+                            fa-solid fa-trash
+                          </v-icon>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </v-list-item>
+                <v-list-item>
+                  <template v-slot:default>
+                    <div class="d-flex">
+                      <div class="text-body-2" style="flex-basis: 25%">
+                        计划开始日期:
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.scheduled_start_date }}
+                        </span>
+                      </div>
+                      <div class="text-body-2" style="flex-basis: 25%">
+                        计划完成日期:
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.planned_completion_time }}
+                        </span>
+                      </div>
+                      <div class="text-body-2" style="flex-basis: 25%">
+                        开始日期：
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.start_date }}
+                        </span>
+                      </div>
+                      <div class="text-body-2" style="flex-basis: 25%">
+                        完成日期:
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.finish_date }}
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </v-list-item>
+                <v-list-item>
+                  <template v-slot:default>
+                    <div class="d-flex">
+                      <div class="text-body-2" style="flex-basis: 23%">
+                        工单编号：
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.workorder_hid }}
+                        </span>
+                      </div>
+                      <div class="text-body-2" style="flex-basis: 15%">
+                        类型：
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.workorder_type }}
+                        </span>
+                      </div>
+                      <div class="text-body-2" style="flex-basis: 20%">
+                        计划数量：
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.planned_quantity }} {{ item.unit }}
+                        </span>
+                      </div>
+
+                      <div class="text-body-2" style="flex-basis: 25%">
+                        审核日期:
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.approve_date }}
+                        </span>
+                      </div>
+                      <div class="text-body-2" style="flex-basis: 20%">
+                        状态：
+                        <span
+                          class="text-teal-darken-1 font-weight-bold"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.status }}
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </v-list-item>
+                <v-divider :thickness="3"></v-divider>
+              </v-list>
+            </v-card>
+            <div class="text-center pt-2">
+              <v-pagination
+                v-model="tablePage"
+                :length="tablePageCount"
+              ></v-pagination>
+            </div>
           </v-col>
         </v-row>
       </v-card>
@@ -1670,97 +1779,211 @@ const dateRule = ref<any>([
           </v-col>
 
           <v-col cols="12">
-            <v-divider></v-divider>
-            <v-data-table
-              hover
-              :items-per-page="tableDetailPerPage"
-              v-model="selected"
-              show-select
-              :key="key"
-              :headers="headers"
-              :items="tableDataDetail"
-              style="overflow-x: auto; white-space: nowrap"
-              fixed-footer
-              fixed-header
-              no-data-text="没有找到符合的数据"
-              height="610"
-            >
-              <template v-slot:item.id="{ index }">
-                {{ index + 1 }}
-              </template>
-              <template v-slot:item.actions="{ item }">
-                <v-icon
+            <v-divider :thickness="3"></v-divider>
+            <v-card style="overflow: auto; white-space: nowrap" height="610px">
+              <v-list
+                density="compact"
+                v-for="(item, index) in tableDataDetail"
+                class="ma-2 elevation-2 rounded-lg d-flex align-center"
+              >
+                <v-checkbox
+                  style="max-width: 30px"
+                  density="compact"
+                  hide-details
                   color="blue"
-                  size="small"
-                  class="mr-2"
-                  @click="
-                    operatingTicketDetail = { ...item.raw };
-                    splitDetailDialog = true;
-                  "
+                  class="ml-3"
+                  v-model="selected"
+                  :value="item"
                 >
-                  fa-solid fa-network-wired
-                </v-icon>
-                <v-icon
-                  color="blue"
-                  size="small"
-                  class="mr-2"
-                  @click="
-                    operatingTicketDetail = { ...item.raw };
-                    editDetailDialog = true;
-                  "
-                >
-                  fa-solid fa-pen
-                </v-icon>
+                </v-checkbox>
+                <div class="w-100">
+                  <v-list-item>
+                    <template v-slot:default>
+                      <div class="d-flex">
+                        <div class="text-body-2" style="flex-basis: 50%">
+                          产出料：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.mdescription }}
+                          </span>
+                        </div>
 
-                <v-icon
-                  color="red"
-                  size="small"
-                  @click="
-                    operatingTicketDetail = { ...item.raw };
-                    deleteDetailDialog = true;
-                  "
-                >
-                  fa-solid fa-trash
-                </v-icon>
-              </template>
-              <template v-slot:item.procedure="{ item }">
-                <span>
-                  <v-btn
-                    @click="showProcessDialog(item.raw)"
-                    :color="item.raw.procedure ? 'green' : 'grey'"
-                    >{{ item.raw.procedure ? "可维护" : "未维护" }}
-                    <v-tooltip activator="parent" location="top">{{
-                      item.raw.procedure
-                    }}</v-tooltip>
-                  </v-btn>
-                </span>
-              </template>
-              <template v-slot:item.bomdata="{ item }">
-                <span>
-                  <v-btn
-                    @click="handleBomClick(item.raw)"
-                    :color="item.raw.bomdata ? 'green' : 'grey'"
-                    >{{ item.raw.bomdata ? "可维护" : "未维护" }}
-                    <v-tooltip activator="parent" location="top">{{
-                      item.raw.bomdata
-                    }}</v-tooltip>
-                  </v-btn></span
-                >
-              </template>
-              <template v-slot:item.blueprint_id="{ item }">
-                <span>
-                  <v-btn
-                    @click="handleBlueprintClick(item.raw)"
-                    :color="item.raw.blueprint_id ? 'green' : 'grey'"
-                    >{{ item.raw.blueprint_id ? "可维护" : "未维护" }}
-                    <v-tooltip activator="parent" location="top">{{
-                      item.raw.blueprint_id
-                    }}</v-tooltip>
-                  </v-btn>
-                </span>
-              </template>
-              <template v-slot:bottom> </template>
-            </v-data-table>
+                        <div class="text-body-2" style="flex-basis: 20%">
+                          工单明细编号：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.workorder_did }}
+                          </span>
+                        </div>
+
+                        <div class="text-body-2" style="flex-basis: 30%">
+                          <div class="d-flex justify-end">
+                            <v-icon
+                              color="blue"
+                              size="small"
+                              class="mr-4"
+                              v-show="item.mdescription"
+                              @click="
+                                operatingTicketDetail = { ...item };
+                                splitDetailDialog = true;
+                              "
+                            >
+                              fa-solid fa-network-wired
+                            </v-icon>
+                            <v-icon
+                              color="blue"
+                              size="small"
+                              class="mr-4"
+                              @click="
+                                operatingTicketDetail = { ...item };
+                                editDetailDialog = true;
+                              "
+                            >
+                              fa-solid fa-pen
+                            </v-icon>
+
+                            <v-icon
+                              color="red"
+                              size="small"
+                              @click="
+                                operatingTicketDetail = { ...item };
+                                deleteDetailDialog = true;
+                              "
+                            >
+                              fa-solid fa-trash
+                            </v-icon>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </v-list-item>
+                  <v-list-item>
+                    <template v-slot:default>
+                      <div class="d-flex">
+                        <div class="text-body-2" style="flex-basis: 30%">
+                          工序：
+                          <span>
+                            <v-btn
+                              @click="showProcessDialog(item)"
+                              :color="item.procedure ? 'green' : 'grey'"
+                              >{{ item.procedure ? "可维护" : "未维护" }}
+                              <v-tooltip activator="parent" location="top">{{
+                                item.procedure
+                              }}</v-tooltip>
+                            </v-btn>
+                          </span>
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 30%">
+                          BOM清单：
+                          <span>
+                            <v-btn
+                              @click="handleBomClick(item)"
+                              :color="item.bomdata ? 'green' : 'grey'"
+                              >{{ item.bomdata ? "可维护" : "未维护" }}
+                              <v-tooltip activator="parent" location="top">{{
+                                item.bomdata
+                              }}</v-tooltip>
+                            </v-btn></span
+                          >
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 30%">
+                          图纸号：
+                          <span>
+                            <v-btn
+                              @click="handleBlueprintClick(item)"
+                              :color="item.blueprint_id ? 'green' : 'grey'"
+                              >{{ item.blueprint_id ? "可维护" : "未维护" }}
+                              <v-tooltip activator="parent" location="top">{{
+                                item.blueprint_id
+                              }}</v-tooltip>
+                            </v-btn>
+                          </span>
+                        </div>
+                      </div>
+                    </template>
+                  </v-list-item>
+                  <v-list-item>
+                    <template v-slot:default>
+                      <div class="d-flex">
+                        <div class="text-body-2" style="flex-basis: 30%">
+                          状态：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.status }}
+                          </span>
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 30%">
+                          预计交付日期：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.estimated_delivery_date }}
+                          </span>
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 30%">
+                          实际交付日期：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.actual_delivery_date }}
+                          </span>
+                        </div>
+                      </div>
+                    </template>
+                  </v-list-item>
+                  <v-list-item>
+                    <template v-slot:default>
+                      <div class="d-flex">
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          计划数量：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.planned_quantity }}{{ item.unit }}
+                          </span>
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          实际报工数量：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.reported_quantity }}{{ item.unit }}
+                          </span>
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          标准工时：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.standard_time }}
+                          </span>
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          实际工时：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.actual_time }}
+                          </span>
+                        </div>
+                      </div>
+                    </template>
+                  </v-list-item>
+                </div>
+              </v-list>
+            </v-card>
             <div class="text-center pt-2">
               <v-pagination
                 v-model="tableDetailPage"

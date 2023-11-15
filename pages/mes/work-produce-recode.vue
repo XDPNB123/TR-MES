@@ -624,7 +624,7 @@ function dyDispatchOrder() {
         </v-toolbar>
         <v-tabs color="blue" direction="vertical" v-model="showingTab">
           <v-tab value="未派工单"> 未派工单 </v-tab>
-          <v-tab value="产能视图" @click="getDeliverList"> 产能视图 </v-tab>
+          <v-tab value="补打工单" @click="getDeliverList"> 补打工单 </v-tab>
         </v-tabs>
       </v-card>
     </v-col>
@@ -1107,12 +1107,12 @@ function dyDispatchOrder() {
           </v-row>
         </v-window-item>
 
-        <v-window-item value="产能视图">
+        <v-window-item value="补打工单">
           <v-card class="rounded-lg elevation-2 ml-1">
             <v-toolbar density="compact">
               <v-toolbar-title
                 class="text-center ml-0 text-blue font-weight-bold"
-                >产能视图</v-toolbar-title
+                >补打工单</v-toolbar-title
               >
             </v-toolbar>
             <v-row class="ma-2">
