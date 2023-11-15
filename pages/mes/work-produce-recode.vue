@@ -999,12 +999,12 @@ function dyDispatchOrder() {
                       'bg-light-blue-lighten-5':
                         element.status === '已审核待排产',
                       '': element.status === '已排产待执行',
-                      'bg-red-lighten-4': element.status === '已扫描在执行',
+                      'bg-red-lighten-4': element.status === '已执行在生产',
                     }"
                   >
                     <div style="position: relative">
                       <v-btn
-                        v-show="element.status !== '已扫描在执行'"
+                        v-show="element.status !== '已执行在生产'"
                         icon="fa-solid fa-x"
                         variant="plain"
                         size="x-small"

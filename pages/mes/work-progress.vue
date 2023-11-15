@@ -126,7 +126,7 @@ async function getProductList(item: any) {
           <v-toolbar-title class="ml-2">项目号</v-toolbar-title>
         </v-toolbar>
         <v-text-field
-          label="项目号"
+          label="项目号搜索"
           variant="outlined"
           density="compact"
           hide-details
@@ -209,7 +209,7 @@ async function getProductList(item: any) {
                           </div>
                           <!-- 计划交付日期 -->
                           <div style="flex-basis: 20%">
-                            计划日期：
+                            计划交付：
                             {{
                               element.mes_workorderdetaildata
                                 .estimated_delivery_date
@@ -281,19 +281,25 @@ async function getProductList(item: any) {
                                 <div style="flex-basis: 10%">
                                   工序顺序：{{ item_.procedure_order_id }}
                                 </div>
-                                <div style="flex-basis: 20%">
+                                <div style="flex-basis: 15%">
                                   计划日期：{{ item_.planned_completion_time }}
                                 </div>
                                 <div style="flex-basis: 20%">
                                   工序：[{{ item_.procedure_description }}]
                                 </div>
-                                <div style="flex-basis: 20%">
+                                <div style="flex-basis: 10%">
                                   是否委外：{{
                                     item_.defaul_outsource === "N" ? "否" : "是"
                                   }}
                                 </div>
+                                <div style="flex-basis: 10%">
+                                  计划数量：{{ item_.planned_quantity }}
+                                </div>
+                                <div style="flex-basis: 10%">
+                                  报工数量：{{ item_.reported_quantity }}
+                                </div>
                                 <div
-                                  style="flex-basis: 13%"
+                                  style="flex-basis: 10%"
                                   v-if="item_.work_center_name"
                                 >
                                   @{{ item_.work_center_name }}

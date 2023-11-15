@@ -1035,7 +1035,7 @@ async function splitTicket() {
   let productionData: any = data.data.pageList;
   productionData = productionData.map((item: any) => {
     item.planned_quantity = oldData.value;
-    item.material_name = operatingTicketDetail.value.planned_quantity;
+    item.material_name = operatingTicketDetail.value.mdescription;
     if (
       item.reported_quantity >= operatingTicketDetail.value.planned_quantity
     ) {
@@ -1065,7 +1065,8 @@ async function splitTicket() {
     actual_delivery_date: operatingTicketDetail.value.actual_delivery_date,
     status: operatingTicketDetail.value.status,
     mcode: operatingTicketDetail.value.mcode,
-    mdescription: operatingTicketDetail.value.mdescription + "(批次工单)",
+    mdescription:
+      operatingTicketDetail.value.mdescription.slice(0, -5) + "(批次工单)",
     project_code: operatingTicketDetail.value.project_code,
   };
   await useHttp("/MesWorkOrderDetail/M06AddWorkOrderDetails", "post", [
@@ -1253,8 +1254,14 @@ function saveProduct() {
       let productString = "";
       //当选择的是自制件的类型
       if (productTypeName.value === "自制件") {
-        //将选择的自制件数据的总装物件名拼接成字符串
-        productString = selectedData.totalName + "," + selectedData.partName;
+        //判断总转名和零部件名称是否一致
+        if (selectedData.totalName === selectedData.partName) {
+          productString = selectedData.totalName;
+        } else {
+          //总转和零部件名称不一致
+          //将选择的自制件数据的总装物件名拼接成字符串
+          productString = selectedData.totalName + "," + selectedData.partName;
+        }
       }
       if (productTypeName.value === "标准外购件") {
         //将选择的标准外购件数据的零件名拼接成字符串
@@ -1517,17 +1524,23 @@ const dateRule = ref<any>([
                 <v-list-item>
                   <template v-slot:default>
                     <div class="d-flex">
-                      <div class="text-body-2" style="flex-basis: 70%">
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 70%"
+                      >
                         产品描述：
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.product_description }}
                         </span>
                       </div>
 
-                      <div class="text-body-2" style="flex-basis: 30%">
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 30%"
+                      >
                         <div class="d-flex justify-end">
                           <v-icon
                             color="green"
@@ -1580,37 +1593,49 @@ const dateRule = ref<any>([
                 <v-list-item>
                   <template v-slot:default>
                     <div class="d-flex">
-                      <div class="text-body-2" style="flex-basis: 25%">
-                        计划开始日期:
+                      <div
+                        class="text-body-3 text-blue-darken-1"
+                        style="flex-basis: 25%"
+                      >
+                        计划开始:
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.scheduled_start_date }}
                         </span>
                       </div>
-                      <div class="text-body-2" style="flex-basis: 25%">
-                        计划完成日期:
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 25%"
+                      >
+                        计划完成:
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.planned_completion_time }}
                         </span>
                       </div>
-                      <div class="text-body-2" style="flex-basis: 25%">
-                        开始日期：
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 25%"
+                      >
+                        实际开始：
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.start_date }}
                         </span>
                       </div>
-                      <div class="text-body-2" style="flex-basis: 25%">
-                        完成日期:
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 25%"
+                      >
+                        实际完成:
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.finish_date }}
@@ -1622,47 +1647,62 @@ const dateRule = ref<any>([
                 <v-list-item>
                   <template v-slot:default>
                     <div class="d-flex">
-                      <div class="text-body-2" style="flex-basis: 23%">
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 23%"
+                      >
                         工单编号：
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.workorder_hid }}
                         </span>
                       </div>
-                      <div class="text-body-2" style="flex-basis: 15%">
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 15%"
+                      >
                         类型：
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.workorder_type }}
                         </span>
                       </div>
-                      <div class="text-body-2" style="flex-basis: 20%">
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 20%"
+                      >
                         计划数量：
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.planned_quantity }} {{ item.unit }}
                         </span>
                       </div>
 
-                      <div class="text-body-2" style="flex-basis: 25%">
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 25%"
+                      >
                         审核日期:
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.approve_date }}
                         </span>
                       </div>
-                      <div class="text-body-2" style="flex-basis: 20%">
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 20%"
+                      >
                         状态：
                         <span
-                          class="text-teal-darken-1 font-weight-bold"
+                          class="text-blue-grey-lighten-2 font-weight-bold"
                           style="text-decoration: underline"
                         >
                           {{ item.status }}
@@ -1783,7 +1823,7 @@ const dateRule = ref<any>([
               <v-list
                 density="compact"
                 v-for="(item, index) in tableDataDetail"
-                class="ma-2 elevation-2 rounded-lg d-flex align-center"
+                class="ma-2 elevation-3 rounded-lg d-flex align-center"
               >
                 <v-checkbox
                   style="max-width: 30px"
@@ -1799,27 +1839,36 @@ const dateRule = ref<any>([
                   <v-list-item>
                     <template v-slot:default>
                       <div class="d-flex">
-                        <div class="text-body-2" style="flex-basis: 50%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 50%"
+                        >
                           产出料：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.mdescription }}
                           </span>
                         </div>
 
-                        <div class="text-body-2" style="flex-basis: 20%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 20%"
+                        >
                           工单明细编号：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.workorder_did }}
                           </span>
                         </div>
 
-                        <div class="text-body-2" style="flex-basis: 30%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 30%"
+                        >
                           <div class="d-flex justify-end">
                             <v-icon
                               color="blue"
@@ -1864,37 +1913,49 @@ const dateRule = ref<any>([
                   <v-list-item>
                     <template v-slot:default>
                       <div class="d-flex">
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           项目号：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.project_code }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           状态：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.status }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           预计日期：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.estimated_delivery_date }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           实际日期：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.actual_delivery_date }}
@@ -1906,37 +1967,49 @@ const dateRule = ref<any>([
                   <v-list-item>
                     <template v-slot:default>
                       <div class="d-flex">
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           计划数量：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.planned_quantity }}{{ item.unit }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           报工数量：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.reported_quantity }}{{ item.unit }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           标准工时：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.standard_time }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           实际工时：
                           <span
-                            class="text-teal-darken-1 font-weight-bold"
+                            class="text-blue-grey-lighten-2 font-weight-bold"
                             style="text-decoration: underline"
                           >
                             {{ item.actual_time }}
@@ -1948,7 +2021,10 @@ const dateRule = ref<any>([
                   <v-list-item>
                     <template v-slot:default>
                       <div class="d-flex">
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           工序：
                           <span>
                             <v-btn
@@ -1962,7 +2038,10 @@ const dateRule = ref<any>([
                             </v-btn>
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 25%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 25%"
+                        >
                           BOM清单：
                           <span>
                             <v-btn
@@ -1976,7 +2055,10 @@ const dateRule = ref<any>([
                             </v-btn></span
                           >
                         </div>
-                        <div class="text-body-2" style="flex-basis: 35%">
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 35%"
+                        >
                           图纸号：
                           <span>
                             <v-btn
