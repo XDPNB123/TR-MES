@@ -1908,7 +1908,16 @@ const dateRule = ref<any>([
                   <v-list-item>
                     <template v-slot:default>
                       <div class="d-flex">
-                        <div class="text-body-2" style="flex-basis: 30%">
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          项目号：
+                          <span
+                            class="text-teal-darken-1 font-weight-bold"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.project_code }}
+                          </span>
+                        </div>
+                        <div class="text-body-2" style="flex-basis: 25%">
                           状态：
                           <span
                             class="text-teal-darken-1 font-weight-bold"
@@ -1917,8 +1926,8 @@ const dateRule = ref<any>([
                             {{ item.status }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 35%">
-                          预计交付日期：
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          预计日期：
                           <span
                             class="text-teal-darken-1 font-weight-bold"
                             style="text-decoration: underline"
@@ -1926,8 +1935,8 @@ const dateRule = ref<any>([
                             {{ item.estimated_delivery_date }}
                           </span>
                         </div>
-                        <div class="text-body-2" style="flex-basis: 30%">
-                          实际交付日期：
+                        <div class="text-body-2" style="flex-basis: 25%">
+                          实际日期：
                           <span
                             class="text-teal-darken-1 font-weight-bold"
                             style="text-decoration: underline"
@@ -1951,7 +1960,7 @@ const dateRule = ref<any>([
                           </span>
                         </div>
                         <div class="text-body-2" style="flex-basis: 25%">
-                          实际报工数量：
+                          报工数量：
                           <span
                             class="text-teal-darken-1 font-weight-bold"
                             style="text-decoration: underline"
