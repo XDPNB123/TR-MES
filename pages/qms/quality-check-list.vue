@@ -234,7 +234,6 @@ async function saveQaInfo() {
           v-if="qaList.length"
           v-for="(item, index) in qaList"
           :key="index"
-          @click="showQaInfo(item)"
         >
           <v-list-item>
             <template v-slot:default>
@@ -252,7 +251,7 @@ async function saveQaInfo() {
                   </span>
                 </div>
                 <div
-                  style="flex-basis: 12%"
+                  style="flex-basis: 11%"
                   class="text-body-1 text-blue-darken-1"
                 >
                   检验员编号：
@@ -300,7 +299,7 @@ async function saveQaInfo() {
                   </span>
                 </div>
                 <div
-                  style="flex-basis: 20%"
+                  style="flex-basis: 10%"
                   class="text-body-1 text-blue-darken-1"
                 >
                   <span
@@ -309,6 +308,22 @@ async function saveQaInfo() {
                   >
                     @{{ item.work_center_name }}
                   </span>
+                </div>
+                <div style="flex-basis: 10%" class="d-flex justify-end">
+                  <!-- 待质检 -->
+                  <v-icon
+                    color="green"
+                    size="small"
+                    class="mr-3"
+                    v-if="item.inspection_status === '待质检'"
+                    @click="showQaInfo(item)"
+                  >
+                    fa-solid fa-eye
+                  </v-icon>
+                  <!-- 已处理 -->
+                  <v-icon color="black" size="small" class="mr-3" v-else>
+                    fa-solid fa-eye-slash
+                  </v-icon>
                 </div>
               </div>
             </template>
@@ -334,7 +349,7 @@ async function saveQaInfo() {
                   </span>
                 </div>
                 <div
-                  style="flex-basis: 12%"
+                  style="flex-basis: 11%"
                   class="text-body-1 text-blue-darken-1"
                 >
                   质检结果：
@@ -417,7 +432,7 @@ async function saveQaInfo() {
                   </span>
                 </div>
                 <div
-                  style="flex-basis: 12%"
+                  style="flex-basis: 11%"
                   class="text-body-1 text-blue-darken-1"
                 >
                   质检数量：
