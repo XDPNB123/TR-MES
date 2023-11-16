@@ -1497,16 +1497,7 @@ const dateRule = ref<any>([
             >
               新增工单
             </v-btn>
-            <v-btn
-              color="blue-darken-2"
-              class="mr-2"
-              size="large"
-              @click="
-                (dialog = true),
-                  router.push({ path: '/mes/work-order-product/bom-design' })
-              "
-              >导出</v-btn
-            >
+            <v-btn color="blue-darken-2" class="mr-2" size="large">导出</v-btn>
           </v-col>
 
           <v-col cols="12">
@@ -1665,7 +1656,7 @@ const dateRule = ref<any>([
                       >
                         类型：
                         <span
-                          class=" font-weight-bold"
+                          class="font-weight-bold"
                           style="text-decoration: underline"
                           :class="{
                             'text-blue': item.workorder_type === '机加',
@@ -1882,7 +1873,10 @@ const dateRule = ref<any>([
                               color="blue"
                               size="small"
                               class="mr-4"
-                              v-show="!item.mdescription.includes('已拆批')"
+                              v-show="
+                                !item.mdescription.includes('已拆批') &&
+                                !item.mdescription.includes('批次工单')
+                              "
                               @click="
                                 operatingTicketDetail = { ...item };
                                 splitDetailDialog = true;
@@ -2857,13 +2851,13 @@ const dateRule = ref<any>([
             <v-col cols="6">
               <v-text-field
                 v-model="oldData"
-                label="拆分后剩余数量"
+                label="拆分后明细行剩余数量"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-text-field
                 v-model="nowData"
-                label="委外明细行数量"
+                label="批次工单明细行数量"
               ></v-text-field>
             </v-col>
           </v-row>
