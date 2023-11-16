@@ -68,8 +68,7 @@ async function getQaData() {
   tableDataLength.value = data.data.totalCount;
   qaList.value = data.data.pageList
     .map((item: any) => {
-      if( item.scan_time)
-      item.scan_time = item.scan_time.substring(0, 10);
+      if (item.scan_time) item.scan_time = item.scan_time.substring(0, 10);
       return item;
     })
     .sort((a: any, b: any) => {
@@ -233,254 +232,260 @@ async function saveQaInfo() {
           v-if="qaList.length"
           v-for="(item, index) in qaList"
           :key="index"
+          @click="showQaInfo(item)"
         >
-          <v-list-item>
-            <template v-slot:default>
-              <div class="d-flex">
-                <div
-                  class="text-body-1 text-blue-darken-1"
-                  style="flex-basis: 12%"
+          <div class="d-flex ma-2">
+            <!-- 1 -->
+            <div class="flex-grow-0">
+              <div
+                class="text-body-1 text-blue-darken-1"
+                style="flex-basis: 12%"
+              >
+                派工单号：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
                 >
-                  派工单号：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.dispatch_order }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 11%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  检验员编号：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.inspector_id }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 15%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  工序：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.procedure_description }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 22%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  物料编号：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.material_id }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 20%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  物料名称：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.material_name }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 10%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    @{{ item.work_center_name }}
-                  </span>
-                </div>
-                <div style="flex-basis: 10%" class="d-flex justify-end">
-                  <!-- 待质检 -->
-                  <v-icon
-                    color="green"
-                    size="small"
-                    class="mr-3"
-                    v-if="item.inspection_status === '待质检'"
-                    @click="showQaInfo(item)"
-                  >
-                    fa-solid fa-eye
-                  </v-icon>
-                  <!-- 已处理 -->
-                  <v-icon color="black" size="small" class="mr-3" v-else>
-                    fa-solid fa-eye-slash
-                  </v-icon>
-                </div>
+                  {{ item.dispatch_order }}
+                </span>
               </div>
-            </template>
-          </v-list-item>
-          <v-list-item>
-            <template v-slot:default>
-              <div class="d-flex">
-                <div
-                  style="flex-basis: 12%"
-                  class="text-body-1 text-blue-darken-1"
+
+              <div
+                style="flex-basis: 12%"
+                class="text-body-1 text-blue-darken-1 py-4"
+              >
+                质检状态：
+                <span
+                  class="font-weight-bold"
+                  style="text-decoration: underline"
+                  :class="{
+                    'text-red': item.inspection_status === '待质检',
+                    'text-green': item.inspection_status === '已处理',
+                    'text-black': item.inspection_status === '已作废',
+                  }"
                 >
-                  质检状态：
-                  <span
-                    class="font-weight-bold"
-                    style="text-decoration: underline"
-                    :class="{
-                      'text-red': item.inspection_status === '待质检',
-                      'text-green': item.inspection_status === '已处理',
-                      'text-black': item.inspection_status === '已作废',
-                    }"
-                  >
-                    {{ item.inspection_status }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 11%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  质检结果：
-                  <span
-                    class="font-weight-bold"
-                    style="text-decoration: underline"
-                    :class="{
-                      'text-red': item.scan_result === '部分合格',
-                      'text-green': item.scan_result === '合格',
-                      'text-black': item.scan_result === '不合格',
-                    }"
-                  >
-                    {{ item.scan_result }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 15%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  质检时间：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.scan_time }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 22%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  托盘号：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.pallet_no }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 20%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  货位号：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.warehouse_location }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 20%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  项目号:
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.project_code }}
-                  </span>
-                </div>
+                  {{ item.inspection_status }}
+                </span>
               </div>
-            </template>
-          </v-list-item>
-          <v-list-item>
-            <template v-slot:default>
-              <div class="d-flex">
-                <div
-                  style="flex-basis: 12%"
-                  class="text-body-1 text-blue-darken-1"
+              <div
+                style="flex-basis: 12%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                报工人：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
                 >
-                  报工人：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.creator }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 11%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  质检数量：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.inspection_quantity }}{{ item.unit }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 15%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  合格数量：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.qualified_quantity }}{{ item.unit }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 22%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  不合格数量：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.non_conforming_quantity }}{{ item.unit }}
-                  </span>
-                </div>
-                <div
-                  style="flex-basis: 40%"
-                  class="text-body-1 text-blue-darken-1"
-                >
-                  不合格原因：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.cause_nonconformity }}
-                  </span>
-                </div>
+                  {{ item.creator }}
+                </span>
               </div>
-            </template>
-          </v-list-item>
+            </div>
+            <!-- 2 -->
+            <div class="flex-grow-0 ml-8 pl-8">
+              <div
+                style="flex-basis: 11%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                检验员编号：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.inspector_id }}
+                </span>
+              </div>
+
+              <div
+                style="flex-basis: 11%"
+                class="text-body-1 text-blue-darken-1 py-4"
+              >
+                质检结果：
+                <span
+                  class="font-weight-bold"
+                  style="text-decoration: underline"
+                  :class="{
+                    'text-red': item.scan_result === '部分合格',
+                    'text-green': item.scan_result === '合格',
+                    'text-black': item.scan_result === '不合格',
+                  }"
+                >
+                  {{ item.scan_result }}
+                </span>
+              </div>
+              <div
+                style="flex-basis: 11%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                质检数量：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.inspection_quantity }}{{ item.unit }}
+                </span>
+              </div>
+            </div>
+            <!-- 3 -->
+            <div class="flex-grow-0 ml-8 pl-8">
+              <div
+                style="flex-basis: 15%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                工序：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.procedure_description }}
+                </span>
+              </div>
+
+              <div
+                style="flex-basis: 15%"
+                class="text-body-1 text-blue-darken-1 py-4"
+              >
+                质检时间：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.scan_time }}
+                </span>
+              </div>
+              <div
+                style="flex-basis: 15%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                合格数量：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.qualified_quantity }}{{ item.unit }}
+                </span>
+              </div>
+            </div>
+            <!-- 4 -->
+            <div class="flex-grow-0 ml-8 pl-8">
+              <div
+                style="flex-basis: 20%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                项目号:
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.project_code }}
+                </span>
+              </div>
+
+              <div
+                style="flex-basis: 22%"
+                class="text-body-1 text-blue-darken-1 py-4"
+              >
+                托盘号：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.pallet_no }}
+                </span>
+              </div>
+              <div
+                style="flex-basis: 22%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                不合格数量：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.non_conforming_quantity }}{{ item.unit }}
+                </span>
+              </div>
+            </div>
+            <!-- 5 -->
+            <div class="flex-grow-0 ml-8 pl-8">
+              <div
+                style="flex-basis: 10%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  @{{ item.work_center_name }}
+                </span>
+              </div>
+
+              <div
+                style="flex-basis: 20%"
+                class="text-body-1 text-blue-darken-1 py-4"
+              >
+                货位号：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.warehouse_location }}
+                </span>
+              </div>
+
+              <div
+                style="flex-basis: 20%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                检验编号：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.inspection_id }}
+                </span>
+              </div>
+            </div>
+            <!-- 6 -->
+            <div class="flex-grow-1 ml-8 pl-8">
+              <div
+                style="flex-basis: 20%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                物料名称：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.material_name }}
+                </span>
+              </div>
+              <div
+                style="flex-basis: 22%"
+                class="text-body-1 text-blue-darken-1 py-4"
+              >
+                物料编号：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.material_id }}
+                </span>
+              </div>
+
+              <div
+                style="flex-basis: 40%"
+                class="text-body-1 text-blue-darken-1"
+              >
+                不合格原因：
+                <span
+                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  {{ item.cause_nonconformity }}
+                </span>
+              </div>
+            </div>
+          </div>
         </v-list>
         <v-list v-else>
           <div class="text-center text-h6 my-3 text-grey">当前类型数据为空</div>
