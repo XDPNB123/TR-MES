@@ -1043,7 +1043,7 @@ async function splitTicket() {
     }
     return item;
   });
-  console.log(productionData);
+
   //调用排产数据修改的接口进行修改
   await useHttp(
     "/ProductionRecode/M23UpdateProductionRecode",
@@ -1073,6 +1073,30 @@ async function splitTicket() {
     newDetailData,
   ]);
   setSnackbar("green", "拆批成功");
+  //查询当前明细下的工单表头状态
+  const data_: any = await useHttp(
+    "/MesWorkOrder/M01GetWorkOrderList",
+    "get",
+    undefined,
+    {
+      workorder_hid: operatingTicketDetail.value.workorder_hid,
+      PageIndex: 1,
+      PageSize: 100000,
+      SortedBy: "id",
+      SortType: "0",
+    }
+  );
+  console.log(data_.data.pageList[0]);
+  if (data_.data.pageList[0].status === "已排产生产中") {
+    data_.data.pageList[0].status = "已审核待排产";
+    console.log(data_.data.pageList[0]);
+    await useHttp(
+      "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
+      "put",
+      [data_.data.pageList[0]]
+    );
+  }
+  getWorkOrder();
   getWorkOrderDetail();
   splitDetailDialog.value = false;
 }

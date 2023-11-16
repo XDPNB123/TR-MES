@@ -68,6 +68,7 @@ async function getQaData() {
   tableDataLength.value = data.data.totalCount;
   qaList.value = data.data.pageList
     .map((item: any) => {
+      if( item.scan_time)
       item.scan_time = item.scan_time.substring(0, 10);
       return item;
     })
@@ -118,8 +119,6 @@ async function getWorkCenterData() {
   workCenterList.value = data.data.pageList.map(
     (item: any) => item.work_center_name
   );
-
-  console.log(workCenterList.value);
 }
 //不合格原因的数据
 let items = ref([
