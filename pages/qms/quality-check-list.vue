@@ -88,18 +88,17 @@ async function getQaData() {
     });
 }
 //搜索过滤
-function filter() {
+function resetFilter() {
   (searchWorkCenter.value = ""),
     (searchName.value = ""),
     (searchUserName.value = ""),
     (tablePerPage.value = 1);
-  (searchStatus.value = "待质检"),
-    (searchResult.value = ""),
-    (searchWorkCenter.value = "");
+
+  (searchResult.value = ""), (searchWorkCenter.value = "");
   getQaData();
 }
 //重置搜索
-function resetFilter() {
+function filter() {
   tablePerPage.value = 1;
   getQaData();
 }
@@ -240,7 +239,10 @@ async function saveQaInfo() {
           <v-list-item>
             <template v-slot:default>
               <div class="d-flex">
-                <div style="flex-basis: 12%">
+                <div
+                  class="text-body-1 text-blue-darken-1"
+                  style="flex-basis: 12%"
+                >
                   派工单号：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -249,7 +251,10 @@ async function saveQaInfo() {
                     {{ item.dispatch_order }}
                   </span>
                 </div>
-                <div style="flex-basis: 12%">
+                <div
+                  style="flex-basis: 12%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   检验员编号：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -258,7 +263,10 @@ async function saveQaInfo() {
                     {{ item.inspector_id }}
                   </span>
                 </div>
-                <div style="flex-basis: 15%">
+                <div
+                  style="flex-basis: 15%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   工序：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -267,7 +275,10 @@ async function saveQaInfo() {
                     {{ item.procedure_description }}
                   </span>
                 </div>
-                <div style="flex-basis: 22%">
+                <div
+                  style="flex-basis: 22%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   物料编号：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -276,7 +287,10 @@ async function saveQaInfo() {
                     {{ item.material_id }}
                   </span>
                 </div>
-                <div style="flex-basis: 20%">
+                <div
+                  style="flex-basis: 20%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   物料名称：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -285,7 +299,10 @@ async function saveQaInfo() {
                     {{ item.material_name }}
                   </span>
                 </div>
-                <div style="flex-basis: 20%">
+                <div
+                  style="flex-basis: 20%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
                     style="text-decoration: underline"
@@ -299,30 +316,10 @@ async function saveQaInfo() {
           <v-list-item>
             <template v-slot:default>
               <div class="d-flex">
-                <div style="flex-basis: 12%">
-                  质检时间：
-                  <span
-                    class="text-blue-grey-lighten-2 font-weight-bold"
-                    style="text-decoration: underline"
-                  >
-                    {{ item.scan_time }}
-                  </span>
-                </div>
-                <div style="flex-basis: 12%">
-                  质检结果：
-                  <span
-                    class="font-weight-bold"
-                    style="text-decoration: underline"
-                    :class="{
-                      'text-red': item.scan_result === '部分合格',
-                      'text-green': item.scan_result === '合格',
-                      'text-black': item.scan_result === '不合格',
-                    }"
-                  >
-                    {{ item.scan_result }}
-                  </span>
-                </div>
-                <div style="flex-basis: 15%">
+                <div
+                  style="flex-basis: 12%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   质检状态：
                   <span
                     class="font-weight-bold"
@@ -336,7 +333,39 @@ async function saveQaInfo() {
                     {{ item.inspection_status }}
                   </span>
                 </div>
-                <div style="flex-basis: 22%">
+                <div
+                  style="flex-basis: 12%"
+                  class="text-body-1 text-blue-darken-1"
+                >
+                  质检结果：
+                  <span
+                    class="font-weight-bold"
+                    style="text-decoration: underline"
+                    :class="{
+                      'text-red': item.scan_result === '部分合格',
+                      'text-green': item.scan_result === '合格',
+                      'text-black': item.scan_result === '不合格',
+                    }"
+                  >
+                    {{ item.scan_result }}
+                  </span>
+                </div>
+                <div
+                  style="flex-basis: 15%"
+                  class="text-body-1 text-blue-darken-1"
+                >
+                  质检时间：
+                  <span
+                    class="text-blue-grey-lighten-2 font-weight-bold"
+                    style="text-decoration: underline"
+                  >
+                    {{ item.scan_time }}
+                  </span>
+                </div>
+                <div
+                  style="flex-basis: 22%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   托盘号：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -345,7 +374,10 @@ async function saveQaInfo() {
                     {{ item.pallet_no }}
                   </span>
                 </div>
-                <div style="flex-basis: 20%">
+                <div
+                  style="flex-basis: 20%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   货位号：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -354,7 +386,10 @@ async function saveQaInfo() {
                     {{ item.warehouse_location }}
                   </span>
                 </div>
-                <div style="flex-basis: 20%">
+                <div
+                  style="flex-basis: 20%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   项目号:
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -369,7 +404,10 @@ async function saveQaInfo() {
           <v-list-item>
             <template v-slot:default>
               <div class="d-flex">
-                <div style="flex-basis: 12%">
+                <div
+                  style="flex-basis: 12%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   报工人：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -378,7 +416,10 @@ async function saveQaInfo() {
                     {{ item.creator }}
                   </span>
                 </div>
-                <div style="flex-basis: 12%">
+                <div
+                  style="flex-basis: 12%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   质检数量：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -387,7 +428,10 @@ async function saveQaInfo() {
                     {{ item.inspection_quantity }}{{ item.unit }}
                   </span>
                 </div>
-                <div style="flex-basis: 15%">
+                <div
+                  style="flex-basis: 15%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   合格数量：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -396,7 +440,10 @@ async function saveQaInfo() {
                     {{ item.qualified_quantity }}{{ item.unit }}
                   </span>
                 </div>
-                <div style="flex-basis: 22%">
+                <div
+                  style="flex-basis: 22%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   不合格数量：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
@@ -405,7 +452,10 @@ async function saveQaInfo() {
                     {{ item.non_conforming_quantity }}{{ item.unit }}
                   </span>
                 </div>
-                <div style="flex-basis: 40%">
+                <div
+                  style="flex-basis: 40%"
+                  class="text-body-1 text-blue-darken-1"
+                >
                   不合格原因：
                   <span
                     class="text-blue-grey-lighten-2 font-weight-bold"
