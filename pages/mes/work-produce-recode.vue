@@ -254,11 +254,12 @@ async function getCenterProduce() {
       SortType: 0,
       SortedBy: "id",
       work_center_id: workCenterId.value,
+      status: "已审核待排产,已排产待执行,已执行在生产",
     }
   );
   tabArr.value = tabArr1.value;
   tabArr.value = [...tabArr.value, ...data.data.pageList];
-
+  console.log(data.data.pageList);
   tempTabArr.value = tabArr.value
     .filter(
       (_item: any) =>
