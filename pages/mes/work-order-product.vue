@@ -1054,7 +1054,7 @@ async function splitTicket() {
     "put",
     productionData
   );
-  //新增一个委外的工单明细对象
+  //新增一个批次工单明细对象
   const newDetailData = {
     estimated_delivery_date:
       operatingTicketDetail.value.estimated_delivery_date,
@@ -1067,7 +1067,7 @@ async function splitTicket() {
     unit: operatingTicketDetail.value.unit,
     workorder_hid: operatingTicketDetail.value.workorder_hid,
     actual_delivery_date: operatingTicketDetail.value.actual_delivery_date,
-    status: operatingTicketDetail.value.status,
+    status: "新增未分配",
     mcode: operatingTicketDetail.value.mcode,
     mdescription:
       operatingTicketDetail.value.mdescription.slice(0, -5) + "(批次工单)",
@@ -1758,7 +1758,9 @@ const dateRule = ref<any>([
     <!-- 右边明细表 -->
     <v-col cols="6">
       <v-card class="h-100">
-        <v-toolbar class="text-h6 pl-6" v-if="detailName">工单【{{ detailName }}】明细</v-toolbar>
+        <v-toolbar class="text-h6 pl-6" v-if="detailName"
+          >工单【{{ detailName }}】明细</v-toolbar
+        >
         <v-toolbar class="text-h6 pl-6" v-else>工单明细</v-toolbar>
         <v-row class="ma-2">
           <v-col cols="6">
@@ -1925,7 +1927,7 @@ const dateRule = ref<any>([
                               class="mr-4"
                               v-show="
                                 item.status === '已分配待排产' ||
-                                item.status === '新建待分配'
+                                item.status === '新增未分配'
                               "
                               @click="
                                 operatingTicketDetail = { ...item };
@@ -1940,7 +1942,7 @@ const dateRule = ref<any>([
                               size="small"
                               v-show="
                                 item.status === '已分配待排产' ||
-                                item.status === '新建待分配'
+                                item.status === '新增未分配'
                               "
                               @click="
                                 operatingTicketDetail = { ...item };
@@ -2075,7 +2077,7 @@ const dateRule = ref<any>([
                             <v-btn
                               :disabled="
                                 item.status !== '已分配待排产' &&
-                                item.status !== '新建待分配'
+                                item.status !== '新增未分配'
                               "
                               size="small"
                               @click="showProcessDialog(item)"
