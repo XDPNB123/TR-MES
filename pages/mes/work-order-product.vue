@@ -1090,11 +1090,9 @@ async function splitTicket() {
   if (data_.data.pageList[0].status === "已排产生产中") {
     data_.data.pageList[0].status = "已审核待排产";
     console.log(data_.data.pageList[0]);
-    await useHttp(
-      "/MesWorkOrder/M03PartiallyUpdateWorkOrder",
-      "put",
-      [data_.data.pageList[0]]
-    );
+    await useHttp("/MesWorkOrder/M03PartiallyUpdateWorkOrder", "put", [
+      data_.data.pageList[0],
+    ]);
   }
   getWorkOrder();
   getWorkOrderDetail();
@@ -1545,7 +1543,7 @@ const dateRule = ref<any>([
                       >
                         产品描述：
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.product_description }}
@@ -1614,7 +1612,7 @@ const dateRule = ref<any>([
                       >
                         计划开始:
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.scheduled_start_date }}
@@ -1626,7 +1624,7 @@ const dateRule = ref<any>([
                       >
                         计划完成:
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.planned_completion_time }}
@@ -1638,7 +1636,7 @@ const dateRule = ref<any>([
                       >
                         实际开始：
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.start_date }}
@@ -1650,7 +1648,7 @@ const dateRule = ref<any>([
                       >
                         实际完成:
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.finish_date }}
@@ -1668,7 +1666,7 @@ const dateRule = ref<any>([
                       >
                         工单编号：
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.workorder_hid }}
@@ -1680,15 +1678,20 @@ const dateRule = ref<any>([
                       >
                         类型：
                         <span
-                          class="font-weight-bold"
+                          class=""
                           style="text-decoration: underline"
                           :class="{
-                            'text-blue': item.workorder_type === '机加',
-                            'text-red': item.workorder_type === '钣金',
-                            'text-yellow': item.workorder_type === '电器装配',
-                            'text-green': item.workorder_type === '模组装配',
-                            'text-black': item.workorder_type === '总装',
-                            'text-orange': item.workorder_type === '其他',
+                            'bg-blue text-white':
+                              item.workorder_type === '机加',
+                            'bg-red text-white': item.workorder_type === '钣金',
+                            'bg-brown text-white':
+                              item.workorder_type === '电器装配',
+                            'bg-green text-white':
+                              item.workorder_type === '模组装配',
+                            'bg-black text-white':
+                              item.workorder_type === '总装',
+                            'bg-orange text-white':
+                              item.workorder_type === '其他',
                           }"
                         >
                           {{ item.workorder_type }}
@@ -1700,7 +1703,7 @@ const dateRule = ref<any>([
                       >
                         计划数量：
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.planned_quantity }} {{ item.unit }}
@@ -1713,7 +1716,7 @@ const dateRule = ref<any>([
                       >
                         审核日期:
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.approve_date }}
@@ -1725,7 +1728,7 @@ const dateRule = ref<any>([
                       >
                         状态：
                         <span
-                          class="text-blue-grey-lighten-2 font-weight-bold"
+                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
                           {{ item.status }}
@@ -1846,6 +1849,7 @@ const dateRule = ref<any>([
               <v-list
                 density="compact"
                 v-for="(item, index) in tableDataDetail"
+                :key="index"
                 class="ma-2 elevation-3 rounded-lg d-flex align-center"
               >
                 <v-checkbox
@@ -1868,7 +1872,7 @@ const dateRule = ref<any>([
                         >
                           产出料：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.mdescription }}
@@ -1881,7 +1885,7 @@ const dateRule = ref<any>([
                         >
                           工单明细编号：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.workorder_did }}
@@ -1945,7 +1949,7 @@ const dateRule = ref<any>([
                         >
                           项目号：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.project_code }}
@@ -1957,7 +1961,7 @@ const dateRule = ref<any>([
                         >
                           状态：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.status }}
@@ -1969,7 +1973,7 @@ const dateRule = ref<any>([
                         >
                           预计日期：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.estimated_delivery_date }}
@@ -1981,7 +1985,7 @@ const dateRule = ref<any>([
                         >
                           实际日期：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.actual_delivery_date }}
@@ -1999,7 +2003,7 @@ const dateRule = ref<any>([
                         >
                           计划数量：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.planned_quantity }}{{ item.unit }}
@@ -2011,7 +2015,7 @@ const dateRule = ref<any>([
                         >
                           报工数量：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.reported_quantity }}{{ item.unit }}
@@ -2023,7 +2027,7 @@ const dateRule = ref<any>([
                         >
                           标准工时：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.standard_time }}
@@ -2035,7 +2039,7 @@ const dateRule = ref<any>([
                         >
                           实际工时：
                           <span
-                            class="text-blue-grey-lighten-2 font-weight-bold"
+                            class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
                           >
                             {{ item.actual_time }}

@@ -35,6 +35,7 @@ let qaDialog = ref<boolean>(false);
 let qaList = ref<any[]>([]);
 //质检数据对象
 let qaInfo = ref<any>(null);
+
 // 质检表每页条数
 let tablePerPage = ref<number>(1);
 watch(tablePerPage, function () {
@@ -129,8 +130,11 @@ let items = ref([
   "打磨不合格",
   "装配不合格",
 ]);
-//
+//打开显示框
 function showQaInfo(item: any) {
+  if (item.inspection_status !== "待质检") {
+    return;
+  }
   qaInfo.value = { ...item };
   if (qaInfo.value.cause_nonconformity) {
     qaInfo.value.cause_nonconformity =
@@ -520,6 +524,7 @@ async function saveQaInfo() {
               <v-text-field
                 v-model="qaInfo.inspection_quantity"
                 label="待质检数量"
+                readonly
                 density="compact"
               ></v-text-field
             ></v-col>
@@ -528,6 +533,7 @@ async function saveQaInfo() {
                 v-model="qaInfo.qualified_quantity"
                 label="合格数量"
                 density="compact"
+                hint="输入合格的数量,与不合格数量相加等于待质检数量"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
@@ -535,6 +541,7 @@ async function saveQaInfo() {
                 v-model="qaInfo.non_conforming_quantity"
                 label="不合格数量"
                 density="compact"
+                hint="输入不合格的数量,与合格数量相加等于待质检数量"
               ></v-text-field>
             </v-col>
             <v-col cols="12">

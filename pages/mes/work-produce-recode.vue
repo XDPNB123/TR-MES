@@ -50,6 +50,15 @@ let workOrderList = ref<any[]>([]);
 let workOrderType = ref<any>("机加");
 watch(workOrderType, function () {
   getWorkOrder();
+  if (workOrderType.value === "机加") {
+    searchType.value = "机加工";
+  } else if (workOrderType.value === "钣金") {
+    searchType.value = "钣金";
+  } else if (workOrderType.value === "其他") {
+    searchType.value = "其他";
+  } else {
+    searchType.value = "装配";
+  }
 });
 //获取工单数据
 async function getWorkOrder() {
@@ -558,6 +567,7 @@ async function getDeliverList() {
       PageSize: 10000,
       SortType: 1,
       SortedBy: "dispatch_order",
+      status: "已排产待执行,已执行在生产",
     }
   );
   deliverList.value = data.data.pageList
@@ -575,7 +585,6 @@ async function getDeliverList() {
       _item.defaul_outsource = _item.defaul_outsource === "Y" ? "是" : "否";
       return _item;
     });
-  console.log(deliverList.value);
 }
 //搜索
 function searchList() {
