@@ -180,7 +180,7 @@ async function saveQaInfo() {
     <v-col cols="4">
       <v-text-field
         label="物料名称"
-        v-mode="searchName"
+        v-model="searchName"
         variant="outlined"
         density="compact"
         hide-details
@@ -190,7 +190,7 @@ async function saveQaInfo() {
     <v-col cols="4">
       <v-text-field
         label="项目号"
-        v-mode="searchProjectCode"
+        v-model="searchProjectCode"
         variant="outlined"
         density="compact"
         hide-details
@@ -200,7 +200,7 @@ async function saveQaInfo() {
     <v-col cols="4">
       <v-text-field
         label="报工人"
-        v-mode="searchUserName"
+        v-model="searchUserName"
         variant="outlined"
         density="compact"
         hide-details
