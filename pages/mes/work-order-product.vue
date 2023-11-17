@@ -343,7 +343,11 @@ let headers = ref<any[]>([
 ]);
 //工单明细表格展示的数据
 let tableDataDetail = ref<any[]>([]);
-
+function isDatePast(dateString: any) {
+  let date = new Date(dateString);
+  let now = new Date();
+  return date < now;
+}
 //自制件表头
 let homemadeHeaders = ref<any[]>([
   { title: "零件名", align: "center", key: "partName" },
@@ -1624,8 +1628,15 @@ const dateRule = ref<any>([
                       >
                         计划完成:
                         <span
-                          class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
+                          :class="{
+                            'text-red': isDatePast(
+                              item.planned_completion_time
+                            ),
+                            'text-blue-grey-lighten-2': !isDatePast(
+                              item.planned_completion_time
+                            ),
+                          }"
                         >
                           {{ item.planned_completion_time }}
                         </span>

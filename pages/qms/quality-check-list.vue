@@ -12,8 +12,10 @@ useSeoMeta({
   // 社交媒体分享该页面时显示的图片
   ogImage: "/同日图标.png",
 });
+// 获取消息条对象
+const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
+  useSnackbar();
 //搜索
-
 let searchName = ref<any>(null);
 let searchProjectCode = ref<any>(null);
 let searchUserName = ref<any>(null);
@@ -114,7 +116,7 @@ async function getWorkCenterData() {
     "/WorkCenter/M13WorkCenterList",
     "get",
     undefined,
-    { PageIndex: 1, PageSize: 10000, SortedBy: "id", SortType: 11 }
+    { PageIndex: 1, PageSize: 10000, SortedBy: "id", SortType: 1 }
   );
   workCenterList.value = data.data.pageList.map(
     (item: any) => item.work_center_name
@@ -151,13 +153,25 @@ async function saveQaInfo() {
       Number(qaInfo.value.non_conforming_quantity) !==
     qaInfo.value.inspection_quantity
   ) {
-    return alert("您输入的数量相加不正确");
+    return setSnackbar("black", "您输入的数量相加不正确");
   }
 
-  qaInfo.value.cause_nonconformity = qaInfo.value.cause_nonconformity.join(",");
+  if (qaInfo.value.non_conforming_quantity) {
+    if (!qaInfo.value.cause_nonconformity) {
+      return setSnackbar("black", "请您填写不合格的原因");
+    }
+  } else {
+    qaInfo.value.non_conforming_quantity = 0;
+    qaInfo.value.cause_nonconformity = [];
+  }
+
+  if (qaInfo.value.cause_nonconformity)
+    qaInfo.value.cause_nonconformity =
+      qaInfo.value.cause_nonconformity.join(",");
   await useHttp("/QaQatask/M41UpdateQaQatask", "put", qaInfo.value);
   getQaData();
   qaDialog.value = false;
+  setSnackbar("green", "质检完成");
 }
 </script>
 
@@ -546,7 +560,10 @@ async function saveQaInfo() {
             </v-col>
             <v-col cols="12">
               <v-select
-                v-if="qaInfo.non_conforming_quantity"
+                v-if="
+                  qaInfo.non_conforming_quantity &&
+                  qaInfo.non_conforming_quantity !== '0'
+                "
                 v-model="qaInfo.cause_nonconformity"
                 :items="items"
                 density="compact"
@@ -605,5 +622,11 @@ async function saveQaInfo() {
         </div>
       </v-card>
     </v-dialog>
+    <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
+      {{ snackbarText }}
+      <template v-slot:actions>
+        <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
+      </template>
+    </v-snackbar>
   </v-row>
 </template>
