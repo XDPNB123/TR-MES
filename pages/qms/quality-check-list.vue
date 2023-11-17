@@ -267,7 +267,7 @@ async function saveQaInfo() {
               >
                 派工单号：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.dispatch_order }}
@@ -280,7 +280,7 @@ async function saveQaInfo() {
               >
                 质检状态：
                 <span
-                  class="font-weight-bold"
+                  class=""
                   style="text-decoration: underline"
                   :class="{
                     'text-red': item.inspection_status === '待质检',
@@ -297,7 +297,7 @@ async function saveQaInfo() {
               >
                 报工人：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.creator }}
@@ -312,7 +312,7 @@ async function saveQaInfo() {
               >
                 检验员编号：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.inspector_id }}
@@ -325,7 +325,7 @@ async function saveQaInfo() {
               >
                 质检结果：
                 <span
-                  class="font-weight-bold"
+                  class=""
                   style="text-decoration: underline"
                   :class="{
                     'text-red': item.scan_result === '部分合格',
@@ -342,7 +342,7 @@ async function saveQaInfo() {
               >
                 质检数量：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.inspection_quantity }}{{ item.unit }}
@@ -357,7 +357,7 @@ async function saveQaInfo() {
               >
                 工序：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.procedure_description }}
@@ -370,7 +370,7 @@ async function saveQaInfo() {
               >
                 质检时间：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.scan_time }}
@@ -382,7 +382,7 @@ async function saveQaInfo() {
               >
                 合格数量：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.qualified_quantity }}{{ item.unit }}
@@ -397,7 +397,7 @@ async function saveQaInfo() {
               >
                 项目号:
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.project_code }}
@@ -410,7 +410,7 @@ async function saveQaInfo() {
               >
                 托盘号：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.pallet_no }}
@@ -422,7 +422,7 @@ async function saveQaInfo() {
               >
                 不合格数量：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.non_conforming_quantity }}{{ item.unit }}
@@ -436,7 +436,7 @@ async function saveQaInfo() {
                 class="text-body-1 text-blue-darken-1"
               >
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   @{{ item.work_center_name }}
@@ -449,7 +449,7 @@ async function saveQaInfo() {
               >
                 货位号：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.warehouse_location }}
@@ -462,7 +462,7 @@ async function saveQaInfo() {
               >
                 检验编号：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.inspection_id }}
@@ -477,7 +477,7 @@ async function saveQaInfo() {
               >
                 物料名称：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.material_name }}
@@ -489,7 +489,7 @@ async function saveQaInfo() {
               >
                 物料编号：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.material_id }}
@@ -502,7 +502,7 @@ async function saveQaInfo() {
               >
                 不合格原因：
                 <span
-                  class="text-blue-grey-lighten-2 font-weight-bold"
+                  class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
                   {{ item.cause_nonconformity }}
