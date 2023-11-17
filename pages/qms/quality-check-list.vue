@@ -174,6 +174,7 @@ async function saveQaInfo() {
   if (qaInfo.value.cause_nonconformity)
     qaInfo.value.cause_nonconformity =
       qaInfo.value.cause_nonconformity.join(",");
+  qaInfo.value.scan_time = new Date().toISOString(0, 10);
   await useHttp("/QaQatask/M41UpdateQaQatask", "put", qaInfo.value);
   getQaData();
   qaDialog.value = false;
