@@ -166,6 +166,7 @@ async function saveQaInfo() {
         variant="outlined"
         density="compact"
         hide-details
+        clearable
       ></v-text-field>
     </v-col>
     <v-col cols="4">
@@ -175,6 +176,7 @@ async function saveQaInfo() {
         variant="outlined"
         density="compact"
         hide-details
+        clearable
       ></v-text-field>
     </v-col>
     <v-col cols="4">
@@ -184,6 +186,7 @@ async function saveQaInfo() {
         variant="outlined"
         density="compact"
         hide-details
+        clearable
       ></v-text-field>
     </v-col>
     <v-col cols="4">
@@ -194,6 +197,7 @@ async function saveQaInfo() {
         :items="workCenterList"
         v-model="searchWorkCenter"
         hide-details
+        clearable
       ></v-select>
     </v-col>
     <v-col cols="4">
@@ -214,6 +218,7 @@ async function saveQaInfo() {
         :items="['合格', '部分合格', '不合格']"
         density="compact"
         hide-details
+        clearable
       ></v-select>
     </v-col>
     <v-col cols="12">
