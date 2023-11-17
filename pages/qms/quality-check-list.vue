@@ -19,6 +19,9 @@ const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
 let searchName = ref<any>(null);
 let searchProjectCode = ref<any>(null);
 let searchDO = ref<any>(null);
+let searchStartDate = ref<any>(null);
+let searchEndDate = ref<any>(null);
+let searchType = ref<any>(null);
 let searchWorkCenter = ref<any>(null);
 let searchResult = ref<any>(null);
 let searchStatus = ref<any>("待质检");
@@ -56,6 +59,9 @@ async function getQaData() {
     "get",
     undefined,
     {
+      start_time: searchStartDate.value,
+      end_time: searchEndDate.value,
+      inspection_type: searchType.value,
       work_center_name: searchWorkCenter.value,
       material_name: searchName.value,
       inspection_status: searchStatus.value,
@@ -177,7 +183,39 @@ async function saveQaInfo() {
 
 <template>
   <v-row class="ma-2">
-    <v-col cols="4">
+    <v-col cols="3">
+      <v-text-field
+        label="最早质检日期"
+        v-model="searchStartDate"
+        variant="outlined"
+        density="compact"
+        hide-details
+        clearable
+        type="date"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="最晚质检日期"
+        v-model="searchEndDate"
+        variant="outlined"
+        density="compact"
+        hide-details
+        clearable
+        type="date"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="质检类型"
+        v-model="searchType"
+        variant="outlined"
+        density="compact"
+        hide-details
+        clearable
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
       <v-text-field
         label="派工单号"
         v-model="searchDO"
@@ -187,7 +225,7 @@ async function saveQaInfo() {
         clearable
       ></v-text-field>
     </v-col>
-    <v-col cols="4">
+    <v-col cols="3">
       <v-text-field
         label="物料名称"
         v-model="searchName"
@@ -197,29 +235,8 @@ async function saveQaInfo() {
         clearable
       ></v-text-field>
     </v-col>
-    <v-col cols="4">
-      <v-text-field
-        label="项目号"
-        v-model="searchProjectCode"
-        variant="outlined"
-        density="compact"
-        hide-details
-        clearable
-      ></v-text-field>
-    </v-col>
 
-    <v-col cols="4">
-      <v-select
-        label="工作中心名称"
-        variant="outlined"
-        density="compact"
-        :items="workCenterList"
-        v-model="searchWorkCenter"
-        hide-details
-        clearable
-      ></v-select>
-    </v-col>
-    <v-col cols="4">
+    <v-col cols="3">
       <v-select
         label="质检状态"
         variant="outlined"
@@ -229,13 +246,24 @@ async function saveQaInfo() {
         hide-details
       ></v-select>
     </v-col>
-    <v-col cols="4">
+    <v-col cols="3">
       <v-select
         label="质检结果"
         variant="outlined"
         v-model="searchResult"
         :items="['合格', '部分合格', '不合格']"
         density="compact"
+        hide-details
+        clearable
+      ></v-select>
+    </v-col>
+    <v-col cols="3">
+      <v-select
+        label="工作中心名称"
+        variant="outlined"
+        density="compact"
+        :items="workCenterList"
+        v-model="searchWorkCenter"
         hide-details
         clearable
       ></v-select>
@@ -310,12 +338,12 @@ async function saveQaInfo() {
                 style="flex-basis: 11%"
                 class="text-body-1 text-blue-darken-1"
               >
-                检验员编号：
+                检验类型：
                 <span
                   class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
-                  {{ item.inspector_id }}
+                  {{ item.inspection_type }}
                 </span>
               </div>
 

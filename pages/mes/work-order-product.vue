@@ -1692,16 +1692,17 @@ const dateRule = ref<any>([
                           class=""
                           style="text-decoration: underline"
                           :class="{
-                            'bg-blue text-white':
+                            'bg-deep-purple text-white':
                               item.workorder_type === '机加',
-                            'bg-red text-white': item.workorder_type === '钣金',
-                            'bg-brown text-white':
+                            'bg-light-green text-white':
+                              item.workorder_type === '钣金',
+                            'bg-blue text-white':
                               item.workorder_type === '电器装配',
-                            'bg-green text-white':
+                            'bg-light-blue text-white':
                               item.workorder_type === '模组装配',
-                            'bg-black text-white':
+                            'bg-cyan text-white':
                               item.workorder_type === '总装',
-                            'bg-orange text-white':
+                            'bg-teal text-white':
                               item.workorder_type === '其他',
                           }"
                         >
@@ -1982,7 +1983,7 @@ const dateRule = ref<any>([
                           class="text-body-2 text-blue-darken-1"
                           style="flex-basis: 25%"
                         >
-                          预计日期：
+                          预计交付：
                           <span
                             class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
@@ -1994,7 +1995,7 @@ const dateRule = ref<any>([
                           class="text-body-2 text-blue-darken-1"
                           style="flex-basis: 25%"
                         >
-                          实际日期：
+                          实际交付：
                           <span
                             class="text-blue-grey-lighten-2"
                             style="text-decoration: underline"
