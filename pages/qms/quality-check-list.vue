@@ -113,7 +113,7 @@ async function getWorkCenterData() {
     "/WorkCenter/M13WorkCenterList",
     "get",
     undefined,
-    { PageIndex: 1, PageSize: 10000, SortedBy: "id", SortType: 0 }
+    { PageIndex: 1, PageSize: 10000, SortedBy: "id", SortType: 1 }
   );
   workCenterList.value = data.data.pageList.map(
     (item: any) => item.work_center_name
