@@ -18,7 +18,7 @@ const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
 //搜索
 let searchName = ref<any>(null);
 let searchProjectCode = ref<any>(null);
-let searchUserName = ref<any>(null);
+let searchDO = ref<any>(null);
 let searchWorkCenter = ref<any>(null);
 let searchResult = ref<any>(null);
 let searchStatus = ref<any>("待质检");
@@ -61,7 +61,7 @@ async function getQaData() {
       inspection_status: searchStatus.value,
       project_code: searchProjectCode.value,
       scan_result: searchResult.value,
-      creator: searchUserName.value,
+      dispatch_order: searchDO.value,
       PageIndex: tablePerPage.value,
       PageSize: 10,
       SortedBy: "id",
@@ -90,20 +90,20 @@ async function getQaData() {
       return 0;
     });
 }
-//搜索过滤
+//重置搜索
 function resetFilter() {
   (searchWorkCenter.value = ""),
     (searchName.value = ""),
-    (searchUserName.value = ""),
+    (searchDO.value = ""),
     (tablePerPage.value = 1);
 
   (searchResult.value = ""), (searchWorkCenter.value = "");
   getQaData();
 }
-//重置搜索
-function filter() {
+//搜素
+async function filter() {
   tablePerPage.value = 1;
-  getQaData();
+  await getQaData();
 }
 onMounted(() => {
   getQaData();
@@ -179,6 +179,16 @@ async function saveQaInfo() {
   <v-row class="ma-2">
     <v-col cols="4">
       <v-text-field
+        label="派工单号"
+        v-model="searchDO"
+        variant="outlined"
+        density="compact"
+        hide-details
+        clearable
+      ></v-text-field>
+    </v-col>
+    <v-col cols="4">
+      <v-text-field
         label="物料名称"
         v-model="searchName"
         variant="outlined"
@@ -197,16 +207,7 @@ async function saveQaInfo() {
         clearable
       ></v-text-field>
     </v-col>
-    <v-col cols="4">
-      <v-text-field
-        label="报工人"
-        v-model="searchUserName"
-        variant="outlined"
-        density="compact"
-        hide-details
-        clearable
-      ></v-text-field>
-    </v-col>
+
     <v-col cols="4">
       <v-select
         label="工作中心名称"
