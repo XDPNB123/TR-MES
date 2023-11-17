@@ -1571,19 +1571,12 @@ const dateRule = ref<any>([
                           >
                             fa-solid fa-eye
                           </v-icon>
-                          <!-- 已审核 -->
-                          <v-icon
-                            color="black"
-                            size="small"
-                            class="mr-3"
-                            v-else
-                          >
-                            fa-solid fa-eye-slash
-                          </v-icon>
+
                           <v-icon
                             color="blue"
                             size="small"
                             class="mr-3"
+                            v-show="item.status === '新建未审核'"
                             @click.stop="
                               operatingTicket = { ...item };
                               editDialog = true;
@@ -1595,6 +1588,7 @@ const dateRule = ref<any>([
                           <v-icon
                             color="red"
                             size="small"
+                            v-show="item.status === '新建未审核'"
                             @click.stop="
                               operatingTicket = { ...item };
                               deleteDialog = true;
@@ -1740,7 +1734,7 @@ const dateRule = ref<any>([
                       >
                         状态：
                         <span
-                          class="text-blue-grey-lighten-2"
+                          class="text-blue-grey-lighten-1 font-weight-black"
                           style="text-decoration: underline"
                         >
                           {{ item.status }}
@@ -1764,7 +1758,8 @@ const dateRule = ref<any>([
     <!-- 右边明细表 -->
     <v-col cols="6">
       <v-card class="h-100">
-        <v-toolbar class="text-h6 pl-6">工单{{ detailName }}明细</v-toolbar>
+        <v-toolbar class="text-h6 pl-6" v-if="detailName">工单【{{ detailName }}】明细</v-toolbar>
+        <v-toolbar class="text-h6 pl-6" v-else>工单明细</v-toolbar>
         <v-row class="ma-2">
           <v-col cols="6">
             <v-text-field
@@ -1928,6 +1923,10 @@ const dateRule = ref<any>([
                               color="blue"
                               size="small"
                               class="mr-4"
+                              v-show="
+                                item.status === '已分配待排产' ||
+                                item.status === '新建待分配'
+                              "
                               @click="
                                 operatingTicketDetail = { ...item };
                                 editDetailDialog = true;
@@ -1939,6 +1938,10 @@ const dateRule = ref<any>([
                             <v-icon
                               color="red"
                               size="small"
+                              v-show="
+                                item.status === '已分配待排产' ||
+                                item.status === '新建待分配'
+                              "
                               @click="
                                 operatingTicketDetail = { ...item };
                                 deleteDetailDialog = true;
@@ -1973,7 +1976,7 @@ const dateRule = ref<any>([
                         >
                           状态：
                           <span
-                            class="text-blue-grey-lighten-2"
+                            class="text-blue-grey-lighten-1 font-weight-black"
                             style="text-decoration: underline"
                           >
                             {{ item.status }}
@@ -2070,6 +2073,10 @@ const dateRule = ref<any>([
                           工序：
                           <span>
                             <v-btn
+                              :disabled="
+                                item.status !== '已分配待排产' &&
+                                item.status !== '新建待分配'
+                              "
                               size="small"
                               @click="showProcessDialog(item)"
                               :color="item.procedure ? 'green' : 'grey'"
@@ -2087,6 +2094,7 @@ const dateRule = ref<any>([
                           BOM清单：
                           <span>
                             <v-btn
+                              disabled
                               size="small"
                               @click="handleBomClick(item)"
                               :color="item.bomdata ? 'green' : 'grey'"
@@ -2104,6 +2112,7 @@ const dateRule = ref<any>([
                           图纸号：
                           <span>
                             <v-btn
+                              disabled
                               size="small"
                               @click="handleBlueprintClick(item)"
                               :color="item.blueprint_id ? 'green' : 'grey'"

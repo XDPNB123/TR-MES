@@ -26,12 +26,15 @@ let searchWorkCenter = ref<any>(null);
 let searchResult = ref<any>(null);
 let searchStatus = ref<any>("待质检");
 watch(searchWorkCenter, function () {
+  tablePerPage.value = 1;
   getQaData();
 });
 watch(searchResult, function () {
+  tablePerPage.value = 1;
   getQaData();
 });
 watch(searchStatus, function () {
+  tablePerPage.value = 1;
   getQaData();
 });
 
@@ -77,7 +80,8 @@ async function getQaData() {
   tableDataLength.value = data.data.totalCount;
   qaList.value = data.data.pageList
     .map((item: any) => {
-      if (item.scan_time) item.scan_time = item.scan_time.substring(0, 10);
+      if (item.create_time)
+        item.create_time = item.create_time.substring(0, 10);
       return item;
     })
     .sort((a: any, b: any) => {
@@ -101,9 +105,12 @@ function resetFilter() {
   (searchWorkCenter.value = ""),
     (searchName.value = ""),
     (searchDO.value = ""),
+    (searchType.value = ""),
     (tablePerPage.value = 1);
-
-  (searchResult.value = ""), (searchWorkCenter.value = "");
+  (searchStartDate.value = ""),
+    (searchEndDate.value = ""),
+    (searchResult.value = ""),
+    (searchWorkCenter.value = "");
   getQaData();
 }
 //搜素
@@ -174,7 +181,7 @@ async function saveQaInfo() {
   if (qaInfo.value.cause_nonconformity)
     qaInfo.value.cause_nonconformity =
       qaInfo.value.cause_nonconformity.join(",");
-  qaInfo.value.scan_time = new Date().toISOString(0, 10);
+  qaInfo.value.scan_time = new Date().toISOString().substring(0, 10);
   await useHttp("/QaQatask/M41UpdateQaQatask", "put", qaInfo.value);
   getQaData();
   qaDialog.value = false;
@@ -186,7 +193,7 @@ async function saveQaInfo() {
   <v-row class="ma-2">
     <v-col cols="3">
       <v-text-field
-        label="最早质检日期"
+        label="最早创建日期"
         v-model="searchStartDate"
         variant="outlined"
         density="compact"
@@ -197,7 +204,7 @@ async function saveQaInfo() {
     </v-col>
     <v-col cols="3">
       <v-text-field
-        label="最晚质检日期"
+        label="最晚创建日期"
         v-model="searchEndDate"
         variant="outlined"
         density="compact"
@@ -397,12 +404,12 @@ async function saveQaInfo() {
                 style="flex-basis: 15%"
                 class="text-body-1 text-blue-darken-1 py-4"
               >
-                质检时间：
+                创建时间：
                 <span
                   class="text-blue-grey-lighten-2"
                   style="text-decoration: underline"
                 >
-                  {{ item.scan_time }}
+                  {{ item.create_time }}
                 </span>
               </div>
               <div
