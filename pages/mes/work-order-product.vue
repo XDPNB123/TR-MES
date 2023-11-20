@@ -2140,7 +2140,7 @@ const dateRule = ref<any>([
                               disabled
                               size="small"
                               @click="handleBomClick(item)"
-                              :color="item.bomdata ? 'green' : 'grey'"
+                              color="grey"
                               >{{ item.bomdata ? "可维护" : "未维护" }}
                               <v-tooltip activator="parent" location="top">{{
                                 item.bomdata
@@ -2158,7 +2158,7 @@ const dateRule = ref<any>([
                               disabled
                               size="small"
                               @click="handleBlueprintClick(item)"
-                              :color="item.blueprint_id ? 'green' : 'grey'"
+                              color="grey"
                               >{{ item.blueprint_id ? "可维护" : "未维护" }}
                               <v-tooltip activator="parent" location="top">{{
                                 item.blueprint_id
