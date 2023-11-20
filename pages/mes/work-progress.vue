@@ -52,6 +52,7 @@ async function getProjectCode() {
     }
   );
   projectCodeList.value = data.data;
+  console.log(projectCodeList.value);
 }
 //搜索项目号
 function filter() {
@@ -203,6 +204,7 @@ async function getProductList(item: any) {
           color="blue"
           direction="vertical"
           show-arrows
+          center-active
         >
           <v-tab
             v-for="(item, index) in projectCodeList"
