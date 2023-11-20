@@ -220,22 +220,26 @@ async function getProductList(item: any) {
                             当前进度:
                             <v-progress-circular
                               :model-value="
-                                Math.round(
-                                  (element.reported_quantity /
-                                    element.planned_total_quantity) *
-                                    100
-                                ) + '%'
+                                element.planned_total_quantity === 0
+                                  ? 0 + '%'
+                                  : Math.round(
+                                      (element.reported_quantity /
+                                        element.planned_total_quantity) *
+                                        100
+                                    ) + '%'
                               "
                               :size="38"
                               color="deep-orange-lighten-2"
                             >
                               <span style="font-size: 12px">
                                 {{
-                                  Math.round(
-                                    (element.reported_quantity /
-                                      element.planned_total_quantity) *
-                                      100
-                                  ) + "%"
+                                  element.planned_total_quantity === 0
+                                    ? 0 + "%"
+                                    : Math.round(
+                                        (element.reported_quantity /
+                                          element.planned_total_quantity) *
+                                          100
+                                      ) + "%"
                                 }}</span
                               >
                             </v-progress-circular>

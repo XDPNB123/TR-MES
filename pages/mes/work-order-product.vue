@@ -1158,8 +1158,9 @@ async function deleteTicket() {
       }
     );
     getWorkOrder();
+    getWorkOrderDetail();
     if (data.code === 200) {
-      setSnackbar("green", "删除成功");
+      setSnackbar("green", data.data);
     } else {
       setSnackbar("black", "删除失败");
     }
@@ -1180,8 +1181,9 @@ async function deleteTicketDetail() {
       { workorderdetail_ids: [operatingTicketDetail.value.id] }
     );
     getWorkOrderDetail();
+
     if (data.code === 200) {
-      setSnackbar("green", "删除成功");
+      setSnackbar("green", data.data);
     } else {
       setSnackbar("black", "删除失败");
     }
