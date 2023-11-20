@@ -1874,7 +1874,10 @@ const dateRule = ref<any>([
               >
                 <v-checkbox
                   v-if="
-                    item.status === '新增未分配' ||
+                    (detailName &&
+                      (detailStatus === '新建未审核' ||
+                        detailStatus === '已审核待排产') &&
+                      item.status === '新增未分配') ||
                     item.status === '已分配待排产'
                   "
                   style="max-width: 30px"
