@@ -109,6 +109,7 @@ function resetAddDialog() {
     config_code: "single_process",
     rsv2: "",
     rsv1: "N",
+    rsv3: "Y",
   };
   addDialog.value = true;
 }
@@ -209,6 +210,7 @@ async function addProcessGroup() {
     config_code: "process_basis",
     rsv2: produceGroupInfo.value,
     rsv1: "N",
+    rsv3: "Y",
   });
   //添加成功后，清空selectedRows，更新工序组数据
   selectedRows.value = [];
@@ -422,6 +424,11 @@ async function delProduceGroup() {
           label="是否委外"
           :items="['Y', 'N']"
           v-model="operateProcess.rsv1"
+        ></v-select>
+        <v-select
+          label="是否质检"
+          :items="['Y', 'N']"
+          v-model="operateProcess.rsv3"
         ></v-select>
       </v-card-text>
 
