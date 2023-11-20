@@ -82,6 +82,7 @@ let workDetailStatus = ref([
 ]);
 //存储当前操作的工单编号
 let detailName = ref("");
+let detailStatus = ref("");
 //存储当前工单数据的产品编号
 let productName = ref("");
 // 用于刷新视图的 key
@@ -864,6 +865,7 @@ function formatDateDetail(data: any) {
 //点击表单显示表单明细
 async function showTicketDetail(item: any) {
   detailName.value = item.workorder_hid;
+  detailStatus.value = item.status;
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
@@ -1828,7 +1830,11 @@ const dateRule = ref<any>([
               color="blue-darken-2"
               class="mr-2"
               size="large"
-              v-if="detailName"
+              v-if="
+                detailName &&
+                (detailStatus === '新建未审核' ||
+                  detailStatus === '已审核待排产')
+              "
               @click="resetAddDetailDialog()"
               >新增明细</v-btn
             >
