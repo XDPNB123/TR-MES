@@ -669,6 +669,28 @@ async function saveTicket() {
       "post",
       tabArr.value
     );
+    //查询当前明细下的工单表头状态
+    const data_: any = await useHttp(
+      "/MesWorkOrder/M01GetWorkOrderList",
+      "get",
+      undefined,
+      {
+        workorder_hid: innerTableSelectData.value[0].workorder_hid,
+        PageIndex: 1,
+        PageSize: 100000,
+        SortedBy: "id",
+        SortType: "0",
+      }
+    );
+    console.log(data_.data.pageList[0]);
+    if (data_.data.pageList[0].status === "已排产生产中") {
+      data_.data.pageList[0].status = "已审核待排产";
+      console.log(data_.data.pageList[0]);
+      await useHttp("/MesWorkOrder/M03PartiallyUpdateWorkOrder", "put", [
+        data_.data.pageList[0],
+      ]);
+    }
+    getWorkOrder();
     setSnackbar("green", "保存成功");
   } catch (error) {
     console.log(error);
