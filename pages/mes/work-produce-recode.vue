@@ -135,7 +135,6 @@ async function getWorkProduce() {
         }
         return 0;
       });
-   
   } catch (error) {
     console.log(error);
   }
@@ -288,7 +287,7 @@ async function getCenterProduce() {
 // 二维码实例
 const qrCodeIns = ref<any>(null);
 //是否打印的复选框
-let checkbox = ref<boolean>(false);
+let checkbox = ref<boolean>(true);
 let dataCode = ref<any[]>([]);
 //确定保存
 async function updateCenterId() {
@@ -941,27 +940,25 @@ function dyDispatchOrder() {
                 </div>
 
                 <v-row class="mt-3">
-                  <v-col cols="6">
-                    <span
+                  <v-col cols="9">
+                    <div
                       v-if="tabArr1.length"
-                      class="text-center text-h6 ml-3 text-grey"
+                      class="text-start text-h6 mt-3 ml-3 text-grey"
                     >
                       您已经进行了操作，如果想重新操作，请点击右边的取消按钮。
-                      <span
-                        v-if="checkbox"
-                        class="text-center text-h6 text-red"
-                      >
+                      <span v-if="checkbox" class="text-start text-h6 text-red">
                         请设置打印页面为无边距属性,大小为新卷80x50
                       </span>
-                    </span>
+                    </div>
                   </v-col>
 
-                  <v-col cols="6">
+                  <v-col cols="3">
                     <div class="d-flex justify-end">
                       <div class="mr-6">
                         <v-checkbox
                           label="派单并打印"
                           v-model="checkbox"
+                          color="red"
                         ></v-checkbox>
                       </div>
                       <div class="mt-3">
