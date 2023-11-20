@@ -1843,6 +1843,11 @@ const dateRule = ref<any>([
               class="mr-2"
               color="blue-darken-2"
               size="large"
+              v-if="
+                detailName &&
+                (detailStatus === '新建未审核' ||
+                  detailStatus === '已审核待排产')
+              "
               >批量工序维护</v-btn
             >
           </v-col>
@@ -1868,6 +1873,10 @@ const dateRule = ref<any>([
                 class="ma-2 elevation-3 rounded-lg d-flex align-center"
               >
                 <v-checkbox
+                  v-if="
+                    item.status === '新增未分配' ||
+                    item.status === '已分配待排产'
+                  "
                   style="max-width: 30px"
                   density="compact"
                   hide-details
