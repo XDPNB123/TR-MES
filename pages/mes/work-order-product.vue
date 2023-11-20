@@ -1466,7 +1466,7 @@ const dateRule = ref<any>([
     <!-- 左边工单表格 -->
     <v-col cols="6">
       <v-card class="h-100">
-        <v-toolbar class="text-h6 pl-6">工单</v-toolbar>
+        <v-toolbar class="text-h6 pl-6">工单头</v-toolbar>
         <v-row class="ma-2">
           <v-col cols="4">
             <v-text-field
