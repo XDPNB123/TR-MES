@@ -1852,11 +1852,7 @@ const dateRule = ref<any>([
               color="blue-darken-2"
               class="mr-2"
               size="large"
-              v-if="
-                detailName &&
-                (detailStatus === '新建未审核' ||
-                  detailStatus === '已审核待排产')
-              "
+              v-if="detailName && detailStatus !== '正常完工'"
               @click="resetAddDetailDialog()"
               >新增明细</v-btn
             >
@@ -1865,11 +1861,7 @@ const dateRule = ref<any>([
               class="mr-2"
               color="blue-darken-2"
               size="large"
-              v-if="
-                detailName &&
-                (detailStatus === '新建未审核' ||
-                  detailStatus === '已审核待排产')
-              "
+              v-if="detailName && detailStatus !== '正常完工'"
               >批量工序维护</v-btn
             >
           </v-col>
