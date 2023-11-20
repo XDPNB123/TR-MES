@@ -1714,13 +1714,13 @@ const dateRule = ref<any>([
                               item.workorder_type === '机加',
                             'bg-light-green text-white':
                               item.workorder_type === '钣金',
-                            'bg-blue text-white':
+                            'bg-grey text-white':
                               item.workorder_type === '电器装配',
                             'bg-light-blue text-white':
                               item.workorder_type === '模组装配',
-                            'bg-cyan text-white':
+                            'bg-black text-white':
                               item.workorder_type === '总装',
-                            'bg-teal text-white':
+                            'bg-purple text-white':
                               item.workorder_type === '其他',
                           }"
                         >
