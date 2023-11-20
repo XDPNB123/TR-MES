@@ -498,6 +498,13 @@ const dateRule = ref<any>([
 //表头数据
 let headers = ref<any[]>([
   {
+    title: "进度",
+    key: "reported_quantity",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
     title: "派工单号",
     key: "dispatch_order",
     align: "center",
@@ -507,6 +514,13 @@ let headers = ref<any[]>([
   {
     title: "物料",
     key: "material_name",
+    align: "center",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工序顺序",
+    key: "procedure_order_id",
     align: "center",
     sortable: false,
     filterable: true,
@@ -533,15 +547,8 @@ let headers = ref<any[]>([
     filterable: true,
   },
   {
-    title: "工序顺序",
-    key: "procedure_order_id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "进度",
-    key: "reported_quantity",
+    title: "分配日期",
+    key: "assignment_date",
     align: "center",
     sortable: false,
     filterable: true,
@@ -581,6 +588,7 @@ async function getDeliverList() {
         0,
         10
       );
+      _item.assignment_date = _item.assignment_date.substring(0, 10);
       _item.defaul_outsource = _item.defaul_outsource === "Y" ? "是" : "否";
       return _item;
     });
@@ -752,7 +760,7 @@ function dyDispatchOrder() {
                 <div class="overflow-x-auto w-100" style="white-space: nowrap">
                   <v-list
                     class="mx-2 mt-3 mb-1 elevation-2 rounded-lg bg-light-blue-lighten-5"
-                    style="display: inline-block; cursor: move"
+                    style="display: inline-block; cursor: grab"
                     :lines="false"
                     density="compact"
                     draggable="true"

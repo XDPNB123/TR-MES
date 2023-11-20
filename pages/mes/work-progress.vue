@@ -22,6 +22,14 @@ let workTypeList = ref<any[]>([]);
 let workTypeInFo = ref<string>("机加,钣金,电器装配,模组装配,总装,其他");
 let tab1 = ref<any>(null);
 let tab2 = ref<any>(null);
+
+let nowDate = new Date();
+nowDate.setFullYear(nowDate.getFullYear() - 1);
+let startDate = nowDate.toISOString().substring(0, 10);
+
+let oldDate = new Date();
+oldDate.setMonth(oldDate.getMonth() + 1);
+let endDate = oldDate.toISOString().substring(0, 10);
 onMounted(() => {
   getProjectCode();
 });
@@ -39,9 +47,22 @@ async function getProjectCode() {
     undefined,
     {
       code: projectCode.value,
+      start_time: startDate,
+      end_time: endDate,
     }
   );
   projectCodeList.value = data.data;
+}
+//搜索项目号
+function filter() {
+  getProjectCode();
+}
+//重置搜索
+function resetFilter() {
+  (projectCode.value = ""),
+    (startDate = nowDate.toISOString().substring(0, 10));
+  endDate = oldDate.toISOString().substring(0, 10);
+  getProjectCode();
 }
 //获取工单明细数据
 async function getWorkDetail() {
@@ -59,7 +80,6 @@ async function getWorkDetail() {
       item.mes_workorderdetaildata.estimated_delivery_date.substring(0, 10);
     return item;
   });
-  console.log(workDetailList.value);
 }
 //点击项目号获取当前项目进度
 //暂存项目号
@@ -120,18 +140,63 @@ async function getProductList(item: any) {
 <template>
   <v-row class="ma-2">
     <!-- 左侧的项目号 -->
-    <v-col cols="2">
+    <v-col cols="3">
       <v-card height="85vh" elevation="2">
         <v-toolbar density="compact">
           <v-toolbar-title class="ml-2">项目号</v-toolbar-title>
         </v-toolbar>
-        <v-text-field
-          label="项目号搜索"
-          variant="outlined"
-          density="compact"
-          hide-details
-          v-model="projectCode"
-        ></v-text-field>
+        <v-row>
+          <v-col cols="6">
+            <v-text-field
+              label="最晚日期搜索"
+              variant="outlined"
+              density="compact"
+              hide-details
+              type="date"
+              class="mt-2"
+              v-model="startDate"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field
+              label="最早日期搜索"
+              variant="outlined"
+              density="compact"
+              hide-details
+              type="date"
+              class="mt-2"
+              v-model="endDate"
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              label="项目号搜索"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="mt-2"
+              v-model="projectCode"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2 mt-2"
+              size="large"
+              @click="filter"
+              >搜索</v-btn
+            >
+            <v-btn
+              color="red"
+              class="mr-2 mt-2"
+              size="large"
+              @click="resetFilter"
+              >重置搜索</v-btn
+            >
+          </v-col>
+        </v-row>
+
         <v-tabs
           v-model="tab1"
           grow
@@ -150,7 +215,7 @@ async function getProductList(item: any) {
       </v-card>
     </v-col>
     <!-- 右侧的工单进度 -->
-    <v-col cols="10" height="85vh" elevation="2">
+    <v-col cols="9" height="85vh" elevation="2">
       <v-card>
         <v-toolbar density="compact">
           <v-toolbar-title class="ml-2">工单进度</v-toolbar-title>

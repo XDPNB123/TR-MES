@@ -19,8 +19,15 @@ const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
 let searchName = ref<any>(null);
 let searchProjectCode = ref<any>(null);
 let searchDO = ref<any>(null);
-let searchStartDate = ref<any>(null);
-let searchEndDate = ref<any>(null);
+
+let nowDate = new Date();
+nowDate.setFullYear(nowDate.getFullYear() - 1);
+
+let oldDate = new Date();
+oldDate.setMonth(oldDate.getMonth() + 1);
+
+let searchStartDate = nowDate.toISOString().substring(0, 10);
+let searchEndDate = oldDate.toISOString().substring(0, 10);
 let searchType = ref<any>(null);
 let searchWorkCenter = ref<any>(null);
 let searchResult = ref<any>(null);
@@ -62,8 +69,8 @@ async function getQaData() {
     "get",
     undefined,
     {
-      start_time: searchStartDate.value,
-      end_time: searchEndDate.value,
+      start_time: searchStartDate,
+      end_time: searchEndDate,
       inspection_type: searchType.value,
       work_center_name: searchWorkCenter.value,
       material_name: searchName.value,
@@ -107,8 +114,8 @@ function resetFilter() {
     (searchDO.value = ""),
     (searchType.value = ""),
     (tablePerPage.value = 1);
-  (searchStartDate.value = ""),
-    (searchEndDate.value = ""),
+  (searchStartDate = nowDate.toISOString().substring(0, 10)),
+    (searchEndDate = oldDate.toISOString().substring(0, 10)),
     (searchResult.value = ""),
     (searchWorkCenter.value = "");
   getQaData();
@@ -182,7 +189,7 @@ async function saveQaInfo() {
     qaInfo.value.cause_nonconformity =
       qaInfo.value.cause_nonconformity.join(",");
   qaInfo.value.scan_time = new Date().toISOString().substring(0, 10);
-  
+
   await useHttp("/QaQatask/M41UpdateQaQatask", "put", qaInfo.value);
   getQaData();
   qaDialog.value = false;

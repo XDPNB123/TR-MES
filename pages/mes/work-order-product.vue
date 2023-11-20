@@ -112,10 +112,18 @@ let dialog = ref(false);
 // 工单搜索
 let searchTicketNumber = ref<string>("");
 let searchProjectNumber = ref<string>("");
-let startDate = ref("");
-let endDate = ref("");
-let startDateDetail = ref("");
-let endDateDetail = ref("");
+
+let nowDate = new Date();
+nowDate.setFullYear(nowDate.getFullYear() - 1);
+let startDate = nowDate.toISOString().substring(0, 10);
+
+let oldDate = new Date();
+oldDate.setMonth(oldDate.getMonth() + 1);
+let endDate = oldDate.toISOString().substring(0, 10);
+
+let startDateDetail = nowDate.toISOString().substring(0, 10);
+let endDateDetail = oldDate.toISOString().substring(0, 10);
+
 let searchTicketStatus = ref<string>("");
 let searchTicketType = ref("");
 let searchOutputs = ref<string>("");
@@ -728,8 +736,8 @@ function resetFilter() {
   searchTicketStatus.value = "";
   searchTicketNumber.value = "";
   searchTicketType.value = "";
-  startDate.value = "";
-  endDate.value = "";
+  startDate = nowDate.toISOString().substring(0, 10);
+  endDate = oldDate.toISOString().substring(0, 10);
   detailName.value = "";
   tablePage.value = 1;
   getWorkOrder();
@@ -748,8 +756,8 @@ async function filterTableDataDetail() {
 function resetFilterDetail() {
   searchOutputs.value = "";
   searchProjectNumber.value = "";
-  startDateDetail.value = "";
-  endDateDetail.value = "";
+  startDateDetail = nowDate.toISOString().substring(0, 10);
+  endDateDetail = oldDate.toISOString().substring(0, 10);
   tableDetailPage.value = 1;
   getWorkOrderDetail();
 }
@@ -774,8 +782,8 @@ async function getWorkOrder() {
         workorder_hid: searchTicketNumber.value,
         status: searchTicketStatus.value,
         workorder_type: searchTicketType.value,
-        start_date: startDate.value,
-        end_date: endDate.value,
+        start_date: startDate,
+        end_date: endDate,
       }
     );
     tableData.value = formatDate(data.data.pageList);
@@ -841,8 +849,8 @@ async function getWorkOrderDetail() {
         workorder_hid: detailName.value,
         mcode: searchOutputs.value,
         project_code: searchProjectNumber.value,
-        estimated_delivery_date: startDateDetail.value,
-        end_date: endDateDetail.value,
+        estimated_delivery_date: startDateDetail,
+        end_date: endDateDetail,
       }
     );
     tableDataDetail.value = formatDateDetail(data.data.pageList);
