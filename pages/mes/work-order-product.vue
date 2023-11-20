@@ -1927,7 +1927,8 @@ const dateRule = ref<any>([
                               class="mr-4"
                               v-show="
                                 !item.mdescription.includes('已拆批') &&
-                                !item.mdescription.includes('批次工单')
+                                !item.mdescription.includes('批次工单') &&
+                                item.status !== '正常完工'
                               "
                               @click="
                                 operatingTicketDetail = { ...item };
