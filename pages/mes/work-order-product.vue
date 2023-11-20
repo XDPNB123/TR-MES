@@ -1710,7 +1710,7 @@ const dateRule = ref<any>([
                           class=""
                           style="text-decoration: underline"
                           :class="{
-                            'bg-deep-purple text-white':
+                            'bg-teal text-white':
                               item.workorder_type === '机加',
                             'bg-light-green text-white':
                               item.workorder_type === '钣金',
