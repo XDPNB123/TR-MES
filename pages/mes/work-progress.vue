@@ -374,7 +374,7 @@ async function getProductList(item: any) {
                                   @{{ item_.work_center_name }}
                                 </div>
                                 <div style="flex-basis: 13%" v-else>
-                                  工作中心：未分配工作中心
+                                  未分配工作中心
                                 </div>
                               </div>
                             </template>
