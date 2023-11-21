@@ -948,7 +948,7 @@ function dyDispatchOrder() {
                 </div>
 
                 <v-row class="mt-3">
-                  <v-col cols="9">
+                  <v-col cols="8">
                     <div
                       v-if="tabArr1.length"
                       class="text-start text-h6 mt-3 ml-3 text-grey"
@@ -960,7 +960,7 @@ function dyDispatchOrder() {
                     </div>
                   </v-col>
 
-                  <v-col cols="3">
+                  <v-col cols="4">
                     <div class="d-flex justify-end">
                       <div class="mr-6">
                         <v-checkbox
