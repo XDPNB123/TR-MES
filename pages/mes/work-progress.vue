@@ -203,8 +203,11 @@ async function getProductList(item: any) {
           grow
           color="blue"
           direction="vertical"
+          next-icon="fa-solid fa-angle-down"
+          prev-icon="fa-solid fa-angle-up"
           show-arrows
           center-active
+          style="height: 65vh"
         >
           <v-tab
             v-for="(item, index) in projectCodeList"
