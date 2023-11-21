@@ -1718,7 +1718,7 @@ const dateRule = ref<any>([
                           class=""
                           style="text-decoration: underline"
                           :class="{
-                            'bg-teal text-white':
+                            'bg-purple text-white':
                               item.workorder_type === '机加',
                             'bg-light-green text-white':
                               item.workorder_type === '钣金',
@@ -1728,7 +1728,7 @@ const dateRule = ref<any>([
                               item.workorder_type === '模组装配',
                             'bg-black text-white':
                               item.workorder_type === '总装',
-                            'bg-purple text-white':
+                            'bg-teal text-white':
                               item.workorder_type === '其他',
                           }"
                         >
