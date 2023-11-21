@@ -236,6 +236,7 @@ onMounted(() => {
                 工序良品统计
               </v-toolbar-title>
             </v-toolbar>
+            
           </v-card>
         </v-window-item>
       </v-window>
