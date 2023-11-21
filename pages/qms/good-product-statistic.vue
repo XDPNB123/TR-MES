@@ -13,72 +13,43 @@ useSeoMeta({
   ogImage: "/同日图标.png",
 });
 let showingTab = ref<any>(null);
-//搜索
-let nowDate = new Date();
-nowDate.setFullYear(nowDate.getFullYear() - 1);
 
-let oldDate = new Date();
-oldDate.setMonth(oldDate.getMonth() + 1);
-
-let searchStartDate = nowDate.toISOString().substring(0, 10);
-let searchEndDate = oldDate.toISOString().substring(0, 10);
-let searchDO = ref<any>(null);
-let searchName = ref<any>(null);
-//存储质检状态为已处理质检单数据
-let qaList = ref<any[]>([]);
-//获取质检单的数据
-async function getQaData() {
+let searchTicketNumber = ref<any>(null);
+watch(searchTicketNumber, function () {
+  getWorkOrder();
+});
+//工单编号
+let workOrderList = ref<any[]>([]);
+let tablePage = ref<number>(1);
+watch(tablePage, function () {
+  getWorkOrder();
+});
+//一共有多少行工单数据
+let tableDataLength = ref<number>(0);
+// 工单表格有多少页
+let tablePageCount = computed(() => {
+  return Math.ceil(tableDataLength.value / 10);
+});
+async function getWorkOrder() {
   const data: any = await useHttp(
-    "/QaQatask/M39GetQaQataskList",
+    "/MesWorkOrder/M01GetWorkOrderList",
     "get",
     undefined,
     {
-      dispatch_order: searchDO.value,
-      material_name: searchName.value,
-      start_time: searchStartDate,
-      end_time: searchEndDate,
-      inspection_status: "已处理",
-      scan_result: "部分合格,不合格",
-      PageIndex: 1,
-      PageSize: 100000,
-      SortedBy: "dispatch_order",
-      SortType: 0,
+      workorder_hid: searchTicketNumber.value,
+      PageIndex: tablePage.value,
+      PageSize: 10,
+      SortType: 1,
+      SortedBy: "id",
     }
   );
-
-  qaList.value = data.data.pageList.map((item: any) => {
-    if (item.create_time) item.create_time = item.create_time.substring(0, 10);
-    return item;
-  });
-  let grouped = qaList.value.reduce((acc: any, cur: any) => {
-    if (
-      !acc[cur.dispatch_order] ||
-      acc[cur.dispatch_order].non_conforming_quantity <
-        cur.non_conforming_quantity
-    ) {
-      acc[cur.dispatch_order] = cur;
-    }
-    return acc;
-  }, {});
-
-  qaList.value = Object.values(grouped);
+  workOrderList.value = data.data.pageList;
+  tableDataLength.value = data.data.totalCount;
 }
-
-//重置搜索
-function resetFilter() {
-  (searchName.value = ""),
-    (searchDO.value = ""),
-    (searchStartDate = nowDate.toISOString().substring(0, 10)),
-    (searchEndDate = oldDate.toISOString().substring(0, 10)),
-    getQaData();
-}
-//搜素
-async function filter() {
-  getQaData();
-}
-
+//查询当前工单下的工单明细的良品统计
+async function showProcess(item: any) {}
 onMounted(() => {
-  getQaData();
+  getWorkOrder();
 });
 </script>
 
@@ -87,146 +58,63 @@ onMounted(() => {
     <v-col cols="1" class="py-3 pl-3 pr-2">
       <v-card height="85vh">
         <v-toolbar density="compact">
-          <v-toolbar-title class="text-center ml-0 text-blue font-weight-bold"
-            >页面</v-toolbar-title
-          >
+          <v-toolbar-title class="text-center ml-0 text-blue font-weight-bold">
+            页面
+          </v-toolbar-title>
         </v-toolbar>
         <v-tabs color="blue" direction="vertical" v-model="showingTab">
-          <v-tab value="派工单统计">派工单统计</v-tab>
+          <v-tab value="工单统计">工单统计</v-tab>
           <v-tab value="工序统计">工序统计</v-tab>
         </v-tabs>
       </v-card>
     </v-col>
     <v-col cols="11" class="py-3 pr-3">
       <v-window v-model="showingTab">
-        <v-window-item value="派工单统计">
-          <v-card elevation="2" height="85vh">
-            <v-toolbar density="compact">
-              <v-toolbar-title class="ml-2 text-blue font-weight-bold">
-                派工单良品统计
-              </v-toolbar-title>
-            </v-toolbar>
-            <v-row class="ma-2">
-              <v-col cols="3">
+        <v-window-item value="工单统计">
+          <v-row no-gutters>
+            <v-col cols="2" class="pr-2">
+              <v-card height="85vh">
+                <v-toolbar density="compact">
+                  <v-toolbar-title class="ml-2 text-blue font-weight-bold">
+                    工单号
+                  </v-toolbar-title>
+                </v-toolbar>
                 <v-text-field
-                  label="最早创建日期"
-                  v-model="searchStartDate"
+                  label="工单编号"
                   variant="outlined"
                   density="compact"
+                  v-model="searchTicketNumber"
                   hide-details
-                  clearable
-                  type="date"
+                  class="ma-2"
                 ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="最晚创建日期"
-                  v-model="searchEndDate"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  clearable
-                  type="date"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="派工单号"
-                  v-model="searchDO"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  clearable
-                ></v-text-field>
-              </v-col>
-              <v-col cols="3">
-                <v-text-field
-                  label="物料名称"
-                  v-model="searchName"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  clearable
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-btn
-                  color="blue-darken-2"
-                  class="mr-2"
-                  size="large"
-                  @click="filter"
-                  >查询</v-btn
-                >
-                <v-btn
-                  color="red"
-                  class="mr-2"
-                  size="large"
-                  @click="resetFilter"
-                >
-                  重置查询
-                </v-btn>
-              </v-col>
-              <v-col cols="12">
-                <div class="overflow-y-auto" style="height: 63vh">
-                  <v-list
-                    v-for="(item, index) in qaList"
-                    :key="index"
+                <v-list v-for="(item, index) in workOrderList" :key="index">
+                  <v-list-item @click="showProcess(item)">
+                    <template v-slot:default>
+                      <div>
+                        {{ item.workorder_hid }}
+                      </div>
+                    </template>
+                  </v-list-item>
+                </v-list>
+                <div class="text-center pt-2">
+                  <v-pagination
                     density="compact"
-                    class="ma-2 elevation-2 rounded-lg"
-                  >
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div class="d-flex">
-                          <div style="flex-basis: 12%">
-                            不良品率：
-                            <v-progress-circular
-                              :rotate="90"
-                              :size="60"
-                              :width="10"
-                              color="red"
-                              :model-value="
-                                Math.round(
-                                  (item.non_conforming_quantity /
-                                    item.inspection_quantity) *
-                                    100
-                                ) + '%'
-                              "
-                            >
-                              {{
-                                Math.round(
-                                  (item.non_conforming_quantity /
-                                    item.inspection_quantity) *
-                                    100
-                                ) + "%"
-                              }}
-                            </v-progress-circular>
-                          </div>
-                          <div style="flex-basis: 15%" class="mt-4">
-                            派工单号：{{ item.dispatch_order }}
-                          </div>
-                          <div style="flex-basis: 15%" class="mt-4">
-                            创建时间：{{ item.create_time }}
-                          </div>
-                          <div style="flex-basis: 10%" class="mt-4">
-                            质检数量：{{ item.inspection_quantity }}
-                          </div>
-                          <div style="flex-basis: 10%" class="mt-4">
-                            不良品：{{ item.non_conforming_quantity }}
-                          </div>
-                          <div style="flex-basis: 20%" class="mt-4">
-                            工序：[{{ item.procedure_description }}]
-                          </div>
-                          <div style="flex-basis: 25%" class="mt-4">
-                            物料名称：{{ item.material_name }}
-                          </div>
-                        </div>
-                      </template>
-                    </v-list-item>
-                  </v-list>
+                    v-model="tablePage"
+                    :length="tablePageCount"
+                  ></v-pagination>
                 </div>
-              </v-col>
-            </v-row>
-          </v-card>
+              </v-card>
+            </v-col>
+            <v-col cols="10">
+              <v-card>
+                <v-toolbar density="compact">
+                  <v-toolbar-title class="ml-2 text-blue font-weight-bold">
+                    工单明细
+                  </v-toolbar-title>
+                </v-toolbar>
+              </v-card>
+            </v-col>
+          </v-row>
         </v-window-item>
 
         <v-window-item value="工序统计">
@@ -236,7 +124,6 @@ onMounted(() => {
                 工序良品统计
               </v-toolbar-title>
             </v-toolbar>
-            
           </v-card>
         </v-window-item>
       </v-window>
