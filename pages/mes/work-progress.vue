@@ -52,6 +52,7 @@ async function getProjectCode() {
     }
   );
   projectCodeList.value = data.data;
+ 
 }
 //搜索项目号
 function filter() {
@@ -222,9 +223,9 @@ async function getProductList(item: any) {
     <v-col cols="9">
       <v-card height="85vh" elevation="2" class="overflow-y-auto">
         <v-toolbar density="compact">
-          <v-toolbar-title class="ml-2" v-if="workProject"
-            >项目号【{{ workProject }}】的工单进度</v-toolbar-title
-          >
+          <v-toolbar-title class="ml-2" v-if="workProject">
+            项目号【{{ workProject }}】的工单进度
+            </v-toolbar-title>
           <v-toolbar-title class="ml-2" v-else>工单进度</v-toolbar-title>
         </v-toolbar>
         <v-card-text>

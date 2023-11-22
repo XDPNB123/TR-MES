@@ -58,14 +58,10 @@ async function getWorkOrder() {
 
 //搜索项目号
 function filter() {
+  tablePage.value = 1;
   getWorkOrder();
 }
-//重置搜索
-function resetFilter() {
-  startDate = nowDate.toISOString().substring(0, 10);
-  endDate = oldDate.toISOString().substring(0, 10);
-  getWorkOrder();
-}
+
 //存储工单明细的信息
 let workOrderDetailList = ref<any[]>([]);
 //存储工单编号
@@ -123,6 +119,7 @@ onMounted(() => {
                       density="compact"
                       v-model="startDate"
                       type="date"
+                      class="mt-2"
                       hide-details
                     >
                     </v-text-field>
@@ -134,6 +131,7 @@ onMounted(() => {
                       variant="outlined"
                       density="compact"
                       v-model="endDate"
+                      class="mt-2"
                       hide-details
                     >
                     </v-text-field>
@@ -150,8 +148,8 @@ onMounted(() => {
                   <v-col cols="6">
                     <v-btn
                       color="blue-darken-2"
-                      class="mr-1 mt-2"
-                      size="default"
+                      class="mr-1"
+                      size="large"
                       @click="filter"
                       >搜索</v-btn
                     >
