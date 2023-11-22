@@ -13,7 +13,7 @@ useSeoMeta({
   ogImage: "/同日图标.png",
 });
 let showingTab = ref<any>(null);
-
+//搜索
 let searchTicketNumber = ref<any>(null);
 let nowDate = new Date();
 nowDate.setFullYear(nowDate.getFullYear() - 1);
@@ -23,6 +23,9 @@ let oldDate = new Date();
 oldDate.setMonth(oldDate.getMonth() + 1);
 let endDate = oldDate.toISOString().substring(0, 10);
 
+let searchName = ref<any>(null);
+let startDateInfo = nowDate.toISOString().substring(0, 10);
+let endDateInfo = oldDate.toISOString().substring(0, 10);
 watch(searchTicketNumber, function () {
   getWorkOrder();
 });
@@ -45,6 +48,8 @@ async function getWorkOrder() {
     "get",
     undefined,
     {
+      start_date: startDate,
+      end_date: endDate,
       workorder_hid: searchTicketNumber.value,
       PageIndex: tablePage.value,
       PageSize: 10,
@@ -78,15 +83,42 @@ async function showProcess(item: any) {
     }
   );
   workOrderDetailList.value = data.data;
-  console.log(workOrderDetailList.value);
 }
 onMounted(() => {
   getWorkOrder();
 });
+//存储工序中的良品统计
+let produceList = ref<any[]>([]);
+//获取工序数据
+async function getProduceData() {
+  const data: any = await useHttp(
+    "/MesWorkProcess/M80ProcedureProductStatistics",
+    "get",
+    undefined,
+    {
+      procedure_id: "",
+      procedure_name: searchName.value,
+      start_time: startDateInfo,
+      end_time: endDateInfo,
+    }
+  );
+  produceList.value = data.data;
+}
+//搜素
+function filterData() {
+  getProduceData();
+}
+//重置搜索
+function resetFilterData() {
+  (searchName.value = ""),
+    (startDateInfo = nowDate.toISOString().substring(0, 10));
+  endDateInfo = oldDate.toISOString().substring(0, 10);
+  getProduceData();
+}
 </script>
 
 <template>
-  <v-row no-gutters style="height: calc(100vh - 84px)">
+  <v-row no-gutters>
     <v-col cols="1" class="py-3 pl-3 pr-2">
       <v-card height="85vh">
         <v-toolbar density="compact">
@@ -96,7 +128,7 @@ onMounted(() => {
         </v-toolbar>
         <v-tabs color="blue" direction="vertical" v-model="showingTab">
           <v-tab value="工单统计">工单统计</v-tab>
-          <v-tab value="工序统计">工序统计</v-tab>
+          <v-tab value="工序统计" @click="getProduceData">工序统计</v-tab>
         </v-tabs>
       </v-card>
     </v-col>
@@ -111,10 +143,10 @@ onMounted(() => {
                     工单号
                   </v-toolbar-title>
                 </v-toolbar>
-                <v-row>
+                <v-row class="ma-1">
                   <v-col cols="6">
                     <v-text-field
-                      label="最早计划 开始日期"
+                      label="最早计划开始日期"
                       variant="outlined"
                       density="compact"
                       v-model="startDate"
@@ -177,7 +209,7 @@ onMounted(() => {
               </v-card>
             </v-col>
             <v-col cols="9">
-              <v-card height="85vh" class="overflow-y-auto">
+              <v-card height="85vh">
                 <v-toolbar density="compact">
                   <v-toolbar-title
                     class="ml-2 text-blue font-weight-bold"
@@ -192,82 +224,199 @@ onMounted(() => {
                     工单明细
                   </v-toolbar-title>
                 </v-toolbar>
-                <v-list
-                  v-for="(item, index) in workOrderDetailList"
-                  :key="index"
-                >
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="d-flex">
-                        <div style="flex-basis: 15%">
-                          良品统计：
-                          <v-progress-circular
-                            :rotate="360"
-                            :size="60"
-                            :width="10"
-                            :model-value="
-                              Math.round(
-                                (item.qualified_quantity /
-                                  item.planned_quantity) *
-                                  100
-                              ) + '%'
-                            "
-                            :color="
-                              Math.round(
-                                (item.qualified_quantity /
-                                  item.planned_quantity) *
-                                  100
-                              ) >= 80
-                                ? 'green'
-                                : 'red'
-                            "
-                          >
-                            {{
-                              Math.round(
-                                (item.qualified_quantity /
-                                  item.planned_quantity) *
-                                  100
-                              ) + "%"
-                            }}
-                          </v-progress-circular>
+                <div style="height: 80vh" class="overflow-y-auto">
+                  <v-list
+                    v-for="(item, index) in workOrderDetailList"
+                    :key="index"
+                  >
+                    <v-list-item>
+                      <template v-slot:default>
+                        <div class="d-flex">
+                          <div style="flex-basis: 15%">
+                            良品统计：
+                            <v-progress-circular
+                              :rotate="360"
+                              :size="60"
+                              :width="10"
+                              :model-value="
+                                Math.round(
+                                  (item.qualified_quantity /
+                                    item.planned_quantity) *
+                                    100
+                                ) + '%'
+                              "
+                              :color="
+                                Math.round(
+                                  (item.qualified_quantity /
+                                    item.planned_quantity) *
+                                    100
+                                ) >= 80
+                                  ? 'green'
+                                  : 'red'
+                              "
+                            >
+                              {{
+                                Math.round(
+                                  (item.qualified_quantity /
+                                    item.planned_quantity) *
+                                    100
+                                ) + "%"
+                              }}
+                            </v-progress-circular>
+                          </div>
+                          <div style="flex-basis: 20%" class="mt-4">
+                            工单明细号：
+                            {{ item.workorder_did }}
+                          </div>
+                          <div style="flex-basis: 12%" class="mt-4">
+                            计划数量：
+                            {{ item.planned_quantity }}
+                          </div>
+                          <div style="flex-basis: 12%" class="mt-4">
+                            良品数量：
+                            {{ item.qualified_quantity }}
+                          </div>
+                          <div style="flex-basis: 15%" class="mt-4">
+                            状态：
+                            {{ item.status }}
+                          </div>
+                          <div style="flex-basis: 25%" class="mt-4">
+                            产出料：
+                            {{ item.mdescription }}
+                          </div>
                         </div>
-                        <div style="flex-basis: 20%" class="mt-4">
-                          工单明细号：
-                          {{ item.workorder_did }}
-                        </div>
-                        <div style="flex-basis: 12%" class="mt-4">
-                          计划数量：
-                          {{ item.planned_quantity }}
-                        </div>
-                        <div style="flex-basis: 12%" class="mt-4">
-                          良品数量：
-                          {{ item.qualified_quantity }}
-                        </div>
-                        <div style="flex-basis: 15%" class="mt-4">
-                          状态：
-                          {{ item.status }}
-                        </div>
-                        <div style="flex-basis: 25%" class="mt-4">
-                          产出料：
-                          {{ item.mdescription }}
-                        </div>
-                      </div>
-                    </template>
-                  </v-list-item>
-                </v-list>
+                      </template>
+                    </v-list-item>
+                    <v-divider :thickness="3" color="info"></v-divider>
+                  </v-list>
+                </div>
               </v-card>
             </v-col>
           </v-row>
         </v-window-item>
 
         <v-window-item value="工序统计">
-          <v-card>
-            <v-toolbar density="compact">
-              <v-toolbar-title class="ml-2 text-blue font-weight-bold">
-                工序良品统计
-              </v-toolbar-title>
-            </v-toolbar>
-          </v-card>
+          <v-row no-gutters>
+            <v-col cols="12">
+              <v-card height="85vh">
+                <v-toolbar density="compact">
+                  <v-toolbar-title class="ml-2 text-blue font-weight-bold">
+                    良品统计
+                  </v-toolbar-title>
+                </v-toolbar>
+                <v-row>
+                  <v-col cols="4">
+                    <v-text-field
+                      label="最早计划开始日期"
+                      variant="outlined"
+                      density="compact"
+                      v-model="startDateInfo"
+                      type="date"
+                      class="mt-2"
+                      hide-details
+                    >
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      label="最晚计划开始日期"
+                      type="date"
+                      variant="outlined"
+                      density="compact"
+                      v-model="endDateInfo"
+                      class="mt-2"
+                      hide-details
+                    >
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      label="工序名称"
+                      variant="outlined"
+                      density="compact"
+                      v-model="searchName"
+                      class="mt-2"
+                      hide-details
+                    >
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-btn
+                      color="blue-darken-2"
+                      class="mr-2 mt-2"
+                      size="default"
+                      @click="filterData"
+                      >搜索</v-btn
+                    >
+                    <v-btn
+                      color="red"
+                      class="mr-2 mt-2"
+                      size="default"
+                      @click="resetFilterData"
+                      >重置搜索</v-btn
+                    >
+                  </v-col>
+                  <v-col cols="12">
+                    <div style="height: 60vh" class="overflow-y-auto">
+                      <v-list v-for="(item, index) in produceList" :key="index">
+                        <v-list-item>
+                          <template v-slot:default>
+                            <div class="d-flex">
+                              <div style="flex-basis: 15%">
+                                良品统计：
+                                <v-progress-circular
+                                  :rotate="360"
+                                  :size="60"
+                                  :width="10"
+                                  :model-value="
+                                    Math.round(
+                                      (item.total_qualified /
+                                        item.total_inspection_quantity) *
+                                        100
+                                    ) + '%'
+                                  "
+                                  :color="
+                                    Math.round(
+                                      (item.total_qualified /
+                                        item.total_inspection_quantity) *
+                                        100
+                                    ) >= 80
+                                      ? 'green'
+                                      : 'red'
+                                  "
+                                >
+                                  {{
+                                    Math.round(
+                                      (item.total_qualified /
+                                        item.total_inspection_quantity) *
+                                        100
+                                    ) + "%"
+                                  }}
+                                </v-progress-circular>
+                              </div>
+                              <div style="flex-basis: 15%" class="mt-4">
+                                [{{ item.procedure_name }}]
+                              </div>
+                              <div style="flex-basis: 15%" class="mt-4">
+                                质检数量：{{ item.total_inspection_quantity }}
+                              </div>
+                              <div style="flex-basis: 15%" class="mt-4">
+                                良品数量：{{ item.total_qualified }}
+                              </div>
+                              <div style="flex-basis: 15%" class="mt-4">
+                                不良品数量：{{ item.totalnon_conforming }}
+                              </div>
+                            </div>
+                          </template>
+                        </v-list-item>
+                        <v-divider :thickness="3" color="info"></v-divider>
+                      </v-list>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-card>
+            </v-col>
+          </v-row>
         </v-window-item>
       </v-window>
     </v-col>

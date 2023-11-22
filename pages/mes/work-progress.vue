@@ -52,7 +52,6 @@ async function getProjectCode() {
     }
   );
   projectCodeList.value = data.data;
- 
 }
 //搜索项目号
 function filter() {
@@ -206,7 +205,6 @@ async function getProductList(item: any) {
           next-icon="fa-solid fa-angle-down"
           prev-icon="fa-solid fa-angle-up"
           show-arrows
-          center-active
           style="height: 65vh"
         >
           <v-tab
@@ -214,8 +212,8 @@ async function getProductList(item: any) {
             :key="index"
             :value="index"
             @click="showProgress(item)"
-            >{{ item }}</v-tab
-          >
+            >{{ item }}
+          </v-tab>
         </v-tabs>
       </v-card>
     </v-col>
@@ -225,7 +223,7 @@ async function getProductList(item: any) {
         <v-toolbar density="compact">
           <v-toolbar-title class="ml-2" v-if="workProject">
             项目号【{{ workProject }}】的工单进度
-            </v-toolbar-title>
+          </v-toolbar-title>
           <v-toolbar-title class="ml-2" v-else>工单进度</v-toolbar-title>
         </v-toolbar>
         <v-card-text>
