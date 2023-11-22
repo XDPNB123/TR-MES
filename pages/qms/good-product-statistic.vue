@@ -239,16 +239,22 @@ function resetFilterData() {
                               :size="60"
                               :width="10"
                               :model-value="
-                                Math.round(
-                                  (item.qualified_quantity /
-                                    item.planned_quantity) *
-                                    100
-                                ) + '%'
+                                item.qualified_quantity +
+                                  item.non_conforming_quantity ===
+                                0
+                                  ? 0 + '%'
+                                  : Math.round(
+                                      (item.qualified_quantity /
+                                        (item.qualified_quantity +
+                                          item.non_conforming_quantity)) *
+                                        100
+                                    ) + '%'
                               "
                               :color="
                                 Math.round(
                                   (item.qualified_quantity /
-                                    item.planned_quantity) *
+                                    (item.qualified_quantity +
+                                      item.non_conforming_quantity)) *
                                     100
                                 ) >= 80
                                   ? 'green'
@@ -256,11 +262,16 @@ function resetFilterData() {
                               "
                             >
                               {{
-                                Math.round(
-                                  (item.qualified_quantity /
-                                    item.planned_quantity) *
-                                    100
-                                ) + "%"
+                                item.qualified_quantity +
+                                  item.non_conforming_quantity ===
+                                0
+                                  ? 0 + "%"
+                                  : Math.round(
+                                      (item.qualified_quantity /
+                                        (item.qualified_quantity +
+                                          item.non_conforming_quantity)) *
+                                        100
+                                    ) + "%"
                               }}
                             </v-progress-circular>
                           </div>
@@ -268,13 +279,14 @@ function resetFilterData() {
                             工单明细号：
                             {{ item.workorder_did }}
                           </div>
-                          <div style="flex-basis: 12%" class="mt-4">
-                            计划数量：
-                            {{ item.planned_quantity }}
-                          </div>
+
                           <div style="flex-basis: 12%" class="mt-4">
                             良品数量：
                             {{ item.qualified_quantity }}
+                          </div>
+                          <div style="flex-basis: 12%" class="mt-4">
+                            不良品数量：
+                            {{ item.non_conforming_quantity }}
                           </div>
                           <div style="flex-basis: 15%" class="mt-4">
                             状态：
