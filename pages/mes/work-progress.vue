@@ -25,12 +25,14 @@ let tab2 = ref<any>(null);
 
 let nowDate = new Date();
 nowDate.setFullYear(nowDate.getFullYear() - 1);
-let startDate = nowDate.toISOString().substring(0, 10);
-
 let oldDate = new Date();
 oldDate.setMonth(oldDate.getMonth() + 1);
-let endDate = oldDate.toISOString().substring(0, 10);
+let startDate = ref<any>(null);
+let endDate = ref<any>(null);
 onMounted(() => {
+  startDate.value = nowDate.toISOString().substring(0, 10);
+
+  endDate.value = oldDate.toISOString().substring(0, 10);
   getProjectCode();
 });
 //项目号搜素
@@ -47,8 +49,8 @@ async function getProjectCode() {
     undefined,
     {
       code: projectCode.value,
-      start_time: startDate,
-      end_time: endDate,
+      start_time: startDate.value,
+      end_time: endDate.value,
     }
   );
   projectCodeList.value = data.data;
@@ -60,8 +62,8 @@ function filter() {
 //重置搜索
 function resetFilter() {
   (projectCode.value = ""),
-    (startDate = nowDate.toISOString().substring(0, 10));
-  endDate = oldDate.toISOString().substring(0, 10);
+    (startDate.value = nowDate.toISOString().substring(0, 10));
+  endDate.value = oldDate.toISOString().substring(0, 10);
   getProjectCode();
 }
 //获取工单明细数据

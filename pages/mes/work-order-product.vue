@@ -115,14 +115,12 @@ let searchProjectNumber = ref<string>("");
 
 let nowDate = new Date();
 nowDate.setFullYear(nowDate.getFullYear() - 1);
-let startDate = nowDate.toISOString().substring(0, 10);
-
 let oldDate = new Date();
 oldDate.setMonth(oldDate.getMonth() + 1);
-let endDate = oldDate.toISOString().substring(0, 10);
-
-let startDateDetail = nowDate.toISOString().substring(0, 10);
-let endDateDetail = oldDate.toISOString().substring(0, 10);
+let startDate = ref<any>(null);
+let endDate = ref<any>(null);
+let startDateDetail = ref<any>(null);
+let endDateDetail = ref<any>(null);
 
 let searchTicketStatus = ref<string>("");
 let searchTicketType = ref("");
@@ -736,8 +734,8 @@ function resetFilter() {
   searchTicketStatus.value = "";
   searchTicketNumber.value = "";
   searchTicketType.value = "";
-  startDate = nowDate.toISOString().substring(0, 10);
-  endDate = oldDate.toISOString().substring(0, 10);
+  startDate.value = nowDate.toISOString().substring(0, 10);
+  endDate.value = oldDate.toISOString().substring(0, 10);
   detailName.value = "";
   tablePage.value = 1;
   getWorkOrder();
@@ -756,13 +754,17 @@ async function filterTableDataDetail() {
 function resetFilterDetail() {
   searchOutputs.value = "";
   searchProjectNumber.value = "";
-  startDateDetail = nowDate.toISOString().substring(0, 10);
-  endDateDetail = oldDate.toISOString().substring(0, 10);
+  startDateDetail.value = nowDate.toISOString().substring(0, 10);
+  endDateDetail.value = oldDate.toISOString().substring(0, 10);
   tableDetailPage.value = 1;
   getWorkOrderDetail();
 }
 //页面加载时获取数据
 onMounted(async () => {
+  startDate.value = nowDate.toISOString().substring(0, 10);
+  endDate.value = oldDate.toISOString().substring(0, 10);
+  startDateDetail.value = nowDate.toISOString().substring(0, 10);
+  endDateDetail.value = oldDate.toISOString().substring(0, 10);
   getWorkOrder();
   getWorkOrderDetail();
 });
@@ -782,8 +784,8 @@ async function getWorkOrder() {
         workorder_hid: searchTicketNumber.value,
         status: searchTicketStatus.value,
         workorder_type: searchTicketType.value,
-        start_date: startDate,
-        end_date: endDate,
+        start_date: startDate.value,
+        end_date: endDate.value,
       }
     );
     tableData.value = formatDate(data.data.pageList);
@@ -849,8 +851,8 @@ async function getWorkOrderDetail() {
         workorder_hid: detailName.value,
         mcode: searchOutputs.value,
         project_code: searchProjectNumber.value,
-        estimated_delivery_date: startDateDetail,
-        end_date: endDateDetail,
+        estimated_delivery_date: startDateDetail.value,
+        end_date: endDateDetail.value,
       }
     );
     tableDataDetail.value = formatDateDetail(data.data.pageList);

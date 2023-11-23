@@ -15,17 +15,16 @@ useSeoMeta({
 let showingTab = ref<any>(null);
 //搜索
 let searchTicketNumber = ref<any>(null);
+let searchName = ref<any>(null);
 let nowDate = new Date();
 nowDate.setFullYear(nowDate.getFullYear() - 1);
-let startDate = nowDate.toISOString().substring(0, 10);
-
 let oldDate = new Date();
 oldDate.setMonth(oldDate.getMonth() + 1);
-let endDate = oldDate.toISOString().substring(0, 10);
 
-let searchName = ref<any>(null);
-let startDateInfo = nowDate.toISOString().substring(0, 10);
-let endDateInfo = oldDate.toISOString().substring(0, 10);
+let startDate = ref<any>(null);
+let endDate = ref<any>(null);
+let startDateInfo = ref<any>(null);
+let endDateInfo = ref<any>(null);
 watch(searchTicketNumber, function () {
   getWorkOrder();
 });
@@ -48,8 +47,8 @@ async function getWorkOrder() {
     "get",
     undefined,
     {
-      start_date: startDate,
-      end_date: endDate,
+      start_date: startDate.value,
+      end_date: endDate.value,
       workorder_hid: searchTicketNumber.value,
       PageIndex: tablePage.value,
       PageSize: 10,
@@ -85,6 +84,10 @@ async function showProcess(item: any) {
   workOrderDetailList.value = data.data;
 }
 onMounted(() => {
+  startDate.value = nowDate.toISOString().substring(0, 10);
+  endDate.value = oldDate.toISOString().substring(0, 10);
+  startDateInfo.value = nowDate.toISOString().substring(0, 10);
+  endDateInfo.value = oldDate.toISOString().substring(0, 10);
   getWorkOrder();
 });
 //存储工序中的良品统计
@@ -98,8 +101,8 @@ async function getProduceData() {
     {
       procedure_id: "",
       procedure_name: searchName.value,
-      start_time: startDateInfo,
-      end_time: endDateInfo,
+      start_time: startDateInfo.value,
+      end_time: endDateInfo.value,
     }
   );
   produceList.value = data.data;
@@ -111,8 +114,8 @@ function filterData() {
 //重置搜索
 function resetFilterData() {
   (searchName.value = ""),
-    (startDateInfo = nowDate.toISOString().substring(0, 10));
-  endDateInfo = oldDate.toISOString().substring(0, 10);
+    (startDateInfo.value = nowDate.toISOString().substring(0, 10));
+  endDateInfo.value = oldDate.toISOString().substring(0, 10);
   getProduceData();
 }
 </script>

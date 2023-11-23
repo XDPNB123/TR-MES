@@ -26,8 +26,8 @@ nowDate.setFullYear(nowDate.getFullYear() - 1);
 let oldDate = new Date();
 oldDate.setMonth(oldDate.getMonth() + 1);
 
-let searchStartDate = nowDate.toISOString().substring(0, 10);
-let searchEndDate = oldDate.toISOString().substring(0, 10);
+let searchStartDate = ref<any>(null);
+let searchEndDate = ref<any>(null);
 let searchType = ref<any>(null);
 let searchWorkCenter = ref<any>(null);
 let searchResult = ref<any>(null);
@@ -69,8 +69,8 @@ async function getQaData() {
     "get",
     undefined,
     {
-      start_time: searchStartDate,
-      end_time: searchEndDate,
+      start_time: searchStartDate.value,
+      end_time: searchEndDate.value,
       inspection_type: searchType.value,
       work_center_name: searchWorkCenter.value,
       material_name: searchName.value,
@@ -114,8 +114,8 @@ function resetFilter() {
     (searchDO.value = ""),
     (searchType.value = ""),
     (tablePerPage.value = 1);
-  (searchStartDate = nowDate.toISOString().substring(0, 10)),
-    (searchEndDate = oldDate.toISOString().substring(0, 10)),
+  (searchStartDate.value = nowDate.toISOString().substring(0, 10)),
+    (searchEndDate.value = oldDate.toISOString().substring(0, 10)),
     (searchResult.value = ""),
     (searchWorkCenter.value = "");
   getQaData();
@@ -126,6 +126,8 @@ async function filter() {
   await getQaData();
 }
 onMounted(() => {
+  searchStartDate.value = nowDate.toISOString().substring(0, 10);
+  searchEndDate.value = oldDate.toISOString().substring(0, 10);
   getQaData();
   getWorkCenterData();
 });
