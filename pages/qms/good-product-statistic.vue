@@ -20,6 +20,10 @@ let nowDate = new Date();
 nowDate.setFullYear(nowDate.getFullYear() - 1);
 let oldDate = new Date();
 oldDate.setMonth(oldDate.getMonth() + 1);
+let nowDate2 = new Date();
+nowDate2.setDate(nowDate2.getDate() - 7);
+let oldDate2 = new Date();
+oldDate2.setDate(oldDate2.getDate() + 7);
 
 let startDate = ref<any>(null);
 let endDate = ref<any>(null);
@@ -86,8 +90,8 @@ async function showProcess(item: any) {
 onMounted(() => {
   startDate.value = nowDate.toISOString().substring(0, 10);
   endDate.value = oldDate.toISOString().substring(0, 10);
-  startDateInfo.value = nowDate.toISOString().substring(0, 10);
-  endDateInfo.value = oldDate.toISOString().substring(0, 10);
+  startDateInfo.value = nowDate2.toISOString().substring(0, 10);
+  endDateInfo.value = oldDate2.toISOString().substring(0, 10);
   getWorkOrder();
 });
 //存储工序中的良品统计
@@ -114,8 +118,8 @@ function filterData() {
 //重置搜索
 function resetFilterData() {
   (searchName.value = ""),
-    (startDateInfo.value = nowDate.toISOString().substring(0, 10));
-  endDateInfo.value = oldDate.toISOString().substring(0, 10);
+    (startDateInfo.value = nowDate2.toISOString().substring(0, 10));
+  endDateInfo.value = oldDate2.toISOString().substring(0, 10);
   getProduceData();
 }
 </script>
