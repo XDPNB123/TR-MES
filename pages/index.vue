@@ -52,7 +52,6 @@ function goToLogin() {
         min-width="200px"
         width="400px"
         @click="goToLogin()"
-        v-permission="`${router.currentRoute.value.fullPath}->login`"
         >去登陆
       </v-btn>
     </div>

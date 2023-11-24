@@ -8,7 +8,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       // 获取 btnList，注意 useCookie 会自动进行 JSON.parse
       const btnList = useCookie("btnList").value as any;
       // 如果按钮权限不存在
-      if (!btnList.includes(binding.value))
+
+
+      if (btnList&&!btnList.includes(binding.value))
         // 移除该按钮
         el.parentNode && el.parentNode.removeChild(el);
     },
