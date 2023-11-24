@@ -142,6 +142,12 @@ const pageMenus = ref<any[]>([
         path: "/work-basic/process-maintenance",
         icon: "fa-solid fa-screwdriver-wrench",
       },
+      {
+        parentName: "MES",
+        name: "权限管理",
+        path: "/work-basic/permission-design",
+        icon: "fa-solid fa-screwdriver-wrench",
+      },
     ],
   },
 ]);
