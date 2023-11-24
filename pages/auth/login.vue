@@ -108,6 +108,8 @@ async function passwordLogin() {
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
 
+  // 登陆成功，获取用户的所有权限
+
   // 登陆成功的提示
   setSnackbar("green", "登陆成功，正在跳转...");
 

@@ -168,6 +168,15 @@ export const usePermissionStore = defineStore("permissionStore", () => {
           path: "/work-basic/process-maintenance",
           icon: "fa-solid fa-screwdriver-wrench",
         },
+        {
+          id: "",
+          pid: "",
+          show: true,
+          parentName: "MES",
+          name: "权限管理",
+          path: "/work-basic/permission-design",
+          icon: "fa-solid fa-gears",
+        },
       ],
     },
   ]);
