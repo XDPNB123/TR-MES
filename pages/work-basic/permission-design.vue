@@ -183,6 +183,7 @@ function showAddBtn(item: any) {
               color="blue-darken-2"
               class="mx-2"
               size="large"
+              v-if="folderInfo"
               @click="showAddPage"
             >
               新增页面权限
