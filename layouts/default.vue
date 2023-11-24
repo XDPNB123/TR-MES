@@ -1,8 +1,4 @@
 <script setup lang="ts">
-// 引入 store
-import { usePermissionStore } from "~/store/global-store";
-// 创建 store
-const permissionStore = usePermissionStore();
 // 使用路由
 const router = useRouter();
 
@@ -34,7 +30,7 @@ const userMenus = ref<any[]>([
 ]);
 
 // 此处定义页面菜单
-const pageMenus = ref<any[]>(permissionStore.pagePermission);
+const pageMenus = ref<any[]>();
 
 // tabs 类型
 type TabType = {
@@ -111,6 +107,9 @@ watch(
   },
   { deep: true }
 );
+onMounted(() => {
+  pageMenus.value = useListToTree(useCookie("menuList").value);
+});
 </script>
 
 <template>

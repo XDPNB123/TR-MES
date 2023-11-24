@@ -2,17 +2,13 @@
 // plugins 下 .server 结尾的插件表示【服务端】生效
 // plugins 下 直接以 ts 结尾的插件表示客户端和服务端都会生效
 
-// 导入 store
-import { usePermissionStore } from "~/store/global-store";
-
 export default defineNuxtPlugin((nuxtApp) => {
-  // pinia 默认在 setup 环境中使用，如果要在非 setup 环境中使用 pinia，可以使用 usePinia() 返回 pinia 实例，再将 pinia 实例作为参数传入 store
-  const permissionStore = usePermissionStore(usePinia());
-
   nuxtApp.vueApp.directive("permission", {
     mounted(el, binding) {
+      // 获取 btnList，注意 useCookie 会自动进行 JSON.parse
+      const btnList = useCookie("btnList").value as any;
       // 如果按钮权限不存在
-      if (!permissionStore.buttonPermission.includes(binding.value))
+      if (!btnList.includes(binding.value))
         // 移除该按钮
         el.parentNode && el.parentNode.removeChild(el);
     },

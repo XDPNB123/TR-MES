@@ -93,7 +93,7 @@ async function passwordLogin() {
   const data: any = await useHttp("/Account/A01LoginV1", "post", {
     login_name: tel.value,
     password_md5: md5Password,
-    platform: "网页",
+    platform: "PC",
     select_company_id: "000",
     platform_version: "网页1.00",
   });
@@ -104,11 +104,11 @@ async function passwordLogin() {
   // 登陆成功，则储存 Cookie
   useCookie("tel").value = tel.value;
   useCookie("password").value = password.value;
-  useCookie("name").value = data.data.name;
+  useCookie("name").value = data.data.userClaims.name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
-
-  // 登陆成功，获取用户的所有权限
+  useCookie("menuList").value = JSON.stringify(data.data.menuList);
+  useCookie("btnList").value = JSON.stringify(data.data.btnList);
 
   // 登陆成功的提示
   setSnackbar("green", "登陆成功，正在跳转...");
@@ -162,6 +162,8 @@ async function captchaLogin() {
   useCookie("name").value = data.data.name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
+  useCookie("menuList").value = JSON.stringify(data.data.menuList);
+  useCookie("btnList").value = JSON.stringify(data.data.btnList);
 
   // 登陆成功提示
   setSnackbar("green", "登陆成功，正在跳转...");
