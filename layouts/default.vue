@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// 引入 store
+import { usePermissionStore } from "~/store/global-store";
+// 创建 store
+const permissionStore = usePermissionStore();
 // 使用路由
 const router = useRouter();
 
@@ -30,127 +34,7 @@ const userMenus = ref<any[]>([
 ]);
 
 // 此处定义页面菜单
-const pageMenus = ref<any[]>([
-  {
-    name: "看板",
-    path: "/dashboard",
-    icon: "fa-solid fa-chart-column",
-    children: [
-      {
-        parentName: "看板",
-        name: "主看板",
-        path: "/dashboard/main-dashboard",
-        icon: "fa-solid fa-boxes-stacked",
-      },
-    ],
-  },
-  {
-    name: "MES",
-    path: "/mes",
-    icon: "fa-solid fa-table-list",
-    children: [
-      {
-        parentName: "MES",
-        name: "生产工单",
-        path: "/mes/work-order-product",
-        icon: "fa-solid fa-table-list",
-      },
-      {
-        parentName: "MES",
-        name: "工单排产",
-        path: "/mes/work-produce-recode",
-        icon: "fa-solid fa-list-ol",
-      },
-      {
-        parentName: "MES",
-        name: "工单进度",
-        path: "/mes/work-progress",
-        icon: "fa-solid fa-chart-line",
-      },
-      {
-        parentName: "MES",
-        name: "BOM清单",
-        path: "/mes/bom-list",
-        icon: "fa-solid fa-list",
-      },
-    ],
-  },
-  {
-    name: "WMS",
-    path: "/wms",
-    icon: "fa-solid fa-chart-column",
-    children: [
-      {
-        parentName: "WMS",
-        name: "仓库主页",
-        path: "/wms/home",
-        icon: "fa-solid fa-gauge",
-      },
-    ],
-  },
-  {
-    name: "QMS",
-    path: "/qms",
-    icon: "fa-solid fa-list-check",
-    children: [
-      {
-        parentName: "QMS",
-        name: "质检单",
-        path: "/qms/quality-check-list",
-        icon: "fa-solid fa-clipboard-list",
-      },
-      {
-        parentName: "QMS",
-        name: "安东 Andon",
-        path: "/qms/andon",
-        icon: "fa-solid fa-bars-progress",
-      },
-      {
-        parentName: "QMS",
-        name: "良品统计",
-        path: "/qms/good-product-statistic",
-        icon: "fa-solid fa-square-poll-vertical",
-      },
-    ],
-  },
-  {
-    name: "基础数据",
-    path: "/work-basic",
-    icon: "fa-solid fa-gear",
-    children: [
-      {
-        parentName: "基础信息",
-        name: "工作中心",
-        path: "/work-basic/work-center",
-        icon: "fa-solid fa-location-crosshairs",
-      },
-      {
-        parentName: "基础信息",
-        name: "班组信息",
-        path: "/work-basic/work-class",
-        icon: "fa-solid fa-people-roof",
-      },
-      {
-        parentName: "MES",
-        name: "常用BOM清单",
-        path: "/work-basic/bom-design",
-        icon: "fa-solid fa-list",
-      },
-      {
-        parentName: "MES",
-        name: "常用工序",
-        path: "/work-basic/process-maintenance",
-        icon: "fa-solid fa-screwdriver-wrench",
-      },
-      {
-        parentName: "MES",
-        name: "权限管理",
-        path: "/work-basic/permission-design",
-        icon: "fa-solid fa-gears",
-      },
-    ],
-  },
-]);
+const pageMenus = ref<any[]>(permissionStore.pagePermission);
 
 // tabs 类型
 type TabType = {
@@ -162,7 +46,6 @@ type TabType = {
 
 // 正在选中的 tab 对象
 let selectTab = ref<TabType | null>(null);
-
 // 已打开的所有 tab
 let tabs = ref<TabType[]>([]);
 

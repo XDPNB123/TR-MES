@@ -128,7 +128,7 @@ async function getCaptcha() {
   // 发送获取验证码请求
   const data: any = await useHttp("/Account/A02GenerateSMSCode", "post", {
     phone: tel.value,
-    platform: "sit occaecat",
+    platform: "PC",
     template: "1890788",
     platform_version: "magna Excepteur",
   });

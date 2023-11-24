@@ -1,3 +1,4 @@
+// 注意：如果函数使用 default 导出，则使用文件名来调用默认导出的函数；如果函数没有使用 default 导出，则可以直接使用【函数名】调用函数
 export default function useCaptchaCountDown() {
   // 验证码倒计时
   let captchaCountDown = ref<string | number>("获取验证码");
