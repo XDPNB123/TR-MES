@@ -1554,7 +1554,9 @@ const dateRule = ref<any>([
               class="mr-2"
               size="large"
               @click="resetAddDialog()"
-              v-permission="`${router.currentRoute.value.fullPath}->addWorkOrder`"
+              v-permission="
+                `${router.currentRoute.value.fullPath}->addWorkOrder`
+              "
             >
               新增工单
             </v-btn>
@@ -1603,6 +1605,9 @@ const dateRule = ref<any>([
                               operatingTicket = { ...item };
                               auditDialog = true;
                             "
+                            v-permission="
+                              `${router.currentRoute.value.fullPath}->eyeWorkOrder`
+                            "
                           >
                             fa-solid fa-eye
                           </v-icon>
@@ -1616,6 +1621,9 @@ const dateRule = ref<any>([
                               operatingTicket = { ...item };
                               editDialog = true;
                             "
+                            v-permission="
+                              `${router.currentRoute.value.fullPath}->updateWorkOrder`
+                            "
                           >
                             fa-solid fa-pen
                           </v-icon>
@@ -1627,6 +1635,9 @@ const dateRule = ref<any>([
                             @click.stop="
                               operatingTicket = { ...item };
                               deleteDialog = true;
+                            "
+                            v-permission="
+                              `${router.currentRoute.value.fullPath}->deleteWorkOrder`
                             "
                           >
                             fa-solid fa-trash
@@ -1865,6 +1876,9 @@ const dateRule = ref<any>([
               size="large"
               v-if="detailName && detailStatus !== '正常完工'"
               @click="resetAddDetailDialog()"
+              v-permission="
+                `${router.currentRoute.value.fullPath}->addWorkOrderDetail`
+              "
               >新增明细</v-btn
             >
             <v-btn
@@ -1873,6 +1887,9 @@ const dateRule = ref<any>([
               color="blue-darken-2"
               size="large"
               v-if="detailName && detailStatus !== '正常完工'"
+              v-permission="
+                `${router.currentRoute.value.fullPath}->batchWorkOrderDetail`
+              "
               >批量工序维护</v-btn
             >
           </v-col>
@@ -1962,6 +1979,9 @@ const dateRule = ref<any>([
                                 operatingTicketDetail = { ...item };
                                 splitDetailDialog = true;
                               "
+                              v-permission="
+                                `${router.currentRoute.value.fullPath}->splitWorkOrderDetail`
+                              "
                             >
                               fa-solid fa-network-wired
                             </v-icon>
@@ -1977,6 +1997,9 @@ const dateRule = ref<any>([
                                 operatingTicketDetail = { ...item };
                                 editDetailDialog = true;
                               "
+                              v-permission="
+                                `${router.currentRoute.value.fullPath}->updateWorkOrderDetail`
+                              "
                             >
                               fa-solid fa-pen
                             </v-icon>
@@ -1991,6 +2014,9 @@ const dateRule = ref<any>([
                               @click="
                                 operatingTicketDetail = { ...item };
                                 deleteDetailDialog = true;
+                              "
+                              v-permission="
+                                `${router.currentRoute.value.fullPath}->deleteWorkOrderDetail`
                               "
                             >
                               fa-solid fa-trash
@@ -2119,6 +2145,9 @@ const dateRule = ref<any>([
                           工序：
                           <span>
                             <v-btn
+                              v-permission="
+                                `${router.currentRoute.value.fullPath}->ProcessWorkOrderDetail`
+                              "
                               :disabled="
                                 item.status !== '已分配待排产' &&
                                 item.status !== '新增未分配'

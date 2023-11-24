@@ -1,16 +1,17 @@
 <script setup lang="ts">
 useSeoMeta({
-    // 该页面的标题
-    title: "班组信息",
-    // 社交媒体分享该页面时显示的标题
-    ogTitle: "班组信息",
-    // 该页面的描述
-    description: "同日 MES 系统，班组信息",
-    // 社交媒体分享该页面时显示的描述
-    ogDescription: "同日 MES 系统，班组信息",
-    // 社交媒体分享该页面时显示的图片
-    ogImage: "/同日图标.png",
+  // 该页面的标题
+  title: "班组信息",
+  // 社交媒体分享该页面时显示的标题
+  ogTitle: "班组信息",
+  // 该页面的描述
+  description: "同日 MES 系统，班组信息",
+  // 社交媒体分享该页面时显示的描述
+  ogDescription: "同日 MES 系统，班组信息",
+  // 社交媒体分享该页面时显示的图片
+  ogImage: "/同日图标.png",
 });
+const router = useRouter();
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
   useSnackbar();
@@ -501,6 +502,7 @@ async function deleteWorkClassInfo() {
               class="mr-2"
               size="large"
               @click="showAddDialog"
+              v-permission="`${router.currentRoute.value.fullPath}->addClass`"
             >
               新增班组
             </v-btn>
@@ -529,6 +531,9 @@ async function deleteWorkClassInfo() {
                     workClass = { ...item.raw };
                     editDialog = true;
                   "
+                  v-permission="
+                    `${router.currentRoute.value.fullPath}->updateClass`
+                  "
                 >
                   fa-solid fa-pen
                 </v-icon>
@@ -539,6 +544,9 @@ async function deleteWorkClassInfo() {
                   @click.stop="
                     workClass = { ...item.raw };
                     deleteDialog = true;
+                  "
+                  v-permission="
+                    `${router.currentRoute.value.fullPath}->deleteClass`
                   "
                 >
                   fa-solid fa-trash
@@ -610,6 +618,9 @@ async function deleteWorkClassInfo() {
               size="large"
               @click="showAddInfoDialog"
               v-if="workerId"
+              v-permission="
+              `${router.currentRoute.value.fullPath}->addClassPerson`
+            "
             >
               新增成员
             </v-btn>
@@ -641,6 +652,9 @@ async function deleteWorkClassInfo() {
                     workClassInfo = { ...item.raw };
                     editInfoDialog = true;
                   "
+                  v-permission="
+              `${router.currentRoute.value.fullPath}->updateClassPerson`
+            "
                 >
                   fa-solid fa-pen
                 </v-icon>
@@ -652,6 +666,9 @@ async function deleteWorkClassInfo() {
                     workClassInfo = { ...item.raw };
                     deleteInfoDialog = true;
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->deleteClassPerson`
+                "
                 >
                   fa-solid fa-trash
                 </v-icon>
@@ -696,7 +713,12 @@ async function deleteWorkClassInfo() {
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addWorkClass">
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          class="mr-2"
+          @click="addWorkClass"
+        >
           确认添加
         </v-btn>
         <v-btn color="grey" size="large" @click="addDialog = false">
@@ -731,7 +753,12 @@ async function deleteWorkClassInfo() {
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="editWorkClass">
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          class="mr-2"
+          @click="editWorkClass"
+        >
           确认修改
         </v-btn>
         <v-btn color="grey" size="large" @click="editDialog = false">
@@ -755,7 +782,12 @@ async function deleteWorkClassInfo() {
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="deleteWorkClass">
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          class="mr-2"
+          @click="deleteWorkClass"
+        >
           确认删除
         </v-btn>
         <v-btn color="grey" size="large" @click="deleteDialog = false">
@@ -790,7 +822,12 @@ async function deleteWorkClassInfo() {
       </v-card-text>
 
       <div class="d-flex justify-end mr-6 mb-4">
-        <v-btn color="blue-darken-2" size="large" class="mr-2" @click="addWorkClassInfo">
+        <v-btn
+          color="blue-darken-2"
+          size="large"
+          class="mr-2"
+          @click="addWorkClassInfo"
+        >
           确认添加
         </v-btn>
         <v-btn color="grey" size="large" @click="addInfoDialog = false">

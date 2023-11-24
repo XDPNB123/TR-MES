@@ -12,7 +12,7 @@ useSeoMeta({
   // 社交媒体分享该页面时显示的图片
   ogImage: "/同日图标.png",
 });
-
+const router = useRouter();
 let workCenterType = ref<any[]>(["钣金", "机加工", "装配", "其他"]);
 // 表格所有数据
 let workCenterList = ref<any[]>([]);
@@ -453,6 +453,7 @@ function cancelDialog() {
           dialogAdd = true;
           resetRow();
         "
+        v-permission="`${router.currentRoute.value.fullPath}->addWorkCenter`"
         >新增工作中心</v-btn
       >
     </v-col>
@@ -478,6 +479,9 @@ function cancelDialog() {
                   dialogUpdate = true;
                   operateRow = { ...item };
                 "
+                v-permission="
+                  `${router.currentRoute.value.fullPath}->updateWorkCenter`
+                "
                 >fa-solid fa-pen</v-icon
               >
               <v-icon
@@ -487,6 +491,9 @@ function cancelDialog() {
                 @click.stop="
                   dialogDelete = true;
                   operateRow = { ...item };
+                "
+                v-permission="
+                  `${router.currentRoute.value.fullPath}->deleteWorkCenter`
                 "
                 >fa-solid fa-trash</v-icon
               >
@@ -608,6 +615,9 @@ function cancelDialog() {
               dialogAddMachine = true;
               showAddMachineDialog();
             "
+            v-permission="
+              `${router.currentRoute.value.fullPath}->addMachine`
+            "
             >新增设备</v-btn
           >
         </v-col>
@@ -628,6 +638,9 @@ function cancelDialog() {
                     dialogUpdateMachine = true;
                     operateMachine = { ...item };
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->updateMachine`
+                "
                   >fa-solid fa-pen</v-icon
                 >
                 <v-icon
@@ -638,6 +651,9 @@ function cancelDialog() {
                     dialogDeleteMachine = true;
                     operateMachine = { ...item };
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->deleteMachine`
+                "
                   >fa-solid fa-trash</v-icon
                 >
               </div>
@@ -772,6 +788,9 @@ function cancelDialog() {
               dialogAddDetail = true;
               resetCenterDetail();
             "
+            v-permission="
+            `${router.currentRoute.value.fullPath}->addStation`
+          "
             >新增工位</v-btn
           >
         </v-col>
@@ -792,6 +811,9 @@ function cancelDialog() {
                     dialogUpdateDetail = true;
                     operateWorkCenterDetail = { ...item };
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->updateStation`
+                "
                   >fa-solid fa-pen</v-icon
                 >
                 <v-icon
@@ -802,6 +824,9 @@ function cancelDialog() {
                     dialogDeleteDetail = true;
                     operateWorkCenterDetail = { ...item };
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->deleteStation`
+                "
                   >fa-solid fa-trash</v-icon
                 >
               </div>

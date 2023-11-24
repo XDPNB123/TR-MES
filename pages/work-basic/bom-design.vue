@@ -14,6 +14,7 @@ useSeoMeta({
   // 社交媒体分享该页面时显示的图片
   ogImage: "/同日图标.png",
 });
+const router = useRouter();
 //弹框
 let addBomDialog = ref<boolean>(false);
 let addDialog = ref<boolean>(false);
@@ -319,6 +320,7 @@ async function delBomInfo() {
             class="mx-2"
             size="large"
             @click="showAdd"
+            v-permission="`${router.currentRoute.value.fullPath}->addSeries`"
           >
             新增产品系列
           </v-btn>
@@ -350,6 +352,9 @@ async function delBomInfo() {
                       class="mx-2"
                       size="large"
                       @click="showAddModel(item)"
+                      v-permission="
+                        `${router.currentRoute.value.fullPath}->addModel`
+                      "
                     >
                       新增型号
                     </v-btn>
@@ -370,6 +375,9 @@ async function delBomInfo() {
                         size="small"
                         class="mr-3"
                         @click.stop="showUpdateBomInfo(_item)"
+                        v-permission="
+                        `${router.currentRoute.value.fullPath}->updateModel`
+                      "
                       >
                         fa-solid fa-pen
                       </v-icon>
@@ -378,6 +386,9 @@ async function delBomInfo() {
                         color="red"
                         size="small"
                         @click.stop="showDel2(_item)"
+                        v-permission="
+                        `${router.currentRoute.value.fullPath}->deleteModel`
+                      "
                       >
                         fa-solid fa-trash
                       </v-icon>

@@ -53,6 +53,7 @@ async function getPageUrlData() {
 //点击查看当前页面下的按钮权限
 function showBtnData(item: any) {
   pageInfo.value = item;
+  getBtnData();
 }
 //点击查看当前页面下的按钮权限
 async function getBtnData() {
@@ -101,7 +102,7 @@ function showAddPage() {
     parent_id: folderInfo.value.permission_id,
     permission_api_url: "",
     page_url: "",
-    is_menu: false,
+    is_menu: true,
     icon_name: "",
     action_name: "",
     platform: "PC",
@@ -216,7 +217,7 @@ function showAddBtn(item: any) {
                         v-for="(item_, index_) in btnList"
                         :key="index_"
                       >
-                        <v-list-item :title="item.permission_title">
+                        <v-list-item :title="item_.permission_title">
                         </v-list-item>
                       </v-list>
                     </v-col>
