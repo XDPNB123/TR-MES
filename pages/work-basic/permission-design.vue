@@ -2,6 +2,10 @@
 onMounted(() => {
   getFolderData();
 });
+let searchType = ref<any>("PC");
+watch(searchType, function () {
+  getFolderData();
+});
 //弹框
 let addFolderDialog = ref<boolean>(false);
 let addPageDialog = ref<boolean>(false);
@@ -20,7 +24,7 @@ async function getFolderData() {
     undefined,
     {
       pid: 0,
-      platform: "PC",
+      platform: searchType.value,
     }
   );
   folderList.value = data.data;
@@ -131,14 +135,25 @@ function showAddBtn(item: any) {
         </v-toolbar>
         <v-row class="ma-1">
           <v-col cols="12">
-            <v-btn
-              color="blue-darken-2"
-              class="mx-2"
-              size="large"
-              @click="showAdd"
-            >
-              新增文件夹
-            </v-btn>
+            <div class="d-flex justify-space-between">
+              <v-select
+                v-model="searchType"
+                label="类型"
+                variant="outlined"
+                density="compact"
+                hide-details
+                :items="['PC', 'PDA']"
+                clearable
+              ></v-select>
+              <v-btn
+                color="blue-darken-2"
+                class="mx-2"
+                size="large"
+                @click="showAdd"
+              >
+                新增文件夹
+              </v-btn>
+            </div>
           </v-col>
           <v-col cols="12">
             <v-list
