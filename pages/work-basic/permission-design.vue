@@ -45,7 +45,7 @@ async function getPageUrlData() {
     undefined,
     {
       pid: folderInfo.value.permission_id,
-      platform: "PC",
+      platform: folderInfo.value.platform,
     }
   );
   pageUrlList.value = data.data;
@@ -62,7 +62,7 @@ async function getBtnData() {
     undefined,
     {
       pid: pageInfo.value.permission_id,
-      platform: "PC",
+      platform: pageInfo.value.platform,
     }
   );
   btnList.value = data.data;
@@ -120,7 +120,7 @@ function showAddBtn(item: any) {
     action_name: "",
     platform: "PC",
   };
-  addPageDialog.value = true;
+  addBtnDialog.value = true;
 }
 </script>
 <template>
@@ -396,11 +396,17 @@ function showAddBtn(item: any) {
                 hide-details
               ></v-text-field>
             </v-col>
-
             <v-col cols="12">
               <v-text-field
                 label="图标"
                 v-model="permissionInfo.icon_name"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="按钮名"
+                v-model="permissionInfo.action_name"
                 hide-details
               ></v-text-field>
             </v-col>

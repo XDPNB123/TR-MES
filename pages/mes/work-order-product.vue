@@ -1554,6 +1554,7 @@ const dateRule = ref<any>([
               class="mr-2"
               size="large"
               @click="resetAddDialog()"
+              v-permission="`${router.currentRoute.value.fullPath}->addWorkOrder`"
             >
               新增工单
             </v-btn>
