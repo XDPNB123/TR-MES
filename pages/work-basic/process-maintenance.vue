@@ -16,6 +16,7 @@ useSeoMeta({
 definePageMeta({
   keepalive: true,
 });
+const router = useRouter();
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
   useSnackbar();
@@ -275,6 +276,9 @@ async function delProduceGroup() {
               class="mr-2"
               size="large"
               @click="resetAddDialog"
+              v-permission="
+              `${router.currentRoute.value.fullPath}->addProcedure`
+            "
             >
               新增工序
             </v-btn>
@@ -301,6 +305,9 @@ async function delProduceGroup() {
                     operateProcess = { ...item.raw };
                     editDialog = true;
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->updateProcedure`
+                "
                 >
                   fa-solid fa-pen
                 </v-icon>
@@ -312,6 +319,9 @@ async function delProduceGroup() {
                     operate = { ...item.raw };
                     deleteDialog = true;
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->deleteProcedure`
+                "
                 >
                   fa-solid fa-trash
                 </v-icon>
@@ -360,6 +370,9 @@ async function delProduceGroup() {
               class="mr-2"
               size="large"
               @click="showAddDialog"
+              v-permission="
+              `${router.currentRoute.value.fullPath}->addGroup`
+            "
             >
               新增工序组
             </v-btn>
@@ -383,6 +396,9 @@ async function delProduceGroup() {
                     produceGroupItem = { ...item };
                     editDialog2 = true;
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->updateGroup`
+                "
                 >
                   fa-solid fa-pen
                 </v-icon>
@@ -394,6 +410,9 @@ async function delProduceGroup() {
                     produceGroupItem = { ...item };
                     deleteDialog2 = true;
                   "
+                  v-permission="
+                  `${router.currentRoute.value.fullPath}->deleteGroup`
+                "
                 >
                   fa-solid fa-trash
                 </v-icon>
