@@ -107,6 +107,8 @@ watch(
   },
   { deep: true }
 );
+
+// 将页面菜单由 list 转换成 tree
 onMounted(() => {
   pageMenus.value = useListToTree(useCookie("menuList").value);
 });
