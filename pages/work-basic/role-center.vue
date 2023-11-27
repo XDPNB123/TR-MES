@@ -9,7 +9,7 @@ let roleList = ref<any[]>([]);
 let headers = ref<any[]>([
   {
     title: "角色名称",
-    key: "roleName",
+    key: "role_name",
     align: "center",
     sortable: false,
     filterable: true,
@@ -36,8 +36,7 @@ let headers = ref<any[]>([
     filterable: true,
   },
 ]);
-let searchPhoneNum = ref<any>(null);
-let searchName = ref<any>(null);
+
 async function getRoleData() {
   const data: any = await useHttp(
     "/RolePermissions/A10GetRoleDate",
@@ -48,17 +47,9 @@ async function getRoleData() {
 }
 onMounted(() => {
   getRoleData();
+  getAllPerm();
 });
-//查询用户
-function filter() {
-  getRoleData();
-}
-//重置查询
-function resetFilter() {
-  searchPhoneNum.value = "";
-  searchName.value = "";
-  getRoleData();
-}
+
 //用户对象
 let roleInfo = ref<any>(null);
 //新增角色
@@ -73,7 +64,7 @@ function addUser() {
 //确认新增
 async function addCertain() {
   const data: any = await useHttp(
-    "/User/A22AddUserRole",
+    "/RolePermissions/A26AddRole",
     "post",
     roleInfo.value
   );
@@ -88,7 +79,7 @@ function showUpdate(item: any) {
 //保存修改
 async function editCertain() {
   const data: any = await useHttp(
-    "/User/A19PutUserInfo",
+    "/RolePermissions/A27PutRole",
     "put",
     roleInfo.value
   );
@@ -102,26 +93,50 @@ function showDelete(item: any) {
 }
 //确认删除
 async function deleteCertain() {
-  const data: any = await useHttp("/User/A20DelUser", "delete", undefined, {
-    ids: roleInfo.user_id,
-  });
+  const data: any = await useHttp(
+    "/RolePermissions/A28DelRole",
+    "delete",
+    undefined,
+    {
+      roleids: [roleInfo.value.roleId],
+    }
+  );
   getRoleData();
   dialogDelete.value = false;
 }
-//禁用用户
+//禁用角色
 async function disableUser(item: any) {
+  item.status = !item.status;
+  const data: any = await useHttp("/RolePermissions/A27PutRole", "put", {
+    status: item.status,
+    role_id: item.roleId,
+    role_name: item.role_name,
+  });
   getRoleData();
   editDialog.value = false;
 }
+
 //存储当前角色的权限
+
 let rolePerm = ref<any[]>([]);
+let select = ref<any[]>([]);
 //存储全部页面的权限
 let allPerm = ref<any[]>([]);
+async function getAllPerm() {
+  const data: any = await useHttp(
+    "/Permissions/A24GetPermissionsTreeList",
+    "get",
+    undefined
+  );
+  allPerm.value = data.data;
+}
 //分配权限
 async function showPermissions(item: any) {
+  permissionDialog.value = true;
+  roleInfo.value = item;
   //获取当前角色的权限
   const data: any = await useHttp(
-    "/RolePermissions/A13GetPermissionsByRoleId",
+    "/RolePermissions/A25GetPermissionsByRoleId",
     "get",
     undefined,
     {
@@ -129,37 +144,28 @@ async function showPermissions(item: any) {
     }
   );
   rolePerm.value = data.data;
-  console.log(rolePerm.value);
-  permissionDialog.value = true;
+  select.value = [...rolePerm.value];
+}
+watch(select, function () {
+  console.log(select.value);
+});
+//保存修改
+async function premCertain() {
+  const data: any = await useHttp(
+    "/RolePermissions/A11AddRolePermissions",
+    "post",
+    {
+      role_id: roleInfo.value.roleId,
+      permissions_ids: select.value.join(","),
+    }
+  );
+  permissionDialog.value = false;
 }
 </script>
+
 <template>
   <v-row class="ma-2">
-    <v-col cols="6">
-      <v-text-field
-        label="手机号"
-        variant="outlined"
-        density="compact"
-        v-model="searchPhoneNum"
-        hide-details
-      ></v-text-field>
-    </v-col>
-    <v-col cols="6">
-      <v-text-field
-        label="用户名称"
-        variant="outlined"
-        density="compact"
-        v-model="searchName"
-        hide-details
-      ></v-text-field>
-    </v-col>
     <v-col cols="12">
-      <v-btn color="blue-darken-2" class="mr-2" size="large" @click="filter"
-        >查询</v-btn
-      >
-      <v-btn color="red" class="mr-2" size="large" @click="resetFilter">
-        重置
-      </v-btn>
       <v-btn color="blue-darken-2" class="mr-2" size="large" @click="addUser">
         新增角色
       </v-btn>
@@ -288,7 +294,6 @@ async function showPermissions(item: any) {
             v-model="roleInfo.role_text"
             clearable
           ></v-text-field>
-          role_name
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -317,17 +322,8 @@ async function showPermissions(item: any) {
           </v-btn>
         </v-toolbar>
 
-        <v-card-text class="mt-4">
-          <v-text-field
-            label="角色名称"
-            v-model="roleInfo.role_name"
-            clearable
-          ></v-text-field>
-          <v-text-field
-            label="角色描述"
-            v-model="roleInfo.role_text"
-            clearable
-          ></v-text-field>
+        <v-card-text style="height: 500px" class="mt-4 overflow-y-auto">
+          <tree-view :treeData="allPerm" :checkedValues="select" />
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -335,7 +331,7 @@ async function showPermissions(item: any) {
             color="blue-darken-2"
             size="large"
             class="mr-2"
-            @click="editCertain()"
+            @click="premCertain()"
           >
             保存修改
           </v-btn>

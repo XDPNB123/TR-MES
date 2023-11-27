@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import draggable from "vuedraggable";
 // 搜索引擎优化
 useSeoMeta({
   // 该页面的标题
