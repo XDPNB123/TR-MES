@@ -113,9 +113,24 @@ async function disableUser(item: any) {
   getRoleData();
   editDialog.value = false;
 }
+//存储当前角色的权限
+let rolePerm = ref<any[]>([]);
+//存储全部页面的权限
+let allPerm = ref<any[]>([]);
 //分配权限
-function showPermissions() {
-  
+async function showPermissions(item: any) {
+  //获取当前角色的权限
+  const data: any = await useHttp(
+    "/RolePermissions/A13GetPermissionsByRoleId",
+    "get",
+    undefined,
+    {
+      roleid: item.roleId,
+    }
+  );
+  rolePerm.value = data.data;
+  console.log(rolePerm.value);
+  permissionDialog.value = true;
 }
 </script>
 <template>
@@ -168,7 +183,7 @@ function showPermissions() {
             color="blue"
             size="small"
             class="mr-5"
-            @click="showPermissions"
+            @click="showPermissions(item.raw)"
           >
             fa-solid fa-gears
           </v-icon>
