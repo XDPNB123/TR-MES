@@ -1,38 +1,22 @@
 <script setup lang="ts">
-import { number } from "echarts";
-
 //弹框
 let dialogAdd = ref(false);
 let dialogDelete = ref(false);
 let editDialog = ref(false);
-let assignDialog = ref(false);
+let permissionDialog = ref(false);
 //存储用户信息
-let users = ref<any[]>([]);
+let roleList = ref<any[]>([]);
 let headers = ref<any[]>([
   {
-    title: "用户手机号",
-    key: "cell_phone",
+    title: "角色名称",
+    key: "roleName",
     align: "center",
     sortable: false,
     filterable: true,
   },
   {
-    title: "用户名称",
-    key: "user_name",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工号",
-    key: "work_no",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "角色",
-    key: "rolenames",
+    title: "角色描述",
+    key: "role_text",
     align: "center",
     sortable: false,
     filterable: true,
@@ -54,118 +38,6 @@ let headers = ref<any[]>([
 ]);
 let searchPhoneNum = ref<any>(null);
 let searchName = ref<any>(null);
-//当前页
-let page = ref<number>(1);
-watch(page, function () {
-  getUserData();
-});
-//数据库存储的数据条数
-let pageLength = ref<number>(0);
-//一共有多少页
-let pageCount = computed(() => {
-  return Math.ceil(pageLength.value / 10);
-});
-//获取用户信息
-async function getUserData() {
-  const data: any = await useHttp(
-    "/User/A21GetUserRoleList",
-    "get",
-    undefined,
-    {
-      Name: searchName.value,
-      PageIndex: page.value,
-      PageSize: 10,
-      SortedBy: "id",
-      SortType: 0,
-    }
-  );
-
-  users.value = data.data.pageList;
-  pageLength.value = data.data.totalCount;
-}
-onMounted(() => {
-  getUserData();
-});
-//查询用户
-function filter() {
-  page.value = 1;
-  getUserData();
-}
-//重置查询
-function resetFilter() {
-  page.value = 1;
-  searchPhoneNum.value = "";
-  searchName.value = "";
-  getUserData();
-}
-//用户对象
-let userInfo = ref<any>(null);
-// //新增用户
-// function addUser() {
-//   userInfo.value = {
-//     user_name: "",
-//     password: "",
-//     work_no: "",
-//     cell_phone: "",
-//     login_rp: "PC",
-//     status: true,
-//   };
-//   dialogAdd.value = true;
-// }
-// //确认新增
-// async function addCertain() {
-//   const data: any = await useHttp(
-//     "/User/A22AddUserRole",
-//     "post",
-//     userInfo.value
-//   );
-//   getUserData();
-//   dialogAdd.value = false;
-// }
-//用户修改
-function showUpdate(item: any) {
-  userInfo.value = { ...item };
-  editDialog.value = true;
-}
-//保存修改
-async function editCertain() {
-  const data: any = await useHttp("/User/A19PutUserInfo", "put", {
-    Uid: userInfo.value.user_id,
-    Status: userInfo.value.status,
-    UName: userInfo.value.user_name,
-    Work_No: userInfo.value.work_no,
-  });
-  getUserData();
-  editDialog.value = false;
-}
-//用户删除
-function showDelete(item: any) {
-  userInfo.value = { ...item };
-  dialogDelete.value = true;
-}
-//确认删除
-async function deleteCertain() {
-  const data: any = await useHttp("/User/A20DelUser", "delete", undefined, {
-    ids: userInfo.value.user_id,
-  });
-  getUserData();
-  dialogDelete.value = false;
-}
-//禁用用户
-async function disableUser(item: any) {
-  item.status = !item.status;
-  const data: any = await useHttp("/User/A19PutUserInfo", "put", {
-    Uid: item.user_id,
-    Status: item.status,
-    UName: item.user_name,
-  });
-  getUserData();
-  editDialog.value = false;
-}
-//已选的角色
-let roles = ref<any[]>([]);
-//存储数据库里面的所有角色数据
-let roleList = ref<any[]>([]);
 async function getRoleData() {
   const data: any = await useHttp(
     "/RolePermissions/A10GetRoleDate",
@@ -174,24 +46,76 @@ async function getRoleData() {
   );
   roleList.value = data.data;
 }
-//分配角色
-function showAssign(item: any) {
-  userInfo.value = { ...item };
+onMounted(() => {
   getRoleData();
-  roles.value = userInfo.value.roleids.split(",").map(Number);
-  assignDialog.value = true;
-}
-watch(roles, function () {
-  console.log(roles.value);
 });
-//保存分配
-async function saveAssign() {
-  await useHttp("/User/A22AddUserRole", "post", {
-    user_id: userInfo.value.user_id,
-    role_id: roles.value.join(","),
+//查询用户
+function filter() {
+  getRoleData();
+}
+//重置查询
+function resetFilter() {
+  searchPhoneNum.value = "";
+  searchName.value = "";
+  getRoleData();
+}
+//用户对象
+let roleInfo = ref<any>(null);
+//新增角色
+function addUser() {
+  roleInfo.value = {
+    role_name: "",
+    role_text: "",
+    status: true,
+  };
+  dialogAdd.value = true;
+}
+//确认新增
+async function addCertain() {
+  const data: any = await useHttp(
+    "/User/A22AddUserRole",
+    "post",
+    roleInfo.value
+  );
+  getRoleData();
+  dialogAdd.value = false;
+}
+//角色修改
+function showUpdate(item: any) {
+  roleInfo.value = { ...item };
+  editDialog.value = true;
+}
+//保存修改
+async function editCertain() {
+  const data: any = await useHttp(
+    "/User/A19PutUserInfo",
+    "put",
+    roleInfo.value
+  );
+  getRoleData();
+  editDialog.value = false;
+}
+//角色删除
+function showDelete(item: any) {
+  roleInfo.value = { ...item };
+  dialogDelete.value = true;
+}
+//确认删除
+async function deleteCertain() {
+  const data: any = await useHttp("/User/A20DelUser", "delete", undefined, {
+    ids: roleInfo.user_id,
   });
-  getUserData();
-  assignDialog.value = false;
+  getRoleData();
+  dialogDelete.value = false;
+}
+//禁用用户
+async function disableUser(item: any) {
+  getRoleData();
+  editDialog.value = false;
+}
+//分配权限
+function showPermissions() {
+  
 }
 </script>
 <template>
@@ -215,18 +139,18 @@ async function saveAssign() {
       ></v-text-field>
     </v-col>
     <v-col cols="12">
-      <v-btn color="blue-darken-2" class="mr-2" size="large" @click="filter">
-        查询
-      </v-btn>
+      <v-btn color="blue-darken-2" class="mr-2" size="large" @click="filter"
+        >查询</v-btn
+      >
       <v-btn color="red" class="mr-2" size="large" @click="resetFilter">
         重置
       </v-btn>
-      <!-- <v-btn color="blue-darken-2" class="mr-2" size="large" @click="addUser">
-        新增用户
-      </v-btn> -->
+      <v-btn color="blue-darken-2" class="mr-2" size="large" @click="addUser">
+        新增角色
+      </v-btn>
     </v-col>
     <v-col cols="12">
-      <v-data-table :items="users" :headers="headers" :items-per-page="10">
+      <v-data-table :items="roleList" :headers="headers" :items-per-page="10">
         <template v-slot:item.status="{ item }">
           <v-switch
             style="display: inline-block; max-width: 120px"
@@ -239,16 +163,16 @@ async function saveAssign() {
           ></v-switch>
         </template>
         <template v-slot:item.action="{ item }">
-          <!-- 角色分配 -->
+          <!-- 权限分配 -->
           <v-icon
             color="blue"
             size="small"
             class="mr-5"
-            @click="showAssign(item.raw)"
+            @click="showPermissions"
           >
-            fa-solid fa-users-gear
+            fa-solid fa-gears
           </v-icon>
-          <!-- 用户修改 -->
+          <!-- 角色修改 -->
           <v-icon
             color="blue"
             size="small"
@@ -257,23 +181,18 @@ async function saveAssign() {
           >
             fa-solid fa-pen
           </v-icon>
-          <!-- 用户删除 -->
+          <!-- 角色删除 -->
           <v-icon color="red" size="small" @click="showDelete(item.raw)">
             fa-solid fa-trash
           </v-icon>
         </template>
-        <template v-slot:bottom>
-          <div class="text-center pt-2">
-            <v-pagination v-model="page" :length="pageCount"></v-pagination>
-          </div>
-        </template>
       </v-data-table>
     </v-col>
-    <!-- 增加用户 -->
-    <!-- <v-dialog v-model="dialogAdd" min-width="400px" width="560px">
+    <!-- 增加角色 -->
+    <v-dialog v-model="dialogAdd" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 新增用户信息 </v-toolbar-title>
+          <v-toolbar-title> 新增角色信息 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="dialogAdd = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -281,28 +200,13 @@ async function saveAssign() {
         </v-toolbar>
         <v-card-text class="mt-4">
           <v-text-field
-            label="用户名称"
-            v-model="userInfo.user_name"
+            label="角色名称"
+            v-model="roleInfo.role_name"
             clearable
           ></v-text-field>
           <v-text-field
-            label="手机号"
-            v-model="userInfo.cell_phone"
-            clearable
-          ></v-text-field>
-          <v-text-field
-            label="工号"
-            v-model="userInfo.work_no"
-            clearable
-          ></v-text-field>
-          <v-text-field
-            label="密码"
-            v-model="userInfo.password"
-            clearable
-          ></v-text-field>
-          <v-text-field
-            label="公司"
-            v-model="userInfo.company_name"
+            label="角色描述"
+            v-model="roleInfo.role_text"
             clearable
           ></v-text-field>
         </v-card-text>
@@ -320,12 +224,12 @@ async function saveAssign() {
           </v-btn>
         </div>
       </v-card>
-    </v-dialog> -->
-    <!-- 删除用户-->
+    </v-dialog>
+    <!-- 删除角色-->
     <v-dialog v-model="dialogDelete" min-width="400px" width="500px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 删除用户信息 </v-toolbar-title>
+          <v-toolbar-title> 删除角色信息 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="dialogDelete = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -347,11 +251,11 @@ async function saveAssign() {
         </div>
       </v-card>
     </v-dialog>
-    <!-- 修改用户-->
+    <!-- 修改角色-->
     <v-dialog v-model="editDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 修改用户信息 </v-toolbar-title>
+          <v-toolbar-title> 修改角色信息 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="editDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -360,15 +264,16 @@ async function saveAssign() {
 
         <v-card-text class="mt-4">
           <v-text-field
-            label="用户名称"
-            v-model="userInfo.user_name"
+            label="角色名称"
+            v-model="roleInfo.role_name"
             clearable
           ></v-text-field>
           <v-text-field
-            label="工号"
-            v-model="userInfo.work_no"
+            label="角色描述"
+            v-model="roleInfo.role_text"
             clearable
           ></v-text-field>
+          role_name
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -386,28 +291,28 @@ async function saveAssign() {
         </div>
       </v-card>
     </v-dialog>
-    <!-- 给用户分配角色-->
-    <v-dialog v-model="assignDialog" min-width="400px" width="560px">
+    <!-- 修改权限-->
+    <v-dialog v-model="permissionDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 分配角色 </v-toolbar-title>
+          <v-toolbar-title> 修改角色权限 </v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn icon @click="assignDialog = false">
+          <v-btn icon @click="permissionDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
           </v-btn>
         </v-toolbar>
 
         <v-card-text class="mt-4">
-          <v-select
-            label="角色列表"
-            v-model="roles"
+          <v-text-field
+            label="角色名称"
+            v-model="roleInfo.role_name"
             clearable
-            chips
-            :items="roleList"
-            item-title="roleName"
-            item-value="roleId"
-            multiple
-          ></v-select>
+          ></v-text-field>
+          <v-text-field
+            label="角色描述"
+            v-model="roleInfo.role_text"
+            clearable
+          ></v-text-field>
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -415,11 +320,11 @@ async function saveAssign() {
             color="blue-darken-2"
             size="large"
             class="mr-2"
-            @click="saveAssign()"
+            @click="editCertain()"
           >
-            保存分配
+            保存修改
           </v-btn>
-          <v-btn color="grey" size="large" @click="assignDialog = false">
+          <v-btn color="grey" size="large" @click="permissionDialog = false">
             取消
           </v-btn>
         </div>
