@@ -404,7 +404,7 @@ async function saveAssign() {
             clearable
             chips
             :items="roleList"
-            item-title="roleName"
+            item-title="role_name"
             item-value="roleId"
             multiple
           ></v-select>
