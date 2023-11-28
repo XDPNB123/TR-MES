@@ -80,11 +80,11 @@ function showUpdate(item: any) {
 }
 //保存修改
 async function editCertain() {
-  const data: any = await useHttp("/RolePermissions/A27PutRole", "put", {
-    role_name: roleInfo.value.role_name,
-    role_text: roleInfo.value.role_text,
-    role_id: roleInfo.value.roleId,
-  });
+  const data: any = await useHttp(
+    "/RolePermissions/A27PutRole",
+    "put",
+    roleInfo.value
+  );
   getRoleData();
   editDialog.value = false;
 }
@@ -150,7 +150,7 @@ async function premCertain() {
     "/RolePermissions/A11AddRolePermissions",
     "post",
     {
-      role_id: roleInfo.value.roleId,
+      role_id: roleInfo.value.role_id,
       permissions_ids: select.value.join(","),
     }
   );
