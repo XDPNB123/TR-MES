@@ -408,7 +408,7 @@ async function saveAssign() {
             chips
             :items="roleList"
             item-title="role_name"
-            item-value="roleId"
+            item-value="role_id"
             multiple
           ></v-select>
         </v-card-text>

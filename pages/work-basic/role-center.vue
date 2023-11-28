@@ -115,7 +115,6 @@ async function disableUser(item: any) {
 }
 
 //存储当前角色的权限
-
 let rolePerm = ref<any[]>([]);
 let select = ref<any[]>([]);
 //存储全部页面的权限
@@ -138,7 +137,7 @@ async function showPermissions(item: any) {
     "get",
     undefined,
     {
-      roleid: item.roleId,
+      roleid: item.role_id,
     }
   );
   rolePerm.value = data.data;
