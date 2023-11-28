@@ -150,7 +150,7 @@ async function premCertain() {
     "/RolePermissions/A11AddRolePermissions",
     "post",
     {
-      role_id: roleInfo.value.roleId,
+      role_id: roleInfo.value.role_id,
       permissions_ids: select.value.join(","),
     }
   );
