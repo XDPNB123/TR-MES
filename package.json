@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.4.11",
+    "@wsfe/vue-tree": "^3.2.0",
     "echarts": "^5.4.3",
     "pinia": "^2.1.6",
     "qrcode.vue": "^3.4.1",

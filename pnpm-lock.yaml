@@ -8,6 +8,9 @@ dependencies:
   '@pinia/nuxt':
     specifier: ^0.4.11
     version: 0.4.11(typescript@5.2.2)(vue@3.3.4)
+  '@wsfe/vue-tree':
+    specifier: ^3.2.0
+    version: 3.2.0(vue@3.3.4)
   echarts:
     specifier: ^5.4.3
     version: 5.4.3
@@ -1852,6 +1855,20 @@ packages:
     transitivePeerDependencies:
       - typescript
     dev: true
+
+  /@wsfe/vue-tree@3.2.0(vue@3.3.4):
+    resolution: {integrity: sha512-1Thj5qHHWdJZ+mK2DSFhCWR5UlOvz4CMB4A33dWh5DJ27fLMKLjoGLVyK+SDZaTK+GYEIwNI09bBwPFj5e8Pxg==}
+    requiresBuild: true
+    peerDependencies:
+      '@vue/composition-api': '*'
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+    dependencies:
+      vue-demi: 0.14.6(vue@3.3.4)
+    transitivePeerDependencies:
+      - vue
+    dev: false
 
   /abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
