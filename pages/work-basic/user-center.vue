@@ -72,6 +72,7 @@ async function getUserData() {
     "get",
     undefined,
     {
+      cell_phone: searchPhoneNum.value,
       Name: searchName.value,
       PageIndex: page.value,
       PageSize: 10,

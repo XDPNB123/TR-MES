@@ -110,7 +110,7 @@ watch(
 
 // 将页面菜单由 list 转换成 tree
 onMounted(() => {
-  pageMenus.value = useListToTree(useCookie("menuList").value);
+  pageMenus.value = useListToTree(useCookie("menuList").value as any);
 });
 </script>
 
@@ -123,37 +123,39 @@ onMounted(() => {
       </template>
 
       <template v-slot:default>
-        <v-menu
-          open-on-hover
-          open-delay="0"
-          close-delay="100"
-          v-for="(item, index) in pageMenus"
-          :key="index"
-        >
-          <template v-slot:activator="{ props }">
-            <v-btn size="large" class="rounded-0" v-bind="props">
-              <v-icon>{{ item.icon }}</v-icon>
-              <div class="mx-6">{{ item.name }}</div>
-              <v-icon>fa-solid fa-angle-down</v-icon>
-            </v-btn>
-          </template>
+        <div v-for="(item, index) in pageMenus" :key="index">
+          <v-menu
+            open-on-hover
+            open-delay="0"
+            close-delay="100"
+            v-if="item.show"
+          >
+            <template v-slot:activator="{ props }">
+              <v-btn size="large" class="rounded-0" v-bind="props">
+                <v-icon>{{ item.icon }}</v-icon>
+                <div class="mx-6">{{ item.name }}</div>
+                <v-icon>fa-solid fa-angle-down</v-icon>
+              </v-btn>
+            </template>
 
-          <v-list rounded="lg" class="pa-3">
-            <!-- 当 url 匹配到 to 时，就会触发 active-class -->
-            <v-list-item
-              rounded="lg"
-              class="mb-1"
-              active-class="list-item-active"
-              v-for="(item_, index_) in item.children"
-              :key="index_"
-              :to="item_.path"
-              :prepend-icon="item_.icon"
-              :title="item_.name"
-              @click="addTab(item_)"
-            >
-            </v-list-item>
-          </v-list>
-        </v-menu>
+            <v-list rounded="lg" class="pa-3">
+              <!-- 当 url 匹配到 to 时，就会触发 active-class -->
+              <div v-for="(item_, index_) in item.children" :key="index_">
+                <v-list-item
+                  rounded="lg"
+                  class="mb-1"
+                  v-if="item_.show"
+                  active-class="list-item-active"
+                  :to="item_.path"
+                  :prepend-icon="item_.icon"
+                  :title="item_.name"
+                  @click="addTab(item_)"
+                >
+                </v-list-item>
+              </div>
+            </v-list>
+          </v-menu>
+        </div>
       </template>
 
       <template v-slot:append>

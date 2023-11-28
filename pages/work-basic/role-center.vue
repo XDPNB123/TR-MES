@@ -329,6 +329,7 @@ async function premCertain() {
             v-model="select"
             titleField="permission_title"
             keyField="permission_id"
+            :cascade="false"
           />
         </v-card-text>
 
