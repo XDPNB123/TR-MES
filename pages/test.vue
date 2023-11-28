@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import Vtree, { VTreeNode, VTreeSearch, VTreeDrop } from "@wsfe/vue-tree";
 import "@wsfe/vue-tree/style.css";
-const value = ref<any>("");
+const value = ref<any[]>([1, 3]);
 const data = ref<any[]>([
   {
     id: 1,

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Vtree, { VTreeNode, VTreeSearch, VTreeDrop } from "@wsfe/vue-tree";
+import "@wsfe/vue-tree/style.css";
 //弹框
 let dialogAdd = ref(false);
 let dialogDelete = ref(false);
@@ -323,7 +325,13 @@ async function premCertain() {
         </v-toolbar>
 
         <v-card-text style="height: 500px" class="mt-4 overflow-y-auto">
-          <tree-view :treeData="allPerm" :checkedValues="select" />
+          <Vtree
+            :data="allPerm"
+            checkable
+            v-model="select"
+            titleField="permission_title"
+            keyField="permission_id"
+          />
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
