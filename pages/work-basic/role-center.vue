@@ -148,9 +148,7 @@ async function showPermissions(item: any) {
   rolePerm.value = data.data;
   select.value = [...rolePerm.value];
 }
-watch(select, function () {
-  console.log(select.value);
-});
+
 //保存修改
 async function premCertain() {
   const data: any = await useHttp(
