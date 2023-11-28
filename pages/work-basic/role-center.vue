@@ -78,11 +78,11 @@ function showUpdate(item: any) {
 }
 //保存修改
 async function editCertain() {
-  const data: any = await useHttp(
-    "/RolePermissions/A27PutRole",
-    "put",
-    roleInfo.value
-  );
+  const data: any = await useHttp("/RolePermissions/A27PutRole", "put", {
+    role_name: roleInfo.value.role_name,
+    role_text: roleInfo.value.role_text,
+    role_id: roleInfo.value.roleId,
+  });
   getRoleData();
   editDialog.value = false;
 }
