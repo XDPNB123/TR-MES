@@ -80,11 +80,11 @@ function showUpdate(item: any) {
 }
 //保存修改
 async function editCertain() {
-  const data: any = await useHttp("/RolePermissions/A27PutRole", "put", {
-    role_name: roleInfo.value.role_name,
-    role_text: roleInfo.value.role_text,
-    role_id: roleInfo.value.roleId,
-  });
+  const data: any = await useHttp(
+    "/RolePermissions/A27PutRole",
+    "put",
+    roleInfo.value
+  );
   getRoleData();
   editDialog.value = false;
 }
@@ -109,11 +109,7 @@ async function deleteCertain() {
 //禁用角色
 async function disableUser(item: any) {
   item.status = !item.status;
-  const data: any = await useHttp("/RolePermissions/A27PutRole", "put", {
-    status: item.status,
-    role_id: item.roleId,
-    role_name: item.role_name,
-  });
+  const data: any = await useHttp("/RolePermissions/A27PutRole", "put", item);
   getRoleData();
   editDialog.value = false;
 }

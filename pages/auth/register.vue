@@ -114,7 +114,7 @@ async function registerSubmit() {
     phone_num: tel.value,
     email_address: email.value,
     verify_code: captcha.value,
-    platform: "Q!*l",
+    platform: "PC",
     password: md5Password,
   });
 
