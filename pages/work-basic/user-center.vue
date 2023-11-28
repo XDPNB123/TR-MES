@@ -159,6 +159,7 @@ async function disableUser(item: any) {
     Uid: item.user_id,
     Status: item.status,
     UName: item.user_name,
+    Work_No: item.work_no,
   });
   getUserData();
   editDialog.value = false;
@@ -406,7 +407,7 @@ async function saveAssign() {
             chips
             :items="roleList"
             item-title="role_name"
-            item-value="roleId"
+            item-value="role_id"
             multiple
           ></v-select>
         </v-card-text>

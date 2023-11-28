@@ -114,7 +114,7 @@ async function registerSubmit() {
     phone_num: tel.value,
     email_address: email.value,
     verify_code: captcha.value,
-    platform: "Q!*l",
+    platform: "PC",
     password: md5Password,
   });
 
@@ -124,7 +124,7 @@ async function registerSubmit() {
   // 储存 Cookie
   useCookie("tel").value = tel.value;
   useCookie("password").value = password.value;
-  useCookie("name").value = data.data.name;
+  useCookie("name").value = data.user_name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
 
@@ -132,7 +132,7 @@ async function registerSubmit() {
   setSnackbar("green", "注册成功，正在跳转...");
 
   setTimeout(function () {
-    router.push({ path: "/home" });
+    router.push({ path: "/auth/login" });
   }, 1500);
 }
 

@@ -109,17 +109,12 @@ async function deleteCertain() {
 //禁用角色
 async function disableUser(item: any) {
   item.status = !item.status;
-  const data: any = await useHttp("/RolePermissions/A27PutRole", "put", {
-    status: item.status,
-    role_id: item.roleId,
-    role_name: item.role_name,
-  });
+  const data: any = await useHttp("/RolePermissions/A27PutRole", "put", item);
   getRoleData();
   editDialog.value = false;
 }
 
 //存储当前角色的权限
-
 let rolePerm = ref<any[]>([]);
 let select = ref<any[]>([]);
 //存储全部页面的权限
@@ -142,7 +137,7 @@ async function showPermissions(item: any) {
     "get",
     undefined,
     {
-      roleid: item.roleId,
+      roleid: item.role_id,
     }
   );
   rolePerm.value = data.data;
