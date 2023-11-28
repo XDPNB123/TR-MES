@@ -132,7 +132,7 @@ async function registerSubmit() {
   setSnackbar("green", "注册成功，正在跳转...");
 
   setTimeout(function () {
-    router.push({ path: "/home" });
+    router.push({ path: "/auth/login" });
   }, 1500);
 }
 
