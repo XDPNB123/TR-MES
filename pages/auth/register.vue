@@ -124,7 +124,7 @@ async function registerSubmit() {
   // 储存 Cookie
   useCookie("tel").value = tel.value;
   useCookie("password").value = password.value;
-  useCookie("name").value = data.data.name;
+  useCookie("name").value = data.user_name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
 
