@@ -73,13 +73,4 @@ const data = ref<any[]>([
     ],
   },
 ]);
-watch(
-  value,
-  () => {
-    console.log(value.value);
-  },
-  {
-    deep: true,
-  }
-);
 </script>
