@@ -919,6 +919,9 @@ function resetAddDialog() {
 // 新增工单
 async function addTicket() {
   try {
+    if (!operatingTicket.value.product_description) {
+      return setSnackbar("black", "请您输入产品描述");
+    }
     const data: any = await useHttp(
       "/MesWorkOrder/M02AddWorkOrder",
       "post",
