@@ -175,7 +175,6 @@ async function getRoleData() {
     undefined
   );
   roleList.value = data.data.filter((item: any) => item.status === true);
-  console.log(roleList.value);
 }
 //分配角色
 function showAssign(item: any) {
@@ -184,9 +183,7 @@ function showAssign(item: any) {
   roles.value = userInfo.value.roleids.split(",").map(Number);
   assignDialog.value = true;
 }
-watch(roles, function () {
-  console.log(roles.value);
-});
+
 //保存分配
 async function saveAssign() {
   await useHttp("/User/A22AddUserRole", "post", {

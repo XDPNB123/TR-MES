@@ -267,7 +267,6 @@ async function getCenterProduce() {
   );
   tabArr.value = tabArr1.value;
   tabArr.value = [...tabArr.value, ...data.data.pageList];
-  console.log(data.data.pageList);
   tempTabArr.value = tabArr.value
     .filter(
       (_item: any) =>
@@ -339,7 +338,6 @@ async function updateCenterId() {
 
     return a.produce_order - b.produce_order;
   });
-  console.log(dataCode.value);
   // 是否打印
   if (checkbox.value) {
     nextTick(() => {
