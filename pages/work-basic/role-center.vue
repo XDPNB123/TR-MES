@@ -125,9 +125,7 @@ async function getAllPerm() {
     "get",
     undefined
   );
-  allPerm.value = data.data.filter((item: any) => {
-    item.status === true;
-  });
+  allPerm.value = data.data;
 }
 //分配权限
 async function showPermissions(item: any) {

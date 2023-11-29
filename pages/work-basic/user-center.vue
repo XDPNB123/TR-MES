@@ -174,7 +174,8 @@ async function getRoleData() {
     "get",
     undefined
   );
-  roleList.value = data.data;
+  roleList.value = data.data.filter((item: any) => item.status === true);
+  console.log(roleList.value);
 }
 //分配角色
 function showAssign(item: any) {
