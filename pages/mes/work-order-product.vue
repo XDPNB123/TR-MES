@@ -124,7 +124,8 @@ let endDateDetail = ref<any>(null);
 let searchTicketStatus = ref<string>("");
 let searchTicketType = ref("");
 let searchOutputs = ref<string>("");
-let searchProduct = ref<any>("");
+let searchProduct = ref<string>("00.00.00.00");
+let searchProjectCode = ref<string>("");
 let searchName = ref("");
 let searchProject = ref("");
 
@@ -1223,7 +1224,7 @@ let productTableData = ref();
 let productHeaders = ref();
 let productTypeName = ref("");
 //获取到自制件的数据
-async function getHomeData(name: any) {
+async function getHomeData() {
   const homeData: any = await useHttp(
     "/MaterialForm/M52GetHomemadeForm",
     "get",
@@ -1233,7 +1234,8 @@ async function getHomeData(name: any) {
       PageSize: productTablePerPage.value,
       SortType: 1,
       SortedBy: "_id",
-      queryname: name.value,
+      queryname: searchProduct.value,
+      projectCode: searchProjectCode.value,
     }
   );
   if (!homeData.data.totalCount) return (productTableData.value = []);
@@ -1242,7 +1244,7 @@ async function getHomeData(name: any) {
   productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
 }
 //获取到标准外购件的数据
-async function getMaterialData(searchProduct: any) {
+async function getMaterialData() {
   const outData: any = await useHttp(
     "/MaterialForm/M51GetMaterialForm",
     "get",
@@ -1264,10 +1266,11 @@ async function getMaterialData(searchProduct: any) {
 //点击弹出产品编号表格弹框
 async function showProductDialog() {
   try {
-    getHomeData(searchProduct);
+    getHomeData();
     selectedRows.value = [];
     productTypeName.value = "自制件";
-    searchProduct.value = "";
+    searchProduct.value = "00.00.00.00";
+    searchProjectCode.value = "";
   } catch (error) {
     console.log(error);
   }
@@ -1277,10 +1280,10 @@ async function showProductDialog() {
 watch(productTypeName, async () => {
   if (productTypeName.value === "自制件") {
     selectedRows.value = [];
-    getHomeData(searchProduct);
+    getHomeData();
   } else if (productTypeName.value === "标准外购件") {
     selectedRows.value = [];
-    getMaterialData(searchProduct);
+    getMaterialData();
   }
 });
 //产品列表有多少页
@@ -1290,17 +1293,17 @@ const productTablePageCount = computed(() => {
 //切换页面，重新给表格赋值
 watch(productTablePage, () => {
   if (productTypeName.value === "自制件") {
-    getHomeData(searchProduct);
+    getHomeData();
   } else if (productTypeName.value === "标准外购件") {
-    getMaterialData(searchProduct);
+    getMaterialData();
   }
 });
 //修改当前页最大数量
 watch(productTablePerPage, () => {
   if (productTypeName.value === "自制件") {
-    getHomeData(searchProduct);
+    getHomeData();
   } else if (productTypeName.value === "标准外购件") {
-    getMaterialData(searchProduct);
+    getMaterialData();
   }
 });
 //选择产品编号
@@ -1354,10 +1357,10 @@ async function filterProduct() {
   try {
     productTablePage.value = 1;
     if (productTypeName.value === "自制件") {
-      getHomeData(searchProduct);
+      getHomeData();
     }
     if (productTypeName.value === "标准外购件") {
-      getMaterialData(searchProduct);
+      getMaterialData();
     }
   } catch (error) {
     console.log(error);
@@ -1365,13 +1368,14 @@ async function filterProduct() {
 }
 //重置搜素
 function resetFilterProduct() {
-  searchProduct.value = "";
+  searchProduct.value = "00.00.00.00";
+  searchProjectCode.value = "";
   productTablePage.value = 1;
   if (productTypeName.value === "自制件") {
-    getHomeData(searchProduct);
+    getHomeData();
   }
   if (productTypeName.value === "标准外购件") {
-    getMaterialData(searchProduct);
+    getMaterialData();
   }
 }
 
@@ -1445,6 +1449,10 @@ watch(productPage, () => {
 watch(productPerPage, () => {
   productList();
 });
+
+function clear() {
+  selectedRows.value = [];
+}
 //选择数据批量创建工单明细产料名和项目号
 async function saveMcodeProduct() {
   try {
@@ -2672,17 +2680,29 @@ const dateRule = ref<any>([
         </v-toolbar>
         <v-card>
           <v-row class="ma-2">
-            <v-col cols="6">
+            <v-col cols="4">
               <v-text-field
-                label="模糊查询，如您输入零件名，物料编码，项目号等信息的部分便可查询"
+                label="项目号查询"
+                variant="outlined"
+                density="compact"
+                v-model="searchProjectCode"
+                hide-details
+                clearable
+                @keydown.enter="filterProduct()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="4">
+              <v-text-field
+                label="查询所有信息"
                 variant="outlined"
                 density="compact"
                 v-model="searchProduct"
                 hide-details
+                clearable
                 @keydown.enter="filterProduct()"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="4">
               <v-select
                 variant="outlined"
                 density="compact"
@@ -2709,6 +2729,7 @@ const dateRule = ref<any>([
                 重置查询
               </v-btn>
             </v-col>
+
             <v-col cols="4">
               <v-select
                 class="mr-1"
@@ -2716,7 +2737,7 @@ const dateRule = ref<any>([
                 density="compact"
                 hide-details
                 label="每页最大数"
-                :items="[10, 20, 30, 40]"
+                :items="[10, 20]"
                 v-model="productTablePerPage"
               ></v-select>
             </v-col>
@@ -2825,7 +2846,11 @@ const dateRule = ref<any>([
               >
                 重置查询
               </v-btn>
+              <v-btn color="red" class="mr-2" size="large" @click="clear()">
+                清空选择
+              </v-btn>
             </v-col>
+
             <v-col cols="4">
               <v-select
                 class="mr-1"
