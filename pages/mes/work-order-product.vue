@@ -2262,12 +2262,14 @@ const dateRule = ref<any>([
             label="计划开始日期"
             :rules="dateRule"
             v-model="operatingTicket.scheduled_start_date"
+            type="date"
           />
 
           <v-text-field
             label="计划完成日期"
             :rules="dateRule"
             v-model="operatingTicket.planned_completion_time"
+            type="date"
           ></v-text-field>
         </v-card-text>
 
@@ -2403,6 +2405,7 @@ const dateRule = ref<any>([
             v-model="operatingTicketDetail.estimated_delivery_date"
             :rules="dateRule"
             label="预计交付时间"
+            type="date"
           ></v-text-field>
 
           <v-text-field
