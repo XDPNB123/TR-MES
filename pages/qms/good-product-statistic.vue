@@ -232,82 +232,114 @@ function resetFilterData() {
                   </v-toolbar-title>
                 </v-toolbar>
                 <div style="height: 80vh" class="overflow-y-auto">
-                  <v-list
-                    v-for="(item, index) in workOrderDetailList"
-                    :key="index"
-                  >
-                    <v-list-item>
-                      <template v-slot:default>
-                        <div class="d-flex">
-                          <div style="flex-basis: 15%">
-                            良品统计：
-                            <v-progress-circular
-                              :rotate="360"
-                              :size="60"
-                              :width="10"
-                              :model-value="
-                                item.qualified_quantity +
-                                  item.non_conforming_quantity ===
-                                0
-                                  ? 0 + '%'
-                                  : Math.round(
-                                      (item.qualified_quantity /
-                                        (item.qualified_quantity +
-                                          item.non_conforming_quantity)) *
-                                        100
-                                    ) + '%'
-                              "
-                              :color="
-                                Math.round(
-                                  (item.qualified_quantity /
-                                    (item.qualified_quantity +
-                                      item.non_conforming_quantity)) *
-                                    100
-                                ) >= 80
-                                  ? 'green'
-                                  : 'red'
-                              "
-                            >
-                              {{
-                                item.qualified_quantity +
-                                  item.non_conforming_quantity ===
-                                0
-                                  ? 0 + "%"
-                                  : Math.round(
-                                      (item.qualified_quantity /
-                                        (item.qualified_quantity +
-                                          item.non_conforming_quantity)) *
-                                        100
-                                    ) + "%"
-                              }}
-                            </v-progress-circular>
-                          </div>
-                          <div style="flex-basis: 20%" class="mt-4">
-                            工单明细号：
+                  <v-expansion-panels variant="accordion" class="my-4">
+                    <v-expansion-panel
+                      v-for="(item, index) in workOrderDetailList"
+                      :key="index"
+                    >
+                      <v-expansion-panel-title>
+                        <div style="flex-basis: 20%">
+                          工单明细：
+                          <span class="text-subtitle-2">
                             {{ item.workorder_did }}
-                          </div>
-
-                          <div style="flex-basis: 12%" class="mt-4">
-                            良品数量：
-                            {{ item.qualified_quantity }}
-                          </div>
-                          <div style="flex-basis: 12%" class="mt-4">
-                            不良品数量：
-                            {{ item.non_conforming_quantity }}
-                          </div>
-                          <div style="flex-basis: 15%" class="mt-4">
-                            状态：
-                            {{ item.status }}
-                          </div>
-                          <div style="flex-basis: 25%" class="mt-4">
-                            产出料：
-                            {{ item.mdescription }}
-                          </div>
+                          </span>
                         </div>
-                      </template>
-                    </v-list-item>
-                    <v-divider :thickness="3" color="info"></v-divider>
-                  </v-list>
+                        <div style="flex-basis: 15%">
+                          计划数量:
+                          <span class="text-subtitle-2">
+                            {{ item.planned_quantity }}{{ item.unit }}
+                          </span>
+                        </div>
+                        <div style="flex-basis: 16%">
+                          状态:
+                          <span class="text-subtitle-2">
+                            {{ item.status }}
+                          </span>
+                        </div>
+                        <div style="flex-basis: 25%">
+                          产出料:
+                          <span class="text-subtitle-2">
+                            {{ item.mdescription }}
+                          </span>
+                        </div>
+                      </v-expansion-panel-title>
+                      <v-expansion-panel-text>
+                        <v-list
+                          v-for="(item_, index_) in item.production_recodelist"
+                          :key="index_"
+                        >
+                          <v-list-item>
+                            <template v-slot:default>
+                              <div class="d-flex">
+                                <div style="flex-basis: 20%">
+                                  良品统计：
+                                  <v-progress-circular
+                                    :rotate="360"
+                                    :size="60"
+                                    :width="10"
+                                    :model-value="
+                                      item_.planned_quantity === 0
+                                        ? 0 + '%'
+                                        : Math.round(
+                                            ((item_.planned_quantity -
+                                              item_.non_conforming_quantity) /
+                                              item_.planned_quantity) *
+                                              100
+                                          ) + '%'
+                                    "
+                                    :color="
+                                      Math.round(
+                                        ((item_.planned_quantity -
+                                          item_.non_conforming_quantity) /
+                                          item_.planned_quantity) *
+                                          100
+                                      ) >= 80
+                                        ? 'green'
+                                        : 'red'
+                                    "
+                                  >
+                                    {{
+                                      item_.planned_quantity === 0
+                                        ? 0 + "%"
+                                        : Math.round(
+                                            ((item_.planned_quantity -
+                                              item_.non_conforming_quantity) /
+                                              item_.planned_quantity) *
+                                              100
+                                          ) + "%"
+                                    }}
+                                  </v-progress-circular>
+                                </div>
+                                <div style="flex-basis: 20%" class="mt-4">
+                                  派工单号：
+                                  <span class="text-subtitle-2">
+                                    {{ item_.dispatch_order }}
+                                  </span>
+                                </div>
+                                <div style="flex-basis: 12%" class="mt-4">
+                                  工序：
+                                  <span class="text-subtitle-2">
+                                    {{ item_.procedure_name }}
+                                  </span>
+                                </div>
+                                <div style="flex-basis: 12%" class="mt-4">
+                                  不良品数量：
+                                  <span class="text-subtitle-2">
+                                    {{
+                                      item_.non_conforming_quantity === null
+                                        ? 0
+                                        : item_.non_conforming_quantity
+                                    }}
+                                  </span>
+                                </div>
+                              </div>
+                            </template>
+                          </v-list-item>
+                          <v-divider :thickness="3" color="info"></v-divider>
+                        </v-list>
+                      </v-expansion-panel-text>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
                 </div>
               </v-card>
             </v-col>
