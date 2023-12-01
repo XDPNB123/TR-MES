@@ -59,13 +59,12 @@ let captcha = ref<string>("");
 let captchaFormValid = ref<boolean>(false);
 
 // 下拉框选中时的返回结果（需要设置选中项）
-let selectedCompany = ref<any>({ companyName: "同日云联", companyCode: "000" });
+let selectedCompany = ref<any>({
+  companyName: "同日自动化",
+  companyCode: "001",
+});
 // 下拉框绑定的所有公司帐套
-let allCompany = ref<any>([
-  { companyName: "同日云联", companyCode: "000" },
-  { companyName: "同日自动化", companyCode: "001" },
-  { companyName: "同日AGV", companyCode: "002" },
-]);
+let allCompany = ref<any>([{ companyName: "同日自动化", companyCode: "001" }]);
 
 // 手机号校验规则
 const telRule = ref<any[]>([
