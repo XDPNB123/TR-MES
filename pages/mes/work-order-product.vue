@@ -137,217 +137,7 @@ let operatingTicketDetail = ref<any>(null);
 // 展示的工单表格数据
 let tableData = ref<any[]>([]);
 // 工单表头
-let tableHeaders = ref<any[]>([
-  {
-    title: "序号",
-    key: "id",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工单号",
-    key: "workorder_hid",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
 
-  {
-    title: "工单类型",
-    key: "workorder_type",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "计划数量",
-    key: "planned_quantity",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "单位",
-    key: "unit",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "产品描述",
-    key: "product_description",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "计划开始时间",
-    key: "scheduled_start_date",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "计划完成时间",
-    key: "planned_completion_time",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "审核日期",
-    key: "approve_date",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "开始日期",
-    key: "start_date",
-    align: "center",
-    sortable: true,
-    filterable: true,
-  },
-  {
-    title: "完成日期",
-    key: "finish_date",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工单状态",
-    key: "status",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "操作",
-    key: "actions",
-    align: "center",
-    sortable: false,
-    filterable: false,
-  },
-]);
-
-//工单明细表头
-let headers = ref<any[]>([
-  {
-    title: "序号",
-    align: "center",
-    key: "id",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "产出料",
-    align: "center",
-    key: "mdescription",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工序",
-    align: "center",
-    key: "procedure",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "图纸号",
-    align: "center",
-    key: "blueprint_id",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "BOM清单",
-    align: "center",
-    key: "bomdata",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "项目号",
-    align: "center",
-    key: "project_code",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "预计交付日期",
-    align: "center",
-    key: "estimated_delivery_date",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "实际交付日期",
-    align: "center",
-    key: "actual_delivery_date",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "工单明细编号",
-    align: "center",
-    key: "workorder_did",
-    sortable: false,
-    filterable: true,
-  },
-
-  {
-    title: "标准工时",
-    align: "center",
-    key: "standard_time",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "实际工时",
-    align: "center",
-    key: "actual_time",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "计划数量",
-    align: "center",
-    key: "planned_quantity",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "实际报工数量",
-    align: "center",
-    key: "reported_quantity",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "单位",
-    align: "center",
-    key: "unit",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "状态",
-    align: "center",
-    key: "status",
-    sortable: false,
-    filterable: true,
-  },
-  {
-    title: "操作",
-    key: "actions",
-    align: "center",
-    sortable: false,
-    filterable: true,
-  },
-]);
 //工单明细表格展示的数据
 let tableDataDetail = ref<any[]>([]);
 function isDatePast(dateString: any) {
@@ -896,6 +686,7 @@ function formatDateDetail(data: any) {
 async function showTicketDetail(item: any) {
   detailName.value = item.workorder_hid;
   detailStatus.value = item.status;
+  searchProject.value = item.product_id.slice(-9);
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
@@ -931,6 +722,7 @@ async function addTicket() {
     getWorkOrder();
     if (data.code === 200) {
       setSnackbar("green", "新增成功");
+      addDialog.value = false;
     } else {
       setSnackbar("black", "新增失败");
     }
@@ -938,7 +730,6 @@ async function addTicket() {
     console.log(error);
     setSnackbar("black", "新增失败");
   }
-  addDialog.value = false;
 }
 
 // 新增工单明细前重置新增对话框
@@ -990,6 +781,7 @@ async function addTicketDetail() {
     selectedRows.value = [];
     if (data.code === 200) {
       setSnackbar("green", "新增成功");
+      addDetailDialog.value = false;
     } else {
       setSnackbar("black", "新增失败");
     }
@@ -997,7 +789,6 @@ async function addTicketDetail() {
     console.log(error);
     setSnackbar("black", "新增失败");
   }
-  addDetailDialog.value = false;
 }
 // 修改工单
 async function editTicket() {
@@ -1010,6 +801,7 @@ async function editTicket() {
     getWorkOrder();
     if (data.code === 200) {
       setSnackbar("green", "修改成功");
+      editDialog.value = false;
     } else {
       setSnackbar("black", "修改失败");
     }
@@ -1017,7 +809,6 @@ async function editTicket() {
     console.log(error);
     setSnackbar("black", "修改失败");
   }
-  editDialog.value = false;
 }
 
 //审核通过
@@ -1149,6 +940,7 @@ async function editTicketDetail() {
     getWorkOrderDetail();
     if (data.code === 200) {
       setSnackbar("green", "修改成功");
+      editDetailDialog.value = false;
     } else {
       setSnackbar("black", "修改失败");
     }
@@ -1156,7 +948,6 @@ async function editTicketDetail() {
     console.log(error);
     setSnackbar("black", "修改失败");
   }
-  editDetailDialog.value = false;
 }
 
 // 删除工单
