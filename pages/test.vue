@@ -1,76 +1,50 @@
 <template>
-  <Vtree
-    :data="data"
-    checkable
-    v-model="value"
-    titleField="name"
-    keyField="id"
-    :cascade="false"
-  />
+  <div class="container">
+    <div class="page" :class="{ flipped: isFlipped }">
+      <div class="front">
+        <v-btn @click="isFlipped = true">翻转到新页面</v-btn>
+        <div>初始页面</div>
+      </div>
+      <div class="back">
+        <v-btn @click="isFlipped = false">返回原来页面</v-btn>
+        <div>翻转后的新页面</div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import Vtree, { VTreeNode, VTreeSearch, VTreeDrop } from "@wsfe/vue-tree";
-import "@wsfe/vue-tree/style.css";
-const value = ref<any[]>([1, 3]);
-const data = ref<any[]>([
-  {
-    id: 1,
-    name: "节点1",
-    checked: false,
-    children: [
-      {
-        id: 2,
-        name: "子节点1",
-        checked: false,
-        children: [
-          {
-            id: 3,
-            name: "孙节点1",
-            checked: false,
-          },
-          {
-            id: 4,
-            name: "孙节点2",
-            checked: false,
-          },
-        ],
-      },
-      {
-        id: 5,
-        name: "子节点2",
-        checked: false,
-      },
-    ],
-  },
-  {
-    id: 7,
-    name: "节点2",
-    checked: false,
-    children: [
-      {
-        id: 8,
-        name: "子节点3",
-        checked: false,
-      },
-      {
-        id: 9,
-        name: "子节点4",
-        checked: false,
-        children: [
-          {
-            id: 10,
-            name: "孙节点3",
-            checked: false,
-          },
-          {
-            id: 11,
-            name: "孙节点4",
-            checked: false,
-          },
-        ],
-      },
-    ],
-  },
-]);
+import { ref } from "vue";
+
+let isFlipped = ref(false);
 </script>
+
+<style scoped>
+.container {
+  perspective: 1000px;
+}
+
+.page {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 1s;
+  transform-style: preserve-3d;
+}
+
+.page.flipped {
+  transform: rotateY(180deg);
+}
+
+.front,
+.back {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  backface-visibility: hidden;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+</style>
