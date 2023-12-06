@@ -14,7 +14,7 @@ let searchIsEmpty = ref<any>(null);
 let searchOccupy = ref<any>(null);
 let searchPlaceType = ref<any>(null);
 let searchDisable = ref<any>(null);
-
+//表头
 let headers = ref<any[]>([
   {
     title: "仓库号",
@@ -101,6 +101,8 @@ let headers = ref<any[]>([
     filterable: true,
   },
 ]);
+//多选内容
+let selected = ref<any[]>([]);
 let wareHouseList = ref<any[]>([]);
 //获取数据库内的数据
 async function getWareHouseDate() {
@@ -111,7 +113,7 @@ async function getWareHouseDate() {
     searchFlag.value = searchFlag.value === "是" ? "Y" : "N";
   }
   if (searchDisable.value) {
-    searchDisable.value = searchDisable.value === "是" ? "Y" : "N";
+    searchDisable.value = searchDisable.value === "是" ? true : false;
   }
   const data: any = await useHttp("/wmsPlace/G100placeid", "get", undefined, {
     place_id: "",
@@ -130,7 +132,7 @@ async function getWareHouseDate() {
   wareHouseList.value = data.data.map((item: any) => {
     item.is_empty = item.is_empty === "Y" ? "是" : "否";
     item.flag_has_task = item.flag_has_task === "Y" ? "是" : "否";
-    item.disable = item.disable === "Y" ? "是" : "否";
+    item.disable = item.disable === false ? "否" : "是";
     return item;
   });
 }
@@ -324,19 +326,26 @@ async function delSation() {
     return setSnackbar("black", "修改失败");
   }
 }
+// 二维码实例
+const qrCodeIns = ref<any>(null);
+let dataCode = ref<any[]>([]);
+//打印出二维码
+function printCode() {
+  if (!selected.value.length) {
+    return setSnackbar("black", "请您选择需要打印的派工单");
+  }
+  selected.value.map((item: any) =>
+    dataCode.value.push({
+      value: item.place_code,
+    })
+  );
+  nextTick(() => {
+    qrCodeIns.value.printQrCode();
+  });
+}
 </script>
 <template>
   <v-row class="ma-2">
-    <v-col cols="2">
-      <v-text-field
-        label="仓库号"
-        v-model="searchWarehouse"
-        variant="outlined"
-        density="compact"
-        hide-details
-        class="mt-2"
-      ></v-text-field>
-    </v-col>
     <v-col cols="2">
       <v-text-field
         label="库位号"
@@ -351,6 +360,16 @@ async function delSation() {
       <v-text-field
         label="仓库名称"
         v-model="searchPlaceDesc"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="2">
+      <v-text-field
+        label="占用单据号"
+        v-model="searchOccupy"
         variant="outlined"
         density="compact"
         hide-details
@@ -388,25 +407,28 @@ async function delSation() {
       ></v-text-field>
     </v-col>
     <v-col cols="2">
-      <v-text-field
+      <v-select
         label="库位类型"
         v-model="searchPlaceType"
+        :items="['平面库', '立体库', '临时库', '虚拟库']"
         variant="outlined"
         density="compact"
         hide-details
         class="mt-2"
-      ></v-text-field>
+      ></v-select>
     </v-col>
     <v-col cols="2">
-      <v-text-field
-        label="占用单据号"
-        v-model="searchOccupy"
+      <v-select
+        label="仓库号"
+        v-model="searchWarehouse"
         variant="outlined"
         density="compact"
+        :items="['A', 'B', 'C', 'D', 'E', 'F', 'Z']"
         hide-details
         class="mt-2"
-      ></v-text-field>
+      ></v-select>
     </v-col>
+
     <v-col cols="2">
       <v-select
         label="是否有任务"
@@ -459,6 +481,15 @@ async function delSation() {
       >
         新增库位
       </v-btn>
+      <v-btn
+        color="blue-darken-2"
+        class="mr-2 mt-2"
+        size="default"
+        @click="printCode"
+      >
+        打印
+      </v-btn>
+      <VQRCode2 :data="dataCode" ref="qrCodeIns"></VQRCode2>
     </v-col>
     <v-col>
       <v-data-table
@@ -466,6 +497,9 @@ async function delSation() {
         :items-per-page="10"
         :headers="headers"
         :items="wareHouseList"
+        v-model="selected"
+        show-select
+        return-object
         style="overflow-x: auto; white-space: nowrap"
         fixed-footer
         fixed-header
@@ -506,12 +540,13 @@ async function delSation() {
         <v-card-text class="mt-4">
           <v-row>
             <v-col cols="12">
-              <v-text-field
+              <v-select
                 label="仓库类型"
                 v-model="stationInfo.place_type"
+                :items="['平面库', '立体库', '临时库', '虚拟库']"
                 clearable
                 hide-details
-              ></v-text-field>
+              ></v-select>
             </v-col>
             <v-col cols="12">
               <v-text-field
@@ -522,12 +557,13 @@ async function delSation() {
               ></v-text-field>
             </v-col>
             <v-col cols="6">
-              <v-text-field
+              <v-select
                 label="仓库号"
                 v-model="stationInfo.warehouse"
                 clearable
+                :items="['A', 'B', 'C', 'D', 'E', 'F', 'Z']"
                 hide-details
-              ></v-text-field>
+              ></v-select>
             </v-col>
             <v-col cols="6">
               <v-text-field
@@ -626,12 +662,13 @@ async function delSation() {
         <v-card-text class="mt-4">
           <v-row>
             <v-col cols="12">
-              <v-text-field
+              <v-select
                 label="仓库类型"
                 v-model="stationInfo.place_type"
                 clearable
                 hide-details
-              ></v-text-field>
+                :items="['平面库', '立体库', '临时库', '虚拟库']"
+              ></v-select>
             </v-col>
             <v-col cols="12">
               <v-text-field
@@ -642,12 +679,13 @@ async function delSation() {
               ></v-text-field>
             </v-col>
             <v-col cols="6">
-              <v-text-field
+              <v-select
                 label="仓库号"
                 v-model="stationInfo.warehouse"
+                :items="['A', 'B', 'C', 'D', 'E', 'F', 'Z']"
                 clearable
                 hide-details
-              ></v-text-field>
+              ></v-select>
             </v-col>
             <v-col cols="6">
               <v-text-field

@@ -1,22 +1,27 @@
 <template>
-  <div class="container">
-    <div class="page" :class="{ flipped: isFlipped }">
-      <div class="front">
-        <v-btn @click="isFlipped = true">翻转到新页面</v-btn>
-        <div>初始页面</div>
-      </div>
-      <div class="back">
-        <v-btn @click="isFlipped = false">返回原来页面</v-btn>
-        <div>翻转后的新页面</div>
-      </div>
-    </div>
-  </div>
+  <VQRCode2 :data="dataCode"></VQRCode2>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
-
-let isFlipped = ref(false);
+let dataCode = ref<any[]>([
+  {
+    text: "库位号1",
+    value: "A-01-01-01-01",
+  },
+  {
+    text: "库位号2",
+    value: "A-01-01-01-02",
+  },
+  {
+    text: "库位号3",
+    value: "A-01-01-01-03",
+  },
+  {
+    text: "库位号4",
+    value: "A-01-01-01-04",
+  },
+]);
 </script>
 
 <style scoped>
