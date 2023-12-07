@@ -737,14 +737,14 @@ function printCode() {
                 hide-details
               ></v-text-field
             ></v-col>
-            <v-col cols="4"
-              ><v-text-field
+            <v-col cols="4">
+              <v-text-field
                 label="高"
                 v-model="stationInfo.height"
                 clearable
                 hide-details
-              ></v-text-field
-            ></v-col>
+              ></v-text-field>
+            </v-col>
             <v-col cols="12">
               <v-text-field
                 label="库位名称"
