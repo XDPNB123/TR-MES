@@ -699,6 +699,7 @@ function resetAddDialog() {
   operatingTicket.value = {
     workorder_type: "机加",
     product_id: "",
+    planned_quantity: 1,
     product_description: "",
     scheduled_start_date: new Date().toISOString().slice(0, 10),
     planned_completion_time: "",
@@ -713,6 +714,9 @@ async function addTicket() {
   try {
     if (!operatingTicket.value.product_description) {
       return setSnackbar("black", "请您输入产品描述");
+    }
+    if (!operatingTicket.value.planned_completion_time) {
+      return setSnackbar("black", "请您选择计划完成时间");
     }
     const data: any = await useHttp(
       "/MesWorkOrder/M02AddWorkOrder",
@@ -737,7 +741,7 @@ function resetAddDetailDialog() {
   operatingTicketDetail.value = {
     estimated_delivery_date: new Date().toISOString().slice(0, 10),
     blueprint_id: "",
-    standard_time: "",
+    standard_time: 0,
     actual_time: 0,
     procedure: null,
     planned_quantity: "",
@@ -1264,7 +1268,9 @@ async function saveMcodeProduct() {
 
 //文本规则、
 //数字规则
-const numberRule = ref<any>([(v: any) => /^\d+$/.test(v) || "只能填写数字"]);
+const numberRule = ref<any>([
+  (v: any) => /^\d+$/.test(v) || "只能填写数字且不为空",
+]);
 //日期规则
 const dateRule = ref<any>([
   (v: any) =>
@@ -1272,6 +1278,12 @@ const dateRule = ref<any>([
       v
     ) || "日期格式如“2023-10-01”",
 ]);
+const rules = [
+  (value: any) => {
+    if (value) return true;
+    return "不能为空";
+  },
+];
 </script>
 
 <template>
@@ -2175,66 +2187,65 @@ const dateRule = ref<any>([
     </v-dialog>
     <!-- 新增工单明细 -->
     <v-dialog v-model="addDetailDialog" min-width="400px" width="560px">
-      <v-card>
-        <v-toolbar color="blue">
-          <v-toolbar-title> 批量新增工单明细 </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="addDetailDialog = false">
-            <v-icon>fa-solid fa-close</v-icon>
-          </v-btn>
-        </v-toolbar>
+      <v-form @submit.prevent>
+        <v-card>
+          <v-toolbar color="blue">
+            <v-toolbar-title> 批量新增工单明细 </v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn icon @click="addDetailDialog = false">
+              <v-icon>fa-solid fa-close</v-icon>
+            </v-btn>
+          </v-toolbar>
 
-        <v-card-text class="mt-4">
-          <v-text-field
-            v-model="operatingTicketDetail.mdescription"
-            label="产出料"
-            append-inner-icon="fa-regular fa-hand-pointer"
-            @click:append-inner="showMcodeDialog"
-          ></v-text-field>
+          <v-card-text class="mt-4">
+            <v-text-field
+              v-model="operatingTicketDetail.mdescription"
+              label="产出料"
+              :rules="rules"
+              append-inner-icon="fa-regular fa-hand-pointer"
+              @click:append-inner="showMcodeDialog"
+            ></v-text-field>
 
-          <v-text-field
-            v-model="operatingTicketDetail.estimated_delivery_date"
-            :rules="dateRule"
-            label="预计交付时间"
-            type="date"
-          ></v-text-field>
+            <v-text-field
+              v-model="operatingTicketDetail.estimated_delivery_date"
+              :rules="dateRule"
+              label="预计交付时间"
+              type="date"
+            ></v-text-field>
 
-          <v-text-field
-            v-model="operatingTicketDetail.blueprint_id"
-            label="图纸号"
-          ></v-text-field>
+            <v-text-field
+              v-model="operatingTicketDetail.standard_time"
+              label="标准工时"
+            ></v-text-field>
 
-          <v-text-field
-            v-model="operatingTicketDetail.standard_time"
-            label="标准工时"
-          ></v-text-field>
+            <v-text-field
+              v-model="operatingTicketDetail.planned_quantity"
+              label="计划数量"
+              :rules="numberRule"
+            ></v-text-field>
+            <v-select
+              label="单位"
+              :items="units"
+              v-model="operatingTicketDetail.unit"
+            ></v-select>
+          </v-card-text>
 
-          <v-text-field
-            v-model="operatingTicketDetail.planned_quantity"
-            label="计划数量"
-            :rules="numberRule"
-          ></v-text-field>
-          <v-select
-            label="单位"
-            :items="units"
-            v-model="operatingTicketDetail.unit"
-          ></v-select>
-        </v-card-text>
-
-        <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn
-            color="blue-darken-2"
-            size="large"
-            class="mr-2"
-            @click="addTicketDetail()"
-          >
-            确认新增
-          </v-btn>
-          <v-btn color="grey" size="large" @click="addDetailDialog = false">
-            取消
-          </v-btn>
-        </div>
-      </v-card>
+          <div class="d-flex justify-end mr-6 mb-4">
+            <v-btn
+              type="submit"
+              color="blue-darken-2"
+              size="large"
+              class="mr-2"
+              @click="addTicketDetail()"
+            >
+              确认新增
+            </v-btn>
+            <v-btn color="grey" size="large" @click="addDetailDialog = false">
+              取消
+            </v-btn>
+          </div>
+        </v-card>
+      </v-form>
     </v-dialog>
     <!-- 删除工单明细行 -->
     <v-dialog v-model="deleteDetailDialog" min-width="400px" width="560px">

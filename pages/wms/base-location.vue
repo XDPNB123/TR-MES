@@ -106,15 +106,6 @@ let selected = ref<any[]>([]);
 let wareHouseList = ref<any[]>([]);
 //获取数据库内的数据
 async function getWareHouseDate() {
-  if (searchIsEmpty.value) {
-    searchIsEmpty.value = searchIsEmpty.value === "是" ? "Y" : "N";
-  }
-  if (searchFlag.value) {
-    searchFlag.value = searchFlag.value === "是" ? "Y" : "N";
-  }
-  if (searchDisable.value) {
-    searchDisable.value = searchDisable.value === "是" ? true : false;
-  }
   const data: any = await useHttp("/wmsPlace/G100placeid", "get", undefined, {
     place_id: "",
     warehouse: searchWarehouse.value,
@@ -122,12 +113,23 @@ async function getWareHouseDate() {
     place_desc: searchPlaceDesc.value,
     area_code: searchAreaCode.value,
     container_id: searchContainer.value,
-    is_empty: searchIsEmpty.value,
-    flag_has_task: searchFlag.value,
+    is_empty:
+      searchIsEmpty.value === "是"
+        ? "Y"
+        : searchIsEmpty.value === "否"
+        ? "N"
+        : "",
+    flag_has_task:
+      searchFlag.value === "是" ? "Y" : searchFlag.value === "否" ? "N" : "",
     default_sku: searchDefaultSku.value,
     occupy_order: searchOccupy.value,
     place_type: searchPlaceType.value,
-    disable: searchDisable.value,
+    disable:
+      searchDisable.value === "是"
+        ? true
+        : searchDisable.value === "否"
+        ? "false"
+        : "",
   });
   wareHouseList.value = data.data.map((item: any) => {
     item.is_empty = item.is_empty === "Y" ? "是" : "否";
