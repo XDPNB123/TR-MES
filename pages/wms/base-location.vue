@@ -510,9 +510,9 @@ function printCode() {
       >
         <template v-slot:item.action="{ item }">
           <!-- 库位详情 -->
-          <v-icon color="blue" size="small" class="mr-5">
+          <!-- <v-icon color="blue" size="small" class="mr-5">
             fa-solid fa-mattress-pillow
-          </v-icon>
+          </v-icon> -->
           <!-- 修改 -->
           <v-icon
             color="blue"
@@ -562,18 +562,17 @@ function printCode() {
               <v-select
                 label="仓库号"
                 v-model="stationInfo.warehouse"
-                clearable
                 :items="['A', 'B', 'C', 'D', 'E', 'F', 'Z']"
                 hide-details
               ></v-select>
             </v-col>
             <v-col cols="6">
-              <v-text-field
+              <v-select
                 label="库区号"
                 v-model="stationInfo.area_code"
-                clearable
+                :items="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
                 hide-details
-              ></v-text-field>
+              ></v-select>
             </v-col>
             <v-col cols="4">
               <v-select
