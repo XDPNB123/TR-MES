@@ -106,9 +106,8 @@ async function passwordLogin() {
   useCookie("name").value = data.data.userClaims.name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
-  useCookie("menuList").value = JSON.stringify(data.data.menuList);
-  useCookie("btnList").value = JSON.stringify(data.data.btnList);
-
+  useCookieSplit("menuList", 5, data.data.menuList);
+  useCookieSplit("btnList", 10, data.data.btnList);
   // 登陆成功的提示
   setSnackbar("green", "登陆成功，正在跳转...");
 
@@ -161,8 +160,8 @@ async function captchaLogin() {
   useCookie("name").value = data.data.name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
-  useCookie("menuList").value = JSON.stringify(data.data.menuList);
-  useCookie("btnList").value = JSON.stringify(data.data.btnList);
+  useCookieSplit("menuList", 5, data.data.menuList);
+  useCookieSplit("btnList", 10, data.data.btnList);
 
   // 登陆成功提示
   setSnackbar("green", "登陆成功，正在跳转...");
