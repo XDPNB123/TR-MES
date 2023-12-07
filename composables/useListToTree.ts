@@ -1,5 +1,4 @@
 export default function useListToTree(list: any[], parentId: any = 0) {
-  console.log(list);
   let tree: any[] = [];
   let temp: any;
 
