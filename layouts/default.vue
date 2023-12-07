@@ -110,6 +110,7 @@ watch(
 
 // 将页面菜单由 list 转换成 tree
 onMounted(() => {
+  console.log(useCookieJoin("menuList").length);
   pageMenus.value = useListToTree(useCookieJoin("menuList"));
 });
 </script>

@@ -3,7 +3,7 @@ export default function useCookieJoin(name: any) {
   // 获取该名称的 cookie 总数
   const count = useCookie(`${name}CookieCount`).value;
   // 如果该名称的 Cookie 总数不存在，则直接返回
-  if (!count) return;
+  if (!count) return false;
 
   // 声明最终的返回结果
   let result: any = [];

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-//弹框
-
 //搜索
 let searchCtnId = ref<any>(null);
 let searchPlaceId = ref<any>(null);
@@ -35,9 +33,23 @@ let headers = ref<any[]>([
     filterable: true,
   },
   {
+    title: "物料编码",
+    align: "center",
+    key: "sku",
+    sortable: false,
+    filterable: true,
+  },
+  {
     title: "物料规格",
     align: "center",
     key: "sku_spec",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "项目编号",
+    align: "center",
+    key: "reserved01",
     sortable: false,
     filterable: true,
   },
@@ -56,6 +68,7 @@ let headers = ref<any[]>([
     sortable: false,
     filterable: true,
   },
+
   {
     title: "来源单号",
     align: "center",
@@ -64,16 +77,16 @@ let headers = ref<any[]>([
     filterable: true,
   },
   {
-    title: "库区",
+    title: "来源类型",
     align: "center",
-    key: "area_code",
+    key: "source_type",
     sortable: false,
     filterable: true,
   },
   {
-    title: "仓库",
+    title: "条码",
     align: "center",
-    key: "warehouse_code",
+    key: "barcode",
     sortable: false,
     filterable: true,
   },
@@ -81,6 +94,13 @@ let headers = ref<any[]>([
     title: "库存状态",
     align: "center",
     key: "state",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "库存批次",
+    align: "center",
+    key: "lot",
     sortable: false,
     filterable: true,
   },
@@ -99,9 +119,23 @@ let headers = ref<any[]>([
     filterable: true,
   },
   {
-    title: "操作",
+    title: "第一次入库时间",
     align: "center",
-    key: "action",
+    key: "time_first_in",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "创建人",
+    align: "center",
+    key: "user_create",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "更新人",
+    align: "center",
+    key: "user_update",
     sortable: false,
     filterable: true,
   },
@@ -149,7 +183,7 @@ function resetFilter() {
 </script>
 <template>
   <v-row class="ma-2">
-    <v-col cols="3">
+    <v-col cols="2">
       <v-text-field
         label="容器编号"
         v-model="searchCtnId"
@@ -159,7 +193,7 @@ function resetFilter() {
         class="mt-2"
       ></v-text-field>
     </v-col>
-    <v-col cols="3">
+    <v-col cols="2">
       <v-text-field
         label="库位编号"
         v-model="searchPlaceId"
@@ -169,7 +203,68 @@ function resetFilter() {
         class="mt-2"
       ></v-text-field>
     </v-col>
-    <v-col cols="3">
+
+    <v-col cols="2">
+      <v-text-field
+        label="物料编码"
+        v-model="searchMaterial"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="2">
+      <v-text-field
+        label="物料描述"
+        v-model="searchMaterialDesc"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="2">
+      <v-text-field
+        label="物料规格"
+        v-model="searchArea"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="2">
+      <v-text-field
+        label="项目编号"
+        v-model="searchArea"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="2">
+      <v-text-field
+        label="库区"
+        v-model="searchArea"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="2">
+      <v-text-field
+        label="库区"
+        v-model="searchArea"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="2">
       <v-select
         label="仓库"
         v-model="searchWarehouse"
@@ -180,38 +275,8 @@ function resetFilter() {
         class="mt-2"
       ></v-select>
     </v-col>
-    <v-col cols="3">
-      <v-select
-        label="库区"
-        v-model="searchArea"
-        :items="['0', '1']"
-        variant="outlined"
-        density="compact"
-        hide-details
-        class="mt-2"
-      ></v-select>
-    </v-col>
-    <v-col cols="3">
-      <v-text-field
-        label="物料编码"
-        v-model="searchMaterial"
-        variant="outlined"
-        density="compact"
-        hide-details
-        class="mt-2"
-      ></v-text-field>
-    </v-col>
-    <v-col cols="3">
-      <v-text-field
-        label="物料描述"
-        v-model="searchMaterialDesc"
-        variant="outlined"
-        density="compact"
-        hide-details
-        class="mt-2"
-      ></v-text-field>
-    </v-col>
-    <v-col cols="3">
+
+    <v-col cols="2">
       <v-text-field
         label="最早入库时间"
         v-model="searchInDateTo"
@@ -222,7 +287,7 @@ function resetFilter() {
         type="date"
       ></v-text-field>
     </v-col>
-    <v-col cols="3">
+    <v-col cols="2">
       <v-text-field
         label="最晚入库时间"
         v-model="searchInDateFrom"
@@ -244,9 +309,6 @@ function resetFilter() {
       <v-btn color="red" class="mr-2 mt-2" size="default" @click="resetFilter"
         >重置搜索</v-btn
       >
-      <v-btn color="blue-darken-2" class="mr-2 mt-2" size="default">
-        新增库位
-      </v-btn>
     </v-col>
     <v-col cols="12">
       <v-data-table
@@ -259,137 +321,7 @@ function resetFilter() {
         fixed-header
         height="610"
         no-data-text="没有找到符合的数据"
-      >
-        <template v-slot:item.action="{ item }">
-          <!-- 修改 -->
-          <v-icon color="blue" size="small" class="mr-3">
-            fa-solid fa-pen
-          </v-icon>
-          <!-- 删除 -->
-          <v-icon color="red" size="small"> fa-solid fa-trash </v-icon>
-        </template>
-      </v-data-table>
+      ></v-data-table>
     </v-col>
-    <!-- 新增库存 -->
-    <v-dialog v-model="addDialog" min-width="400px" width="560px">
-      <v-card>
-        <v-toolbar color="blue">
-          <v-toolbar-title> 新增库位 </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="addDialog = false">
-            <v-icon>fa-solid fa-close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-card-text class="mt-4">
-          <v-row>
-            <v-col cols="12">
-              <v-select
-                label="仓库类型"
-                v-model="stationInfo.place_type"
-                :items="['平面库', '立体库', '临时库', '虚拟库']"
-                clearable
-                hide-details
-              ></v-select>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="默认物料"
-                v-model="stationInfo.default_sku"
-                clearable
-                hide-details
-              ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-select
-                label="仓库号"
-                v-model="stationInfo.warehouse"
-                :items="['A', 'B', 'C', 'D', 'E', 'F', 'Z']"
-                hide-details
-              ></v-select>
-            </v-col>
-            <v-col cols="6">
-              <v-select
-                label="库区号"
-                v-model="stationInfo.area_code"
-                :items="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
-                hide-details
-              ></v-select>
-            </v-col>
-            <v-col cols="4">
-              <v-select
-                label="排"
-                v-model="stationInfo.num_row"
-                :items="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
-                hide-details
-              ></v-select>
-            </v-col>
-            <v-col cols="4">
-              <v-select
-                label="列"
-                v-model="stationInfo.num_cloumn"
-                :items="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
-                hide-details
-              ></v-select>
-            </v-col>
-            <v-col cols="4">
-              <v-select
-                label="层"
-                v-model="stationInfo.num_layer"
-                :items="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
-                hide-details
-              ></v-select>
-            </v-col>
-
-            <v-col cols="4">
-              <v-text-field
-                label="长"
-                v-model="stationInfo.lenth"
-                clearable
-                hide-details
-              ></v-text-field
-            ></v-col>
-            <v-col cols="4"
-              ><v-text-field
-                label="宽"
-                v-model="stationInfo.width"
-                clearable
-                hide-details
-              ></v-text-field
-            ></v-col>
-            <v-col cols="4"
-              ><v-text-field
-                label="高"
-                v-model="stationInfo.height"
-                clearable
-                hide-details
-              ></v-text-field
-            ></v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="库位名称"
-                v-model="stationInfo.place_desc"
-                clearable
-                hide-details
-                append-inner-icon="fa-solid fa-star"
-                @click:append-inner="importName"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn
-            color="blue-darken-2"
-            size="large"
-            class="mr-2"
-            @click="addSation()"
-          >
-            确认
-          </v-btn>
-          <v-btn color="grey" size="large" @click="addDialog = false">
-            取消
-          </v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
   </v-row>
 </template>

@@ -136,8 +136,6 @@ let operatingTicketDetail = ref<any>(null);
 //工单表按照开始时间进行降序排序
 // 展示的工单表格数据
 let tableData = ref<any[]>([]);
-// 工单表头
-
 //工单明细表格展示的数据
 let tableDataDetail = ref<any[]>([]);
 function isDatePast(dateString: any) {

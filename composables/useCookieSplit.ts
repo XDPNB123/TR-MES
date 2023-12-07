@@ -23,7 +23,7 @@ export default function useCookieSplit(
       cookieCount++;
     }
     // 处理最后一个 Cookie 的菜单项少于 size 个
-    if (index === cookies.length - 1 && tempArr < size) {
+    if (index === cookies.length - 1 && tempArr.length < size) {
       useCookie(`${name}${tempIndex}`).value = JSON.stringify(tempArr);
       cookieCount++;
     }

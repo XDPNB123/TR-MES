@@ -101,6 +101,7 @@ async function passwordLogin() {
   if (data.code === 201) return setSnackbar("black", "账号不存在或密码错误");
 
   // 登陆成功，则储存 Cookie
+  console.log(data.data.menuList.length);
   useCookie("tel").value = tel.value;
   useCookie("password").value = password.value;
   useCookie("name").value = data.data.userClaims.name;
