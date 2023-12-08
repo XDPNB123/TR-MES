@@ -146,7 +146,7 @@ async function captchaLogin() {
   // 发送登陆请求
   const data: any = await useHttp("/Account/A03SignInSms", "post", {
     login_name: tel.value,
-    platform: "consequat in labore",
+    platform: "PC",
     sns_code: captcha.value,
     select_company_id: "96",
     platform_version: "magna consectetur",

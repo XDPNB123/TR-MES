@@ -8,6 +8,9 @@ let searchMaterial = ref<any>(null);
 let searchMaterialDesc = ref<any>(null);
 let searchInDateTo = ref<any>(null);
 let searchInDateFrom = ref<any>(null);
+let searchLot = ref<any>(null);
+let searchReserve = ref<any>(null);
+let searchSkuSpec = ref<any>(null);
 //表头
 let headers = ref<any[]>([
   {
@@ -157,6 +160,9 @@ async function getInventoryData() {
       materialDesc: searchMaterialDesc.value,
       indateTo: searchInDateTo.value,
       indateFrom: searchInDateFrom.value,
+      lot: searchLot.value,
+      reserved01: searchReserve.value,
+      sku_spec: searchSkuSpec.value,
     }
   );
   inventoryList.value = data.data;
@@ -178,6 +184,9 @@ function resetFilter() {
   searchMaterialDesc.value = "";
   searchInDateTo.value = "";
   searchInDateFrom.value = "";
+  searchLot.value = "";
+  searchReserve.value = "";
+  searchSkuSpec.value = "";
   getInventoryData();
 }
 </script>
@@ -227,7 +236,7 @@ function resetFilter() {
     <v-col cols="2">
       <v-text-field
         label="物料规格"
-        v-model="searchArea"
+        v-model="searchSkuSpec"
         variant="outlined"
         density="compact"
         hide-details
@@ -237,7 +246,7 @@ function resetFilter() {
     <v-col cols="2">
       <v-text-field
         label="项目编号"
-        v-model="searchArea"
+        v-model="searchReserve"
         variant="outlined"
         density="compact"
         hide-details
@@ -246,8 +255,8 @@ function resetFilter() {
     </v-col>
     <v-col cols="2">
       <v-text-field
-        label="库区"
-        v-model="searchArea"
+        label="库存批次"
+        v-model="searchLot"
         variant="outlined"
         density="compact"
         hide-details

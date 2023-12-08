@@ -567,12 +567,11 @@ function printCode() {
               ></v-select>
             </v-col>
             <v-col cols="6">
-              <v-select
+              <v-text-field
                 label="库区号"
                 v-model="stationInfo.area_code"
-                :items="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]"
                 hide-details
-              ></v-select>
+              ></v-text-field>
             </v-col>
             <v-col cols="4">
               <v-select
