@@ -134,7 +134,6 @@ function printQrCode() {
 </div>
 
 `);
-
       if (index === props.data.length - 1) {
         window.print();
         window.location.reload();

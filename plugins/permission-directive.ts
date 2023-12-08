@@ -6,11 +6,18 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.directive("permission", {
     mounted(el, binding) {
       // 获取 btnList，注意 useCookie 会自动进行 JSON.parse
-      const btnList = useCookie("btnList").value as any;
-      // 如果按钮权限不存在
-      if (btnList && !btnList.includes(binding.value))
+      const btnList = useCookieJoin("btnList");
+
+      // useCookieJoin("btnList") 的返回值如果是 false
+      if (!btnList) {
         // 移除该按钮
-        el.parentNode && el.parentNode.removeChild(el);
+        return el.parentNode && el.parentNode.removeChild(el);
+      }
+
+      // btnList 中如果不包含这个 btn
+      if (!btnList.includes(binding.value))
+        // 移除该按钮
+        return el.parentNode && el.parentNode.removeChild(el);
     },
     getSSRProps(binding, vnode) {
       // 不做任何处理

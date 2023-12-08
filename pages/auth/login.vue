@@ -101,14 +101,14 @@ async function passwordLogin() {
   if (data.code === 201) return setSnackbar("black", "账号不存在或密码错误");
 
   // 登陆成功，则储存 Cookie
+  console.log(data.data.menuList.length);
   useCookie("tel").value = tel.value;
   useCookie("password").value = password.value;
   useCookie("name").value = data.data.userClaims.name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
-  useCookie("menuList").value = JSON.stringify(data.data.menuList);
-  useCookie("btnList").value = JSON.stringify(data.data.btnList);
-
+  useCookieSplit("menuList", 5, data.data.menuList);
+  useCookieSplit("btnList", 10, data.data.btnList);
   // 登陆成功的提示
   setSnackbar("green", "登陆成功，正在跳转...");
 
@@ -146,7 +146,7 @@ async function captchaLogin() {
   // 发送登陆请求
   const data: any = await useHttp("/Account/A03SignInSms", "post", {
     login_name: tel.value,
-    platform: "consequat in labore",
+    platform: "PC",
     sns_code: captcha.value,
     select_company_id: "96",
     platform_version: "magna consectetur",
@@ -161,8 +161,8 @@ async function captchaLogin() {
   useCookie("name").value = data.data.name;
   useCookie("token").value = data.token;
   useCookie("refreshToken").value = data.refresh_token;
-  useCookie("menuList").value = JSON.stringify(data.data.menuList);
-  useCookie("btnList").value = JSON.stringify(data.data.btnList);
+  useCookieSplit("menuList", 5, data.data.menuList);
+  useCookieSplit("btnList", 10, data.data.btnList);
 
   // 登陆成功提示
   setSnackbar("green", "登陆成功，正在跳转...");
