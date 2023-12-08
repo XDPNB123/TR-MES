@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const router = useRouter();
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
   useSnackbar();
@@ -480,6 +481,7 @@ function printCode() {
         class="mr-2 mt-2"
         size="default"
         @click="showAddDialog"
+        v-permission="`${router.currentRoute.value.fullPath}->addLocation`"
       >
         新增库位
       </v-btn>
@@ -488,6 +490,9 @@ function printCode() {
         class="mr-2 mt-2"
         size="default"
         @click="printCode"
+        v-permission="
+          `${router.currentRoute.value.fullPath}->printCodeLocation`
+        "
       >
         打印
       </v-btn>
@@ -519,11 +524,19 @@ function printCode() {
             size="small"
             class="mr-3"
             @click="showEditDialog(item.raw)"
+            v-permission="`${router.currentRoute.value.fullPath}->editLocation`"
           >
             fa-solid fa-pen
           </v-icon>
           <!-- 删除 -->
-          <v-icon color="red" size="small" @click="showDelDialog(item.raw)">
+          <v-icon
+            color="red"
+            size="small"
+            @click="showDelDialog(item.raw)"
+            v-permission="
+              `${router.currentRoute.value.fullPath}->deleteLocation`
+            "
+          >
             fa-solid fa-trash
           </v-icon>
         </template>
