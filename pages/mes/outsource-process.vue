@@ -1,0 +1,431 @@
+<script setup lang="ts">
+let editDialog = ref<boolean>(false);
+let addDialog = ref<boolean>(false);
+let delDialog = ref<boolean>(false);
+let headers = ref<any[]>([
+  {
+    title: "派工单号",
+    align: "center",
+    key: "dispatch_order",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "供应商",
+    align: "center",
+    key: "supplier_id",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "委外物料",
+    align: "center",
+    key: "material_id",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "验收标准",
+    align: "center",
+    key: "acceptance_criteria",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "委外数量",
+    align: "center",
+    key: "outsourced_quantity",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "单位",
+    align: "center",
+    key: "unit",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "委外开始日期",
+    align: "center",
+    key: "outsourced_start_date",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "委外完成日期",
+    align: "center",
+    key: "outsourced_finish_date",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "委外状态",
+    align: "center",
+    key: "outsourced_status",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "操作",
+    align: "center",
+    key: "action",
+    sortable: false,
+    filterable: true,
+  },
+]);
+
+let outSourceList = ref<any[]>([]);
+//获取数据库数据
+async function getOutSourceData() {
+  const data: any = await useHttp("/QaOrder/M81GetQaOrder", "get", undefined);
+  outSourceList.value = data.data.pageList.map((item: any) => {
+    item.outsourced_start_date = item.outsourced_start_date.substring(0, 10);
+    item.outsourced_finish_date = item.outsourced_finish_date.substring(0, 10);
+    return item;
+  });
+}
+onMounted(() => {
+  getOutSourceData();
+});
+//委外工序对象
+let outSourceInfo = ref<any>(null);
+//修改委外信息
+function showEdit(item: any) {
+  outSourceInfo.value = { ...item };
+  editDialog.value = true;
+}
+async function editInfo() {
+  const data: any = await useHttp(
+    "/QaOrder/M83UpdateQaOrder",
+    "put",
+    outSourceInfo.value
+  );
+  getOutSourceData();
+  editDialog.value = false;
+}
+function showDel(item: any) {
+  outSourceInfo.value = { ...item };
+  delDialog.value = true;
+}
+async function delInfo() {
+  const data: any = await useHttp(
+    "/QaOrder/M84DeleteQaOrder",
+    "delete",
+    undefined,
+    {
+      ids: outSourceInfo.value.id,
+    }
+  );
+  getOutSourceData();
+  delDialog.value = false;
+}
+//新增委外工序
+function showAdd() {
+  outSourceInfo.value = {
+    dispatch_order: "",
+    supplier_id: "",
+    material_id: "",
+    acceptance_criteria: "",
+    outsourced_quantity: "",
+    unit: "",
+    outsourced_start_date: "",
+    outsourced_finish_date: "",
+    outsourced_status: "外出中",
+  };
+  addDialog.value = true;
+}
+async function addInfo() {
+  const data: any = await useHttp(
+    "/QaOrder/M82AddQaOrder",
+    "post",
+    outSourceInfo.value
+  );
+  getOutSourceData();
+  addDialog.value = false;
+}
+</script>
+<template>
+  <v-row class="ma-2">
+    <v-col cols="4">
+      <v-text-field
+        label="供应商"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="4">
+      <v-text-field
+        label="委外物料"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="4">
+      <v-text-field
+        label="派工单号"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="12">
+      <v-btn
+        color="blue-darken-2"
+        class="mr-2 mt-2"
+        size="default"
+        @click="showAdd"
+      >
+        新增委外
+      </v-btn>
+    </v-col>
+    <v-col cols="12">
+      <v-data-table
+        hover
+        :items-per-page="10"
+        :headers="headers"
+        :items="outSourceList"
+        style="overflow-x: auto; white-space: nowrap"
+        fixed-footer
+        fixed-header
+        height="610"
+        no-data-text="没有找到符合的数据"
+      >
+        <template v-slot:item.action="{ item }">
+          <!-- 修改 -->
+          <v-icon
+            color="blue"
+            size="small"
+            class="mr-3"
+            @click="showEdit(item.raw)"
+          >
+            fa-solid fa-pen
+          </v-icon>
+          <!-- 删除 -->
+          <v-icon color="red" size="small" @click="showDel(item.raw)">
+            fa-solid fa-trash
+          </v-icon>
+        </template>
+      </v-data-table>
+    </v-col>
+    <!-- 新增委外工序 -->
+    <v-dialog v-model="addDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 新增委外工序 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="addDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                label="派工单号"
+                v-model="outSourceInfo.dispatch_order"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="供应商"
+                v-model="outSourceInfo.supplier_id"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外物料"
+                v-model="outSourceInfo.material_id"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="说明验收标准"
+                v-model="outSourceInfo.acceptance_criteria"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外数量"
+                v-model="outSourceInfo.outsourced_quantity"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="单位"
+                v-model="outSourceInfo.unit"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外开始日期"
+                v-model="outSourceInfo.outsourced_start_date"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外完成日期"
+                v-model="outSourceInfo.outsourced_finish_date"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="addInfo"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="addDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+    <!-- 修改委外工序 -->
+    <v-dialog v-model="editDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 修改委外工序 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="editDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                label="供应商"
+                v-model="outSourceInfo.supplier_id"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外物料"
+                v-model="outSourceInfo.material_id"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="说明验收标准"
+                v-model="outSourceInfo.acceptance_criteria"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外数量"
+                v-model="outSourceInfo.outsourced_quantity"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="单位"
+                v-model="outSourceInfo.unit"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外开始日期"
+                v-model="outSourceInfo.outsourced_start_date"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外完成日期"
+                v-model="outSourceInfo.outsourced_finish_date"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="委外状态"
+                v-model="outSourceInfo.outsourced_status"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="editInfo"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="editDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+    <!-- 删除委外工序 -->
+    <v-dialog v-model="delDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 删除工序 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="delDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="text-center">
+          您确定要删除这条委外工序吗?
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="delInfo()"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="delDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+  </v-row>
+</template>

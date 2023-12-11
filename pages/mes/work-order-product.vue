@@ -97,7 +97,7 @@ let selected = ref<any[]>([]);
 // 工单新增、修改、删除对话框
 let addDialog = ref(false);
 let editDialog = ref(false);
-let deleteDialog = ref(false);
+let deleteDialog = ref(false);  
 let addDetailDialog = ref(false);
 let deleteDetailDialog = ref(false);
 let editDetailDialog = ref(false);

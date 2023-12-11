@@ -145,7 +145,7 @@ let headers = ref<any[]>([
 ]);
 //存储数据库数据
 let inventoryList = ref<any[]>([]);
-//获取数据库时间
+//获取数据库数据
 async function getInventoryData() {
   const data: any = await useHttp(
     "/wmsInventory/G115condition_query",
@@ -165,7 +165,12 @@ async function getInventoryData() {
       sku_spec: searchSkuSpec.value,
     }
   );
-  inventoryList.value = data.data;
+  inventoryList.value = data.data.map((item: any) => {
+    item.time_in = item.time_in.substring(0, 10);
+    item.time_out = item.time_out.substring(0, 10);
+    item.time_first_in = item.time_first_in.substring(0, 10);
+    return item
+  });
 }
 onMounted(() => {
   getInventoryData();
