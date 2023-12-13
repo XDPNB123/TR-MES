@@ -152,12 +152,12 @@ async function getInventoryData() {
     "post",
 
     {
-      ctn_id: searchCtnId.value,
-      placeid: searchPlaceId.value,
-      warehouse: searchWarehouse.value,
-      area: searchArea.value,
-      material: searchMaterial.value,
-      materialDesc: searchMaterialDesc.value,
+      container_id: searchCtnId.value,
+      place_code: searchPlaceId.value,
+      warehouse_code: searchWarehouse.value,
+      area_code: searchArea.value,
+      sku: searchMaterial.value,
+      sku_desc: searchMaterialDesc.value,
       indateTo: searchInDateTo.value,
       indateFrom: searchInDateFrom.value,
       lot: searchLot.value,
