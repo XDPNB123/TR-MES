@@ -27,5 +27,24 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="initial-animation">这是系统设置页面</div>
+  <div
+    style="
+      background: linear-gradient(to bottom, red, blue);
+      height: 100vh;
+      width: 100%;
+    "
+  >
+    <div
+      class="initial-animation text-h5"
+      style="
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-shadow: 5px 5px 5px #ff0000
+      "
+    >                    
+      当前版本信息:1.01
+    </div>
+  </div>
 </template>
