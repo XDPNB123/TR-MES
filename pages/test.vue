@@ -1,27 +1,21 @@
 <template>
-  <VQRCode2 :data="dataCode"></VQRCode2>
+  <div>
+    <v-btn @click="openPrint()"> 打印 </v-btn>
+    <div id="printContent">
+      <div>你好</div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-let dataCode = ref<any[]>([
-  {
-    text: "库位号1",
-    value: "A-01-01-01-01",
-  },
-  {
-    text: "库位号2",
-    value: "A-01-01-01-02",
-  },
-  {
-    text: "库位号3",
-    value: "A-01-01-01-03",
-  },
-  {
-    text: "库位号4",
-    value: "A-01-01-01-04",
-  },
-]);
+import printJS from "print-js";
+function openPrint() {
+  printJS({
+    printable: "printContent",
+    type: "html",
+    targetStyles: ["*"],
+  });
+}
 </script>
 
 <style scoped>
