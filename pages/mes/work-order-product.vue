@@ -97,7 +97,7 @@ let selected = ref<any[]>([]);
 // 工单新增、修改、删除对话框
 let addDialog = ref(false);
 let editDialog = ref(false);
-let deleteDialog = ref(false);  
+let deleteDialog = ref(false);
 let addDetailDialog = ref(false);
 let deleteDetailDialog = ref(false);
 let editDetailDialog = ref(false);
@@ -225,6 +225,18 @@ async function getProduceGroup() {
 let innerTableSelectData = ref<any[]>([]);
 //用来存储产出料名称的字段，便于知道在维护哪一行数据
 let mcodeName = ref();
+let selectName = ref<string>("全选");
+//选中所有的工单明细
+function selectAll() {
+  if (selectName.value === "全选") {
+    selected.value = [...tableDataDetail.value];
+    selectName.value = "清空";
+  } else {
+    selected.value = [];
+    selectName.value = "全选";
+  }
+}
+
 // 发请求获取完整的选中的数据
 // 判断工序是否一致
 // 如果一致，则将选中的数据暂时保存
@@ -281,6 +293,7 @@ async function batchWork() {
       }
     } else {
       selected.value = [];
+      selectName.value = "全选";
       return setSnackbar(
         "black",
         "您选择的数据的初始工序属性并不一致，请检查后重新选择"
@@ -491,6 +504,7 @@ async function saveTicket() {
   processDialog.value = false;
   innerTableSelectData.value = [];
   selected.value = [];
+  selectName.value = "全选";
   droppedChips.value = [];
 }
 
@@ -1702,6 +1716,14 @@ const rules = [
                 `${router.currentRoute.value.fullPath}->batchWorkOrderDetail`
               "
               >批量工序维护</v-btn
+            >
+            <v-btn
+              class="mr-2"
+              color="blue-darken-2"
+              size="large"
+              v-if="detailName && detailStatus === '新建未审核'"
+              @click="selectAll"
+              >{{ selectName }}</v-btn
             >
           </v-col>
           <v-col cols="2">

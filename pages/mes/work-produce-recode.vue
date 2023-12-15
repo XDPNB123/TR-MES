@@ -1,6 +1,7 @@
 <script setup lang="ts">
 //tabArr和tabArr1的作用，tabArr1全程存储拖拽的数据，tabArr作为中间值，在代码里面有很多使用，因此他的值变化的很快，tabArr1的值是全程都是存储拖拽的工单任务的。
-
+import printJS from "print-js";
+import QrcodeVue from "qrcode.vue";
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
   useSnackbar();
@@ -94,6 +95,8 @@ let workDetailList = ref<any[]>([]);
 let workDetailInfo = ref<any>(null);
 //修改弹框的的
 let editDialog = ref<boolean>(false);
+//打印页面
+let printDialog = ref<boolean>(false);
 //根据工单编号来查询到工单工序数据
 async function getWorkProduce() {
   try {
@@ -624,6 +627,52 @@ function dyDispatchOrder() {
     qrCodeIns.value.printQrCode();
   });
 }
+//打印明细
+let workDetail = ref<any[]>([]);
+//搜索数据
+let searchMcode = ref<string>("");
+let searchWorkId = ref<string>("");
+//获取工单明细编号以及派工单
+async function getWorkDetail() {
+  const data = await useHttp(
+    "/MesWorkOrderDetail/M85GetWorkOrderDetails",
+    "get",
+    undefined,
+    {
+      status: "已分配生产中",
+      workorder_did: searchWorkId.value,
+      mcode: searchMcode.value,
+    }
+  );
+  workDetail.value = data.data.map((item: any) => {
+    item.estimated_delivery_date = item.estimated_delivery_date.substring(
+      0,
+      10
+    );
+    return item;
+  });
+}
+//搜索
+function searchWork() {
+  getWorkDetail();
+}
+//重置搜索
+function resetSearchWork() {
+  searchMcode.value = "";
+  searchWorkId.value = "";
+  getWorkDetail();
+}
+let selectedRow = ref<any[]>([]);
+
+//打印
+function openPrint() {
+  printJS({
+    printable: "printContent",
+    type: "html",
+    targetStyles: ["*"],
+  });
+  selectedRow.value = [];
+}
 </script>
 
 <template>
@@ -640,6 +689,7 @@ function dyDispatchOrder() {
         <v-tabs color="blue" direction="vertical" v-model="showingTab">
           <v-tab value="未派工单"> 未派工单 </v-tab>
           <v-tab value="补打工单" @click="getDeliverList"> 补打工单 </v-tab>
+          <v-tab value="打印明细" @click="getWorkDetail"> 打印明细 </v-tab>
         </v-tabs>
       </v-card>
     </v-col>
@@ -1200,6 +1250,224 @@ function dyDispatchOrder() {
                     </v-progress-circular>
                   </template>
                 </v-data-table>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-window-item>
+        <v-window-item value="打印明细">
+          <v-card class="rounded-lg elevation-2 ml-1">
+            <v-toolbar density="compact">
+              <v-toolbar-title
+                class="text-center ml-0 text-blue font-weight-bold"
+                >打印明细</v-toolbar-title
+              >
+            </v-toolbar>
+            <v-row class="ma-2">
+              <v-col cols="6">
+                <v-text-field
+                  label="工单明细编号"
+                  variant="outlined"
+                  density="compact"
+                  v-model="searchWorkId"
+                  hide-details
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  label="物料名称"
+                  v-model="searchMcode"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12">
+                <v-btn
+                  color="blue-darken-2"
+                  class="mr-2"
+                  size="large"
+                  @click="searchWork"
+                  >查询</v-btn
+                >
+                <v-btn
+                  color="red"
+                  class="mr-2"
+                  size="large"
+                  @click="resetSearchWork"
+                >
+                  重置查询
+                </v-btn>
+                <v-btn
+                  color="blue-darken-2"
+                  class="mr-2"
+                  size="large"
+                  @click="openPrint()"
+                  >打印明细</v-btn
+                >
+              </v-col>
+
+              <v-col cols="12">
+                <v-card height="600px" class="overflow-y-auto">
+                  <v-expansion-panels>
+                    <v-expansion-panel
+                      v-for="(element, index) in workDetail"
+                      :key="index"
+                    >
+                      <div class="d-flex">
+                        <v-checkbox
+                          style="max-width: 30px"
+                          density="compact"
+                          hide-details
+                          color="blue"
+                          class="ml-3"
+                          v-model="selectedRow"
+                          :value="element"
+                        >
+                        </v-checkbox>
+                        <v-expansion-panel-title>
+                          <!-- 工单明细编号 -->
+                          <div style="flex-basis: 22%">
+                            工单明细编号：
+                            {{ element.workorder_did }}
+                          </div>
+                          <!-- 产出料 -->
+                          <div style="flex-basis: 25%">
+                            产出料：{{ element.mdescription }}
+                          </div>
+
+                          <!-- 计划产出料数量 -->
+                          <div style="flex-basis: 13%">
+                            计划数量：
+                            {{ element.planned_quantity }}
+                          </div>
+                          <!-- 计划交付日期 -->
+                          <div style="flex-basis: 20%">
+                            计划交付：
+                            {{ element.estimated_delivery_date }}
+                          </div>
+                        </v-expansion-panel-title>
+                      </div>
+                      <v-expansion-panel-text>
+                        <v-list-item
+                          v-for="(item_, index_) in element.children"
+                          :key="index_"
+                        >
+                          <template v-slot:default>
+                            <div class="d-flex align-center">
+                              <div style="flex-basis: 15%">
+                                派工单号：{{ item_.dispatch_order }}
+                              </div>
+
+                              <div style="flex-basis: 10%">
+                                工序顺序：{{ item_.procedure_order_id }}
+                              </div>
+                              <div style="flex-basis: 22%">
+                                计划日期：{{ item_.planned_completion_time }}
+                              </div>
+                              <div style="flex-basis: 22%">
+                                工序：[{{ item_.procedure_description }}]
+                              </div>
+                              <div style="flex-basis: 10%">
+                                委外：{{
+                                  item_.defaul_outsource === "N" ? "否" : "是"
+                                }}
+                              </div>
+
+                              <div style="flex-basis: 10%">
+                                @{{ item_.work_center_name }}
+                              </div>
+                            </div>
+                          </template>
+                        </v-list-item>
+                      </v-expansion-panel-text>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
+                </v-card>
+              </v-col>
+              <!-- 打印页面 -->
+              <v-col cols="12" style="display: none">
+                <div id="printContent">
+                  <div
+                    v-for="(item, index) in selectedRow"
+                    :key="index"
+                    style="page-break-before: always"
+                  >
+                    <div class="d-flex">
+                      <div style="flex-basis: 50%">
+                        产出料：{{ item.mdescription }}
+                      </div>
+                      <div>图纸号：{{ item.mcode }}</div>
+                    </div>
+                    <div class="d-flex">
+                      <div style="flex-basis: 35%">
+                        工单明细编号：{{ item.workorder_did }}
+                      </div>
+                      <div style="flex-basis: 30%">
+                        计划日期：{{ item.estimated_delivery_date }}
+                      </div>
+                      <div style="flex-basis: 15%; font-size: 20px">
+                        数量：{{ item.planned_quantity }}{{ item.unit }}
+                      </div>
+                    </div>
+
+                    <div
+                      style="display: flex"
+                      v-for="(item_, index_) in item.children"
+                      :key="index_"
+                      class="mt-3"
+                    >
+                      <div
+                        style="padding-right: 5px; flex-basis: 20%"
+                        v-if="index_ % 2 === 0"
+                      >
+                        <qrcode-vue
+                          style="width: 80px; height: 80px"
+                          :value="item_.dispatch_order"
+                        ></qrcode-vue>
+                      </div>
+                      <div
+                        style="
+                          font-family: 'SongTi';
+                          flex-basis: 25%;
+                          align-self: center;
+                        "
+                      >
+                        派工单号：{{ item_.dispatch_order }}
+                      </div>
+
+                      <div
+                        style="
+                          font-family: 'SongTi';
+                          flex-basis: 30%;
+                          align-self: center;
+                        "
+                      >
+                        工序顺序：{{ item_.procedure_order_id }}[{{
+                          item_.procedure_description
+                        }}]
+                      </div>
+                      <div
+                        style="
+                          font-family: 'SongTi';
+                          flex-basis: 20%;
+                          align-self: center;
+                        "
+                      >
+                        @{{ item_.work_center_name }}
+                      </div>
+                      <div
+                        style="padding-right: 5px; flex-basis: 20%"
+                        v-if="index_ % 2 !== 0"
+                      >
+                        <qrcode-vue
+                          style="width: 80px; height: 80px"
+                          :value="item_.dispatch_order"
+                        ></qrcode-vue>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </v-col>
             </v-row>
           </v-card>

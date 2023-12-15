@@ -3,6 +3,10 @@ export default defineNuxtConfig({
   build: {
     transpile: ["vuetify"],
   },
+  routeRules: {
+    "/mes/work-produce-recode": { ssr: false },
+    "/test": { ssr: false },
+  },
   // 启用了哪些模块
   modules: ["@pinia/nuxt", "nuxt-lodash", "@hypernym/nuxt-gsap"],
   // 声明 gsap 为 composables，可以直接使用 useGsap 掉用 gsap 动画
