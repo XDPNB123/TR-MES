@@ -631,6 +631,7 @@ function dyDispatchOrder() {
 let workDetail = ref<any[]>([]);
 //搜索数据
 let searchMcode = ref<string>("");
+let searchMdescription = ref<string>("");
 let searchWorkId = ref<string>("");
 //获取工单明细编号以及派工单
 async function getWorkDetail() {
@@ -642,6 +643,7 @@ async function getWorkDetail() {
       status: "已分配生产中",
       workorder_did: searchWorkId.value,
       mcode: searchMcode.value,
+      mdescription: searchMdescription.value,
     }
   );
   workDetail.value = data.data.map((item: any) => {
@@ -649,6 +651,15 @@ async function getWorkDetail() {
       0,
       10
     );
+    if (Array.isArray(item.children)) {
+      item.children = item.children.map((item_: any) => {
+        item_.planned_completion_time = item_.planned_completion_time.substring(
+          0,
+          10
+        );
+        return item_;
+      });
+    }
     return item;
   });
 }
@@ -660,6 +671,7 @@ function searchWork() {
 function resetSearchWork() {
   searchMcode.value = "";
   searchWorkId.value = "";
+  searchMdescription.value = "";
   getWorkDetail();
 }
 let selectedRow = ref<any[]>([]);
@@ -1263,7 +1275,7 @@ function openPrint() {
               >
             </v-toolbar>
             <v-row class="ma-2">
-              <v-col cols="6">
+              <v-col cols="4">
                 <v-text-field
                   label="工单明细编号"
                   variant="outlined"
@@ -1272,10 +1284,19 @@ function openPrint() {
                   hide-details
                 ></v-text-field>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="4">
                 <v-text-field
-                  label="物料名称"
+                  label="图纸号"
                   v-model="searchMcode"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                ></v-text-field>
+              </v-col>
+              <v-col cols="4">
+                <v-text-field
+                  label="产出料"
+                  v-model="searchMdescription"
                   variant="outlined"
                   density="compact"
                   hide-details
@@ -1327,12 +1348,12 @@ function openPrint() {
                         </v-checkbox>
                         <v-expansion-panel-title>
                           <!-- 工单明细编号 -->
-                          <div style="flex-basis: 22%">
+                          <div style="flex-basis: 15%">
                             工单明细编号：
                             {{ element.workorder_did }}
                           </div>
                           <!-- 产出料 -->
-                          <div style="flex-basis: 25%">
+                          <div style="flex-basis: 20%">
                             产出料：{{ element.mdescription }}
                           </div>
 
@@ -1345,6 +1366,10 @@ function openPrint() {
                           <div style="flex-basis: 20%">
                             计划交付：
                             {{ element.estimated_delivery_date }}
+                          </div>
+                          <div>
+                            图纸号：
+                            {{ element.mcode }}
                           </div>
                         </v-expansion-panel-title>
                       </div>
@@ -1373,7 +1398,9 @@ function openPrint() {
                                   item_.defaul_outsource === "N" ? "否" : "是"
                                 }}
                               </div>
-
+                              <div style="flex-basis: 10%">
+                                状态：{{ item_.status }}
+                              </div>
                               <div style="flex-basis: 10%">
                                 @{{ item_.work_center_name }}
                               </div>
@@ -1386,7 +1413,7 @@ function openPrint() {
                 </v-card>
               </v-col>
               <!-- 打印页面 -->
-              <v-col cols="12" style="display: none">
+              <v-col cols="12" v-show="false">
                 <div id="printContent">
                   <div
                     v-for="(item, index) in selectedRow"
@@ -1405,7 +1432,7 @@ function openPrint() {
                       <div style="flex-basis: 35%">
                         工单明细编号：{{ item.workorder_did }}
                       </div>
-                      <div style="flex-basis: 30%">
+                      <div style="flex-basis: 35%">
                         计划日期：{{ item.estimated_delivery_date }}
                       </div>
                       <div style="flex-basis: 15%; font-weight: bold">
@@ -1417,7 +1444,7 @@ function openPrint() {
                     <div v-for="(item_, index_) in item.children" :key="index_">
                       <div style="display: flex" class="mt-3">
                         <div
-                          style="padding-right: 5px; flex-basis: 20%"
+                          style="padding-right: 5px; flex-basis: 12%"
                           v-if="index_ % 2 === 0"
                         >
                           <qrcode-vue
@@ -1443,10 +1470,11 @@ function openPrint() {
                             font-weight: bold;
                           "
                         >
-                          工序顺序：{{ item_.procedure_order_id }}[{{
+                          工序顺序：{{ item_.procedure_order_id }} [{{
                             item_.procedure_description
                           }}]
                         </div>
+
                         <div
                           style="
                             font-family: 'SongTi';
@@ -1457,7 +1485,7 @@ function openPrint() {
                           @{{ item_.work_center_name }}
                         </div>
                         <div
-                          style="padding-right: 5px; flex-basis: 20%"
+                          style="padding-right: 5px; flex-basis: 12%"
                           v-if="index_ % 2 !== 0"
                         >
                           <qrcode-vue
