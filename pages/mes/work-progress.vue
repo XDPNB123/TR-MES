@@ -294,7 +294,10 @@ async function getProductList(item: any) {
                             <v-progress-circular
                               :model-value="
                                 element.planned_total_quantity === 0
-                                  ? 0 + '%'
+                                  ? '0%'
+                                  : element.reported_quantity >
+                                    element.planned_total_quantity
+                                  ? '100%'
                                   : Math.round(
                                       (element.reported_quantity /
                                         element.planned_total_quantity) *
@@ -308,6 +311,9 @@ async function getProductList(item: any) {
                                 {{
                                   element.planned_total_quantity === 0
                                     ? 0 + "%"
+                                    : element.reported_quantity >
+                                      element.planned_total_quantity
+                                    ? "100%"
                                     : Math.round(
                                         (element.reported_quantity /
                                           element.planned_total_quantity) *
@@ -319,28 +325,37 @@ async function getProductList(item: any) {
                           </div>
                         </v-expansion-panel-title>
                         <v-expansion-panel-text>
-                          <v-list-item v-for="(item_, index_) in productList">
+                          <v-list-item
+                            v-for="(item_, index_) in productList"
+                            :key="index_"
+                          >
                             <template v-slot:default>
                               <div class="d-flex align-center">
                                 <div style="flex-basis: 10%">
                                   进度：<v-progress-circular
                                     :model-value="
-                                      Math.round(
-                                        (item_.reported_quantity /
-                                          item_.planned_quantity) *
-                                          100
-                                      ) + '%'
+                                      item_.reported_quantity >
+                                      item_.planned_quantity
+                                        ? '100%'
+                                        : Math.round(
+                                            (item_.reported_quantity /
+                                              item_.planned_quantity) *
+                                              100
+                                          ) + '%'
                                     "
                                     :size="38"
                                     color="deep-orange-lighten-2"
                                   >
                                     <span style="font-size: 12px">
                                       {{
-                                        Math.round(
-                                          (item_.reported_quantity /
-                                            item_.planned_quantity) *
-                                            100
-                                        ) + "%"
+                                        item_.reported_quantity >
+                                        item_.planned_quantity
+                                          ? "100%"
+                                          : Math.round(
+                                              (item_.reported_quantity /
+                                                item_.planned_quantity) *
+                                                100
+                                            ) + "%"
                                       }}</span
                                     >
                                   </v-progress-circular>
