@@ -1132,7 +1132,7 @@ function saveProduct() {
         } else {
           //总转和零部件名称不一致
           //将选择的自制件数据的总装物件名拼接成字符串
-          productString = selectedData.totalName + "," + selectedData.partName;
+          productString = selectedData.partName;
         }
       }
       if (productTypeName.value === "标准外购件") {
@@ -1405,7 +1405,7 @@ const rules = [
                     <div class="d-flex">
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 70%"
+                        style="flex-basis: 30%"
                       >
                         产品描述：
                         <span
@@ -1413,6 +1413,19 @@ const rules = [
                           style="text-decoration: underline"
                         >
                           {{ item.product_description }}
+                        </span>
+                      </div>
+
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 40%; font-weight: bold"
+                      >
+                        产品编码：
+                        <span
+                          class="text-black"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.product_id }}
                         </span>
                       </div>
 
@@ -1770,7 +1783,7 @@ const rules = [
                       <div class="d-flex">
                         <div
                           class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 50%"
+                          style="flex-basis: 20%"
                         >
                           产出料：
                           <span
@@ -1780,10 +1793,21 @@ const rules = [
                             {{ item.mdescription }}
                           </span>
                         </div>
-
                         <div
                           class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 20%"
+                          style="flex-basis: 40%; font-weight: bold"
+                        >
+                          图纸号：
+                          <span
+                            class="text-black"
+                            style="text-decoration: underline"
+                          >
+                            {{ item.mcode }}
+                          </span>
+                        </div>
+                        <div
+                          class="text-body-2 text-blue-darken-1"
+                          style="flex-basis: 30%"
                         >
                           工单明细编号：
                           <span
@@ -1794,10 +1818,7 @@ const rules = [
                           </span>
                         </div>
 
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 30%"
-                        >
+                        <div class="text-body-2 text-blue-darken-1">
                           <div class="d-flex justify-end">
                             <v-icon
                               color="blue"
