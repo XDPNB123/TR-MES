@@ -1397,74 +1397,76 @@ function openPrint() {
                       <div style="flex-basis: 50%">
                         产出料：{{ item.mdescription }}
                       </div>
-                      <div>图纸号：{{ item.mcode }}</div>
+                      <div style="font-weight: bold">
+                        图纸号：{{ item.mcode }}
+                      </div>
                     </div>
-                    <div class="d-flex">
+                    <div class="d-flex mt-3">
                       <div style="flex-basis: 35%">
                         工单明细编号：{{ item.workorder_did }}
                       </div>
                       <div style="flex-basis: 30%">
                         计划日期：{{ item.estimated_delivery_date }}
                       </div>
-                      <div style="flex-basis: 15%; font-size: 20px">
+                      <div style="flex-basis: 15%; font-weight: bold">
                         数量：{{ item.planned_quantity }}{{ item.unit }}
                       </div>
                     </div>
+                    <hr />
+                    <!--派工单二维码页面  -->
+                    <div v-for="(item_, index_) in item.children" :key="index_">
+                      <div style="display: flex" class="mt-3">
+                        <div
+                          style="padding-right: 5px; flex-basis: 20%"
+                          v-if="index_ % 2 === 0"
+                        >
+                          <qrcode-vue
+                            style="width: 70px; height: 70px"
+                            :value="item_.dispatch_order"
+                          ></qrcode-vue>
+                        </div>
+                        <div
+                          style="
+                            font-family: 'SongTi';
+                            flex-basis: 25%;
+                            align-self: center;
+                          "
+                        >
+                          派工单号：{{ item_.dispatch_order }}
+                        </div>
 
-                    <div
-                      style="display: flex"
-                      v-for="(item_, index_) in item.children"
-                      :key="index_"
-                      class="mt-3"
-                    >
-                      <div
-                        style="padding-right: 5px; flex-basis: 20%"
-                        v-if="index_ % 2 === 0"
-                      >
-                        <qrcode-vue
-                          style="width: 80px; height: 80px"
-                          :value="item_.dispatch_order"
-                        ></qrcode-vue>
+                        <div
+                          style="
+                            font-family: 'SongTi';
+                            flex-basis: 30%;
+                            align-self: center;
+                            font-weight: bold;
+                          "
+                        >
+                          工序顺序：{{ item_.procedure_order_id }}[{{
+                            item_.procedure_description
+                          }}]
+                        </div>
+                        <div
+                          style="
+                            font-family: 'SongTi';
+                            flex-basis: 20%;
+                            align-self: center;
+                          "
+                        >
+                          @{{ item_.work_center_name }}
+                        </div>
+                        <div
+                          style="padding-right: 5px; flex-basis: 20%"
+                          v-if="index_ % 2 !== 0"
+                        >
+                          <qrcode-vue
+                            style="width: 70px; height: 70px"
+                            :value="item_.dispatch_order"
+                          ></qrcode-vue>
+                        </div>
                       </div>
-                      <div
-                        style="
-                          font-family: 'SongTi';
-                          flex-basis: 25%;
-                          align-self: center;
-                        "
-                      >
-                        派工单号：{{ item_.dispatch_order }}
-                      </div>
-
-                      <div
-                        style="
-                          font-family: 'SongTi';
-                          flex-basis: 30%;
-                          align-self: center;
-                        "
-                      >
-                        工序顺序：{{ item_.procedure_order_id }}[{{
-                          item_.procedure_description
-                        }}]
-                      </div>
-                      <div
-                        style="
-                          font-family: 'SongTi';
-                          flex-basis: 20%;
-                          align-self: center;
-                        "
-                      >
-                        @{{ item_.work_center_name }}
-                      </div>
-                      <div
-                        style="padding-right: 5px; flex-basis: 20%"
-                        v-if="index_ % 2 !== 0"
-                      >
-                        <qrcode-vue
-                          style="width: 80px; height: 80px"
-                          :value="item_.dispatch_order"
-                        ></qrcode-vue>
-                      </div>
+                      <hr />
                     </div>
                   </div>
                 </div>
