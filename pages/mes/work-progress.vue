@@ -267,10 +267,17 @@ async function getProductList(item: any) {
                             {{ element.mes_workorderdetaildata.workorder_did }}
                           </div>
                           <!-- 产出料 -->
-                          <div style="flex-basis: 25%">
-                            产出料：{{
-                              element.mes_workorderdetaildata.mdescription
-                            }}
+                          <div style="flex-basis: 30%">
+                            <div>
+                              产出料：{{
+                                element.mes_workorderdetaildata.mdescription
+                              }}
+                            </div>
+                            <div class="mt-2">
+                              图纸号：{{
+                                element.mes_workorderdetaildata.mcode
+                              }}
+                            </div>
                           </div>
 
                           <!-- 计划产出料数量 -->

@@ -583,8 +583,11 @@ async function getDeliverList() {
     )
     .map((_item: any) => {
       _item.reported_quantity =
-        Math.round((_item.reported_quantity / _item.planned_quantity) * 100) +
-        "%";
+        _item.reported_quantity > _item.planned_quantity
+          ? "100%"
+          : Math.round(
+              (_item.reported_quantity / _item.planned_quantity) * 100
+            ) + "%";
       _item.planned_completion_time = _item.planned_completion_time.substring(
         0,
         10
