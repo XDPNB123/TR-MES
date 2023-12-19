@@ -713,7 +713,7 @@ function openPrint() {
       <v-window v-model="showingTab">
         <v-window-item value="未派工单">
           <v-row no-gutters>
-            <v-col cols="2">
+            <v-col cols="3">
               <v-card class="rounded-lg elevation-2 ml-1">
                 <v-toolbar density="compact">
                   <v-toolbar-title
@@ -768,31 +768,31 @@ function openPrint() {
                       <v-list-item>
                         <template v-slot:default>
                           <div class="text-body-2">
+                            产品描述：
+                            <span class="text-grey font-weight-medium">
+                              {{ item.product_description }}
+                            </span>
+                          </div>
+                        </template>
+                      </v-list-item>
+
+                      <v-list-item>
+                        <template v-slot:default>
+                          <div class="text-body-2">
+                            产品编码：
+                            <span class="text-grey font-weight-medium">
+                              {{ item.product_id }}
+                            </span>
+                          </div>
+                        </template>
+                      </v-list-item>
+
+                      <v-list-item>
+                        <template v-slot:default>
+                          <div class="text-body-2">
                             计划完成日期：
                             <span class="text-grey font-weight-medium">
                               {{ item.planned_completion_time }}
-                            </span>
-                          </div>
-                        </template>
-                      </v-list-item>
-
-                      <v-list-item>
-                        <template v-slot:default>
-                          <div class="text-body-2">
-                            类型：
-                            <span class="text-grey font-weight-medium">
-                              {{ item.workorder_type }}
-                            </span>
-                          </div>
-                        </template>
-                      </v-list-item>
-
-                      <v-list-item>
-                        <template v-slot:default>
-                          <div class="text-body-2">
-                            数量：
-                            <span class="text-grey font-weight-medium">
-                              {{ item.planned_quantity }}{{ item.unit }}
                             </span>
                           </div>
                         </template>
@@ -806,7 +806,7 @@ function openPrint() {
               </v-card>
             </v-col>
 
-            <v-col cols="10" class="px-3">
+            <v-col cols="9" class="px-3">
               <v-card class="mb-3 elevation-2 rounded-lg">
                 <v-toolbar density="compact">
                   <v-toolbar-title

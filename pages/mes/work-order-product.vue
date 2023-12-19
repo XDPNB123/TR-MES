@@ -698,6 +698,15 @@ function formatDateDetail(data: any) {
 async function showTicketDetail(item: any) {
   detailName.value = item.workorder_hid;
   detailStatus.value = item.status;
+  if (
+    item.workorder_type !== "机加" &&
+    item.workorder_type !== "钣金" &&
+    item.workorder_type !== "其他"
+  ) {
+    searchName.value = item.product_description;
+  } else {
+    searchName.value = "";
+  }
   searchProject.value = item.product_id.slice(-9);
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
@@ -735,10 +744,12 @@ async function addTicket() {
       "post",
       operatingTicket.value
     );
-    getWorkOrder();
     if (data.code === 200) {
       setSnackbar("green", "新增成功");
       addDialog.value = false;
+      await getWorkOrder();
+      detailName.value = tableData.value[0].workorder_hid;
+      detailStatus.value = tableData.value[0].status;
     } else {
       setSnackbar("black", "新增失败");
     }
@@ -1224,7 +1235,7 @@ async function showMcodeDialog() {
   try {
     selectedRows.value = [];
     productLength.value = 0;
-    searchName.value = "";
+
     productList();
     productPage.value = 1;
     productTypeName.value = "自制件";

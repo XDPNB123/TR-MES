@@ -1,2 +1,254 @@
-<script setup lang="ts"></script>
-<template><div>工时统计</div></template>
+<script setup lang="ts">
+let headers = ref<any[]>([
+  {
+    title: "项目号",
+    align: "center",
+    key: "project_code",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工单编号",
+    align: "center",
+    key: "workorder_hid",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "明细编号",
+    align: "center",
+    key: "workorder_did",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "派工单号",
+    align: "center",
+    key: "dispatch_order",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工作中心",
+    align: "center",
+    key: "work_center_name",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工作人数",
+    align: "center",
+    key: "employee_number",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工作时间",
+    align: "center",
+    key: "temporal_interval",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "工时",
+    align: "center",
+    key: "work_time",
+    sortable: false,
+    filterable: true,
+  },
+]);
+let showDialog = ref<boolean>(false);
+//获取数据库数据
+let hourList = ref<any[]>([]);
+//搜索
+let searchProject = ref<any>("");
+let searchWorkHid = ref<any>("");
+let searchWorkDid = ref<any>("");
+let searchOrder = ref<any>("");
+let searchCenterName = ref<any>("");
+let searchStartTime = ref<any>(null);
+let searchEndTime = ref<any>(null);
+
+//调用接口
+async function getHourDate() {
+  const data: any = await useHttp(
+    "/MesProcessScanRecord/M87CountManHour",
+    "get",
+    undefined,
+    {
+      project_code: searchProject.value,
+      workorder_hid: searchWorkHid.value,
+      workorder_did: searchWorkDid.value,
+      dispatch_order: searchOrder.value,
+      work_center_name: searchCenterName.value,
+      start_time: searchStartTime.value,
+      end_time: searchEndTime.value,
+    }
+  );
+  hourList.value = data.data;
+}
+onMounted(() => {
+  getHourDate();
+});
+async function filter() {
+  await getHourDate();
+  addHour();
+}
+function resetFilter() {
+  (searchProject.value = ""),
+    (searchWorkHid.value = ""),
+    (searchWorkDid.value = ""),
+    (searchOrder.value = ""),
+    (searchCenterName.value = ""),
+    (searchStartTime.value = null),
+    (searchEndTime.value = null);
+  hour.value = 0;
+  getHourDate();
+}
+function showSum() {
+  showDialog.value = true;
+}
+let hour = ref<number>(0);
+function addHour() {
+  hour.value = 0;
+  hourList.value.forEach((item: any) => {
+    hour.value += Math.round(item.work_time * 100);
+  });
+  hour.value /= 100;
+}
+</script>
+<template>
+  <v-row class="ma-2">
+    <v-col cols="3">
+      <v-text-field
+        label="项目号"
+        v-model="searchProject"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+        @keydown.enter="filter()"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="工单表头"
+        v-model="searchWorkHid"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+        @keydown.enter="filter()"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="工单明细"
+        v-model="searchWorkDid"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+        @keydown.enter="filter()"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="派工单号"
+        v-model="searchOrder"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+        @keydown.enter="filter()"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="工作中心"
+        v-model="searchCenterName"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+        @keydown.enter="filter()"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="开始时间"
+        v-model="searchStartTime"
+        type="date"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+        @keydown.enter="filter()"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="截止时间"
+        v-model="searchEndTime"
+        type="date"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+        @keydown.enter="filter()"
+      ></v-text-field>
+    </v-col>
+
+    <v-col cols="12">
+      <v-btn
+        color="blue-darken-2"
+        class="mr-2 mt-2"
+        size="default"
+        @click="filter"
+        >查询</v-btn
+      >
+      <v-btn color="red" class="mr-2 mt-2" size="default" @click="resetFilter"
+        >重置查询</v-btn
+      >
+      <v-btn
+        color="blue-darken-2"
+        class="mr-2 mt-2"
+        size="default"
+        @click="showSum"
+      >
+        工时统计
+      </v-btn>
+    </v-col>
+    <v-col cols="12">
+      <v-data-table
+        hover
+        :items-per-page="10"
+        :headers="headers"
+        :items="hourList"
+        style="overflow-x: auto; white-space: nowrap"
+        fixed-footer
+        fixed-header
+        height="610"
+        no-data-text="没有找到符合的数据"
+      ></v-data-table>
+    </v-col>
+    <v-dialog v-model="showDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-card-text class="mt-4">
+          <div v-if="searchProject">项目号:{{ searchProject }}</div>
+          <div v-if="searchWorkHid">工单表头:{{ searchWorkHid }}</div>
+          <div v-if="searchWorkDid">明细编号:{{ searchWorkDid }}</div>
+          <div v-if="searchOrder">派工单号:{{ searchOrder }}</div>
+          <div v-if="searchCenterName">工作中心:{{ searchCenterName }}</div>
+          工时为:{{ hour }}
+        </v-card-text>
+
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn color="grey" size="large" @click="showDialog = false">
+            关闭
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+  </v-row>
+</template>
