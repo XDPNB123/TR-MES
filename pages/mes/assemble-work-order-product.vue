@@ -51,7 +51,7 @@ let units = ref<string[]>([
   "本",
 ]);
 //工单类型
-let workType = ref<any[]>(["机加", "钣金", "其他"]);
+let workType = ref<any[]>(["电器装配", "模组装配", "总装"]);
 
 //工单表头的状态
 let workStatus = ref([
@@ -72,13 +72,7 @@ let workDetailStatus = ref([
   "异常取消",
   "强制关闭",
 ]);
-//存储当前操作的工单编号
-let detailName = ref("");
-let detailStatus = ref("");
-//存储当前工单数据的产品编号
-let productName = ref("");
-// 用于刷新视图的 key
-let key = ref<number>(0);
+
 //多选产品编号
 let selectedRows = ref<any[]>([]);
 //创建一个键值对数组，存储工单明细
@@ -91,19 +85,12 @@ let selected = ref<any[]>([]);
 let addDialog = ref(false);
 let editDialog = ref(false);
 let deleteDialog = ref(false);
-let addDetailDialog = ref(false);
-let deleteDetailDialog = ref(false);
-let editDetailDialog = ref(false);
-let splitDetailDialog = ref(false);
 let productDialog = ref(false);
 let auditDialog = ref(false);
 let processDialog = ref(false);
-let mcodeDialog = ref(false);
-let deleteProduceDialog = ref(false);
-let dialog = ref(false);
+let addHomeDialog = ref<boolean>(false);
 // 工单搜索
 let searchTicketNumber = ref<string>("");
-let searchProjectNumber = ref<string>("");
 
 let nowDate = new Date();
 nowDate.setFullYear(nowDate.getFullYear() - 1);
@@ -111,19 +98,14 @@ let oldDate = new Date();
 oldDate.setMonth(oldDate.getMonth() + 1);
 let startDate = ref<any>(null);
 let endDate = ref<any>(null);
-let startDateDetail = ref<any>(null);
-let endDateDetail = ref<any>(null);
 
 let searchTicketStatus = ref<string>("");
-let searchTicketType = ref("机加");
+let searchTicketType = ref("总装");
 watch(searchTicketType, function () {
   getWorkOrder();
 });
-let searchOutputs = ref<string>("");
 let searchProduct = ref<string>("00.00.00.00");
 let searchProjectCode = ref<string>("");
-let searchName = ref("");
-let searchProject = ref("");
 
 // 正在操作的工单
 let operatingTicket = ref<any>(null);
@@ -221,17 +203,6 @@ async function getProduceGroup() {
 let innerTableSelectData = ref<any[]>([]);
 //用来存储产出料名称的字段，便于知道在维护哪一行数据
 let mcodeName = ref();
-let selectName = ref<string>("全选");
-//选中所有的工单明细
-function selectAll() {
-  if (selectName.value === "全选") {
-    selected.value = [...tableDataDetail.value];
-    selectName.value = "清空";
-  } else {
-    selected.value = [];
-    selectName.value = "全选";
-  }
-}
 
 // 发请求获取完整的选中的数据
 // 判断工序是否一致
@@ -289,7 +260,7 @@ async function batchWork() {
       }
     } else {
       selected.value = [];
-      selectName.value = "全选";
+
       return setSnackbar(
         "black",
         "您选择的数据的初始工序属性并不一致，请检查后重新选择"
@@ -438,13 +409,35 @@ async function saveTicket() {
         .join(",")),
         (item.status = "已分配待排产");
     });
+    let tabArr2 = ref<any[]>([]);
+    innerTableSelectData.value.forEach((item) => {
+      tabArr2.value.push({
+        id: item.did,
+        bomdata: item.bomdata,
+        estimated_delivery_date: item.estimated_delivery_date,
+        mcode: item.mcode,
+        mdescription: item.mdescription,
+        blueprint_id: item.blueprint_id,
+        standard_time: item.standard_time,
+        actual_time: item.actual_time,
+        procedure: item.procedure,
+        planned_quantity: item.planned_quantity,
+        reported_quantity: item.reported_quantity,
+        unit: item.unit,
+        project_code: item.project_code,
+        workorder_hid: item.workorder_hid,
+        workorder_did: item.workorder_did,
+        actual_delivery_date: item.actual_delivery_date,
+        status: item.status,
+      });
+    });
+
     await useHttp(
       "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
       "put",
-      innerTableSelectData.value
+      tabArr2.value
     );
 
-    getWorkOrderDetail();
     let tabArr = ref<any[]>([]);
     innerTableSelectData.value.forEach((item: any) => {
       droppedChips.value.forEach((_item: any, index: number) => {
@@ -500,7 +493,7 @@ async function saveTicket() {
   processDialog.value = false;
   innerTableSelectData.value = [];
   selected.value = [];
-  selectName.value = "全选";
+
   droppedChips.value = [];
 }
 
@@ -531,47 +524,26 @@ async function filterTableData() {
 function resetFilter() {
   searchTicketStatus.value = "";
   searchTicketNumber.value = "";
-  searchTicketType.value = "机加";
+  searchTicketType.value = "总装";
   startDate.value = nowDate.toISOString().substring(0, 10);
   endDate.value = oldDate.toISOString().substring(0, 10);
-  detailName.value = "";
+
   tablePage.value = 1;
   getWorkOrder();
 }
 
-//工单明细搜素
-async function filterTableDataDetail() {
-  try {
-    tableDetailPage.value = 1;
-    getWorkOrderDetail();
-  } catch (error) {
-    console.log(error);
-  }
-}
-//重置工单明细的搜素
-function resetFilterDetail() {
-  searchOutputs.value = "";
-  searchProjectNumber.value = "";
-  startDateDetail.value = nowDate.toISOString().substring(0, 10);
-  endDateDetail.value = oldDate.toISOString().substring(0, 10);
-  tableDetailPage.value = 1;
-  getWorkOrderDetail();
-}
 //页面加载时获取数据
 onMounted(async () => {
   startDate.value = nowDate.toISOString().substring(0, 10);
   endDate.value = oldDate.toISOString().substring(0, 10);
-  startDateDetail.value = nowDate.toISOString().substring(0, 10);
-  endDateDetail.value = oldDate.toISOString().substring(0, 10);
   getWorkOrder();
-  getWorkOrderDetail();
 });
 
 //获取工单数据
 async function getWorkOrder() {
   try {
     const data: any = await useHttp(
-      "/MesWorkOrder/M01GetWorkOrderList",
+      "/MesWorkOrder/M88GetWorkOrderList",
       "get",
       undefined,
       {
@@ -586,12 +558,8 @@ async function getWorkOrder() {
         end_date: endDate.value,
       }
     );
-
     tableData.value = formatDate(data.data.pageList);
     tableDataLength.value = data.data.totalCount;
-    if (tableData.value.length) {
-      detailName.value = tableData.value[0].workorder_hid;
-    }
   } catch (error) {
     setSnackbar("black", "获取数据失败");
     console.log(error);
@@ -638,87 +606,12 @@ function formatDate(data: any) {
   }
 }
 
-//获取工单明细数据
-async function getWorkOrderDetail() {
-  try {
-    const data: any = await useHttp(
-      "/MesWorkOrderDetail/M05WorkOrderDetails",
-      "get",
-      undefined,
-      {
-        PageIndex: tableDetailPage.value,
-        PageSize: tableDetailPerPage.value,
-        SortType: 1,
-        SortedBy: "id",
-        workorder_hid: detailName.value,
-        mcode: searchOutputs.value,
-        project_code: searchProjectNumber.value,
-        estimated_delivery_date: startDateDetail.value,
-        end_date: endDateDetail.value,
-      }
-    );
-    tableDataDetail.value = formatDateDetail(data.data.pageList);
-    tableDataDetailLength.value = data.data.totalCount;
-  } catch (error) {
-    setSnackbar("black", "获取数据失败");
-    console.log(error);
-  }
-}
-// 工单明细表格有多少页
-let tableDetailPageCount = computed(() => {
-  return Math.ceil(tableDataDetailLength.value / tableDetailPerPage.value);
-});
-//工单明细下一页
-watch(tableDetailPage, () => {
-  getWorkOrderDetail();
-});
-//更改工单明细页面显示的最大数量
-watch(tableDetailPerPage, () => {
-  getWorkOrderDetail();
-});
-//将工单明细数据的日期进行截取，保留年月份
-function formatDateDetail(data: any) {
-  try {
-    data.forEach((item: any) => {
-      if (item.estimated_delivery_date !== null) {
-        item.estimated_delivery_date = item.estimated_delivery_date.substring(
-          0,
-          10
-        );
-      }
-      if (item.actual_delivery_date !== null)
-        item.actual_delivery_date = item.actual_delivery_date.substring(0, 10);
-    });
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
-}
-//点击表单显示表单明细
-async function showTicketDetail(item: any) {
-  detailName.value = item.workorder_hid;
-  detailStatus.value = item.status;
-  if (
-    item.workorder_type !== "机加" &&
-    item.workorder_type !== "钣金" &&
-    item.workorder_type !== "其他"
-  ) {
-    searchName.value = item.product_description;
-  } else {
-    searchName.value = "";
-  }
-  searchProject.value = item.product_id.slice(-9);
-}
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
-watch(detailName, () => {
-  tableDetailPage.value = 1;
-  getWorkOrderDetail();
-});
-let date = new Date();
+
 // 新增工单前重置新增对话框
 function resetAddDialog() {
   operatingTicket.value = {
-    workorder_type: "机加",
+    workorder_type: "总装",
     product_id: "",
     planned_quantity: 1,
     product_description: "",
@@ -726,6 +619,22 @@ function resetAddDialog() {
     planned_completion_time: "",
     unit: "套",
     status: "新建未审核",
+  };
+  operatingTicketDetail.value = {
+    estimated_delivery_date: null,
+    mcode: "",
+    mdescription: "",
+    blueprint_id: "",
+    standard_time: 0,
+    actual_time: 0,
+    procedure: null,
+    planned_quantity: 0,
+    reported_quantity: 0,
+    unit: "",
+    project_code: "",
+    workorder_hid: "",
+    actual_delivery_date: null,
+    status: "新增未分配",
   };
   addDialog.value = true;
 }
@@ -739,17 +648,38 @@ async function addTicket() {
     if (!operatingTicket.value.planned_completion_time) {
       return setSnackbar("black", "请您选择计划完成时间");
     }
+
     const data: any = await useHttp(
       "/MesWorkOrder/M02AddWorkOrder",
       "post",
       operatingTicket.value
     );
-    if (data.code === 200) {
+    //给工单明细对象赋值
+    operatingTicketDetail.value = {
+      mcode: operatingTicket.value.product_id,
+      mdescription: operatingTicket.value.product_description,
+      project_code: operatingTicket.value.product_id.slice(-9),
+      estimated_delivery_date: operatingTicket.value.planned_completion_time,
+      blueprint_id: "",
+      standard_time: operatingTicketDetail.value.standard_time,
+      actual_time: "0",
+      procedure: null,
+      planned_quantity: operatingTicket.value.planned_quantity,
+      reported_quantity: "0",
+      unit: operatingTicket.value.unit,
+      workorder_hid: data.data,
+      actual_delivery_date: null,
+      status: "新增未分配",
+    };
+    const data2: any = await useHttp(
+      "/MesWorkOrderDetail/M06AddWorkOrderDetails",
+      "post",
+      [operatingTicketDetail.value]
+    );
+    if (data.code === 200 && data2.code === 200) {
       setSnackbar("green", "新增成功");
       addDialog.value = false;
       await getWorkOrder();
-      detailName.value = tableData.value[0].workorder_hid;
-      detailStatus.value = tableData.value[0].status;
     } else {
       setSnackbar("black", "新增失败");
     }
@@ -757,66 +687,44 @@ async function addTicket() {
     console.log(error);
     setSnackbar("black", "新增失败");
   }
+}
+//修改前的对话框
+function showEdit(item: any) {
+  operatingTicket.value = {
+    id: item.id,
+    workorder_hid: item.workorder_hid,
+    workorder_type: item.workorder_type,
+    product_id: item.product_id,
+    planned_quantity: item.planned_quantity,
+    product_description: item.product_description,
+    scheduled_start_date: item.scheduled_start_date,
+    planned_completion_time: item.planned_completion_time,
+    unit: item.unit,
+    status: item.status,
+  };
+  operatingTicketDetail.value = {
+    id: item.did,
+    bomdata: item.bomdata,
+    estimated_delivery_date: item.estimated_delivery_date.substring(0, 10),
+    mcode: item.mcode,
+    mdescription: item.mdescription,
+    blueprint_id: item.blueprint_id,
+    standard_time: item.standard_time,
+    actual_time: item.actual_time,
+    procedure: item.procedure,
+    planned_quantity: item.planned_quantity,
+    reported_quantity: item.reported_quantity,
+    unit: item.unit,
+    project_code: item.project_code,
+    workorder_hid: item.workorder_hid,
+    workorder_did: item.workorder_did,
+    actual_delivery_date: item.actual_delivery_date,
+    status: item.status,
+  };
+
+  editDialog.value = true;
 }
 
-// 新增工单明细前重置新增对话框
-function resetAddDetailDialog() {
-  operatingTicketDetail.value = {
-    estimated_delivery_date: new Date().toISOString().slice(0, 10),
-    blueprint_id: "",
-    standard_time: 0,
-    actual_time: 0,
-    procedure: null,
-    planned_quantity: "",
-    reported_quantity: 0,
-    unit: "件",
-    workorder_hid: detailName.value,
-    actual_delivery_date: null,
-    status: null,
-  };
-  addDetailDialog.value = true;
-}
-//新增工单明细行
-async function addTicketDetail() {
-  try {
-    const tableArr: any[] = [];
-    selectedRows.value.forEach((item: any) => {
-      tableArr.push({
-        mdescription: item.partName,
-        mcode: item.resultCode,
-        estimated_delivery_date:
-          operatingTicketDetail.value.estimated_delivery_date,
-        blueprint_id: operatingTicketDetail.value.blueprint_id,
-        project_code: item.projectCode,
-        standard_time: operatingTicketDetail.value.standard_time,
-        actual_time: "0",
-        procedure: null,
-        planned_quantity: operatingTicketDetail.value.planned_quantity,
-        reported_quantity: "0",
-        unit: operatingTicketDetail.value.unit,
-        workorder_hid: detailName.value,
-        actual_delivery_date: null,
-        status: "新增未分配",
-      });
-    });
-    const data: any = await useHttp(
-      "/MesWorkOrderDetail/M06AddWorkOrderDetails",
-      "post",
-      tableArr
-    );
-    getWorkOrderDetail();
-    selectedRows.value = [];
-    if (data.code === 200) {
-      setSnackbar("green", "新增成功");
-      addDetailDialog.value = false;
-    } else {
-      setSnackbar("black", "新增失败");
-    }
-  } catch (error) {
-    console.log(error);
-    setSnackbar("black", "新增失败");
-  }
-}
 // 修改工单
 async function editTicket() {
   try {
@@ -825,10 +733,34 @@ async function editTicket() {
       "put",
       [operatingTicket.value]
     );
-    getWorkOrder();
-    if (data.code === 200) {
+    operatingTicketDetail.value = {
+      id: operatingTicketDetail.value.id,
+      workorder_did: operatingTicketDetail.value.workorder_did,
+      workorder_hid: operatingTicketDetail.value.workorder_hid,
+      bomdata: operatingTicketDetail.value.bomdata,
+      mcode: operatingTicketDetail.value.mcode,
+      project_code: operatingTicketDetail.value.project_code,
+      mdescription: operatingTicketDetail.value.mdescription,
+      estimated_delivery_date: operatingTicket.value.planned_completion_time,
+      blueprint_id: operatingTicketDetail.blueprint_id,
+      standard_time: operatingTicketDetail.value.standard_time,
+      actual_time: operatingTicketDetail.value.actual_time,
+      procedure: operatingTicketDetail.value.procedure,
+      planned_quantity: operatingTicket.value.planned_quantity,
+      reported_quantity: operatingTicketDetail.value.reported_quantity,
+      unit: operatingTicket.value.unit,
+      actual_delivery_date: operatingTicketDetail.value.actual_delivery_date,
+      status: operatingTicketDetail.value.status,
+    };
+    const data2: any = await useHttp(
+      "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
+      "put",
+      [operatingTicketDetail.value]
+    );
+    if (data.code === 200 && data2.code === 200) {
       setSnackbar("green", "修改成功");
       editDialog.value = false;
+      getWorkOrder();
     } else {
       setSnackbar("black", "修改失败");
     }
@@ -837,7 +769,23 @@ async function editTicket() {
     setSnackbar("black", "修改失败");
   }
 }
-
+//打开审核弹框
+function showAudit(item: any) {
+  operatingTicket.value = {
+    id: item.id,
+    finish_date: item.finish_date,
+    workorder_hid: item.workorder_hid,
+    workorder_type: item.workorder_type,
+    product_id: item.product_id,
+    planned_quantity: item.planned_quantity,
+    product_description: item.product_description,
+    scheduled_start_date: item.scheduled_start_date,
+    planned_completion_time: item.planned_completion_time,
+    unit: item.unit,
+    status: item.status,
+  };
+  auditDialog.value = true;
+}
 //审核通过
 async function auditTicket() {
   try {
@@ -854,128 +802,6 @@ async function auditTicket() {
   }
   auditDialog.value = false;
 }
-//拆分明细行数据，新增一个明细行数据
-//剩余的数量和委外的数量
-let nowData = ref<number>(0);
-let oldData = ref<number>(0);
-async function splitTicket() {
-  if (
-    Number(nowData.value) + Number(oldData.value) !==
-    operatingTicketDetail.value.planned_quantity
-  ) {
-    return setSnackbar(
-      "black",
-      "请你确保剩余数量和委外数量相加与初始任务数量一致"
-    );
-  }
-  //修改当前明细行数据的数量
-  operatingTicketDetail.value.planned_quantity = oldData.value;
-  operatingTicketDetail.value.mdescription =
-    operatingTicketDetail.value.mdescription + "(已拆批)";
-  await useHttp("/MesWorkOrderDetail/M07UpdateWorkOrderDetail", "put", [
-    operatingTicketDetail.value,
-  ]);
-  //修改当前明细编号下的排产数据的每条的数据
-  const data: any = await useHttp(
-    "/ProductionRecode/M21ProductionRecodeList",
-    "get",
-    undefined,
-    {
-      workorder_did: operatingTicketDetail.value.workorder_did,
-      PageIndex: 1,
-      PageSize: 100000,
-      SortedBy: "id",
-      SortType: "0",
-    }
-  );
-  //存储当前明细编号下的所有排产数据
-  let productionData: any = data.data.pageList;
-  productionData = productionData.map((item: any) => {
-    item.planned_quantity = oldData.value;
-    item.material_name = operatingTicketDetail.value.mdescription;
-    if (
-      item.reported_quantity >= operatingTicketDetail.value.planned_quantity
-    ) {
-      item.reported_quantity = operatingTicketDetail.value.planned_quantity;
-    }
-    return item;
-  });
-
-  //调用排产数据修改的接口进行修改
-  await useHttp(
-    "/ProductionRecode/M23UpdateProductionRecode",
-    "put",
-    productionData
-  );
-  //新增一个批次工单明细对象
-  const newDetailData = {
-    estimated_delivery_date:
-      operatingTicketDetail.value.estimated_delivery_date,
-    blueprint_id: operatingTicketDetail.value.blueprint_id,
-    standard_time: operatingTicketDetail.value.standard_time,
-    actual_time: operatingTicketDetail.value.actual_time,
-    procedure: null,
-    planned_quantity: nowData.value,
-    reported_quantity: 0,
-    unit: operatingTicketDetail.value.unit,
-    workorder_hid: operatingTicketDetail.value.workorder_hid,
-    actual_delivery_date: operatingTicketDetail.value.actual_delivery_date,
-    status: "新增未分配",
-    mcode: operatingTicketDetail.value.mcode,
-    mdescription:
-      operatingTicketDetail.value.mdescription.slice(0, -5) + "(批次工单)",
-    project_code: operatingTicketDetail.value.project_code,
-  };
-  await useHttp("/MesWorkOrderDetail/M06AddWorkOrderDetails", "post", [
-    newDetailData,
-  ]);
-  setSnackbar("green", "拆批成功");
-  // //查询当前明细下的工单表头状态
-  // const data_: any = await useHttp(
-  //   "/MesWorkOrder/M01GetWorkOrderList",
-  //   "get",
-  //   undefined,
-  //   {
-  //     workorder_hid: operatingTicketDetail.value.workorder_hid,
-  //     PageIndex: 1,
-  //     PageSize: 100000,
-  //     SortedBy: "id",
-  //     SortType: "0",
-  //   }
-  // );
-  // console.log(data_.data.pageList[0]);
-  // if (data_.data.pageList[0].status === "已排产生产中") {
-  //   data_.data.pageList[0].status = "已审核待排产";
-
-  //   await useHttp("/MesWorkOrder/M03PartiallyUpdateWorkOrder", "put", [
-  //     data_.data.pageList[0],
-  //   ]);
-  // }
-  getWorkOrder();
-  getWorkOrderDetail();
-  splitDetailDialog.value = false;
-}
-
-//修改工单明细行
-async function editTicketDetail() {
-  try {
-    const data: any = await useHttp(
-      "/MesWorkOrderDetail/M07UpdateWorkOrderDetail",
-      "put",
-      [operatingTicketDetail.value]
-    );
-    getWorkOrderDetail();
-    if (data.code === 200) {
-      setSnackbar("green", "修改成功");
-      editDetailDialog.value = false;
-    } else {
-      setSnackbar("black", "修改失败");
-    }
-  } catch (error) {
-    console.log(error);
-    setSnackbar("black", "修改失败");
-  }
-}
 
 // 删除工单
 async function deleteTicket() {
@@ -989,7 +815,7 @@ async function deleteTicket() {
       }
     );
     getWorkOrder();
-    getWorkOrderDetail();
+
     if (data.code === 200) {
       setSnackbar("green", data.data);
     } else {
@@ -1000,41 +826,6 @@ async function deleteTicket() {
     setSnackbar("black", "删除失败");
   }
   deleteDialog.value = false;
-}
-
-// 删除工单明细行
-async function deleteTicketDetail() {
-  try {
-    const data: any = await useHttp(
-      "/MesWorkOrderDetail/M08DeleteWorkOrderDetails",
-      "delete",
-      undefined,
-      { workorderdetail_ids: [operatingTicketDetail.value.id] }
-    );
-    getWorkOrderDetail();
-
-    if (data.code === 200) {
-      setSnackbar("green", data.data);
-    } else {
-      setSnackbar("black", "删除失败");
-    }
-  } catch (error) {
-    console.log(error);
-    setSnackbar("black", "删除失败");
-  }
-  deleteDetailDialog.value = false;
-}
-
-//查看图纸
-function handleBlueprintClick(item: any) {
-  console.log(item.blueprint_id); // 查看图纸
-}
-//bom清单维护
-function handleBomClick(item: any) {
-  router.push({
-    path: "/mes/bom-list",
-    query: { workorder_did: item.workorder_did, mcodeName: item.mcode },
-  });
 }
 
 //产品编号列表数据
@@ -1196,99 +987,39 @@ function resetFilterProduct() {
     getMaterialData();
   }
 }
-
-let productPage = ref(1);
-let productPerPage = ref(10);
-let productLength = ref(0);
-//根据项目号和零件名查询产料
-async function productList() {
-  try {
-    const data: any = await useHttp(
-      "/MaterialForm/M53GetHomemadeForm",
-      "get",
-      undefined,
-      {
-        PageIndex: productPage.value,
-        PageSize: productPerPage.value,
-        SortType: 1,
-        SortedBy: "_id",
-        projectCode: searchProject.value,
-        partName: searchName.value,
-      }
-    );
-    if (!data.data.totalCount) return (productTableData.value = []);
-    productTableData.value = data.data.pageList; //赋值
-    productLength.value = data.data.totalCount; //获取数据库总数据条
-    productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
-  } catch (error) {
-    console.log(error);
-  }
+//自制件对象
+let homeInfo = ref<any>(null);
+let projectCompany = ref<any[]>([
+  "自动化",
+  "孚鼎泰",
+  "机器人",
+  "AGV",
+  "研究院",
+  "云联",
+  "安徽",
+]);
+let projectType = ref<any[]>([
+  "智能制造",
+  "输送分拣",
+  "研发",
+  "售后",
+  "内部委托",
+]);
+function addHome() {
+  addHomeDialog.value = true;
+  homeInfo.value = {
+    partCode: "",
+    partName: "",
+    projectCode: "",
+    projectCompany: "",
+    projectType: "",
+    resultCode: "",
+    totalCode: "",
+    totalName: "",
+    unitCode: "",
+    unitName: "",
+  };
 }
-
-//当前项目产品列表有多少页
-const productPageCount = computed(() => {
-  return Math.ceil(productLength.value / productPerPage.value);
-});
-
-//根据产品的项目号来筛选新增的产出料
-async function showMcodeDialog() {
-  try {
-    selectedRows.value = [];
-    productLength.value = 0;
-
-    productList();
-    productPage.value = 1;
-    productTypeName.value = "自制件";
-  } catch (error) {
-    console.log(error);
-  }
-  mcodeDialog.value = true;
-}
-
-//搜素
-async function filterNameProduct() {
-  try {
-    productPage.value = 1;
-    productList();
-  } catch (error) {
-    console.log(error);
-  }
-}
-//重置搜素
-function resetFilterNameProduct() {
-  searchName.value = "";
-  searchProject.value = "";
-  productPage.value = 1;
-  productList();
-}
-watch(productPage, () => {
-  productList();
-});
-watch(productPerPage, () => {
-  productList();
-});
-
-function clear() {
-  selectedRows.value = [];
-}
-//选择数据批量创建工单明细产料名和项目号
-async function saveMcodeProduct() {
-  try {
-    if (selectedRows.value.length === 0) {
-      return setSnackbar("black", "请选择产出料，创建工单明细");
-    }
-    operatingTicketDetail.value.mdescription = selectedRows.value
-      .map((item) => item.partName)
-      .join(",");
-    operatingTicketDetail.value.mcode = selectedRows.value
-      .map((item) => item.resultCode)
-      .join(",");
-    mcodeDialog.value = false;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 //文本规则、
 //数字规则
 const numberRule = ref<any>([
@@ -1311,8 +1042,8 @@ const rules = [
 
 <template>
   <v-row class="ma-2">
-    <!-- 左边工单表格 -->
-    <v-col cols="6">
+    <!--工单表格 -->
+    <v-col cols="12">
       <v-card class="h-100">
         <v-toolbar class="text-h6 pl-6">工单头</v-toolbar>
         <v-row class="ma-2">
@@ -1391,7 +1122,7 @@ const rules = [
               size="large"
               @click="resetAddDialog()"
               v-permission="
-                `${router.currentRoute.value.fullPath}->addWorkOrder`
+                `${router.currentRoute.value.fullPath}->addWorkOrder2`
               "
             >
               新增工单
@@ -1408,7 +1139,6 @@ const rules = [
                 density="compact"
                 v-for="(item, index) in tableData"
                 :key="index"
-                @click="showTicketDetail(item)"
                 class="ma-2 elevation-2 rounded-lg"
               >
                 <v-list-item>
@@ -1416,7 +1146,7 @@ const rules = [
                     <div class="d-flex">
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 30%"
+                        style="flex-basis: 20%"
                       >
                         产品描述：
                         <span
@@ -1429,7 +1159,7 @@ const rules = [
 
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 40%; font-weight: bold"
+                        style="flex-basis: 30%; font-weight: bold"
                       >
                         产品编码：
                         <span
@@ -1450,12 +1180,9 @@ const rules = [
                             size="small"
                             class="mr-3"
                             v-if="item.status === '新建未审核'"
-                            @click.stop="
-                              operatingTicket = { ...item };
-                              auditDialog = true;
-                            "
+                            @click.stop="showAudit(item)"
                             v-permission="
-                              `${router.currentRoute.value.fullPath}->eyeWorkOrder`
+                              `${router.currentRoute.value.fullPath}->eyeWorkOrder2`
                             "
                           >
                             fa-solid fa-eye
@@ -1466,12 +1193,9 @@ const rules = [
                             size="small"
                             class="mr-3"
                             v-show="item.status === '新建未审核'"
-                            @click.stop="
-                              operatingTicket = { ...item };
-                              editDialog = true;
-                            "
+                            @click.stop="showEdit(item)"
                             v-permission="
-                              `${router.currentRoute.value.fullPath}->updateWorkOrder`
+                              `${router.currentRoute.value.fullPath}->updateWorkOrder2`
                             "
                           >
                             fa-solid fa-pen
@@ -1480,13 +1204,13 @@ const rules = [
                           <v-icon
                             color="red"
                             size="small"
-                            v-show="item.status === '新建未审核'"
                             @click.stop="
                               operatingTicket = { ...item };
                               deleteDialog = true;
                             "
+                            v-show="item.status === '新建未审核'"
                             v-permission="
-                              `${router.currentRoute.value.fullPath}->deleteWorkOrder`
+                              `${router.currentRoute.value.fullPath}->deleteWorkOrder2`
                             "
                           >
                             fa-solid fa-trash
@@ -1501,7 +1225,7 @@ const rules = [
                     <div class="d-flex">
                       <div
                         class="text-body-3 text-blue-darken-1"
-                        style="flex-basis: 25%"
+                        style="flex-basis: 15%"
                       >
                         计划开始:
                         <span
@@ -1513,7 +1237,7 @@ const rules = [
                       </div>
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 25%"
+                        style="flex-basis: 15%"
                       >
                         计划完成:
                         <span
@@ -1532,7 +1256,7 @@ const rules = [
                       </div>
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 25%"
+                        style="flex-basis: 15%"
                       >
                         实际开始：
                         <span
@@ -1544,7 +1268,7 @@ const rules = [
                       </div>
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 25%"
+                        style="flex-basis: 15%"
                       >
                         实际完成:
                         <span
@@ -1552,6 +1276,19 @@ const rules = [
                           style="text-decoration: underline"
                         >
                           {{ item.finish_date }}
+                        </span>
+                      </div>
+
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 15%"
+                      >
+                        审核日期:
+                        <span
+                          class="text-blue-grey-lighten-2"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.approve_date }}
                         </span>
                       </div>
                     </div>
@@ -1562,7 +1299,7 @@ const rules = [
                     <div class="d-flex">
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 23%"
+                        style="flex-basis: 15%"
                       >
                         工单编号：
                         <span
@@ -1600,7 +1337,7 @@ const rules = [
                       </div>
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 20%"
+                        style="flex-basis: 15%"
                       >
                         计划数量：
                         <span
@@ -1613,19 +1350,33 @@ const rules = [
 
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 25%"
+                        style="flex-basis: 15%"
                       >
-                        审核日期:
+                        标准工时：
                         <span
                           class="text-blue-grey-lighten-2"
                           style="text-decoration: underline"
                         >
-                          {{ item.approve_date }}
+                          {{ item.standard_time }}
                         </span>
                       </div>
+
                       <div
                         class="text-body-2 text-blue-darken-1"
-                        style="flex-basis: 20%"
+                        style="flex-basis: 15%"
+                      >
+                        实际工时：
+                        <span
+                          class="text-blue-grey-lighten-2"
+                          style="text-decoration: underline"
+                        >
+                          {{ item.actual_time }}
+                        </span>
+                      </div>
+
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 15%"
                       >
                         状态：
                         <span
@@ -1633,6 +1384,61 @@ const rules = [
                           style="text-decoration: underline"
                         >
                           {{ item.status }}
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </v-list-item>
+                <v-list-item>
+                  <template v-slot:default>
+                    <div class="d-flex">
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 15%"
+                      >
+                        工序：
+                        <span>
+                          <v-btn
+                            :disabled="
+                              item.status !== '已审核待排产' &&
+                              item.status !== '新建未审核'
+                            "
+                            size="small"
+                            @click="showProcessDialog(item)"
+                            :color="item.procedure ? 'green' : 'grey'"
+                            >{{ item.procedure ? "可维护" : "未维护" }}
+                            <v-tooltip activator="parent" location="top">{{
+                              item.procedure
+                            }}</v-tooltip>
+                          </v-btn>
+                        </span>
+                      </div>
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 15%"
+                      >
+                        BOM清单：
+                        <span>
+                          <v-btn disabled size="small" color="grey"
+                            >{{ item.bomdata ? "可维护" : "未维护" }}
+                            <v-tooltip activator="parent" location="top">{{
+                              item.bomdata
+                            }}</v-tooltip>
+                          </v-btn></span
+                        >
+                      </div>
+                      <div
+                        class="text-body-2 text-blue-darken-1"
+                        style="flex-basis: 15%"
+                      >
+                        图纸号：
+                        <span>
+                          <v-btn disabled size="small" color="grey"
+                            >{{ item.blueprint_id ? "可维护" : "未维护" }}
+                            <v-tooltip activator="parent" location="top">{{
+                              item.blueprint_id
+                            }}</v-tooltip>
+                          </v-btn>
                         </span>
                       </div>
                     </div>
@@ -1650,435 +1456,7 @@ const rules = [
         </v-row>
       </v-card>
     </v-col>
-    <!-- 右边明细表 -->
-    <v-col cols="6">
-      <v-card class="h-100">
-        <v-toolbar class="text-h6 pl-6" v-if="detailName"
-          >工单【{{ detailName }}】明细</v-toolbar
-        >
-        <v-toolbar class="text-h6 pl-6" v-else>工单明细</v-toolbar>
-        <v-row class="ma-2">
-          <v-col cols="6">
-            <v-text-field
-              label="项目号"
-              variant="outlined"
-              density="compact"
-              v-model="searchProjectNumber"
-              hide-details
-              @keydown.enter="filterTableDataDetail()"
-            ></v-text-field>
-          </v-col>
 
-          <v-col cols="6">
-            <v-text-field
-              label="产出料"
-              variant="outlined"
-              density="compact"
-              v-model="searchOutputs"
-              hide-details
-              @keydown.enter="filterTableDataDetail()"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="6">
-            <v-text-field
-              label="最早交付日期"
-              type="date"
-              variant="outlined"
-              density="compact"
-              v-model="startDateDetail"
-              hide-details
-              @keydown.enter="filterTableDataDetail()"
-            >
-            </v-text-field>
-          </v-col>
-          <v-col cols="6">
-            <v-text-field
-              label="最晚交付日期"
-              type="date"
-              variant="outlined"
-              density="compact"
-              v-model="endDateDetail"
-              hide-details
-              @keydown.enter="filterTableDataDetail()"
-            >
-            </v-text-field>
-          </v-col>
-          <v-col cols="10">
-            <v-btn
-              color="blue-darken-2"
-              class="mr-2"
-              size="large"
-              @click="filterTableDataDetail()"
-              >查询</v-btn
-            >
-            <v-btn
-              color="red"
-              class="mr-2"
-              size="large"
-              @click="resetFilterDetail()"
-            >
-              重置查询
-            </v-btn>
-            <v-btn
-              color="blue-darken-2"
-              class="mr-2"
-              size="large"
-              v-if="detailName && detailStatus !== '正常完工'"
-              @click="resetAddDetailDialog()"
-              v-permission="
-                `${router.currentRoute.value.fullPath}->addWorkOrderDetail`
-              "
-              >新增明细</v-btn
-            >
-            <v-btn
-              @click="batchWork()"
-              class="mr-2"
-              color="blue-darken-2"
-              size="large"
-              v-if="detailName && detailStatus !== '正常完工'"
-              v-permission="
-                `${router.currentRoute.value.fullPath}->batchWorkOrderDetail`
-              "
-              >批量工序维护</v-btn
-            >
-            <v-btn
-              class="mr-2"
-              color="blue-darken-2"
-              size="large"
-              v-if="detailName && detailStatus === '新建未审核'"
-              @click="selectAll"
-              >{{ selectName }}</v-btn
-            >
-          </v-col>
-          <v-col cols="2">
-            <v-select
-              class="mr-1"
-              density="compact"
-              hide-details
-              variant="outlined"
-              label="每页最大数"
-              :items="[10, 20, 30, 40]"
-              v-model="tableDetailPerPage"
-            ></v-select>
-          </v-col>
-
-          <v-col cols="12">
-            <v-divider :thickness="3"></v-divider>
-            <v-card style="overflow: auto; white-space: nowrap" height="610px">
-              <v-list
-                density="compact"
-                v-for="(item, index) in tableDataDetail"
-                :key="index"
-                class="ma-2 elevation-3 rounded-lg d-flex align-center"
-              >
-                <v-checkbox
-                  v-if="
-                    (detailName &&
-                      (detailStatus === '新建未审核' ||
-                        detailStatus === '已审核待排产') &&
-                      item.status === '新增未分配') ||
-                    item.status === '已分配待排产'
-                  "
-                  style="max-width: 30px"
-                  density="compact"
-                  hide-details
-                  color="blue"
-                  class="ml-3"
-                  v-model="selected"
-                  :value="item"
-                >
-                </v-checkbox>
-                <div class="w-100">
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="d-flex">
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 20%"
-                        >
-                          产出料：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.mdescription }}
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 40%; font-weight: bold"
-                        >
-                          图纸号：
-                          <span
-                            class="text-black"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.mcode }}
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 30%"
-                        >
-                          工单明细编号：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.workorder_did }}
-                          </span>
-                        </div>
-
-                        <div class="text-body-2 text-blue-darken-1">
-                          <div class="d-flex justify-end">
-                            <v-icon
-                              color="blue"
-                              size="small"
-                              class="mr-4"
-                              v-show="
-                                !item.mdescription.includes('已拆批') &&
-                                !item.mdescription.includes('批次工单') &&
-                                item.status !== '正常完工'
-                              "
-                              @click="
-                                operatingTicketDetail = { ...item };
-                                splitDetailDialog = true;
-                              "
-                              v-permission="
-                                `${router.currentRoute.value.fullPath}->splitWorkOrderDetail`
-                              "
-                            >
-                              fa-solid fa-network-wired
-                            </v-icon>
-                            <v-icon
-                              color="blue"
-                              size="small"
-                              class="mr-4"
-                              v-show="
-                                item.status === '已分配待排产' ||
-                                item.status === '新增未分配'
-                              "
-                              @click="
-                                operatingTicketDetail = { ...item };
-                                editDetailDialog = true;
-                              "
-                              v-permission="
-                                `${router.currentRoute.value.fullPath}->updateWorkOrderDetail`
-                              "
-                            >
-                              fa-solid fa-pen
-                            </v-icon>
-
-                            <v-icon
-                              color="red"
-                              size="small"
-                              v-show="
-                                item.status === '已分配待排产' ||
-                                item.status === '新增未分配'
-                              "
-                              @click="
-                                operatingTicketDetail = { ...item };
-                                deleteDetailDialog = true;
-                              "
-                              v-permission="
-                                `${router.currentRoute.value.fullPath}->deleteWorkOrderDetail`
-                              "
-                            >
-                              fa-solid fa-trash
-                            </v-icon>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-                  </v-list-item>
-
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="d-flex">
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          项目号：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.project_code }}
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          状态：
-                          <span
-                            class="text-blue-grey-lighten-1 font-weight-black"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.status }}
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          预计交付：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.estimated_delivery_date }}
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          实际交付：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.actual_delivery_date }}
-                          </span>
-                        </div>
-                      </div>
-                    </template>
-                  </v-list-item>
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="d-flex">
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          计划数量：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.planned_quantity }}{{ item.unit }}
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          报工数量：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.reported_quantity }}{{ item.unit }}
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          标准工时：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.standard_time }}
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          实际工时：
-                          <span
-                            class="text-blue-grey-lighten-2"
-                            style="text-decoration: underline"
-                          >
-                            {{ item.actual_time }}
-                          </span>
-                        </div>
-                      </div>
-                    </template>
-                  </v-list-item>
-                  <v-list-item>
-                    <template v-slot:default>
-                      <div class="d-flex">
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          工序：
-                          <span>
-                            <v-btn
-                              v-permission="
-                                `${router.currentRoute.value.fullPath}->ProcessWorkOrderDetail`
-                              "
-                              :disabled="
-                                item.status !== '已分配待排产' &&
-                                item.status !== '新增未分配'
-                              "
-                              size="small"
-                              @click="showProcessDialog(item)"
-                              :color="item.procedure ? 'green' : 'grey'"
-                              >{{ item.procedure ? "可维护" : "未维护" }}
-                              <v-tooltip activator="parent" location="top">{{
-                                item.procedure
-                              }}</v-tooltip>
-                            </v-btn>
-                          </span>
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 25%"
-                        >
-                          BOM清单：
-                          <span>
-                            <v-btn
-                              disabled
-                              size="small"
-                              @click="handleBomClick(item)"
-                              color="grey"
-                              >{{ item.bomdata ? "可维护" : "未维护" }}
-                              <v-tooltip activator="parent" location="top">{{
-                                item.bomdata
-                              }}</v-tooltip>
-                            </v-btn></span
-                          >
-                        </div>
-                        <div
-                          class="text-body-2 text-blue-darken-1"
-                          style="flex-basis: 35%"
-                        >
-                          图纸号：
-                          <span>
-                            <v-btn
-                              disabled
-                              size="small"
-                              @click="handleBlueprintClick(item)"
-                              color="grey"
-                              >{{ item.blueprint_id ? "可维护" : "未维护" }}
-                              <v-tooltip activator="parent" location="top">{{
-                                item.blueprint_id
-                              }}</v-tooltip>
-                            </v-btn>
-                          </span>
-                        </div>
-                      </div>
-                    </template>
-                  </v-list-item>
-                </div>
-              </v-list>
-            </v-card>
-            <div class="text-center pt-2">
-              <v-pagination
-                v-model="tableDetailPage"
-                :length="tableDetailPageCount"
-              ></v-pagination>
-            </div>
-          </v-col>
-        </v-row>
-      </v-card>
-    </v-col>
     <!-- 新增工单表头 -->
     <v-dialog v-model="addDialog" min-width="400px" width="560px">
       <v-card>
@@ -2125,6 +1503,11 @@ const rules = [
             :rules="dateRule"
             v-model="operatingTicket.planned_completion_time"
             type="date"
+          ></v-text-field>
+
+          <v-text-field
+            v-model="operatingTicketDetail.standard_time"
+            label="标准工时"
           ></v-text-field>
         </v-card-text>
 
@@ -2190,6 +1573,10 @@ const rules = [
             :items="workStatus"
             v-model="operatingTicket.status"
           ></v-select>
+          <v-text-field
+            v-model="operatingTicketDetail.standard_time"
+            label="标准工时"
+          ></v-text-field>
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -2237,160 +1624,7 @@ const rules = [
         </div>
       </v-card>
     </v-dialog>
-    <!-- 新增工单明细 -->
-    <v-dialog v-model="addDetailDialog" min-width="400px" width="560px">
-      <v-form @submit.prevent>
-        <v-card>
-          <v-toolbar color="blue">
-            <v-toolbar-title> 批量新增工单明细 </v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-btn icon @click="addDetailDialog = false">
-              <v-icon>fa-solid fa-close</v-icon>
-            </v-btn>
-          </v-toolbar>
 
-          <v-card-text class="mt-4">
-            <v-text-field
-              v-model="operatingTicketDetail.mdescription"
-              label="产出料"
-              :rules="rules"
-              append-inner-icon="fa-regular fa-hand-pointer"
-              @click:append-inner="showMcodeDialog"
-            ></v-text-field>
-
-            <v-text-field
-              v-model="operatingTicketDetail.estimated_delivery_date"
-              :rules="dateRule"
-              label="预计交付时间"
-              type="date"
-            ></v-text-field>
-
-            <v-text-field
-              v-model="operatingTicketDetail.standard_time"
-              label="标准工时"
-            ></v-text-field>
-
-            <v-text-field
-              v-model="operatingTicketDetail.planned_quantity"
-              label="计划数量"
-              :rules="numberRule"
-            ></v-text-field>
-            <v-select
-              label="单位"
-              :items="units"
-              v-model="operatingTicketDetail.unit"
-            ></v-select>
-          </v-card-text>
-
-          <div class="d-flex justify-end mr-6 mb-4">
-            <v-btn
-              type="submit"
-              color="blue-darken-2"
-              size="large"
-              class="mr-2"
-              @click="addTicketDetail()"
-            >
-              确认新增
-            </v-btn>
-            <v-btn color="grey" size="large" @click="addDetailDialog = false">
-              取消
-            </v-btn>
-          </div>
-        </v-card>
-      </v-form>
-    </v-dialog>
-    <!-- 删除工单明细行 -->
-    <v-dialog v-model="deleteDetailDialog" min-width="400px" width="560px">
-      <v-card>
-        <v-toolbar color="blue">
-          <v-toolbar-title> 删除工单明细 </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="deleteDetailDialog = false">
-            <v-icon>fa-solid fa-close</v-icon>
-          </v-btn>
-        </v-toolbar>
-
-        <v-card-text class="mt-4 text-center text-red text-h6">
-          您确认要删除工单明细编号为"{{
-            operatingTicketDetail.workorder_did
-          }}"这条数据吗？
-        </v-card-text>
-        <div class="d-flex justify-end mr-6 my-4">
-          <v-btn
-            color="blue-darken-2"
-            size="large"
-            class="mr-2"
-            @click="deleteTicketDetail()"
-          >
-            确认删除
-          </v-btn>
-          <v-btn color="grey" size="large" @click="deleteDetailDialog = false">
-            取消
-          </v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
-    <!-- 修改工单明细行 -->
-    <v-dialog v-model="editDetailDialog" min-width="400px" width="560px">
-      <v-card>
-        <v-toolbar color="blue">
-          <v-toolbar-title> 修改工单 </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="editDetailDialog = false">
-            <v-icon>fa-solid fa-close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-card-text class="mt-4">
-          <v-text-field
-            v-model="operatingTicketDetail.estimated_delivery_date"
-            :rules="dateRule"
-            label="预计交付时间"
-          ></v-text-field>
-          <v-text-field
-            v-model="operatingTicketDetail.actual_delivery_date"
-            :rules="dateRule"
-            label="实际交付时间"
-          ></v-text-field>
-          <v-text-field
-            v-model="operatingTicketDetail.standard_time"
-            label="标准工时"
-          ></v-text-field>
-          <v-text-field
-            v-model="operatingTicketDetail.actual_time"
-            label="实际工时"
-          ></v-text-field>
-          <v-text-field
-            v-model="operatingTicketDetail.planned_quantity"
-            label="计划数量"
-            :rules="numberRule"
-          ></v-text-field>
-          <v-text-field
-            v-model="operatingTicketDetail.reported_quantity"
-            label="实际报工数量"
-            :rules="numberRule"
-          ></v-text-field>
-          <v-select
-            label="单位"
-            :items="units"
-            v-model="operatingTicketDetail.unit"
-          ></v-select>
-        </v-card-text>
-
-        <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn
-            color="blue-darken-2"
-            size="large"
-            class="mr-2"
-            @click="editTicketDetail()"
-          >
-            确认修改
-          </v-btn>
-          <v-btn color="grey" size="large" @click="editDetailDialog = false">
-            取消
-          </v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
     <!-- 工序维护弹框 -->
     <v-dialog v-model="processDialog" min-width="400px" width="800px">
       <v-card>
@@ -2585,6 +1819,14 @@ const rules = [
               >
                 重置查询
               </v-btn>
+              <v-btn
+                color="blue-darken-2"
+                class="mr-2"
+                size="large"
+                @click="addHome()"
+              >
+                新增自制件
+              </v-btn>
             </v-col>
 
             <v-col cols="4">
@@ -2607,7 +1849,6 @@ const rules = [
                 v-model="selectedRows"
                 return-object
                 show-select
-                :key="key"
                 :headers="productHeaders"
                 :items="productTableData"
                 style="overflow-x: auto; white-space: nowrap"
@@ -2643,127 +1884,7 @@ const rules = [
         </div>
       </v-card>
     </v-dialog>
-    <!-- 工单明细产出料 -->
-    <v-dialog v-model="mcodeDialog" min-width="400px" width="1000px">
-      <v-card>
-        <v-toolbar color="blue">
-          <v-toolbar-title> 可以批量选择产品，批量增加产出料 </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="mcodeDialog = false">
-            <v-icon>fa-solid fa-close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-card>
-          <v-row class="ma-2">
-            <v-col cols="4">
-              <v-text-field
-                label="零件名查询"
-                variant="outlined"
-                density="compact"
-                v-model="searchName"
-                hide-details
-                @keydown.enter="filterNameProduct()"
-              ></v-text-field>
-            </v-col>
 
-            <v-col cols="4">
-              <v-text-field
-                label="项目号查询"
-                variant="outlined"
-                density="compact"
-                v-model="searchProject"
-                hide-details
-                @keydown.enter="filterNameProduct()"
-              ></v-text-field>
-            </v-col>
-
-            <v-col cols="4">
-              <v-select
-                variant="outlined"
-                density="compact"
-                label="当前产品类别"
-                :items="['自制件', '标准外购件']"
-                v-model="productTypeName"
-              >
-              </v-select>
-            </v-col>
-            <v-col cols="8">
-              <v-btn
-                color="blue-darken-2"
-                class="mr-2"
-                size="large"
-                @click="filterNameProduct()"
-                >查询</v-btn
-              >
-              <v-btn
-                color="red"
-                class="mr-2"
-                size="large"
-                @click="resetFilterNameProduct()"
-              >
-                重置查询
-              </v-btn>
-              <v-btn color="red" class="mr-2" size="large" @click="clear()">
-                清空选择
-              </v-btn>
-            </v-col>
-
-            <v-col cols="4">
-              <v-select
-                class="mr-1"
-                variant="outlined"
-                density="compact"
-                hide-details
-                label="每页最大数"
-                :items="[10, 20, 30, 40]"
-                v-model="productPerPage"
-              ></v-select>
-            </v-col>
-
-            <v-col cols="12">
-              <v-divider></v-divider>
-              <v-data-table
-                hover
-                :items-per-page="productPerPage"
-                v-model="selectedRows"
-                return-object
-                show-select
-                :key="key"
-                :headers="productHeaders"
-                :items="productTableData"
-                style="overflow-x: auto; white-space: nowrap"
-                fixed-footer
-                fixed-header
-                height="400"
-                no-data-text="没有找到符合的数据"
-              >
-                <template v-slot:bottom>
-                  <div class="text-center pt-2 mb-4">
-                    <v-pagination
-                      v-model="productPage"
-                      :length="productPageCount"
-                    ></v-pagination>
-                  </div>
-                </template>
-              </v-data-table>
-            </v-col>
-          </v-row>
-        </v-card>
-        <div class="d-flex justify-end mr-6 my-4">
-          <v-btn
-            color="blue-darken-2"
-            size="large"
-            class="mr-2"
-            @click="saveMcodeProduct()"
-          >
-            确定
-          </v-btn>
-          <v-btn color="grey" size="large" @click="mcodeDialog = false">
-            取消
-          </v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
     <!-- 工单表头审核 -->
     <v-dialog v-model="auditDialog" min-width="400px" width="560px">
       <v-card>
@@ -2822,53 +1943,55 @@ const rules = [
         </div>
       </v-card>
     </v-dialog>
-
-    <!-- 备用 -->
-    <v-dialog v-model="dialog">
+    <!-- 新增自制件弹框 -->
+    <v-dialog v-model="addHomeDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 备用 </v-toolbar-title>
+          <v-toolbar-title> 新增自制件 </v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn icon @click="dialog = false">
-            <v-icon>fa-solid fa-close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <nuxt-page> </nuxt-page>
-      </v-card>
-    </v-dialog>
-    <!-- 拆分明细数据 -->
-    <v-dialog v-model="splitDetailDialog" min-width="400px" width="560px">
-      <v-card>
-        <v-toolbar color="blue">
-          <v-toolbar-title> 拆分明细数据 </v-toolbar-title>
-          <v-spacer></v-spacer>
-
-          <v-btn icon @click="splitDetailDialog = false">
+          <v-btn icon @click="addHomeDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text class="mt-4">
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                label="当前明细行总数量"
-                readonly
-                v-model="operatingTicketDetail.planned_quantity"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                v-model="oldData"
-                label="拆分后明细行剩余数量"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                v-model="nowData"
-                label="批次工单明细行数量"
-              ></v-text-field>
-            </v-col>
-          </v-row>
+          <v-text-field
+            label="总装物料名"
+            readonly
+            v-model="homeInfo.totalName"
+          ></v-text-field>
+          <v-text-field
+            label="数量"
+            v-model="homeInfo.unitCode"
+            readonly
+          ></v-text-field>
+          <v-select
+            readonly
+            label="单位"
+            v-model="homeInfo.unitName"
+            :items="units"
+          ></v-select>
+          <v-text-field
+            readonly
+            v-model="homeInfo.projectCode"
+            label="项目号"
+          ></v-text-field>
+          <v-text-field
+            v-model="homeInfo.partCode"
+            label="编号"
+            readonly
+          ></v-text-field>
+          <v-select
+            v-model="homeInfo.projectCompany"
+            label="部门"
+            :items="projectCompany"
+            readonly
+          ></v-select>
+          <v-select
+            v-model="homeInfo.projectType"
+            label="类型"
+            :items="projectType"
+            readonly
+          ></v-select>
         </v-card-text>
 
         <div class="d-flex justify-end mr-6 mb-4">
@@ -2876,11 +1999,11 @@ const rules = [
             color="blue-darken-2"
             size="large"
             class="mr-2"
-            @click="splitTicket()"
+            @click="auditTicket()"
           >
-            保存
+            确定新增
           </v-btn>
-          <v-btn color="grey" size="large" @click="splitDetailDialog = false">
+          <v-btn color="grey" size="large" @click="addHomeDialog = false">
             取消
           </v-btn>
         </div>
