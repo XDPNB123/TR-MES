@@ -1497,9 +1497,12 @@ function openPrint() {
                             align-self: center;
                           "
                         >
-                          是否质检:{{
-                            item_.required_inspection === "Y" ? "是" : "否"
-                          }}
+                          质检:
+                          <span style="font-weight: bold">
+                            {{
+                              item_.required_inspection === "Y" ? "是" : "否"
+                            }}
+                          </span>
                         </div>
                         <div
                           style="
