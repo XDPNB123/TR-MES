@@ -72,9 +72,6 @@ let workDetailStatus = ref([
   "异常取消",
   "强制关闭",
 ]);
-//存储当前操作的工单编号
-let detailName = ref("");
-let detailStatus = ref("");
 
 //多选产品编号
 let selectedRows = ref<any[]>([]);
@@ -104,7 +101,9 @@ let endDate = ref<any>(null);
 
 let searchTicketStatus = ref<string>("");
 let searchTicketType = ref("总装");
-
+watch(searchTicketType, function () {
+  getWorkOrder();
+});
 let searchProduct = ref<string>("00.00.00.00");
 let searchProjectCode = ref<string>("");
 
@@ -528,7 +527,7 @@ function resetFilter() {
   searchTicketType.value = "总装";
   startDate.value = nowDate.toISOString().substring(0, 10);
   endDate.value = oldDate.toISOString().substring(0, 10);
-  detailName.value = "";
+
   tablePage.value = 1;
   getWorkOrder();
 }
@@ -1211,8 +1210,8 @@ const rules = [
                             "
                             v-show="item.status === '新建未审核'"
                             v-permission="
-                            `${router.currentRoute.value.fullPath}->deleteWorkOrder2`
-                          "
+                              `${router.currentRoute.value.fullPath}->deleteWorkOrder2`
+                            "
                           >
                             fa-solid fa-trash
                           </v-icon>

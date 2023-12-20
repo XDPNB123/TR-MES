@@ -116,6 +116,9 @@ let endDateDetail = ref<any>(null);
 
 let searchTicketStatus = ref<string>("");
 let searchTicketType = ref("机加");
+watch(searchTicketType, function () {
+  getWorkOrder();
+});
 let searchOutputs = ref<string>("");
 let searchProduct = ref<string>("00.00.00.00");
 let searchProjectCode = ref<string>("");
@@ -583,9 +586,12 @@ async function getWorkOrder() {
         end_date: endDate.value,
       }
     );
+
     tableData.value = formatDate(data.data.pageList);
     tableDataLength.value = data.data.totalCount;
-    detailName.value = tableData.value[0].workorder_hid;
+    if (tableData.value.length) {
+      detailName.value = tableData.value[0].workorder_hid;
+    }
   } catch (error) {
     setSnackbar("black", "获取数据失败");
     console.log(error);
