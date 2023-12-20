@@ -20,38 +20,38 @@ definePageMeta({
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
   useSnackbar();
 //单位
-let units = ref<string[]>([
-  "PCS",
-  "米",
-  "毫米",
-  "张",
-  "KG",
-  "瓶（通）",
-  "盒（包）",
-  "双（对）",
-  "平方米",
-  "卷",
-  "台",
-  "套",
-  "件",
-  "根",
-  "个",
-  "袋",
-  "立方",
-  "升",
-  "支",
-  "箱",
-  "盒",
-  "节",
-  "把",
-  "片",
-  "公斤",
-  "干公斤",
-  "包",
-  "本",
+let units = ref<any[]>([
+  { id: "1", name: "PCS" },
+  { id: "2", name: "米" },
+  { id: "3", name: "毫米" },
+  { id: "4", name: "张" },
+  { id: "5", name: "KG" },
+  { id: "6", name: "瓶（桶）" },
+  { id: "7", name: "盒（包）" },
+  { id: "8", name: "双（对）" },
+  { id: "9", name: "平方米" },
+  { id: "10", name: "卷" },
+  { id: "11", name: "台" },
+  { id: "12", name: "套" },
+  { id: "13", name: "件" },
+  { id: "14", name: "根" },
+  { id: "15", name: "个" },
+  { id: "16", name: "袋" },
+  { id: "17", name: "立方" },
+  { id: "18", name: "升" },
+  { id: "19", name: "支" },
+  { id: "20", name: "箱" },
+  { id: "21", name: "盒" },
+  { id: "22", name: "节" },
+  { id: "23", name: "把" },
+  { id: "24", name: "片" },
+  { id: "25", name: "公斤" },
+  { id: "26", name: "千公斤" },
+  { id: "27", name: "包" },
+  { id: "28", name: "本" },
 ]);
 //工单类型
-let workType = ref<any[]>(["电器装配", "模组装配", "总装"]);
+let workType = ref<any[]>(["电器装配", "模组装配", "总装", "其他"]);
 
 //工单表头的状态
 let workStatus = ref([
@@ -104,7 +104,7 @@ let searchTicketType = ref("总装");
 watch(searchTicketType, function () {
   getWorkOrder();
 });
-let searchProduct = ref<string>("00.00.00.00");
+let searchProduct = ref<string>("");
 let searchProjectCode = ref<string>("");
 
 // 正在操作的工单
@@ -115,7 +115,7 @@ let operatingTicketDetail = ref<any>(null);
 // 展示的工单表格数据
 let tableData = ref<any[]>([]);
 //工单明细表格展示的数据
-let tableDataDetail = ref<any[]>([]);
+
 function isDatePast(dateString: any) {
   let date = new Date(dateString);
   let now = new Date();
@@ -127,6 +127,8 @@ let homemadeHeaders = ref<any[]>([
   { title: "总装物料名", align: "start", key: "totalName" },
   { title: "物料编码", align: "start", key: "resultCode" },
   { title: "项目号", align: "start", key: "projectCode" },
+  { title: "部门", align: "start", key: "projectCompany" },
+  { title: "类型", align: "start", key: "projectType" },
   { title: "项目类型", align: "start", key: "projectType" },
   { title: "单位名", align: "start", key: "unitName" },
 ]);
@@ -878,7 +880,7 @@ async function showProductDialog() {
     getHomeData();
     selectedRows.value = [];
     productTypeName.value = "自制件";
-    searchProduct.value = "00.00.00.00";
+    searchProduct.value = "";
     searchProjectCode.value = "";
   } catch (error) {
     console.log(error);
@@ -977,7 +979,7 @@ async function filterProduct() {
 }
 //重置搜素
 function resetFilterProduct() {
-  searchProduct.value = "00.00.00.00";
+  searchProduct.value = "";
   searchProjectCode.value = "";
   productTablePage.value = 1;
   if (productTypeName.value === "自制件") {
@@ -1006,19 +1008,47 @@ let projectType = ref<any[]>([
   "内部委托",
 ]);
 function addHome() {
-  addHomeDialog.value = true;
   homeInfo.value = {
-    partCode: "",
+    partCode: "88.88.88.88A",
     partName: "",
     projectCode: "",
-    projectCompany: "",
-    projectType: "",
+    projectCompany: "云联",
+    projectType: "智能制造",
     resultCode: "",
     totalCode: "",
     totalName: "",
     unitCode: "",
-    unitName: "",
+    unitName: { id: "12", name: "套" },
   };
+  addHomeDialog.value = true;
+}
+
+//调用接口新增自制件
+async function addHomeInfo() {
+  homeInfo.value = {
+    partCode: homeInfo.value.partCode,
+    partName: homeInfo.value.totalName,
+    projectCode: homeInfo.value.projectCode,
+    projectCompany: homeInfo.value.projectCompany,
+    projectType: homeInfo.value.projectType,
+    resultCode: "",
+    totalCode: "",
+    totalName: homeInfo.value.totalName,
+    unitCode: homeInfo.value.unitName.id,
+    unitName: homeInfo.value.unitName.name,
+  };
+  const data: any = await useHttp(
+    "/MaterialForm/M89InsertHomemadeForm",
+    "post",
+    homeInfo.value
+  );
+  if (data.code === 200) {
+    setSnackbar("green", "新增成功");
+    addHomeDialog.value = false;
+    getHomeData();
+  } else {
+    setSnackbar("black", "新增失败");
+  }
 }
 //文本规则、
 //数字规则
@@ -1490,6 +1520,7 @@ const rules = [
             label="单位"
             :items="units"
             v-model="operatingTicket.unit"
+            item-title="name"
           ></v-select>
           <v-text-field
             label="计划开始日期"
@@ -1557,6 +1588,7 @@ const rules = [
             label="单位"
             :items="units"
             v-model="operatingTicket.unit"
+            item-title="name"
           ></v-select>
           <v-text-field
             v-model="operatingTicket.scheduled_start_date"
@@ -1956,41 +1988,28 @@ const rules = [
         <v-card-text class="mt-4">
           <v-text-field
             label="总装物料名"
-            readonly
             v-model="homeInfo.totalName"
           ></v-text-field>
-          <v-text-field
-            label="数量"
-            v-model="homeInfo.unitCode"
-            readonly
-          ></v-text-field>
           <v-select
-            readonly
             label="单位"
             v-model="homeInfo.unitName"
             :items="units"
+            item-title="name"
+            return-object
           ></v-select>
           <v-text-field
-            readonly
             v-model="homeInfo.projectCode"
             label="项目号"
-          ></v-text-field>
-          <v-text-field
-            v-model="homeInfo.partCode"
-            label="编号"
-            readonly
           ></v-text-field>
           <v-select
             v-model="homeInfo.projectCompany"
             label="部门"
             :items="projectCompany"
-            readonly
           ></v-select>
           <v-select
             v-model="homeInfo.projectType"
             label="类型"
             :items="projectType"
-            readonly
           ></v-select>
         </v-card-text>
 
@@ -1999,7 +2018,7 @@ const rules = [
             color="blue-darken-2"
             size="large"
             class="mr-2"
-            @click="auditTicket()"
+            @click="addHomeInfo()"
           >
             确定新增
           </v-btn>

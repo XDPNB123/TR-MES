@@ -270,7 +270,7 @@ onMounted(() => {
     </v-app-bar>
 
     <v-main>
-      <slot></slot>
+    <slot></slot>
     </v-main>
   </v-app>
 </template>
