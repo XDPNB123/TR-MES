@@ -77,11 +77,27 @@ async function getWorkDetail() {
       projectCode: workProject.value,
     }
   );
-  workDetailList.value = data.data.map((item: any) => {
-    item.mes_workorderdetaildata.estimated_delivery_date =
-      item.mes_workorderdetaildata.estimated_delivery_date.substring(0, 10);
-    return item;
-  });
+  workDetailList.value = data.data
+    .map((item: any) => {
+      item.mes_workorderdetaildata.estimated_delivery_date =
+        item.mes_workorderdetaildata.estimated_delivery_date.substring(0, 10);
+      return item;
+    })
+    .sort((a: any, b: any) => {
+      if (
+        a.mes_workorderdetaildata.status === "正常完工" &&
+        b.mes_workorderdetaildata.status !== "正常完工"
+      ) {
+        return 1;
+      }
+      if (
+        a.mes_workorderdetaildata.status !== "正常完工" &&
+        b.mes_workorderdetaildata.status === "正常完工"
+      ) {
+        return -1;
+      }
+      return 0;
+    });
 }
 //点击项目号获取当前项目进度
 //暂存项目号
@@ -243,8 +259,11 @@ async function getProductList(item: any) {
                   :key="index"
                   :value="index"
                   @click="showWorkDetail(item, _item)"
-                  >{{ _item.typename }}({{ _item.totalcount }})</v-tab
-                >
+                  >{{ _item.typename
+                  }}({{ _item.completed }}/{{
+                    _item.totalcount
+                  }})
+                </v-tab>
               </v-tabs>
               <div>
                 <v-window v-model="tab2">
