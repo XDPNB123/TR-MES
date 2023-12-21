@@ -681,12 +681,12 @@ function resetSearchWork() {
 let selectedRow = ref<any[]>([]);
 
 //打印
-async function openPrint() {
-  await JsBarcode(".barcode", "Short barcode", {
+function openPrint() {
+  JsBarcode(".barcode", "Short barcode", {
     width: 1,
     height: 30,
     displayValue: false,
-  });
+  }).init();
 
   printJS({
     printable: "printContent",
