@@ -722,7 +722,7 @@ function resetAddDialog() {
   };
   addDialog.value = true;
 }
-let tabArr1 = ref<any[]>([]);
+
 // 新增工单
 async function addTicket() {
   try {
@@ -732,23 +732,11 @@ async function addTicket() {
     if (!operatingTicket.value.planned_completion_time) {
       return setSnackbar("black", "请您选择计划完成时间");
     }
-    let workOrderType = operatingTicket.value.workorder_type.slice(",");
-    workOrderType.forEach((item: any) => {
-      tabArr1.value.push({
-        workorder_type: item,
-        product_id: operatingTicket.value.product_id,
-        planned_quantity: operatingTicket.value.planned_quantity,
-        product_description: operatingTicket.value.product_description,
-        scheduled_start_date: operatingTicket.value.scheduled_start_date,
-        planned_completion_time: operatingTicket.value.planned_completion_time,
-        unit: operatingTicket.value.unit,
-        status: operatingTicket.value.status,
-      });
-    });
+
     const data: any = await useHttp(
       "/MesWorkOrder/M02AddWorkOrder",
       "post",
-     tabArr1.value
+      operatingTicket.value
     );
     if (data.code === 200) {
       setSnackbar("green", "新增成功");
