@@ -2,6 +2,7 @@
 //tabArr和tabArr1的作用，tabArr1全程存储拖拽的数据，tabArr作为中间值，在代码里面有很多使用，因此他的值变化的很快，tabArr1的值是全程都是存储拖拽的工单任务的。
 import printJS from "print-js";
 import QrcodeVue from "qrcode.vue";
+import JsBarcode from "jsbarcode";
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
   useSnackbar();
@@ -681,6 +682,12 @@ let selectedRow = ref<any[]>([]);
 
 //打印
 function openPrint() {
+  JsBarcode(".barcode", "Short barcode", {
+    width: 1,
+    height: 30,
+    displayValue: false,
+  }).init();
+
   printJS({
     printable: "printContent",
     type: "html",
@@ -1424,23 +1431,28 @@ function openPrint() {
                     style="page-break-before: always"
                   >
                     <div class="d-flex">
-                      <div style="flex-basis: 50%">
+                      <div style="flex-basis: 40%">
                         产出料：{{ item.mdescription }}
                       </div>
                       <div style="font-weight: bold">
-                        图纸号：{{ item.mcode }}
+                        料号/图纸号：{{ item.mcode }}
                       </div>
                     </div>
                     <div class="d-flex mt-3">
                       <div style="flex-basis: 35%">
                         工单明细编号：{{ item.workorder_did }}
                       </div>
+
                       <div style="flex-basis: 35%">
                         计划日期：{{ item.estimated_delivery_date }}
                       </div>
                       <div style="flex-basis: 15%; font-weight: bold">
                         数量：{{ item.planned_quantity }}{{ item.unit }}
                       </div>
+                      <svg
+                        class="barcode"
+                        :jsbarcode-value="item.workorder_did"
+                      ></svg>
                     </div>
                     <hr />
                     <!--派工单二维码页面  -->
@@ -1468,7 +1480,7 @@ function openPrint() {
                         <div
                           style="
                             font-family: 'SongTi';
-                            flex-basis: 30%;
+                            flex-basis: 25%;
                             align-self: center;
                             font-weight: bold;
                           "
@@ -1478,6 +1490,20 @@ function openPrint() {
                           }}]
                         </div>
 
+                        <div
+                          style="
+                            font-family: 'SongTi';
+                            flex-basis: 15%;
+                            align-self: center;
+                          "
+                        >
+                          质检:
+                          <span style="font-weight: bold">
+                            {{
+                              item_.required_inspection === "Y" ? "是" : "否"
+                            }}
+                          </span>
+                        </div>
                         <div
                           style="
                             font-family: 'SongTi';

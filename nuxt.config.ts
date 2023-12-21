@@ -5,6 +5,7 @@ export default defineNuxtConfig({
   },
   routeRules: {
     "/mes/work-produce-recode": { ssr: false },
+    "/work-basic/work-class": { ssr: false },
     "/test": { ssr: false },
   },
   // 启用了哪些模块

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import printJS from "print-js";
+import QrcodeVue from "qrcode.vue";
 useSeoMeta({
   // 该页面的标题
   title: "班组信息",
@@ -160,7 +162,7 @@ let workClass = ref<any>({
   work_classname: "",
   leader_name: "",
 });
-//搜素操作
+//搜索操作
 let workClassName = ref("");
 let workClassLeader = ref("");
 //查询
@@ -323,17 +325,7 @@ let workClassInfoHeader = ref<any[]>([
 ]);
 //班组成员信息数据
 let workClassInfoTableData = ref<any[]>([]);
-//表格当前页
-let workClassPageInfo = ref(1);
-watch(workClassPageInfo, () => {
-  getWorkClassInfo();
-});
-//数据库一共存储多少数据
-let workClassInfoPageCount = ref(0);
-//计算一共有的多少页
-let workClassInfoTablePageCount = computed(() => {
-  return Math.ceil(workClassInfoPageCount.value / 10);
-});
+
 async function getWorkClassInfo() {
   try {
     const data: any = await useHttp(
@@ -344,14 +336,13 @@ async function getWorkClassInfo() {
         employee_id: employeeId.value,
         employee_name: employeeName.value,
         worker_id: workerId.value,
-        PageIndex: workClassPageInfo.value,
-        PageSize: 10,
+        PageIndex: 1,
+        PageSize: 10000,
         SortedBy: "id",
         SortType: 0,
       }
     );
     workClassInfoTableData.value = formateDate(data.data.pageList);
-    workClassInfoPageCount.value = data.data.totalCount;
   } catch (error) {
     setSnackbar("black", "获取数据失败");
     console.log(error);
@@ -450,6 +441,35 @@ async function deleteWorkClassInfo() {
     console.log(error);
   }
   deleteInfoDialog.value = false;
+}
+//打印员工信息
+let selected = ref<any[]>([]);
+let printList = ref<any[]>([]);
+
+async function print() {
+  await selected.value.forEach((item: any) => {
+    if (
+      item.employee_id.charAt(0) !== "l" &&
+      item.employee_id.charAt(0) !== "L"
+    ) {
+      printList.value.push({
+        id: "WNM-" + item.employee_id.substring(1) + "-" + item.employee_name,
+        name: item.employee_id.substring(1) + "-" + item.employee_name,
+      });
+    } else {
+      printList.value.push({
+        id: "LSG-" + item.employee_id.substring(1) + "-" + item.employee_name,
+        name: item.employee_id.substring(1) + "-" + item.employee_name,
+      });
+    }
+  });
+  printJS({
+    printable: "printContent",
+    type: "html",
+    targetStyles: ["*"],
+  });
+  selected.value = [];
+  printList.value = [];
 }
 </script>
 <template>
@@ -619,10 +639,18 @@ async function deleteWorkClassInfo() {
               @click="showAddInfoDialog"
               v-if="workerId"
               v-permission="
-              `${router.currentRoute.value.fullPath}->addClassPerson`
-            "
+                `${router.currentRoute.value.fullPath}->addClassPerson`
+              "
             >
               新增成员
+            </v-btn>
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2"
+              size="large"
+              @click="print"
+            >
+              打印
             </v-btn>
           </v-col>
           <v-col cols="12">
@@ -633,6 +661,9 @@ async function deleteWorkClassInfo() {
               :items-per-page="10"
               :headers="workClassInfoHeader"
               :items="workClassInfoTableData"
+              v-model="selected"
+              show-select
+              return-object
               style="overflow-x: auto; white-space: nowrap"
               fixed-footer
               fixed-header
@@ -653,8 +684,8 @@ async function deleteWorkClassInfo() {
                     editInfoDialog = true;
                   "
                   v-permission="
-              `${router.currentRoute.value.fullPath}->updateClassPerson`
-            "
+                    `${router.currentRoute.value.fullPath}->updateClassPerson`
+                  "
                 >
                   fa-solid fa-pen
                 </v-icon>
@@ -667,21 +698,36 @@ async function deleteWorkClassInfo() {
                     deleteInfoDialog = true;
                   "
                   v-permission="
-                  `${router.currentRoute.value.fullPath}->deleteClassPerson`
-                "
+                    `${router.currentRoute.value.fullPath}->deleteClassPerson`
+                  "
                 >
                   fa-solid fa-trash
                 </v-icon>
               </template>
-              <template v-slot:bottom>
-                <div class="text-center pt-2">
-                  <v-pagination
-                    v-model="workClassPageInfo"
-                    :length="workClassInfoTablePageCount"
-                  ></v-pagination>
-                </div>
-              </template>
             </v-data-table>
+          </v-col>
+          <v-col cols="12" v-show="false">
+            <div id="printContent">
+              <div
+                v-for="(item, index) in printList"
+                :key="index"
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  height: 100%;
+                "
+              >
+                <div>
+                  <qrcode-vue
+                    style="width: 70px; height: 70px"
+                    :value="item.id"
+                  ></qrcode-vue>
+                </div>
+                <div class="text-text-subtitle-1">姓名:{{ item.name }}</div>
+              </div>
+            </div>
           </v-col>
         </v-row>
       </v-card>

@@ -124,6 +124,7 @@ let searchProduct = ref<string>("00.00.00.00");
 let searchProjectCode = ref<string>("");
 let searchName = ref("");
 let searchProject = ref("");
+let searchMac = ref("");
 
 // 正在操作的工单
 let operatingTicket = ref<any>(null);
@@ -698,16 +699,8 @@ function formatDateDetail(data: any) {
 async function showTicketDetail(item: any) {
   detailName.value = item.workorder_hid;
   detailStatus.value = item.status;
-  if (
-    item.workorder_type !== "机加" &&
-    item.workorder_type !== "钣金" &&
-    item.workorder_type !== "其他"
-  ) {
-    searchName.value = item.product_description;
-  } else {
-    searchName.value = "";
-  }
   searchProject.value = item.product_id.slice(-9);
+  searchMac.value = item.product_id.substring(2, 7);
 }
 //通过监听当前操作的工单编号是否改变，来显示右边的工单明细数据
 watch(detailName, () => {
@@ -739,6 +732,7 @@ async function addTicket() {
     if (!operatingTicket.value.planned_completion_time) {
       return setSnackbar("black", "请您选择计划完成时间");
     }
+
     const data: any = await useHttp(
       "/MesWorkOrder/M02AddWorkOrder",
       "post",
@@ -793,7 +787,7 @@ async function addTicketDetail() {
         procedure: null,
         planned_quantity: operatingTicketDetail.value.planned_quantity,
         reported_quantity: "0",
-        unit: operatingTicketDetail.value.unit,
+        unit: item.unitName,
         workorder_hid: detailName.value,
         actual_delivery_date: null,
         status: "新增未分配",
@@ -1197,9 +1191,6 @@ function resetFilterProduct() {
   }
 }
 
-let productPage = ref(1);
-let productPerPage = ref(10);
-let productLength = ref(0);
 //根据项目号和零件名查询产料
 async function productList() {
   try {
@@ -1208,36 +1199,28 @@ async function productList() {
       "get",
       undefined,
       {
-        PageIndex: productPage.value,
-        PageSize: productPerPage.value,
+        PageIndex: 1,
+        PageSize: 10000,
         SortType: 1,
         SortedBy: "_id",
         projectCode: searchProject.value,
         partName: searchName.value,
+        totalCode: searchMac.value,
       }
     );
     if (!data.data.totalCount) return (productTableData.value = []);
     productTableData.value = data.data.pageList; //赋值
-    productLength.value = data.data.totalCount; //获取数据库总数据条
     productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
   } catch (error) {
     console.log(error);
   }
 }
 
-//当前项目产品列表有多少页
-const productPageCount = computed(() => {
-  return Math.ceil(productLength.value / productPerPage.value);
-});
-
 //根据产品的项目号来筛选新增的产出料
 async function showMcodeDialog() {
   try {
     selectedRows.value = [];
-    productLength.value = 0;
-
     productList();
-    productPage.value = 1;
     productTypeName.value = "自制件";
   } catch (error) {
     console.log(error);
@@ -1248,7 +1231,6 @@ async function showMcodeDialog() {
 //搜素
 async function filterNameProduct() {
   try {
-    productPage.value = 1;
     productList();
   } catch (error) {
     console.log(error);
@@ -1258,16 +1240,9 @@ async function filterNameProduct() {
 function resetFilterNameProduct() {
   searchName.value = "";
   searchProject.value = "";
-  productPage.value = 1;
+  searchMac.value = "";
   productList();
 }
-watch(productPage, () => {
-  productList();
-});
-watch(productPerPage, () => {
-  productList();
-});
-
 function clear() {
   selectedRows.value = [];
 }
@@ -2100,6 +2075,7 @@ const rules = [
           <v-select
             label="工单类型"
             :items="workType"
+            multiple
             v-model="operatingTicket.workorder_type"
           ></v-select>
           <v-text-field
@@ -2275,11 +2251,6 @@ const rules = [
               label="计划数量"
               :rules="numberRule"
             ></v-text-field>
-            <v-select
-              label="单位"
-              :items="units"
-              v-model="operatingTicketDetail.unit"
-            ></v-select>
           </v-card-text>
 
           <div class="d-flex justify-end mr-6 mb-4">
@@ -2655,7 +2626,7 @@ const rules = [
         </v-toolbar>
         <v-card>
           <v-row class="ma-2">
-            <v-col cols="4">
+            <v-col cols="3">
               <v-text-field
                 label="零件名查询"
                 variant="outlined"
@@ -2666,7 +2637,7 @@ const rules = [
               ></v-text-field>
             </v-col>
 
-            <v-col cols="4">
+            <v-col cols="3">
               <v-text-field
                 label="项目号查询"
                 variant="outlined"
@@ -2676,8 +2647,18 @@ const rules = [
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>
             </v-col>
+            <v-col cols="3">
+              <v-text-field
+                label="设备号"
+                variant="outlined"
+                density="compact"
+                v-model="searchMac"
+                hide-details
+                @keydown.enter="filterNameProduct()"
+              ></v-text-field>
+            </v-col>
 
-            <v-col cols="4">
+            <v-col cols="3">
               <v-select
                 variant="outlined"
                 density="compact"
@@ -2708,23 +2689,11 @@ const rules = [
               </v-btn>
             </v-col>
 
-            <v-col cols="4">
-              <v-select
-                class="mr-1"
-                variant="outlined"
-                density="compact"
-                hide-details
-                label="每页最大数"
-                :items="[10, 20, 30, 40]"
-                v-model="productPerPage"
-              ></v-select>
-            </v-col>
-
             <v-col cols="12">
               <v-divider></v-divider>
               <v-data-table
                 hover
-                :items-per-page="productPerPage"
+                :items-per-page="10"
                 v-model="selectedRows"
                 return-object
                 show-select
@@ -2737,14 +2706,6 @@ const rules = [
                 height="400"
                 no-data-text="没有找到符合的数据"
               >
-                <template v-slot:bottom>
-                  <div class="text-center pt-2 mb-4">
-                    <v-pagination
-                      v-model="productPage"
-                      :length="productPageCount"
-                    ></v-pagination>
-                  </div>
-                </template>
               </v-data-table>
             </v-col>
           </v-row>
