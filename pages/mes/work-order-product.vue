@@ -711,7 +711,7 @@ let date = new Date();
 // 新增工单前重置新增对话框
 function resetAddDialog() {
   operatingTicket.value = {
-    workorder_type: "机加",
+    workorder_type: ["机加"],
     product_id: "",
     planned_quantity: 1,
     product_description: "",
@@ -724,6 +724,7 @@ function resetAddDialog() {
 }
 //存储新增工单信息
 let tabArr1 = ref<any[]>([]);
+
 // 新增工单
 async function addTicket() {
   try {
@@ -733,7 +734,7 @@ async function addTicket() {
     if (!operatingTicket.value.planned_completion_time) {
       return setSnackbar("black", "请您选择计划完成时间");
     }
-    let workOrderType = operatingTicket.value.workorder_type.slice(",");
+    let workOrderType = operatingTicket.value.workorder_type;
     workOrderType.forEach((item: any) => {
       tabArr1.value.push({
         workorder_type: item,
@@ -1166,6 +1167,7 @@ function saveProduct() {
       operatingTicket.value.product_description = productString;
       //将选择的物料编码，赋值给新建工单的产品id
       operatingTicket.value.product_id = productIdString;
+      operatingTicket.value.unit = selectedData.unitName;
       //清空选择的数据
       selectedRows.value = [];
       productDialog.value = false;
@@ -2097,11 +2099,6 @@ const rules = [
             :rules="numberRule"
           ></v-text-field>
 
-          <v-select
-            label="单位"
-            :items="units"
-            v-model="operatingTicket.unit"
-          ></v-select>
           <v-text-field
             label="计划开始日期"
             :rules="dateRule"
@@ -2159,11 +2156,7 @@ const rules = [
             label="计划数量"
             :rules="numberRule"
           ></v-text-field>
-          <v-select
-            label="单位"
-            :items="units"
-            v-model="operatingTicket.unit"
-          ></v-select>
+
           <v-text-field
             v-model="operatingTicket.scheduled_start_date"
             :rules="dateRule"
