@@ -654,7 +654,7 @@ async function addTicket() {
     const data: any = await useHttp(
       "/MesWorkOrder/M02AddWorkOrder",
       "post",
-      operatingTicket.value
+      [operatingTicket.value]
     );
     //给工单明细对象赋值
     operatingTicketDetail.value = {
@@ -669,7 +669,7 @@ async function addTicket() {
       planned_quantity: operatingTicket.value.planned_quantity,
       reported_quantity: "0",
       unit: operatingTicket.value.unit,
-      workorder_hid: data.data,
+      workorder_hid: data.data[0],
       actual_delivery_date: null,
       status: "新增未分配",
     };
