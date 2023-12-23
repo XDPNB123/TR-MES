@@ -13,8 +13,8 @@
             margin-top: 20px;
           "
           class="d-flex flex-column"
-          v-for="(item_, index_) in newArray"
-          :key="index_"
+          v-for="(item, index) in dateNum"
+          :key="index"
         >
           <div class="d-flex justify-space-around">
             <!-- 第一列-->
@@ -165,75 +165,40 @@
                 <th style="text-align: center; height: 30px">数量</th>
                 <th style="text-align: center; height: 30px">备注</th>
               </tr>
-              <tr v-for="item in item_.group" :key="item.no">
-                <td>
-                  <input
-                    type="text"
-                    :value="item.no"
-                    style="text-align: center; height: 30px; width: 80px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    :value="item.production"
-                    style="text-align: center; height: 30px; width: 230px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    :value="item.model"
-                    style="text-align: center; height: 30px; width: 180px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    :value="item.qty"
-                    style="text-align: center; height: 30px; width: 80px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    :value="item.rmks"
-                    style="text-align: center; height: 30px; width: 230px"
-                  />
-                </td>
-              </tr>
 
-              <tr
-                v-for="index1 in 18 - item_.group.length"
-                :key="index1 + 18 - item_.group.length"
-              >
+              <tr v-for="(item_, index_) in item.num" :key="item_">
                 <td>
                   <input
                     type="text"
+                    v-model="tableData[index][index_].no"
                     style="text-align: center; height: 30px; width: 80px"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
+                    v-model="tableData[index][index_].production"
                     style="text-align: center; height: 30px; width: 230px"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
+                    v-model="tableData[index][index_].model"
                     style="text-align: center; height: 30px; width: 180px"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
+                    v-model="tableData[index][index_].qty"
                     style="text-align: center; height: 30px; width: 80px"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
+                    v-model="tableData[index][index_].rmks"
                     style="text-align: center; height: 30px; width: 230px"
                   />
                 </td>
@@ -284,337 +249,20 @@ function openPrint() {
   });
 }
 function add() {
-  newArray.value.push({ group });
+  dateNum.value.push(dateNumInfo.value);
+  tableData.value.push(
+    Array(18).fill({ no: "", production: "", model: "", qty: "", rmks: "" })
+  );
 }
-const tableData = ref([
-  { no: "1", production: "Prod1", model: "Model1", qty: "10", rmks: "Remark1" },
-  { no: "2", production: "Prod2", model: "Model2", qty: "20", rmks: "Remark2" },
-  { no: "3", production: "Prod3", model: "Model3", qty: "30", rmks: "Remark3" },
-  { no: "4", production: "Prod4", model: "Model4", qty: "40", rmks: "Remark4" },
-  { no: "5", production: "Prod5", model: "Model5", qty: "50", rmks: "Remark5" },
-  { no: "6", production: "Prod6", model: "Model6", qty: "60", rmks: "Remark6" },
-  { no: "7", production: "Prod7", model: "Model7", qty: "70", rmks: "Remark7" },
-  { no: "8", production: "Prod8", model: "Model8", qty: "80", rmks: "Remark8" },
-  { no: "9", production: "Prod9", model: "Model9", qty: "90", rmks: "Remark9" },
+let dateNum = ref([
   {
-    no: "10",
-    production: "Prod10",
-    model: "Model10",
-    qty: "100",
-    rmks: "Remark10",
-  },
-  {
-    no: "11",
-    production: "Prod11",
-    model: "Model11",
-    qty: "110",
-    rmks: "Remark11",
-  },
-  {
-    no: "12",
-    production: "Prod12",
-    model: "Model12",
-    qty: "120",
-    rmks: "Remark12",
-  },
-  {
-    no: "13",
-    production: "Prod13",
-    model: "Model13",
-    qty: "130",
-    rmks: "Remark13",
-  },
-  {
-    no: "14",
-    production: "Prod14",
-    model: "Model14",
-    qty: "140",
-    rmks: "Remark14",
-  },
-  {
-    no: "15",
-    production: "Prod15",
-    model: "Model15",
-    qty: "150",
-    rmks: "Remark15",
-  },
-  {
-    no: "16",
-    production: "Prod16",
-    model: "Model16",
-    qty: "160",
-    rmks: "Remark16",
-  },
-  {
-    no: "17",
-    production: "Prod17",
-    model: "Model17",
-    qty: "170",
-    rmks: "Remark17",
-  },
-  {
-    no: "18",
-    production: "Prod18",
-    model: "Model18",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "19",
-    production: "Prod119",
-    model: "Model19",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "20",
-    production: "Prod120",
-    model: "Model20",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
+    num: 18,
   },
 ]);
-
-let newArray = ref<any[]>([]);
-let groupSize = 18;
-let group = Array.from({ length: 18 }, () => ({}));
-onMounted(() => {
-  for (let i = 0; i < tableData.value.length; i += groupSize) {
-    group = tableData.value.slice(i, i + groupSize);
-    newArray.value.push({ group });
-  }
-  group = Array.from({ length: 18 }, () => ({}));
-  
+let dateNumInfo = ref({
+  num: 18,
 });
+let tableData = ref([
+  Array(18).fill({ no: "", production: "", model: "", qty: "", rmks: "" }),
+]);
 </script>
