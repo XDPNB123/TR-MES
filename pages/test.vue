@@ -252,6 +252,12 @@ function add() {
   pageNum.value += 1;
 }
 let pageNum = ref<number>(1);
-
+let tableDataItem = ref<any>({
+  no: "",
+  production: "",
+  model: "",
+  qty: "",
+  rmks: "",
+});
 let tableData = ref<any[]>([]);
 </script>

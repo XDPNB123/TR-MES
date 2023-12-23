@@ -578,7 +578,7 @@ async function getDeliverList() {
       status: "已排产待执行,已执行在生产",
     }
   );
-  
+
   deliverList.value = data.data.pageList
     .filter(
       (item: any) => item.dispatch_order !== null && item.dispatch_order !== ""
@@ -687,7 +687,7 @@ async function openPrint() {
     width: 1,
     height: 30,
     displayValue: false,
-  });
+  }).init();
 
   printJS({
     printable: "printContent",

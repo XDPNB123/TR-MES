@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import printJS from "print-js";
 import QrcodeVue from "qrcode.vue";
+import JsBarcode from "jsbarcode";
 //弹框
 let addDialog = ref<boolean>(false);
 let editDialog = ref<boolean>(false);
@@ -478,13 +479,69 @@ function resetFilter1() {
 }
 //打印
 let selectRows = ref<any[]>([]);
-function print() {
+let printList = ref<any[]>([]);
+//选择的清单编号
+let code = ref<any[]>([]);
+//选择的所有的清单明细数据
+let detailData = ref<any[]>([]);
+// 打印
+async function print() {
+  await getPrintData();
+
+  //第四步,打印
   printJS({
     printable: "printContent",
     type: "html",
     targetStyles: ["*"],
   });
+  //第五步,清空所有选择的数据
   selectRows.value = [];
+  printList.value = [];
+  code.value = [];
+  detailData.value = [];
+}
+//获取选择的所有清单明细
+async function fetchDetailData() {
+  for (const item of code.value) {
+    const data: any = await useHttp(
+      "/WmsOutOrder/G170GetOutDetialList",
+      "get",
+      undefined,
+      {
+        container_code: "",
+        place_code: "",
+        sku_code: "",
+        sku_name: "",
+        out_order_num: item,
+      }
+    );
+    detailData.value.push(...data.data);
+  }
+}
+async function getPrintData() {
+  //第一步 拿到选择的所有的清单单号
+  await selectRows.value.forEach((item: any) => {
+    code.value.push(item.out_order_num);
+  });
+  //第二步 获取选择的所有清单的明细数据
+  await fetchDetailData();
+
+  //第三步,将清单数据和清单数据的明细组合成树形结构
+  printList.value = await buildTree(selectRows.value, detailData.value);
+}
+// 将俩个数组整合到一起成一个树形结构
+function buildTree(parents: any, children: any) {
+  let tree: any = [];
+  parents.forEach((parent: any) => {
+    let node = { ...parent, children: [] };
+    children.forEach((child: any) => {
+      if (child.out_order === parent.out_order_num) {
+        node.children.push(child);
+      }
+    });
+    tree.push(node);
+  });
+  return tree;
 }
 </script>
 <template>
@@ -614,27 +671,263 @@ function print() {
             </v-data-table>
           </v-col>
           <!-- 打印页面 -->
-          <v-col cols="12" v-show="false">
+          <v-col cols="12">
             <div id="printContent">
               <div
-                v-for="(item, index) in selectRows"
-                :key="index"
                 style="
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                  height: 100%;
+                  width: 794px;
+                  height: 1123px;
+                  page-break-before: always;
+                  margin-top: 20px;
                 "
+                class="d-flex flex-column"
+                v-for="(item, index) in printList"
+                :key="index"
               >
-                <div>
-                  <qrcode-vue
-                    style="width: 70px; height: 70px"
-                    :value="item.out_order_num"
-                  ></qrcode-vue>
+                <div class="d-flex justify-space-between">
+                  <!-- 第一列-->
+                  <div>
+                    <div class="font-weight-bold">
+                      昆山同日工业自动化有限公司
+                    </div>
+                    <div class="font-weight-black" style="white-space: nowrap">
+                      Tungray Industrial Automation(KunShan)Co.,Ltd
+                    </div>
+                    <div class="text-subtitle-2">Http://www.tungray.com.cn</div>
+                    <div class="text-subtitle-2">
+                      E-mail:tungray@tungray.com.cn
+                    </div>
+                  </div>
+                  <!-- 第二列 -->
+                  <div class="d-flex flex-column text-h6">
+                    <div>地址：江苏昆山淀山</div>
+                    <div>湖镇丁家浜路3号</div>
+                    <div>电话：0512-36829026</div>
+                  </div>
                 </div>
-                <div class="text-text-subtitle-1">
-                  出库单号:{{ item.out_order_num }}
+                <!-- 出库 -->
+                <div class="d-flex justify-space-between">
+                  <div
+                    class="mt-2 align-self-center"
+                    style="border-top: 10px solid black; width: 43%"
+                  ></div>
+                  <div
+                    class="d-flex flex-column justify-center align-self-center"
+                    style="align-self: center"
+                  >
+                    <div style="align-self: center">
+                      <qrcode-vue
+                        style="width: 60px; height: 60px"
+                        :value="item.out_order_num"
+                      ></qrcode-vue>
+                    </div>
+
+                    <div style="font-weight: black; white-space: nowrap">
+                      出库清单:{{ item.out_order_num }}
+                    </div>
+                  </div>
+                  <div
+                    class="mt-2 align-self-center"
+                    style="border-top: 10px solid black; width: 44%"
+                  ></div>
+                </div>
+                <!-- 其他内容 -->
+                <div class="d-flex justify-space-between">
+                  <!-- 第一列 -->
+                  <div class="d-flex flex-column">
+                    <!-- 第一列第一行 -->
+                    <div style="white-space: nowrap">
+                      出库类型：<input
+                        type="text"
+                        :value="item.out_order_type"
+                        style="
+                          border: none;
+                          border-bottom: 1px solid black;
+                          outline: none;
+                          text-align: center;
+                        "
+                      />
+                    </div>
+                    <!-- 第一列第二行 -->
+                    <div class="d-flex justify-space-between mt-4">
+                      <div style="white-space: nowrap">
+                        仓库:<input
+                          type="text"
+                          :value="item.warehouse_code"
+                          style="
+                            border: none;
+                            border-bottom: 1px solid black;
+                            outline: none;
+                            text-align: center;
+                          "
+                        />
+                      </div>
+                      <div style="white-space: nowrap">
+                        库区<input
+                          type="text"
+                          :value="item.area_code"
+                          style="
+                            border: none;
+                            border-bottom: 1px solid black;
+                            outline: none;
+                            text-align: center;
+                          "
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 第二列 -->
+                  <div class="d-flex flex-column">
+                    <!-- 第二列第一行 -->
+                    <div style="white-space: nowrap">
+                      制单日期：<input
+                        type="text"
+                        :value="item.order_date"
+                        style="
+                          border: none;
+                          border-bottom: 1px solid black;
+                          outline: none;
+                          text-align: center;
+                        "
+                      />
+                    </div>
+                    <!-- 第二列第二行 -->
+                    <div style="white-space: nowrap" class="mt-4">
+                      制单人：<input
+                        type="text"
+                        :value="item.order_maker"
+                        style="
+                          border: none;
+                          border-bottom: 1px solid black;
+                          outline: none;
+                          text-align: center;
+                        "
+                      />
+                    </div>
+                    <!-- 第二列第三行 -->
+                  </div>
+                </div>
+                <div class="mt-4">清单明细：</div>
+                <!-- 表格 -->
+                <div style="white-space: nowrap" class="mt-4">
+                  <table border="1" style="border-collapse: collapse">
+                    <tr>
+                      <th style="text-align: center; height: 30px">库位</th>
+                      <th style="text-align: center; height: 30px">容器号</th>
+                      <th style="text-align: center; height: 30px">批次</th>
+                      <th style="text-align: center; height: 30px">数量</th>
+                      <th style="text-align: center; height: 30px">物料名称</th>
+                      <th style="text-align: center; height: 30px">物料规格</th>
+                      <th style="text-align: center; height: 30px">物料编码</th>
+                    </tr>
+
+                    <tr v-for="(item_, index_) in item.children" :key="index_">
+                      <td
+                        style="text-align: center; height: 40px; width: 125px"
+                      >
+                        {{ item_.place_code }}
+                      </td>
+                      <td style="text-align: center; height: 40px; width: 85px">
+                        {{ item_.container_code }}
+                      </td>
+
+                      <td
+                        style="text-align: center; height: 40px; width: 105px"
+                      >
+                        {{ item_.batch_lot }}
+                      </td>
+                      <td style="text-align: center; height: 40px; width: 85px">
+                        {{ item_.sku_qty }}
+                      </td>
+                      <td
+                        style="
+                          text-align: center;
+                          height: 40px;
+                          max-width: 140px;
+                          word-wrap: break-word;
+                          white-space: normal;
+                        "
+                      >
+                        {{ item_.sku_name }}
+                      </td>
+
+                      <td
+                        style="
+                          text-align: center;
+                          height: 40px;
+                          max-width: 140px;
+                          word-wrap: break-word;
+                          white-space: normal;
+                        "
+                      >
+                        {{ item_.sku_spec }}
+                      </td>
+                      <td
+                        style="text-align: center; height: 40px; width: 140px"
+                      >
+                        <qrcode-vue
+                          style="width: 70px; height: 70px"
+                          :value="item_.sku_code"
+                        ></qrcode-vue>
+                      </td>
+                    </tr>
+                    <!--  -->
+                    <tr
+                      v-for="(item__, index__) in 10 - item.children.length"
+                      :key="index__"
+                    >
+                      <td
+                        style="text-align: center; height: 40px; width: 120px"
+                      ></td>
+                      <td
+                        style="text-align: center; height: 40px; width: 80px"
+                      ></td>
+
+                      <td
+                        style="text-align: center; height: 40px; width: 100px"
+                      ></td>
+                      <td
+                        style="text-align: center; height: 40px; width: 80px"
+                      ></td>
+                      <td
+                        style="text-align: center; height: 40px; width: 140px"
+                      ></td>
+                      <td
+                        style="text-align: center; height: 40px; width: 140px"
+                      ></td>
+                      <td
+                        style="text-align: center; height: 40px; width: 140px"
+                      ></td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="mt-4">Your faithfuly:</div>
+                <div class="font-weight-black mt-4" style="white-space: nowrap">
+                  Tungray Industrial Automation(KunShan)Co.,Ltd
+                </div>
+                <div class="mt-4">供应商：昆山同日工业自动化有限公司</div>
+                <div class="d-flex justify-space-around mt-4">
+                  <div class="d-flex" style="white-space: nowrap">
+                    出库员：<input
+                      type="text"
+                      style="
+                        border: none;
+                        border-bottom: 1px solid black;
+                        outline: none;
+                      "
+                    />
+                  </div>
+                  <div class="d-flex" style="white-space: nowrap">
+                    复核员：<input
+                      type="text"
+                      style="
+                        border: none;
+                        border-bottom: 1px solid black;
+                        outline: none;
+                      "
+                    />
+                  </div>
                 </div>
               </div>
             </div>
