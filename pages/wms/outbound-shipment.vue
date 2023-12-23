@@ -265,7 +265,6 @@ async function getDate() {
 function showDetail(item: any, obj: any) {
   orderCode.value = obj.item.raw.out_order_num;
   status.value = obj.item.raw.order_status;
-  getDateDetail();
 }
 
 let detailList = ref<any[]>([]);

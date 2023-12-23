@@ -12,9 +12,9 @@
             page-break-before: always;
             margin-top: 20px;
           "
-          class="d-flex flex-column"
-          v-for="(item, index) in dateNum"
+          v-for="(item, index) in pageNum"
           :key="index"
+          class="d-flex flex-column"
         >
           <div class="d-flex justify-space-around">
             <!-- 第一列-->
@@ -166,40 +166,40 @@
                 <th style="text-align: center; height: 30px">备注</th>
               </tr>
 
-              <tr v-for="(item_, index_) in item.num" :key="item_">
+              <tr v-for="(item_, index_) in 18" :key="index_">
                 <td>
                   <input
                     type="text"
-                    v-model="tableData[index][index_].no"
                     style="text-align: center; height: 30px; width: 80px"
+                    v-model="tableData[index + index_].no"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
-                    v-model="tableData[index][index_].production"
                     style="text-align: center; height: 30px; width: 230px"
+                    v-model="tableData[index + index_].production"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
-                    v-model="tableData[index][index_].model"
                     style="text-align: center; height: 30px; width: 180px"
+                    v-model="tableData[index + index_].model"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
-                    v-model="tableData[index][index_].qty"
                     style="text-align: center; height: 30px; width: 80px"
+                    v-model="tableData[index + index_].qty"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
-                    v-model="tableData[index][index_].rmks"
                     style="text-align: center; height: 30px; width: 230px"
+                    v-model="tableData[index + index_].rmks"
                   />
                 </td>
               </tr>
@@ -249,20 +249,9 @@ function openPrint() {
   });
 }
 function add() {
-  dateNum.value.push(dateNumInfo.value);
-  tableData.value.push(
-    Array(18).fill({ no: "", production: "", model: "", qty: "", rmks: "" })
-  );
+  pageNum.value += 1;
 }
-let dateNum = ref([
-  {
-    num: 18,
-  },
-]);
-let dateNumInfo = ref({
-  num: 18,
-});
-let tableData = ref([
-  Array(18).fill({ no: "", production: "", model: "", qty: "", rmks: "" }),
-]);
+let pageNum = ref<number>(1);
+
+let tableData = ref<any[]>([]);
 </script>
