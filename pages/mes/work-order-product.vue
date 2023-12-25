@@ -2497,7 +2497,7 @@ const rules = [
       </v-card>
     </v-dialog>
     <!-- 产品编号类型 -->
-    <v-dialog v-model="productDialog" min-width="400px" width="1000px">
+    <v-dialog v-model="productDialog" min-width="1400px" width="1000px">
       <v-card>
         <v-toolbar color="blue">
           <v-toolbar-title> 选择产品描述 </v-toolbar-title>
@@ -2615,7 +2615,7 @@ const rules = [
       </v-card>
     </v-dialog>
     <!-- 工单明细产出料 -->
-    <v-dialog v-model="mcodeDialog" min-width="400px" width="1000px">
+    <v-dialog v-model="mcodeDialog" min-width="1400px" width="1000px">
       <v-card>
         <v-toolbar color="blue">
           <v-toolbar-title> 可以批量选择产品，批量增加产出料 </v-toolbar-title>
