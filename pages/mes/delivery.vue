@@ -1,619 +1,1212 @@
-<template>
-  <div>
-    <v-btn @click="openPrint()"> 打印 </v-btn>
-    <v-btn @click="add"> 添加一页 </v-btn>
-
-    <div class="d-flex justify-center h-100">
-      <div id="printContent">
-        <div
-          style="
-            width: 794px;
-            height: 1123px;
-            page-break-before: always;
-            margin-top: 20px;
-          "
-          class="d-flex flex-column"
-          v-for="(item_, index_) in newArray"
-          :key="index_"
-        >
-          <div class="d-flex justify-space-around">
-            <!-- 第一列-->
-            <div>
-              <div class="font-weight-bold">昆山同日工业自动化有限公司</div>
-              <div class="font-weight-black" style="white-space: nowrap">
-                Tungray Industrial Automation(KunShan)Co.,Ltd
-              </div>
-              <div class="text-subtitle-2">Http://www.tungray.com.cn</div>
-              <div class="text-subtitle-2">E-mail:tungray@tungray.com.cn</div>
-            </div>
-            <!-- 第二列 -->
-            <div class="d-flex flex-column text-h6">
-              <div>地址：江苏昆山淀山</div>
-              <div>湖镇丁家浜路3号</div>
-              <div>电话：0512-36829026</div>
-            </div>
-          </div>
-          <!-- 装箱单 -->
-          <div class="d-flex justify-space-between">
-            <div
-              class="mt-2 align-self-center"
-              style="border-top: 10px solid black; width: 43%"
-            ></div>
-            <div
-              class="d-flex flex-column justify-center align-self-center"
-              style="align-self: center"
-            >
-              <div style="align-self: center">
-                <qrcode-vue
-                  style="width: 60px; height: 60px"
-                  value="WW771234"
-                ></qrcode-vue>
-              </div>
-
-              <div style="font-weight: black; white-space: nowrap">
-                装箱单:WW771234
-              </div>
-            </div>
-            <div
-              class="mt-2 align-self-center"
-              style="border-top: 10px solid black; width: 44%"
-            ></div>
-          </div>
-          <!-- 其他内容 -->
-          <div class="d-flex justify-space-between">
-            <!-- 第一列 -->
-            <div class="d-flex flex-column">
-              <!-- 第一列第一行 -->
-              <div style="white-space: nowrap">
-                Project No/项目号：<input
-                  type="text"
-                  style="
-                    border: none;
-                    border-bottom: 1px solid black;
-                    outline: none;
-                    text-align: center;
-                  "
-                />
-              </div>
-              <!-- 第一列第二行 -->
-              <div class="d-flex justify-space-between mt-4">
-                <div style="white-space: nowrap">
-                  No:<input
-                    type="text"
-                    style="
-                      border: none;
-                      border-bottom: 1px solid black;
-                      outline: none;
-                      text-align: center;
-                    "
-                  />
-                </div>
-                <div style="white-space: nowrap">
-                  共<input
-                    type="text"
-                    style="
-                      border: none;
-                      border-bottom: 1px solid black;
-                      outline: none;
-                      text-align: center;
-                    "
-                  />箱
-                </div>
-              </div>
-              <!-- 第一列第三行 -->
-              <div style="white-space: nowrap" class="mt-4">
-                包装材料：
-                <span style="padding-right: 80px"
-                  >Case(木箱) <input type="checkbox"
-                /></span>
-                <span>Crate(板条箱) <input type="checkbox" /></span>
-              </div>
-            </div>
-
-            <!-- 第二列 -->
-            <div class="d-flex flex-column">
-              <!-- 第二列第一行 -->
-              <div style="white-space: nowrap">
-                Date/日期：<input
-                  type="text"
-                  style="
-                    border: none;
-                    border-bottom: 1px solid black;
-                    outline: none;
-                    text-align: center;
-                  "
-                />
-              </div>
-              <!-- 第二列第二行 -->
-              <div style="white-space: nowrap" class="mt-4">
-                L/W/H(长/宽/高)/其他：<input
-                  type="text"
-                  style="
-                    border: none;
-                    border-bottom: 1px solid black;
-                    outline: none;
-                    text-align: center;
-                  "
-                />
-              </div>
-              <!-- 第二列第三行 -->
-              <div style="white-space: nowrap" class="mt-4">
-                <span style="padding-right: 80px"
-                  >Carton(纸箱）<input type="checkbox"
-                /></span>
-                <span>其他 <input type="checkbox" /></span>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4">装箱明细：</div>
-          <!-- 表格 -->
-          <div style="white-space: nowrap" class="mt-4">
-            <table border="1" style="border-collapse: collapse">
-              <tr>
-                <th style="text-align: center; height: 30px">No</th>
-                <th style="text-align: center; height: 30px">Production</th>
-                <th style="text-align: center; height: 30px">
-                  Model No/Item No
-                </th>
-                <th style="text-align: center; height: 30px">QTY</th>
-                <th style="text-align: center; height: 30px">Rmks</th>
-              </tr>
-              <tr>
-                <th style="text-align: center; height: 30px">序号</th>
-                <th style="text-align: center; height: 30px">产品</th>
-                <th style="text-align: center; height: 30px">产品规格及型号</th>
-                <th style="text-align: center; height: 30px">数量</th>
-                <th style="text-align: center; height: 30px">备注</th>
-              </tr>
-              <tr v-for="item in item_.group" :key="item.no">
-                <td>
-                  <input
-                    type="text"
-                    :value="item.no"
-                    style="text-align: center; height: 30px; width: 80px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    :value="item.production"
-                    style="text-align: center; height: 30px; width: 230px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    :value="item.model"
-                    style="text-align: center; height: 30px; width: 180px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    :value="item.qty"
-                    style="text-align: center; height: 30px; width: 80px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    :value="item.rmks"
-                    style="text-align: center; height: 30px; width: 230px"
-                  />
-                </td>
-              </tr>
-
-              <tr
-                v-for="index1 in 18 - item_.group.length"
-                :key="index1 + 18 - item_.group.length"
-              >
-                <td>
-                  <input
-                    type="text"
-                    style="text-align: center; height: 30px; width: 80px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    style="text-align: center; height: 30px; width: 230px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    style="text-align: center; height: 30px; width: 180px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    style="text-align: center; height: 30px; width: 80px"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    style="text-align: center; height: 30px; width: 230px"
-                  />
-                </td>
-              </tr>
-            </table>
-          </div>
-          <div class="mt-4">Your faithfuly:</div>
-          <div class="font-weight-black mt-4" style="white-space: nowrap">
-            Tungray Industrial Automation(KunShan)Co.,Ltd
-          </div>
-          <div class="mt-4">供应商：昆山同日工业自动化有限公司</div>
-          <div class="d-flex justify-space-around mt-4">
-            <div class="d-flex" style="white-space: nowrap">
-              装箱员：<input
-                type="text"
-                style="
-                  border: none;
-                  border-bottom: 1px solid black;
-                  outline: none;
-                "
-              />
-            </div>
-            <div class="d-flex" style="white-space: nowrap">
-              复核员：<input
-                type="text"
-                style="
-                  border: none;
-                  border-bottom: 1px solid black;
-                  outline: none;
-                "
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import printJS from "print-js";
 import QrcodeVue from "qrcode.vue";
-function openPrint() {
+import JsBarcode from "jsbarcode";
+// 搜索引擎优化
+useSeoMeta({
+  // 该页面的标题
+  title: "装箱单制作",
+  // 社交媒体分享该页面时显示的标题
+  ogTitle: "装箱单制作",
+  // 该页面的描述
+  description: "同日 MES 系统，装箱单制作",
+  // 社交媒体分享该页面时显示的描述
+  ogDescription: "同日 MES 系统，装箱单制作",
+  // 社交媒体分享该页面时显示的图片
+  ogImage: "/同日图标.png",
+});
+// 页面缓存
+definePageMeta({
+  keepalive: true,
+});
+// 获取消息条对象
+const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
+  useSnackbar();
+//弹框
+let addDialog = ref<boolean>(false);
+let editDialog = ref<boolean>(false);
+let deleteDialog = ref<boolean>(false);
+let auditDialog = ref<boolean>(false);
+
+let addDetailDialog = ref<boolean>(false);
+let addDetailDialog2 = ref<boolean>(false);
+let editDetailDialog = ref<boolean>(false);
+let deleteDetailDialog = ref<boolean>(false);
+//装箱单头
+let orderHeaders = ref<any[]>([
+  {
+    title: "装箱单号",
+    align: "center",
+    key: "packcode",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "项目号",
+    align: "center",
+    key: "projectcode",
+    sortable: false,
+    filterable: true,
+  },
+
+  {
+    title: "日期",
+    align: "center",
+    key: "date",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "物料名称",
+    align: "center",
+    key: "sku_name",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "数量",
+    align: "center",
+    key: "num",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "包装材料",
+    align: "center",
+    key: "package_material",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "操作",
+    align: "center",
+    key: "action",
+    sortable: false,
+    filterable: true,
+  },
+]);
+//装箱单明细头
+let detailHeaders = ref<any[]>([
+  {
+    title: "产品",
+    align: "center",
+    key: "production",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "规格",
+    align: "center",
+    key: "model",
+    sortable: false,
+    filterable: true,
+  },
+
+  {
+    title: "数量",
+    align: "center",
+    key: "qty",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "备注",
+    align: "center",
+    key: "rmks",
+    sortable: false,
+    filterable: true,
+  },
+
+  {
+    title: "操作",
+    align: "center",
+    key: "action",
+    sortable: false,
+    filterable: true,
+  },
+]);
+//自制件表头
+let homemadeHeaders = ref<any[]>([
+  { title: "零件名", align: "center", key: "partName" },
+  { title: "总装物料名", align: "start", key: "totalName" },
+  { title: "物料编码", align: "start", key: "resultCode" },
+  { title: "项目号", align: "start", key: "projectCode" },
+  { title: "项目类型", align: "start", key: "projectType" },
+  { title: "单位名", align: "start", key: "unitName" },
+]);
+//外购件表头
+let materialHeaders = ref<any[]>([
+  { title: "型号描述", align: "start", key: "xhms" },
+  { title: "规格描述", align: "center", key: "ggms" },
+  { title: "物料编码", align: "start", key: "resultCode" },
+  { title: "种类描述", align: "start", key: "middleName" },
+  { title: "细类描述", align: "start", key: "smallName" },
+  { title: "细类名", align: "start", key: "thinName" },
+  { title: "单位名", align: "start", key: "unitName" },
+]);
+//存储装箱单数据
+let orderList = ref<any[]>([]);
+//存储明细单数据
+let detailList = ref<any[]>([]);
+// 装箱单搜索条件
+let searchPackCode = ref<any>("");
+let searchProjectCode = ref<any>("");
+let searchProduction = ref<any>("");
+let searchRmks = ref<any>("");
+//装箱单搜素
+function filter() {
+  getOrderData();
+}
+//装箱单重置搜索
+function resetFilter() {
+  searchPackCode.value = "";
+  searchProjectCode.value = "";
+  searchProduction.value = "";
+  searchRmks.value = "";
+  getOrderData();
+}
+// 装箱单明细搜素
+let searchProduction2 = ref<any>("");
+let searchRmks2 = ref<any>("");
+//明细搜索
+function filterDetail() {
+  getDetailData();
+}
+//重置明细搜索
+function resetDetail() {
+  searchProduction2.value = "";
+  searchRmks2.value = "";
+  getDetailData();
+}
+//获取数据库的装箱单数据
+async function getOrderData() {}
+//获取数据库的装箱单明细数据
+async function getDetailData() {}
+// 点击显示装箱单明细
+function showDetail() {}
+//页面加载获取数据
+onMounted(() => {
+  getOrderData();
+});
+//装箱单对象
+let orderInfo = ref<any>(null);
+//新增装箱单
+function showAddDialog() {
+  orderInfo.value = {
+    projectcode: "",
+    date: new Date().toISOString().substring(0, 10),
+    num: "",
+    lwh: "",
+    package_material: "",
+  };
+  addDialog.value = true;
+}
+//确认新增
+async function addSucces() {}
+
+//装箱单的修改
+function showEditDialog(item: any) {
+  orderInfo.value = { ...item };
+  editDialog.value = true;
+}
+async function editSucces() {}
+//装箱单的删除
+function showDelDialog(item: any) {
+  orderInfo.value = { ...item };
+  deleteDialog.value = true;
+}
+async function delSucces() {}
+
+//装箱单明细的制作
+let productHeaders = ref<any[]>([]);
+let productTableData = ref<any>([]);
+let selected = ref<any[]>([]);
+//产品信息的搜索
+let searchProject = ref<any>("");
+let searchName = ref<any>("");
+let searchMac = ref<any>("");
+//新增装箱单明细信息
+function showAddDetail() {
+  selected.value = [];
+  productList();
+  addDetailDialog.value = true;
+}
+//根据项目号和零件名查询产料
+async function productList() {
+  try {
+    const data: any = await useHttp(
+      "/MaterialForm/M53GetHomemadeForm",
+      "get",
+      undefined,
+      {
+        PageIndex: 1,
+        PageSize: 10000,
+        SortType: 1,
+        SortedBy: "_id",
+        projectCode: searchProject.value,
+        partName: searchName.value,
+        totalCode: searchMac.value,
+      }
+    );
+    if (!data.data.totalCount) return (productTableData.value = []);
+    productTableData.value = data.data.pageList; //赋值
+    productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
+  } catch (error) {
+    console.log(error);
+  }
+}
+//产品搜素
+function filterNameProduct() {
+  productList();
+}
+//重置产品搜索
+function resetFilterNameProduct() {
+  searchName.value = "";
+  searchProject.value = "";
+  searchMac.value = "";
+  productList();
+}
+let addDetailList = ref<any[]>([]);
+function saveMcodeProduct() {
+  if (selected.value.length === 0) {
+    return setSnackbar("black", "请选择产品，创建装箱单明细");
+  }
+  addDetailList.value = [];
+  selected.value.forEach((item: any) => {
+    addDetailList.value.push({
+      no: "",
+      production: item.partName,
+      model: "",
+      qty: "",
+      unit: item.unitName,
+      rmks: item.totalCode + "-" + item.partCode,
+    });
+  });
+  addDetailDialog2.value = true;
+}
+//在当前索引加一的位置复制一行当前数据加入数组
+
+function addRow(item: any, index: number) {
+  addDetailList.value.splice(index, 0, { ...item });
+}
+function addDetailSucces() {
+  console.log(addDetailList.value);
+}
+//装箱单明细对象
+let detailInfo = ref<any>(null);
+// 删除装箱单的明细
+function showDelDetailDialog(item: any) {
+  detailInfo.value = { ...item };
+  deleteDetailDialog.value = true;
+}
+//确认删除
+async function delDetailSucces() {}
+
+//打印
+let selectRows = ref<any[]>([]);
+let printList = ref<any[]>([]);
+//选择的装箱单编号
+let code = ref<any[]>([]);
+//选择的所有的装箱单明细数据
+let detailData = ref<any[]>([]);
+async function print() {
+  await getPrintData();
+  //第四步,打印
   printJS({
     printable: "printContent",
     type: "html",
     targetStyles: ["*"],
   });
+  //第五步,清空所有选择的数据
+  selectRows.value = [];
+  printList.value = [];
+  code.value = [];
+  detailData.value = [];
 }
-function add() {
-  newArray.value.push({ group });
-}
-const tableData = ref([
-  { no: "1", production: "Prod1", model: "Model1", qty: "10", rmks: "Remark1" },
-  { no: "2", production: "Prod2", model: "Model2", qty: "20", rmks: "Remark2" },
-  { no: "3", production: "Prod3", model: "Model3", qty: "30", rmks: "Remark3" },
-  { no: "4", production: "Prod4", model: "Model4", qty: "40", rmks: "Remark4" },
-  { no: "5", production: "Prod5", model: "Model5", qty: "50", rmks: "Remark5" },
-  { no: "6", production: "Prod6", model: "Model6", qty: "60", rmks: "Remark6" },
-  { no: "7", production: "Prod7", model: "Model7", qty: "70", rmks: "Remark7" },
-  { no: "8", production: "Prod8", model: "Model8", qty: "80", rmks: "Remark8" },
-  { no: "9", production: "Prod9", model: "Model9", qty: "90", rmks: "Remark9" },
-  {
-    no: "10",
-    production: "Prod10",
-    model: "Model10",
-    qty: "100",
-    rmks: "Remark10",
-  },
-  {
-    no: "11",
-    production: "Prod11",
-    model: "Model11",
-    qty: "110",
-    rmks: "Remark11",
-  },
-  {
-    no: "12",
-    production: "Prod12",
-    model: "Model12",
-    qty: "120",
-    rmks: "Remark12",
-  },
-  {
-    no: "13",
-    production: "Prod13",
-    model: "Model13",
-    qty: "130",
-    rmks: "Remark13",
-  },
-  {
-    no: "14",
-    production: "Prod14",
-    model: "Model14",
-    qty: "140",
-    rmks: "Remark14",
-  },
-  {
-    no: "15",
-    production: "Prod15",
-    model: "Model15",
-    qty: "150",
-    rmks: "Remark15",
-  },
-  {
-    no: "16",
-    production: "Prod16",
-    model: "Model16",
-    qty: "160",
-    rmks: "Remark16",
-  },
-  {
-    no: "17",
-    production: "Prod17",
-    model: "Model17",
-    qty: "170",
-    rmks: "Remark17",
-  },
-  {
-    no: "18",
-    production: "Prod18",
-    model: "Model18",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "19",
-    production: "Prod119",
-    model: "Model19",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "20",
-    production: "Prod120",
-    model: "Model20",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-  {
-    no: "21",
-    production: "Prod21",
-    model: "Model21",
-    qty: "180",
-    rmks: "Remark18",
-  },
-]);
-
-let newArray = ref<any[]>([]);
-let groupSize = 18;
-let group = Array.from({ length: 18 }, () => ({}));
-onMounted(() => {
-  for (let i = 0; i < tableData.value.length; i += groupSize) {
-    group = tableData.value.slice(i, i + groupSize);
-    newArray.value.push({ group });
-  }
-  group = Array.from({ length: 18 }, () => ({}));
-});
 </script>
+<template>
+  <v-row class="ma-2">
+    <!-- 出库单表头 -->
+    <v-col cols="5">
+      <v-card class="h-100">
+        <v-toolbar class="text-h6 pl-6">装箱单</v-toolbar>
+        <v-row class="ma-1">
+          <v-col cols="3">
+            <v-text-field
+              label="装箱单号"
+              v-model="searchPackCode"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="mt-2"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="3">
+            <v-text-field
+              label="项目号"
+              v-model="searchProjectCode"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="mt-2"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="3">
+            <v-text-field
+              label="产品名称"
+              v-model="searchProduction"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="mt-2"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="3">
+            <v-text-field
+              label="产品备注"
+              v-model="searchRmks"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="mt-2"
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12">
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2 mt-2"
+              size="default"
+              @click="filter"
+              >查询</v-btn
+            >
+            <v-btn
+              color="red"
+              class="mr-2 mt-2"
+              size="default"
+              @click="resetFilter"
+              >重置查询</v-btn
+            >
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2 mt-2"
+              size="default"
+              @click="showAddDialog"
+              >新增装箱单</v-btn
+            >
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2 mt-2"
+              size="default"
+              @click="print"
+              >打印装箱单</v-btn
+            >
+          </v-col>
+          <v-col cols="12">
+            <v-data-table
+              hover
+              :items-per-page="10"
+              :headers="orderHeaders"
+              :items="orderList"
+              v-model="selectRows"
+              show-select
+              return-object
+              style="overflow-x: auto; white-space: nowrap"
+              fixed-footer
+              fixed-header
+              height="610"
+              no-data-text="没有找到符合的数据"
+              @click:row="showDetail"
+            >
+              <template v-slot:item.action="{ item }">
+                >
+                <!-- 修改 -->
+                <v-icon
+                  color="blue"
+                  size="small"
+                  class="mr-3"
+                  @click.stop="showEditDialog(item.raw)"
+                >
+                  fa-solid fa-pen
+                </v-icon>
+                <!-- 删除 -->
+                <v-icon
+                  color="red"
+                  size="small"
+                  @click.stop="showDelDialog(item.raw)"
+                >
+                  fa-solid fa-trash
+                </v-icon>
+              </template>
+            </v-data-table>
+          </v-col>
+          <!-- 打印页面 -->
+          <v-col cols="12" v-show="false">
+            <div id="printContent">
+              <div v-for="(item, index) in printList" :key="index">
+                <div
+                  style="
+                    width: 794px;
+                    height: 1123px;
+                    page-break-before: always;
+                    margin-top: 20px;
+                  "
+                  class="d-flex flex-column"
+                  v-for="page in Math.ceil(item.children.length / 18)"
+                  :key="`page-${page}`"
+                >
+                  <div class="d-flex justify-space-between">
+                    <!-- 第一列-->
+                    <div>
+                      <div class="font-weight-bold">
+                        昆山同日工业自动化有限公司
+                      </div>
+                      <div
+                        class="font-weight-black"
+                        style="white-space: nowrap"
+                      >
+                        Tungray Industrial Automation(KunShan)Co.,Ltd
+                      </div>
+                      <div class="text-subtitle-2">
+                        Http://www.tungray.com.cn
+                      </div>
+                      <div class="text-subtitle-2">
+                        E-mail:tungray@tungray.com.cn
+                      </div>
+                    </div>
+                    <!-- 第二列 -->
+                    <div class="d-flex flex-column text-h6">
+                      <div>地址：江苏昆山淀山</div>
+                      <div>湖镇丁家浜路3号</div>
+                      <div>电话：0512-36829026</div>
+                    </div>
+                  </div>
+                  <!-- 出库 -->
+                  <div class="d-flex justify-space-between">
+                    <div
+                      class="mt-2 align-self-center"
+                      style="border-top: 10px solid black; width: 43%"
+                    ></div>
+                    <div
+                      class="d-flex flex-column justify-center align-self-center"
+                      style="align-self: center"
+                    >
+                      <div style="align-self: center">
+                        <qrcode-vue
+                          style="width: 60px; height: 60px"
+                          :value="item.out_order_num"
+                        ></qrcode-vue>
+                      </div>
+
+                      <div style="font-weight: black; white-space: nowrap">
+                        出库清单:{{ item.out_order_num }}
+                      </div>
+                    </div>
+                    <div
+                      class="mt-2 align-self-center"
+                      style="border-top: 10px solid black; width: 44%"
+                    ></div>
+                  </div>
+                  <!-- 其他内容 -->
+                  <div class="d-flex justify-space-between">
+                    <!-- 第一列 -->
+                    <div class="d-flex flex-column">
+                      <!-- 第一列第一行 -->
+                      <div style="white-space: nowrap">
+                        Project No/项目号：<input
+                          type="text"
+                          :value="item.projectcode"
+                          style="
+                            border: none;
+                            border-bottom: 1px solid black;
+                            outline: none;
+                            text-align: center;
+                          "
+                        />
+                      </div>
+                      <!-- 第一列第二行 -->
+                      <div class="d-flex justify-space-between mt-4">
+                        <div style="white-space: nowrap">
+                          No:<input
+                            :value="item.num"
+                            type="text"
+                            style="
+                              border: none;
+                              border-bottom: 1px solid black;
+                              outline: none;
+                              text-align: center;
+                            "
+                          />
+                        </div>
+                      </div>
+                      <!-- 第一列第三行 -->
+                      <div style="white-space: nowrap" class="mt-4">
+                        包装材料：
+                        <span style="padding-right: 80px"
+                          >Case(木箱) <input type="checkbox"
+                        /></span>
+                        <span>Crate(板条箱) <input type="checkbox" /></span>
+                      </div>
+                    </div>
+
+                    <!-- 第二列 -->
+                    <div class="d-flex flex-column">
+                      <!-- 第二列第一行 -->
+                      <div style="white-space: nowrap">
+                        Date/日期：<input
+                          type="text"
+                          :value="item.date"
+                          style="
+                            border: none;
+                            border-bottom: 1px solid black;
+                            outline: none;
+                            text-align: center;
+                          "
+                        />
+                      </div>
+                      <!-- 第二列第二行 -->
+                      <div style="white-space: nowrap" class="mt-4">
+                        L/W/H(长/宽/高)/其他：<input
+                          type="text"
+                          :value="item.lwh"
+                          style="
+                            border: none;
+                            border-bottom: 1px solid black;
+                            outline: none;
+                            text-align: center;
+                          "
+                        />
+                      </div>
+                      <!-- 第二列第三行 -->
+                      <div style="white-space: nowrap" class="mt-4">
+                        <span style="padding-right: 80px"
+                          >Carton(纸箱）<input type="checkbox"
+                        /></span>
+                        <span>其他 <input type="checkbox" /></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mt-4">装箱明细：</div>
+                  <!-- 表格 -->
+                  <div style="white-space: nowrap" class="mt-4">
+                    <table border="1" style="border-collapse: collapse">
+                      <tr>
+                        <th style="text-align: center; height: 30px">No</th>
+                        <th style="text-align: center; height: 30px">
+                          Production
+                        </th>
+                        <th style="text-align: center; height: 30px">
+                          Model No/Item No
+                        </th>
+                        <th style="text-align: center; height: 30px">QTY</th>
+                        <th style="text-align: center; height: 30px">Rmks</th>
+                      </tr>
+                      <tr>
+                        <th style="text-align: center; height: 30px">序号</th>
+                        <th style="text-align: center; height: 30px">产品</th>
+                        <th style="text-align: center; height: 30px">
+                          产品规格及型号
+                        </th>
+                        <th style="text-align: center; height: 30px">数量</th>
+                        <th style="text-align: center; height: 30px">备注</th>
+                      </tr>
+
+                      <tr
+                        v-for="(item_, index_) in item.children.slice(
+                          (page - 1) * 18,
+                          page * 18
+                        )"
+                        :key="index_"
+                      >
+                        <td>
+                          <input
+                            type="text"
+                            :value="item_.no"
+                            style="
+                              text-align: center;
+                              height: 30px;
+                              width: 80px;
+                            "
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            :value="item_.production"
+                            style="
+                              text-align: center;
+                              height: 30px;
+                              width: 230px;
+                            "
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            :value="item_.model"
+                            style="
+                              text-align: center;
+                              height: 30px;
+                              width: 180px;
+                            "
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            :value="item_.qty"
+                            style="
+                              text-align: center;
+                              height: 30px;
+                              width: 80px;
+                            "
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            :value="item_.rmks"
+                            style="
+                              text-align: center;
+                              height: 30px;
+                              width: 230px;
+                            "
+                          />
+                        </td>
+                      </tr>
+                      <!--  -->
+                      <tr
+                        v-for="(item__, index__) in 18 -
+                        item.children.slice((page - 1) * 18, page * 18).length"
+                        :key="index__"
+                      >
+                        <td
+                          style="text-align: center; height: 55px; width: 120px"
+                        ></td>
+                        <td
+                          style="text-align: center; height: 55px; width: 80px"
+                        ></td>
+
+                        <td
+                          style="text-align: center; height: 55px; width: 100px"
+                        ></td>
+                        <td
+                          style="text-align: center; height: 55px; width: 80px"
+                        ></td>
+                        <td
+                          style="text-align: center; height: 55px; width: 140px"
+                        ></td>
+
+                        <td
+                          style="text-align: center; height: 55px; width: 140px"
+                        ></td>
+                        <td
+                          style="text-align: center; height: 55px; width: 140px"
+                        ></td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="mt-4">Your faithfuly:</div>
+                  <div
+                    class="font-weight-black mt-4"
+                    style="white-space: nowrap"
+                  >
+                    Tungray Industrial Automation(KunShan)Co.,Ltd
+                  </div>
+                  <div class="mt-4">供应商：昆山同日工业自动化有限公司</div>
+                  <div class="d-flex justify-space-around mt-4">
+                    <div class="d-flex" style="white-space: nowrap">
+                      出库员：<input
+                        type="text"
+                        style="
+                          border: none;
+                          border-bottom: 1px solid black;
+                          outline: none;
+                        "
+                      />
+                    </div>
+                    <div class="d-flex" style="white-space: nowrap">
+                      审核时间：<input
+                        type="text"
+                        :value="item.reserved10"
+                        style="
+                          border: none;
+                          border-bottom: 1px solid black;
+                          outline: none;
+                        "
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+      </v-card>
+    </v-col>
+
+    <!-- 出库单明细 -->
+    <v-col cols="7">
+      <v-card class="h-100">
+        <v-toolbar class="text-h6 pl-6">装箱单明细</v-toolbar>
+
+        <v-row class="ma-1">
+          <v-col cols="6">
+            <v-text-field
+              label="产品"
+              v-model="searchProduction2"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="mt-2"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field
+              label="编码"
+              v-model="searchRmks2"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="mt-2"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2 mt-2"
+              size="default"
+              @click="filterDetail"
+              >查询</v-btn
+            >
+            <v-btn
+              color="red"
+              class="mr-2 mt-2"
+              size="default"
+              @click="resetDetail"
+              >重置查询</v-btn
+            >
+            <v-btn
+              color="blue-darken-2"
+              class="mr-2 mt-2"
+              size="default"
+              @click="showAddDetail"
+              >添加明细</v-btn
+            >
+          </v-col>
+          <v-col cols="12">
+            <v-data-table
+              hover
+              :items-per-page="10"
+              :headers="detailHeaders"
+              :items="detailList"
+              style="overflow-x: auto; white-space: nowrap"
+              fixed-footer
+              fixed-header
+              height="610"
+              no-data-text="没有找到符合的数据"
+            >
+              <template v-slot:item.action="{ item }">
+                <!-- 删除 -->
+                <v-icon
+                  color="red"
+                  size="small"
+                  @click="showDelDetailDialog(item.raw)"
+                >
+                  fa-solid fa-trash
+                </v-icon>
+              </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
+      </v-card>
+    </v-col>
+    <!-- 新增装箱单 -->
+    <v-dialog v-model="addDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 新增装箱单 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="addDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                label="项目号"
+                v-model="orderInfo.projectcode"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+              <v-text-field
+                label="日期"
+                v-model="orderInfo.warehouse_code"
+                type="date"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="数量"
+                v-model="orderInfo.num"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-select
+                label="包装材料"
+                v-model="orderInfo.package_material"
+                :items="['木箱', '板条箱', '纸箱', '其他']"
+                hide-details
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="addSucces()"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="addDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+    <!-- 修改装箱单 -->
+    <v-dialog v-model="editDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 修改装箱 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="editDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                label="项目号"
+                v-model="orderInfo.projectcode"
+                clearable
+                hide-details
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+              <v-text-field
+                label="日期"
+                v-model="orderInfo.warehouse_code"
+                type="date"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="数量"
+                v-model="orderInfo.num"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-select
+                label="包装材料"
+                v-model="orderInfo.package_material"
+                :items="['木箱', '板条箱', '纸箱', '其他']"
+                hide-details
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="editSucces()"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="editDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+    <!-- 删除装箱单 -->
+    <v-dialog v-model="deleteDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 删除装箱单 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="deleteDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="text-center">
+          您确定要删除【{{ orderInfo.out_order_num }}】这装箱单吗?
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="delSucces()"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="deleteDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 新增装箱单明细 -->
+    <v-dialog v-model="addDetailDialog" min-width="1400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 可以批量选择产品，批量增加产出料 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="addDetailDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card>
+          <v-row class="ma-2">
+            <v-col cols="3">
+              <v-text-field
+                label="零件名查询"
+                variant="outlined"
+                density="compact"
+                v-model="searchName"
+                hide-details
+                @keydown.enter="filterNameProduct()"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="3">
+              <v-text-field
+                label="项目号查询"
+                variant="outlined"
+                density="compact"
+                v-model="searchProject"
+                hide-details
+                @keydown.enter="filterNameProduct()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field
+                label="设备号"
+                variant="outlined"
+                density="compact"
+                v-model="searchMac"
+                hide-details
+                @keydown.enter="filterNameProduct()"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="3">
+              <v-select
+                variant="outlined"
+                density="compact"
+                label="当前产品类别"
+                :items="['自制件', '标准外购件']"
+              >
+              </v-select>
+            </v-col>
+            <v-col cols="8">
+              <v-btn
+                color="blue-darken-2"
+                class="mr-2"
+                size="large"
+                @click="filterNameProduct()"
+                >查询</v-btn
+              >
+              <v-btn
+                color="red"
+                class="mr-2"
+                size="large"
+                @click="resetFilterNameProduct()"
+              >
+                重置查询
+              </v-btn>
+            </v-col>
+
+            <v-col cols="12">
+              <v-divider></v-divider>
+              <v-data-table
+                hover
+                :items-per-page="10"
+                v-model="selected"
+                return-object
+                show-select
+                :headers="productHeaders"
+                :items="productTableData"
+                style="overflow-x: auto; white-space: nowrap"
+                fixed-footer
+                fixed-header
+                height="400"
+                no-data-text="没有找到符合的数据"
+              >
+              </v-data-table>
+            </v-col>
+          </v-row>
+        </v-card>
+        <div class="d-flex justify-end mr-6 my-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="saveMcodeProduct()"
+          >
+            确定
+          </v-btn>
+          <v-btn color="grey" size="large" @click="addDetailDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+    <!-- 检查新建的明细信息 -->
+    <v-dialog v-model="addDetailDialog2" min-width="1400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 检查新建的明细信息 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="addDetailDialog2 = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-row v-for="(item, index) in addDetailList">
+            <v-col cols="2">
+              <v-text-field
+                label="序号"
+                variant="outlined"
+                density="compact"
+                v-model="item.no"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="产品"
+                readonly
+                variant="outlined"
+                density="compact"
+                v-model="item.production"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="规格"
+                variant="outlined"
+                density="compact"
+                v-model="item.model"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="数量"
+                variant="outlined"
+                density="compact"
+                v-model="item.qty"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="单位"
+                readonly
+                variant="outlined"
+                density="compact"
+                v-model="item.unit"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <div class="d-flex">
+                <v-text-field
+                  label="备注"
+                  readonly
+                  variant="outlined"
+                  density="compact"
+                  v-model="item.rmks"
+                  hide-details
+                ></v-text-field>
+                <v-icon
+                  class="align-self-center"
+                  color="blue"
+                  @click="addRow(item, index)"
+                >
+                  fa-solid fa-plus
+                </v-icon>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="addDetailSucces()"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="addDetailDialog2 = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <!-- 删除装箱单明细 -->
+    <v-dialog v-model="deleteDetailDialog" min-width="400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 删除装箱单明细 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="deleteDetailDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="text-center">
+          您确定要删除这条装箱单明细吗?
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="delDetailSucces()"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="deleteDetailDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+  </v-row>
+  <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
+    {{ snackbarText }}
+    <template v-slot:actions>
+      <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
+    </template>
+  </v-snackbar>
+</template>

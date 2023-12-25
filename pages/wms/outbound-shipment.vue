@@ -258,6 +258,7 @@ async function getDate() {
   );
   orderList.value = data.data.map((item: any) => {
     item.order_date = item.order_date.substring(0, 10);
+    item.reserved10 = item.reserved10.substring(0, 10);
     return item;
   });
   orderCode.value = orderList.value[0].out_order_num;
@@ -288,7 +289,6 @@ async function getDateDetail() {
 //页面加载更新数据
 onMounted(() => {
   getDate();
-  getDateDetail();
 });
 //清单对象
 let orderInfo = ref<any>("");
@@ -362,6 +362,7 @@ function showAuditDialog(item: any) {
 }
 async function auditSucces() {
   orderInfo.value.order_status = "已审核";
+  orderInfo.value.reserved10 = new Date().toISOString();
   const data: any = await useHttp(
     "/WmsOutOrder/G168UptOutOrder",
     "put",
@@ -371,6 +372,7 @@ async function auditSucces() {
   await getDateDetail();
   detailList.value = detailList.value.map((item: any) => {
     item.detail_status = "已审核";
+    item.reserved08 = new Date().toISOString();
     return item;
   });
   await useHttp("/WmsOutOrder/G172UptOutDetial", "put", detailList.value);
@@ -402,6 +404,7 @@ async function addDetailSucces() {
       sku_qty: item.qty,
       detail_status: "新建",
       flag_done: "N",
+      reserved09: item.uom,
     });
   });
   const data: any = await useHttp(
@@ -487,7 +490,6 @@ let detailData = ref<any[]>([]);
 // 打印
 async function print() {
   await getPrintData();
-  console.log(printList.value);
   //第四步,打印
   printJS({
     printable: "printContent",
@@ -622,7 +624,7 @@ function buildTree(parents: any, children: any) {
               class="mr-2 mt-2"
               size="default"
               @click="print"
-              >打印</v-btn
+              >打印清单</v-btn
             >
           </v-col>
           <v-col cols="12">
@@ -672,7 +674,7 @@ function buildTree(parents: any, children: any) {
             </v-data-table>
           </v-col>
           <!-- 打印页面 -->
-          <v-col cols="12">
+          <v-col cols="12" v-show="false">
             <div id="printContent">
               <div v-for="(item, index) in printList" :key="index">
                 <div
@@ -683,10 +685,8 @@ function buildTree(parents: any, children: any) {
                     margin-top: 20px;
                   "
                   class="d-flex flex-column"
-                  v-for="(page, pageIndex) in Math.ceil(
-                    item.children.length / 10
-                  )"
-                  :key="`page-${pageIndex}`"
+                  v-for="page in Math.ceil(item.children.length / 10)"
+                  :key="`page-${page}`"
                 >
                   <div class="d-flex justify-space-between">
                     <!-- 第一列-->
@@ -845,30 +845,30 @@ function buildTree(parents: any, children: any) {
                         :key="index_"
                       >
                         <td
-                          style="text-align: center; height: 40px; width: 125px"
+                          style="text-align: center; height: 55px; width: 125px"
                         >
                           {{ item_.place_code }}
                         </td>
                         <td
-                          style="text-align: center; height: 40px; width: 85px"
+                          style="text-align: center; height: 55px; width: 85px"
                         >
                           {{ item_.container_code }}
                         </td>
 
                         <td
-                          style="text-align: center; height: 40px; width: 105px"
+                          style="text-align: center; height: 55px; width: 105px"
                         >
                           {{ item_.batch_lot }}
                         </td>
                         <td
-                          style="text-align: center; height: 40px; width: 85px"
+                          style="text-align: center; height: 55px; width: 85px"
                         >
                           {{ item_.sku_qty }}
                         </td>
                         <td
                           style="
                             text-align: center;
-                            height: 40px;
+                            height: 55px;
                             max-width: 140px;
                             word-wrap: break-word;
                             white-space: normal;
@@ -880,7 +880,7 @@ function buildTree(parents: any, children: any) {
                         <td
                           style="
                             text-align: center;
-                            height: 40px;
+                            height: 55px;
                             max-width: 140px;
                             word-wrap: break-word;
                             white-space: normal;
@@ -889,7 +889,7 @@ function buildTree(parents: any, children: any) {
                           {{ item_.sku_spec }}
                         </td>
                         <td
-                          style="text-align: center; height: 40px; width: 140px"
+                          style="text-align: center; height: 55px; width: 140px"
                         >
                           <qrcode-vue
                             style="width: 50px; height: 50px"
@@ -899,31 +899,32 @@ function buildTree(parents: any, children: any) {
                       </tr>
                       <!--  -->
                       <tr
-                        v-for="(item__, index__) in 10 - item.children.length"
+                        v-for="(item__, index__) in 10 -
+                        item.children.slice((page - 1) * 10, page * 10).length"
                         :key="index__"
                       >
                         <td
-                          style="text-align: center; height: 40px; width: 120px"
+                          style="text-align: center; height: 55px; width: 120px"
                         ></td>
                         <td
-                          style="text-align: center; height: 40px; width: 80px"
-                        ></td>
-
-                        <td
-                          style="text-align: center; height: 40px; width: 100px"
-                        ></td>
-                        <td
-                          style="text-align: center; height: 40px; width: 80px"
-                        ></td>
-                        <td
-                          style="text-align: center; height: 40px; width: 140px"
+                          style="text-align: center; height: 55px; width: 80px"
                         ></td>
 
                         <td
-                          style="text-align: center; height: 40px; width: 140px"
+                          style="text-align: center; height: 55px; width: 100px"
                         ></td>
                         <td
-                          style="text-align: center; height: 40px; width: 140px"
+                          style="text-align: center; height: 55px; width: 80px"
+                        ></td>
+                        <td
+                          style="text-align: center; height: 55px; width: 140px"
+                        ></td>
+
+                        <td
+                          style="text-align: center; height: 55px; width: 140px"
+                        ></td>
+                        <td
+                          style="text-align: center; height: 55px; width: 140px"
                         ></td>
                       </tr>
                     </table>
@@ -948,8 +949,9 @@ function buildTree(parents: any, children: any) {
                       />
                     </div>
                     <div class="d-flex" style="white-space: nowrap">
-                      复核员：<input
+                      审核时间：<input
                         type="text"
+                        :value="item.reserved10"
                         style="
                           border: none;
                           border-bottom: 1px solid black;
@@ -1104,6 +1106,13 @@ function buildTree(parents: any, children: any) {
                 hide-details
               ></v-text-field>
             </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="货主"
+                v-model="orderInfo.belong_customer"
+                hide-details
+              ></v-text-field>
+            </v-col>
           </v-row>
         </v-card-text>
         <div class="d-flex justify-end mr-6 mb-4">
@@ -1155,6 +1164,13 @@ function buildTree(parents: any, children: any) {
               <v-text-field
                 label="库区"
                 v-model="orderInfo.area_code"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="货主"
+                v-model="orderInfo.belong_customer"
                 hide-details
               ></v-text-field>
             </v-col>
