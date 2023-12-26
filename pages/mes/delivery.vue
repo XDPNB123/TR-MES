@@ -57,26 +57,13 @@ let orderHeaders = ref<any[]>([
     filterable: true,
   },
   {
-    title: "物料名称",
-    align: "center",
-    key: "sku_name",
-    sortable: false,
-    filterable: true,
-  },
-  {
     title: "数量",
     align: "center",
     key: "num",
     sortable: false,
     filterable: true,
   },
-  {
-    title: "包装材料",
-    align: "center",
-    key: "package_material",
-    sortable: false,
-    filterable: true,
-  },
+
   {
     title: "操作",
     align: "center",
@@ -154,8 +141,31 @@ let searchProjectCode = ref<any>("");
 let searchProduction = ref<any>("");
 let searchRmks = ref<any>("");
 //装箱单搜素
-function filter() {
-  getOrderData();
+async function filter() {
+  const data: any = await useHttp(
+    "/PackingList/G94GetPackingList",
+    "get",
+    undefined,
+    {
+      packcode: searchPackCode.value,
+      projectcode: searchProjectCode.value,
+      production: searchProduction.value,
+      rmks: searchRmks.value,
+    }
+  );
+  orderList.value = data.data
+    .map((item: any) => {
+      item.date = item.date.substring(0, 10);
+      return item;
+    })
+    .sort((a: any, b: any) => {
+      if (a.id > b.id) {
+        return -1;
+      }
+      return 1;
+    });
+  packCode.value = orderList.value[0].packcode;
+  projectCode.value = orderList.value[0].projectcode;
 }
 //装箱单重置搜索
 function resetFilter() {
@@ -179,11 +189,63 @@ function resetDetail() {
   getDetailData();
 }
 //获取数据库的装箱单数据
-async function getOrderData() {}
+async function getOrderData() {
+  const data: any = await useHttp(
+    "/PackingList/G94GetPackingList",
+    "get",
+    undefined,
+    {
+      packcode: searchPackCode.value,
+      projectcode: searchProjectCode.value,
+      production: searchProduction.value,
+      rmks: searchRmks.value,
+      startdate: new Date().toISOString().substring(0, 10),
+      enddate: new Date().toISOString().substring(0, 10),
+    }
+  );
+  orderList.value = data.data
+    .map((item: any) => {
+      item.date = item.date.substring(0, 10);
+      return item;
+    })
+    .sort((a: any, b: any) => {
+      if (a.id > b.id) {
+        return -1;
+      }
+      return 1;
+    });
+  packCode.value = orderList.value[0].packcode;
+  projectCode.value = orderList.value[0].projectcode;
+}
 //获取数据库的装箱单明细数据
-async function getDetailData() {}
+async function getDetailData() {
+  const data: any = await useHttp(
+    "/PackingList/G97GetPackingListDetial",
+    "get",
+    undefined,
+    {
+      production: searchProduction2.value,
+      rmks: searchRmks2.value,
+      packcode: packCode.value,
+    }
+  );
+  detailList.value = data.data.sort((a: any, b: any) => {
+    if (a.no > b.no) {
+      return -1;
+    }
+    return 1;
+  });
+}
+let packCode = ref<any>(null);
+let projectCode = ref<any>(null);
 // 点击显示装箱单明细
-function showDetail() {}
+function showDetail(item: any, obj: any) {
+  packCode.value = obj.item.raw.packcode;
+  projectCode.value = obj.item.raw.projectcode;
+}
+watch(packCode, function () {
+  getDetailData();
+});
 //页面加载获取数据
 onMounted(() => {
   getOrderData();
@@ -199,23 +261,60 @@ function showAddDialog() {
     lwh: "",
     package_material: "",
   };
+
   addDialog.value = true;
 }
 //确认新增
-async function addSucces() {}
+async function addSucces() {
+  const data: any = await useHttp("/PackingList/G95AddPackingList", "post", [
+    orderInfo.value,
+  ]);
+  if (data.code === 200) {
+    getOrderData();
+    addDialog.value = false;
+    setSnackbar("green", "新增成功");
+  } else {
+    setSnackbar("black", "新增失败");
+  }
+}
 
 //装箱单的修改
 function showEditDialog(item: any) {
   orderInfo.value = { ...item };
   editDialog.value = true;
 }
-async function editSucces() {}
+async function editSucces() {
+  const data: any = await useHttp("/PackingList/G96UptPackingList", "put", [
+    orderInfo.value,
+  ]);
+  if (data.code === 200) {
+    getOrderData();
+    editDialog.value = false;
+    setSnackbar("green", "修改成功");
+  } else {
+    setSnackbar("black", "修改失败");
+  }
+}
 //装箱单的删除
 function showDelDialog(item: any) {
   orderInfo.value = { ...item };
   deleteDialog.value = true;
 }
-async function delSucces() {}
+async function delSucces() {
+  const data: any = await useHttp(
+    "/PackingList/G97DelPackingList",
+    "delete",
+    undefined,
+    { id: orderInfo.value.id, packcode: orderInfo.value.packcode }
+  );
+  if (data.code === 200) {
+    getOrderData();
+    deleteDialog.value = false;
+    setSnackbar("green", "删除成功");
+  } else {
+    setSnackbar("black", "删除失败");
+  }
+}
 
 //装箱单明细的制作
 let productHeaders = ref<any[]>([]);
@@ -243,7 +342,7 @@ async function productList() {
         PageSize: 10000,
         SortType: 1,
         SortedBy: "_id",
-        projectCode: searchProject.value,
+        projectCode: projectCode.value,
         partName: searchName.value,
         totalCode: searchMac.value,
       }
@@ -274,7 +373,7 @@ function saveMcodeProduct() {
   addDetailList.value = [];
   selected.value.forEach((item: any) => {
     addDetailList.value.push({
-      no: "",
+      packcode: packCode.value,
       production: item.partName,
       model: "",
       qty: "",
@@ -289,8 +388,20 @@ function saveMcodeProduct() {
 function addRow(item: any, index: number) {
   addDetailList.value.splice(index, 0, { ...item });
 }
-function addDetailSucces() {
-  console.log(addDetailList.value);
+async function addDetailSucces() {
+  const data: any = await useHttp(
+    "/PackingList/G98AddPackingListDetial",
+    "post",
+    addDetailList.value
+  );
+  if (data.code === 200) {
+    addDetailDialog.value = false;
+    addDetailDialog2.value = false;
+    getDetailData();
+    setSnackbar("green", "新增成功");
+  } else {
+    setSnackbar("black", "新增失败");
+  }
 }
 //装箱单明细对象
 let detailInfo = ref<any>(null);
@@ -300,7 +411,23 @@ function showDelDetailDialog(item: any) {
   deleteDetailDialog.value = true;
 }
 //确认删除
-async function delDetailSucces() {}
+async function delDetailSucces() {
+  const data: any = await useHttp(
+    "/PackingList/G100DelPackingListDetial",
+    "delete",
+    undefined,
+    {
+      id: [detailInfo.value.no],
+    }
+  );
+  if (data.code === 200) {
+    deleteDetailDialog.value = false;
+    getDetailData();
+    setSnackbar("green", "删除成功");
+  } else {
+    setSnackbar("black", "删除失败");
+  }
+}
 
 //打印
 let selectRows = ref<any[]>([]);
@@ -311,6 +438,7 @@ let code = ref<any[]>([]);
 let detailData = ref<any[]>([]);
 async function print() {
   await getPrintData();
+  console.log(printList.value);
   //第四步,打印
   printJS({
     printable: "printContent",
@@ -322,6 +450,48 @@ async function print() {
   printList.value = [];
   code.value = [];
   detailData.value = [];
+}
+//获取选择的所有装箱单明细
+async function fetchDetailData() {
+  for (const item of code.value) {
+    const data: any = await useHttp(
+      "/PackingList/G97GetPackingListDetial",
+      "get",
+      undefined,
+      {
+        production: "",
+        rmks: "",
+        packcode: item,
+      }
+    );
+    detailData.value.push(...detailList.value);
+  }
+}
+//获取打印数据
+async function getPrintData() {
+  //第一步 拿到选择的所有的清单单号
+  await selectRows.value.forEach((item: any) => {
+    code.value.push(item.packcode);
+  });
+  //第二步 获取选择的所有清单的明细数据
+  await fetchDetailData();
+
+  //第三步,将清单数据和清单数据的明细组合成树形结构
+  printList.value = await buildTree(selectRows.value, detailData.value);
+}
+// 将俩个数组整合到一起成一个树形结构的方法
+function buildTree(parents: any, children: any) {
+  let tree: any = [];
+  parents.forEach((parent: any) => {
+    let node = { ...parent, children: [] };
+    children.forEach((child: any) => {
+      if (child.out_order === parent.out_order_num) {
+        node.children.push(child);
+      }
+    });
+    tree.push(node);
+  });
+  return tree;
 }
 </script>
 <template>
@@ -419,7 +589,6 @@ async function print() {
               @click:row="showDetail"
             >
               <template v-slot:item.action="{ item }">
-                >
                 <!-- 修改 -->
                 <v-icon
                   color="blue"
@@ -494,12 +663,12 @@ async function print() {
                       <div style="align-self: center">
                         <qrcode-vue
                           style="width: 60px; height: 60px"
-                          :value="item.out_order_num"
+                          :value="item.packcode"
                         ></qrcode-vue>
                       </div>
 
                       <div style="font-weight: black; white-space: nowrap">
-                        出库清单:{{ item.out_order_num }}
+                        装箱单:{{ item.packcode }}
                       </div>
                     </div>
                     <div
@@ -527,7 +696,7 @@ async function print() {
                       <!-- 第一列第二行 -->
                       <div class="d-flex justify-space-between mt-4">
                         <div style="white-space: nowrap">
-                          No:<input
+                          数量: 共:<input
                             :value="item.num"
                             type="text"
                             style="
@@ -536,7 +705,7 @@ async function print() {
                               outline: none;
                               text-align: center;
                             "
-                          />
+                          />箱
                         </div>
                       </div>
                       <!-- 第一列第三行 -->
@@ -618,60 +787,44 @@ async function print() {
                         )"
                         :key="index_"
                       >
-                        <td>
-                          <input
-                            type="text"
-                            :value="item_.no"
-                            style="
-                              text-align: center;
-                              height: 30px;
-                              width: 80px;
-                            "
-                          />
+                        <td
+                          style="text-align: center; height: 30px; width: 80px"
+                        >
+                          {{ index_ + (page - 1) * 18 + 1 }}
                         </td>
-                        <td>
-                          <input
-                            type="text"
-                            :value="item_.production"
-                            style="
-                              text-align: center;
-                              height: 30px;
-                              width: 230px;
-                            "
-                          />
+                        <td
+                          style="
+                            text-align: center;
+                            height: 30px;
+                            width: 230px;
+                            max-width: 230px;
+                            word-wrap: break-word;
+                            white-space: normal;
+                          "
+                        >
+                          {{ item_.production }}
                         </td>
-                        <td>
-                          <input
-                            type="text"
-                            :value="item_.model"
-                            style="
-                              text-align: center;
-                              height: 30px;
-                              width: 180px;
-                            "
-                          />
+                        <td
+                          style="
+                            text-align: center;
+                            height: 30px;
+                            width: 180px;
+                            max-width: 180px;
+                            word-wrap: break-word;
+                            white-space: normal;
+                          "
+                        >
+                          {{ item_.model }}
                         </td>
-                        <td>
-                          <input
-                            type="text"
-                            :value="item_.qty"
-                            style="
-                              text-align: center;
-                              height: 30px;
-                              width: 80px;
-                            "
-                          />
+                        <td
+                          style="text-align: center; height: 30px; width: 80px"
+                        >
+                          {{ item_.qty }}
                         </td>
-                        <td>
-                          <input
-                            type="text"
-                            :value="item_.rmks"
-                            style="
-                              text-align: center;
-                              height: 30px;
-                              width: 230px;
-                            "
-                          />
+                        <td
+                          style="text-align: center; height: 30px; width: 230px"
+                        >
+                          {{ item_.rmks }}
                         </td>
                       </tr>
                       <!--  -->
@@ -681,27 +834,20 @@ async function print() {
                         :key="index__"
                       >
                         <td
-                          style="text-align: center; height: 55px; width: 120px"
+                          style="text-align: center; height: 30px; width: 80px"
                         ></td>
                         <td
-                          style="text-align: center; height: 55px; width: 80px"
-                        ></td>
-
-                        <td
-                          style="text-align: center; height: 55px; width: 100px"
-                        ></td>
-                        <td
-                          style="text-align: center; height: 55px; width: 80px"
-                        ></td>
-                        <td
-                          style="text-align: center; height: 55px; width: 140px"
+                          style="text-align: center; height: 30px; width: 230px"
                         ></td>
 
                         <td
-                          style="text-align: center; height: 55px; width: 140px"
+                          style="text-align: center; height: 30px; width: 180px"
                         ></td>
                         <td
-                          style="text-align: center; height: 55px; width: 140px"
+                          style="text-align: center; height: 30px; width: 80px"
+                        ></td>
+                        <td
+                          style="text-align: center; height: 30px; width: 230px"
                         ></td>
                       </tr>
                     </table>
@@ -748,7 +894,10 @@ async function print() {
     <!-- 出库单明细 -->
     <v-col cols="7">
       <v-card class="h-100">
-        <v-toolbar class="text-h6 pl-6">装箱单明细</v-toolbar>
+        <v-toolbar class="text-h6 pl-6" v-if="packCode"
+          >装箱单【{{ packCode }}】明细</v-toolbar
+        >
+        <v-toolbar class="text-h6 pl-6" v-else>装箱单明细</v-toolbar>
 
         <v-row class="ma-1">
           <v-col cols="6">
@@ -845,7 +994,7 @@ async function print() {
             <v-col cols="12">
               <v-text-field
                 label="日期"
-                v-model="orderInfo.warehouse_code"
+                v-model="orderInfo.date"
                 type="date"
                 hide-details
               ></v-text-field>
@@ -906,7 +1055,7 @@ async function print() {
             <v-col cols="12">
               <v-text-field
                 label="日期"
-                v-model="orderInfo.warehouse_code"
+                v-model="orderInfo.date"
                 type="date"
                 hide-details
               ></v-text-field>
@@ -954,7 +1103,7 @@ async function print() {
           </v-btn>
         </v-toolbar>
         <v-card-text class="text-center">
-          您确定要删除【{{ orderInfo.out_order_num }}】这装箱单吗?
+          您确定要删除【{{ orderInfo.packcode }}】这装箱单吗?
         </v-card-text>
         <div class="d-flex justify-end mr-6 mb-4">
           <v-btn
@@ -1000,7 +1149,7 @@ async function print() {
                 label="项目号查询"
                 variant="outlined"
                 density="compact"
-                v-model="searchProject"
+                v-model="projectCode"
                 hide-details
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>
@@ -1092,15 +1241,6 @@ async function print() {
           <v-row v-for="(item, index) in addDetailList">
             <v-col cols="2">
               <v-text-field
-                label="序号"
-                variant="outlined"
-                density="compact"
-                v-model="item.no"
-                hide-details
-              ></v-text-field>
-            </v-col>
-            <v-col cols="2">
-              <v-text-field
                 label="产品"
                 readonly
                 variant="outlined"
@@ -1138,23 +1278,23 @@ async function print() {
               ></v-text-field>
             </v-col>
             <v-col cols="2">
-              <div class="d-flex">
-                <v-text-field
-                  label="备注"
-                  readonly
-                  variant="outlined"
-                  density="compact"
-                  v-model="item.rmks"
-                  hide-details
-                ></v-text-field>
-                <v-icon
-                  class="align-self-center"
-                  color="blue"
-                  @click="addRow(item, index)"
-                >
-                  fa-solid fa-plus
-                </v-icon>
-              </div>
+              <v-text-field
+                label="备注"
+                readonly
+                variant="outlined"
+                density="compact"
+                v-model="item.rmks"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-icon
+                class="align-self-center"
+                color="blue"
+                @click="addRow(item, index)"
+              >
+                fa-solid fa-plus
+              </v-icon>
             </v-col>
           </v-row>
         </v-card-text>

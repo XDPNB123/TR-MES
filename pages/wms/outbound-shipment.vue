@@ -278,6 +278,7 @@ async function getDate() {
     return item;
   });
   orderCode.value = orderList.value[0].out_order_num;
+  status.value = orderList.value[0].order_status;
 }
 //点击获取当前清单下的明细
 function showDetail(item: any, obj: any) {

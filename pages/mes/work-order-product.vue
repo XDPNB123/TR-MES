@@ -593,6 +593,9 @@ async function getWorkOrder() {
     tableDataLength.value = data.data.totalCount;
     if (tableData.value.length) {
       detailName.value = tableData.value[0].workorder_hid;
+      detailStatus.value =  tableData.value[0].status;
+  searchProject.value =  tableData.value[0].product_id.slice(-9);
+  searchMac.value =  tableData.value[0].product_id.substring(2, 7);
     }
   } catch (error) {
     setSnackbar("black", "获取数据失败");
@@ -2259,7 +2262,6 @@ const rules = [
               color="blue-darken-2"
               size="large"
               class="mr-2"
-              @click="addTicketDetail()"
             >
               确认新增
             </v-btn>
