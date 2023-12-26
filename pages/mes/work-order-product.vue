@@ -92,6 +92,7 @@ let addDialog = ref(false);
 let editDialog = ref(false);
 let deleteDialog = ref(false);
 let addDetailDialog = ref(false);
+let addDetailDialog2 = ref<boolean>(false);
 let deleteDetailDialog = ref(false);
 let editDetailDialog = ref(false);
 let splitDetailDialog = ref(false);
@@ -592,6 +593,9 @@ async function getWorkOrder() {
     tableDataLength.value = data.data.totalCount;
     if (tableData.value.length) {
       detailName.value = tableData.value[0].workorder_hid;
+      detailStatus.value =  tableData.value[0].status;
+  searchProject.value =  tableData.value[0].product_id.slice(-9);
+  searchMac.value =  tableData.value[0].product_id.substring(2, 7);
     }
   } catch (error) {
     setSnackbar("black", "获取数据失败");
@@ -769,37 +773,26 @@ async function addTicket() {
 
 // 新增工单明细前重置新增对话框
 function resetAddDetailDialog() {
-  operatingTicketDetail.value = {
-    estimated_delivery_date: new Date().toISOString().slice(0, 10),
-    blueprint_id: "",
-    standard_time: 0,
-    actual_time: 0,
-    procedure: null,
-    planned_quantity: "",
-    reported_quantity: 0,
-    unit: "件",
-    workorder_hid: detailName.value,
-    actual_delivery_date: null,
-    status: null,
-  };
-  addDetailDialog.value = true;
+  selectedRows.value = [];
+  productList();
+  productTypeName.value = "自制件";
+  mcodeDialog.value = true;
 }
 //新增工单明细行
-async function addTicketDetail() {
+async function addDetailSucces() {
   try {
     const tableArr: any[] = [];
-    selectedRows.value.forEach((item: any) => {
+    addDetailList.value.forEach((item: any) => {
       tableArr.push({
         mdescription: item.partName,
         mcode: item.resultCode,
-        estimated_delivery_date:
-          operatingTicketDetail.value.estimated_delivery_date,
-        blueprint_id: operatingTicketDetail.value.blueprint_id,
+        estimated_delivery_date: item.date,
+        blueprint_id: "",
         project_code: item.projectCode,
-        standard_time: operatingTicketDetail.value.standard_time,
+        standard_time: item.hour,
         actual_time: "0",
         procedure: null,
-        planned_quantity: operatingTicketDetail.value.planned_quantity,
+        planned_quantity: item.num,
         reported_quantity: "0",
         unit: item.unitName,
         workorder_hid: detailName.value,
@@ -816,7 +809,8 @@ async function addTicketDetail() {
     selectedRows.value = [];
     if (data.code === 200) {
       setSnackbar("green", "新增成功");
-      addDetailDialog.value = false;
+      addDetailDialog2.value = false;
+      mcodeDialog.value = false;
     } else {
       setSnackbar("black", "新增失败");
     }
@@ -1262,21 +1256,24 @@ function clear() {
   selectedRows.value = [];
 }
 //选择数据批量创建工单明细产料名和项目号
+let addDetailList = ref<any[]>([]);
 async function saveMcodeProduct() {
-  try {
-    if (selectedRows.value.length === 0) {
-      return setSnackbar("black", "请选择产出料，创建工单明细");
-    }
-    operatingTicketDetail.value.mdescription = selectedRows.value
-      .map((item) => item.partName)
-      .join(",");
-    operatingTicketDetail.value.mcode = selectedRows.value
-      .map((item) => item.resultCode)
-      .join(",");
-    mcodeDialog.value = false;
-  } catch (error) {
-    console.log(error);
+  if (selectedRows.value.length === 0) {
+    return setSnackbar("black", "请选择产出料，创建工单明细");
   }
+  addDetailList.value = [];
+  selectedRows.value.forEach((item: any) => {
+    addDetailList.value.push({
+      partName: item.partName,
+      resultCode: item.resultCode,
+      unitName: item.unitName,
+      projectCode: item.projectCode,
+      num: "",
+      date: new Date().toISOString().substring(0, 10),
+      hour: 24,
+    });
+  });
+  addDetailDialog2.value = true;
 }
 
 //文本规则、
@@ -2265,7 +2262,6 @@ const rules = [
               color="blue-darken-2"
               size="large"
               class="mr-2"
-              @click="addTicketDetail()"
             >
               确认新增
             </v-btn>
@@ -2503,7 +2499,7 @@ const rules = [
       </v-card>
     </v-dialog>
     <!-- 产品编号类型 -->
-    <v-dialog v-model="productDialog" min-width="400px" width="1000px">
+    <v-dialog v-model="productDialog" min-width="1400px" width="1000px">
       <v-card>
         <v-toolbar color="blue">
           <v-toolbar-title> 选择产品描述 </v-toolbar-title>
@@ -2621,7 +2617,7 @@ const rules = [
       </v-card>
     </v-dialog>
     <!-- 工单明细产出料 -->
-    <v-dialog v-model="mcodeDialog" min-width="400px" width="1000px">
+    <v-dialog v-model="mcodeDialog" min-width="1400px" width="1000px">
       <v-card>
         <v-toolbar color="blue">
           <v-toolbar-title> 可以批量选择产品，批量增加产出料 </v-toolbar-title>
@@ -2670,7 +2666,6 @@ const rules = [
                 density="compact"
                 label="当前产品类别"
                 :items="['自制件', '标准外购件']"
-                v-model="productTypeName"
               >
               </v-select>
             </v-col>
@@ -2731,6 +2726,94 @@ const rules = [
         </div>
       </v-card>
     </v-dialog>
+    <!-- 经常新建明细 -->
+    <v-dialog v-model="addDetailDialog2" min-width="1400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 检查新建的明细信息 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="addDetailDialog2 = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-row v-for="(item, index) in addDetailList">
+            <v-col cols="2">
+              <v-text-field
+                label="产品名称"
+                variant="outlined"
+                density="compact"
+                readonly
+                v-model="item.partName"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="产品编码"
+                readonly
+                variant="outlined"
+                density="compact"
+                v-model="item.resultCode"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="项目号"
+                readonly
+                variant="outlined"
+                density="compact"
+                v-model="item.projectCode"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="数量"
+                variant="outlined"
+                density="compact"
+                v-model="item.num"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="交付日期"
+                type="date"
+                variant="outlined"
+                density="compact"
+                v-model="item.date"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="工时"
+                variant="outlined"
+                density="compact"
+                v-model="item.hour"
+                hide-details
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="addDetailSucces()"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="addDetailDialog2 = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
     <!-- 工单表头审核 -->
     <v-dialog v-model="auditDialog" min-width="400px" width="560px">
       <v-card>

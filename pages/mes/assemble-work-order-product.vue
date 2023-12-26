@@ -2,13 +2,13 @@
 // 搜索引擎优化
 useSeoMeta({
   // 该页面的标题
-  title: "生产工单",
+  title: "装配工单",
   // 社交媒体分享该页面时显示的标题
-  ogTitle: "生产工单",
+  ogTitle: "装配工单",
   // 该页面的描述
-  description: "同日 MES 系统，生产工单",
+  description: "同日 MES 系统，装配工单",
   // 社交媒体分享该页面时显示的描述
-  ogDescription: "同日 MES 系统，生产工单",
+  ogDescription: "同日 MES 系统，装配工单",
   // 社交媒体分享该页面时显示的图片
   ogImage: "/同日图标.png",
 });

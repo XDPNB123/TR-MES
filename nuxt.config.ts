@@ -5,8 +5,10 @@ export default defineNuxtConfig({
   },
   routeRules: {
     "/mes/work-produce-recode": { ssr: false },
+    "/mes/delivery": { ssr: false },
     "/work-basic/work-class": { ssr: false },
     "/test": { ssr: false },
+    "/wms/outbound-shipment": { ssr: false },
   },
   // 启用了哪些模块
   modules: ["@pinia/nuxt", "nuxt-lodash", "@hypernym/nuxt-gsap"],
