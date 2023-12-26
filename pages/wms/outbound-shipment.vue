@@ -18,6 +18,7 @@ useSeoMeta({
 definePageMeta({
   keepalive: true,
 });
+const router = useRouter();
 //弹框
 let addDialog = ref<boolean>(false);
 let editDialog = ref<boolean>(false);
@@ -634,6 +635,8 @@ function buildTree(parents: any, children: any) {
               class="mr-2 mt-2"
               size="default"
               @click="showAddDialog"
+              v-permission="`${router.currentRoute.value.fullPath}->addOrder`"
+            >
               >添加清单</v-btn
             >
             <v-btn
@@ -667,6 +670,9 @@ function buildTree(parents: any, children: any) {
                   class="mr-3"
                   @click.stop="showAuditDialog(item.raw)"
                   v-if="item.raw.order_status === '新建'"
+                  v-permission="
+                    `${router.currentRoute.value.fullPath}->auditOrder`
+                  "
                 >
                   fa-solid fa-eye
                 </v-icon>
@@ -676,6 +682,9 @@ function buildTree(parents: any, children: any) {
                   size="small"
                   class="mr-3"
                   @click.stop="showEditDialog(item.raw)"
+                  v-permission="
+                    `${router.currentRoute.value.fullPath}->updateOrder`
+                  "
                 >
                   fa-solid fa-pen
                 </v-icon>
@@ -684,6 +693,9 @@ function buildTree(parents: any, children: any) {
                   color="red"
                   size="small"
                   @click.stop="showDelDialog(item.raw)"
+                  v-permission="
+                    `${router.currentRoute.value.fullPath}->deleteOrder`
+                  "
                 >
                   fa-solid fa-trash
                 </v-icon>
@@ -1056,6 +1068,7 @@ function buildTree(parents: any, children: any) {
               size="default"
               @click="showAddDetail"
               v-if="orderCode && status === '新建'"
+              v-permission="`${router.currentRoute.value.fullPath}->addDetail`"
               >添加明细</v-btn
             >
           </v-col>
@@ -1077,6 +1090,9 @@ function buildTree(parents: any, children: any) {
                   color="red"
                   size="small"
                   @click="showDelDetailDialog(item.raw)"
+                  v-permission="
+                    `${router.currentRoute.value.fullPath}->deleteDetail`
+                  "
                 >
                   fa-solid fa-trash
                 </v-icon>
