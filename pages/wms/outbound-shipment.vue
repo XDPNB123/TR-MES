@@ -637,7 +637,7 @@ function buildTree(parents: any, children: any) {
               @click="showAddDialog"
               v-permission="`${router.currentRoute.value.fullPath}->addOrder`"
             >
-              >添加清单</v-btn
+              添加清单</v-btn
             >
             <v-btn
               color="blue-darken-2"
@@ -988,6 +988,9 @@ function buildTree(parents: any, children: any) {
                         "
                       />
                     </div>
+                  </div>
+                  <div class="d-flex justify-end mt-5">
+                    {{ page }}/{{ Math.ceil(item.children.length / 10) }}
                   </div>
                 </div>
               </div>

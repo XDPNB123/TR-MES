@@ -58,7 +58,7 @@ let orderHeaders = ref<any[]>([
     filterable: true,
   },
   {
-    title: "数量",
+    title: "堆",
     align: "center",
     key: "num",
     sortable: false,
@@ -128,8 +128,6 @@ let materialHeaders = ref<any[]>([
   { title: "规格描述", align: "center", key: "ggms" },
   { title: "物料编码", align: "start", key: "resultCode" },
   { title: "种类描述", align: "start", key: "middleName" },
-  { title: "细类描述", align: "start", key: "smallName" },
-  { title: "细类名", align: "start", key: "thinName" },
   { title: "单位名", align: "start", key: "unitName" },
 ]);
 //存储装箱单数据
@@ -258,7 +256,7 @@ function showAddDialog() {
   orderInfo.value = {
     projectcode: "",
     date: new Date().toISOString().substring(0, 10),
-    num: "",
+    packer: "",
     lwh: "",
     package_material: "",
   };
@@ -267,9 +265,11 @@ function showAddDialog() {
 }
 //确认新增
 async function addSucces() {
-  const data: any = await useHttp("/PackingList/G95AddPackingList", "post", [
-    orderInfo.value,
-  ]);
+  const data: any = await useHttp(
+    "/PackingList/G95AddPackingList",
+    "post",
+    orderInfo.value
+  );
   if (data.code === 200) {
     getOrderData();
     addDialog.value = false;
@@ -325,10 +325,23 @@ let selected = ref<any[]>([]);
 let searchProject = ref<any>("");
 let searchName = ref<any>("");
 let searchMac = ref<any>("");
+//外购件搜素
+let searchProduct = ref<any>("");
+let searchTypeName = ref<any>("");
+watch(searchTypeName, function () {
+  if (searchTypeName.value === "自制件") {
+    selected.value = [];
+    productList();
+  } else {
+    selected.value = [];
+    getMaterialData();
+  }
+});
+
 //新增装箱单明细信息
 function showAddDetail() {
   selected.value = [];
-  productList();
+  searchTypeName.value = "自制件";
   addDetailDialog.value = true;
 }
 //根据项目号和零件名查询产料
@@ -348,23 +361,52 @@ async function productList() {
         totalCode: searchMac.value,
       }
     );
-    if (!data.data.totalCount) return (productTableData.value = []);
+
     productTableData.value = data.data.pageList; //赋值
     productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
   } catch (error) {
     console.log(error);
   }
 }
+
+//获取到标准外购件的数据
+async function getMaterialData() {
+  const outData: any = await useHttp(
+    "/MaterialForm/M51GetMaterialForm",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 10000,
+      SortType: 1,
+      SortedBy: "_id",
+      queryname: searchProduct.value,
+    }
+  );
+  productTableData.value = outData.data.pageList;
+  productHeaders.value = materialHeaders.value;
+}
+
 //产品搜素
 function filterNameProduct() {
-  productList();
+  if (searchTypeName.value === "自制件") {
+    productList();
+  }
+  if (searchTypeName.value === "标准外购件") {
+    getMaterialData();
+  }
 }
 //重置产品搜索
 function resetFilterNameProduct() {
-  searchName.value = "";
-  searchProject.value = "";
-  searchMac.value = "";
-  productList();
+  if (searchTypeName.value === "自制件") {
+    searchName.value = "";
+    searchProject.value = "";
+    searchMac.value = "";
+    productList();
+  } else {
+    searchProduct.value = "";
+    getMaterialData();
+  }
 }
 let addDetailList = ref<any[]>([]);
 function saveMcodeProduct() {
@@ -372,22 +414,38 @@ function saveMcodeProduct() {
     return setSnackbar("black", "请选择产品，创建装箱单明细");
   }
   addDetailList.value = [];
-  selected.value.forEach((item: any) => {
-    addDetailList.value.push({
-      packcode: packCode.value,
-      production: item.partName,
-      model: "",
-      qty: "",
-      unit: item.unitName,
-      rmks: item.totalCode + "-" + item.partCode,
+  if (searchTypeName.value === "自制件") {
+    selected.value.forEach((item: any) => {
+      addDetailList.value.push({
+        packcode: packCode.value,
+        production: item.partName,
+        model: "",
+        qty: "",
+        unit: item.unitName,
+        rmks: item.totalCode + "-" + item.partCode,
+      });
     });
-  });
+  } else {
+    selected.value.forEach((item: any) => {
+      addDetailList.value.push({
+        packcode: packCode.value,
+        production: item.xhms,
+        model: item.ggms,
+        qty: "",
+        unit: item.unitName,
+        rmks: item.resultCode,
+      });
+    });
+  }
   addDetailDialog2.value = true;
 }
 //在当前索引加一的位置复制一行当前数据加入数组
 
 function addRow(item: any, index: number) {
   addDetailList.value.splice(index, 0, { ...item });
+}
+function minusRow(item: any, index: number) {
+  addDetailList.value.splice(index, 1);
 }
 async function addDetailSucces() {
   const data: any = await useHttp(
@@ -465,19 +523,20 @@ async function fetchDetailData() {
         packcode: item,
       }
     );
-    detailData.value.push(...detailList.value);
+    detailData.value.push(...data.data);
   }
 }
 //获取打印数据
 async function getPrintData() {
-  //第一步 拿到选择的所有的清单单号
+  //第一步 拿到选择的所有的装箱单号
   await selectRows.value.forEach((item: any) => {
     code.value.push(item.packcode);
   });
-  //第二步 获取选择的所有清单的明细数据
+
+  //第二步 获取选择的所有装箱单的明细数据
   await fetchDetailData();
 
-  //第三步,将清单数据和清单数据的明细组合成树形结构
+  //第三步,将装箱单数据和装箱单数据的明细组合成树形结构
   printList.value = await buildTree(selectRows.value, detailData.value);
 }
 // 将俩个数组整合到一起成一个树形结构的方法
@@ -486,13 +545,22 @@ function buildTree(parents: any, children: any) {
   parents.forEach((parent: any) => {
     let node = { ...parent, children: [] };
     children.forEach((child: any) => {
-      if (child.out_order === parent.out_order_num) {
+      if (child.packcode === parent.packcode) {
         node.children.push(child);
       }
     });
     tree.push(node);
   });
   return tree;
+}
+
+function focusInput(inputRef: any) {
+  const inputElement = document.querySelector(
+    `[ref=${inputRef}]`
+  ) as HTMLElement;
+  if (inputElement) {
+    inputElement.focus();
+  }
 }
 </script>
 <template>
@@ -629,7 +697,7 @@ function buildTree(parents: any, children: any) {
                     margin-top: 20px;
                   "
                   class="d-flex flex-column"
-                  v-for="page in Math.ceil(item.children.length / 18)"
+                  v-for="page in Math.ceil(item.children.length / 15)"
                   :key="`page-${page}`"
                 >
                   <div class="d-flex justify-space-between">
@@ -704,7 +772,8 @@ function buildTree(parents: any, children: any) {
                       <!-- 第一列第二行 -->
                       <div class="d-flex justify-space-between mt-4">
                         <div style="white-space: nowrap">
-                          数量: 共:<input
+                          No:
+                          <input
                             :value="item.num"
                             type="text"
                             style="
@@ -713,7 +782,7 @@ function buildTree(parents: any, children: any) {
                               outline: none;
                               text-align: center;
                             "
-                          />箱
+                          />
                         </div>
                       </div>
                       <!-- 第一列第三行 -->
@@ -768,42 +837,42 @@ function buildTree(parents: any, children: any) {
                   <div style="white-space: nowrap" class="mt-4">
                     <table border="1" style="border-collapse: collapse">
                       <tr>
-                        <th style="text-align: center; height: 30px">No</th>
-                        <th style="text-align: center; height: 30px">
+                        <th style="text-align: center; height: 32px">No</th>
+                        <th style="text-align: center; height: 32px">
                           Production
                         </th>
-                        <th style="text-align: center; height: 30px">
+                        <th style="text-align: center; height: 32px">
                           Model No/Item No
                         </th>
-                        <th style="text-align: center; height: 30px">QTY</th>
-                        <th style="text-align: center; height: 30px">Rmks</th>
+                        <th style="text-align: center; height: 32px">QTY</th>
+                        <th style="text-align: center; height: 32px">Rmks</th>
                       </tr>
                       <tr>
-                        <th style="text-align: center; height: 30px">序号</th>
-                        <th style="text-align: center; height: 30px">产品</th>
-                        <th style="text-align: center; height: 30px">
+                        <th style="text-align: center; height: 32px">序号</th>
+                        <th style="text-align: center; height: 32px">产品</th>
+                        <th style="text-align: center; height: 32px">
                           产品规格及型号
                         </th>
-                        <th style="text-align: center; height: 30px">数量</th>
-                        <th style="text-align: center; height: 30px">备注</th>
+                        <th style="text-align: center; height: 32px">数量</th>
+                        <th style="text-align: center; height: 32px">备注</th>
                       </tr>
 
                       <tr
                         v-for="(item_, index_) in item.children.slice(
-                          (page - 1) * 18,
-                          page * 18
+                          (page - 1) * 15,
+                          page * 15
                         )"
                         :key="index_"
                       >
                         <td
-                          style="text-align: center; height: 30px; width: 80px"
+                          style="text-align: center; height: 32px; width: 80px"
                         >
-                          {{ index_ + (page - 1) * 18 + 1 }}
+                          {{ index_ + (page - 1) * 15 + 1 }}
                         </td>
                         <td
                           style="
                             text-align: center;
-                            height: 30px;
+                            height: 32px;
                             width: 230px;
                             max-width: 230px;
                             word-wrap: break-word;
@@ -815,7 +884,7 @@ function buildTree(parents: any, children: any) {
                         <td
                           style="
                             text-align: center;
-                            height: 30px;
+                            height: 32px;
                             width: 180px;
                             max-width: 180px;
                             word-wrap: break-word;
@@ -825,37 +894,37 @@ function buildTree(parents: any, children: any) {
                           {{ item_.model }}
                         </td>
                         <td
-                          style="text-align: center; height: 30px; width: 80px"
+                          style="text-align: center; height: 32px; width: 80px"
                         >
-                          {{ item_.qty }}
+                          {{ item_.qty }}{{ item_.unit }}
                         </td>
                         <td
-                          style="text-align: center; height: 30px; width: 230px"
+                          style="text-align: center; height: 32px; width: 230px"
                         >
                           {{ item_.rmks }}
                         </td>
                       </tr>
                       <!--  -->
                       <tr
-                        v-for="(item__, index__) in 18 -
-                        item.children.slice((page - 1) * 18, page * 18).length"
+                        v-for="(item__, index__) in 15 -
+                        item.children.slice((page - 1) * 15, page * 15).length"
                         :key="index__"
                       >
                         <td
-                          style="text-align: center; height: 30px; width: 80px"
+                          style="text-align: center; height: 32px; width: 80px"
                         ></td>
                         <td
-                          style="text-align: center; height: 30px; width: 230px"
+                          style="text-align: center; height: 32px; width: 230px"
                         ></td>
 
                         <td
-                          style="text-align: center; height: 30px; width: 180px"
+                          style="text-align: center; height: 32px; width: 180px"
                         ></td>
                         <td
-                          style="text-align: center; height: 30px; width: 80px"
+                          style="text-align: center; height: 32px; width: 80px"
                         ></td>
                         <td
-                          style="text-align: center; height: 30px; width: 230px"
+                          style="text-align: center; height: 32px; width: 230px"
                         ></td>
                       </tr>
                     </table>
@@ -872,6 +941,7 @@ function buildTree(parents: any, children: any) {
                     <div class="d-flex" style="white-space: nowrap">
                       出库员：<input
                         type="text"
+                        :value="item.packer"
                         style="
                           border: none;
                           border-bottom: 1px solid black;
@@ -882,7 +952,7 @@ function buildTree(parents: any, children: any) {
                     <div class="d-flex" style="white-space: nowrap">
                       审核时间：<input
                         type="text"
-                        :value="item.reserved10"
+                        :value="item.date"
                         style="
                           border: none;
                           border-bottom: 1px solid black;
@@ -890,6 +960,9 @@ function buildTree(parents: any, children: any) {
                         "
                       />
                     </div>
+                  </div>
+                  <div class="d-flex justify-end">
+                    {{ item.num }}-{{ page }}
                   </div>
                 </div>
               </div>
@@ -1013,8 +1086,8 @@ function buildTree(parents: any, children: any) {
             </v-col>
             <v-col cols="12">
               <v-text-field
-                label="数量"
-                v-model="orderInfo.num"
+                label="装箱员"
+                v-model="orderInfo.packer"
                 hide-details
               ></v-text-field>
             </v-col>
@@ -1145,7 +1218,7 @@ function buildTree(parents: any, children: any) {
         </v-toolbar>
         <v-card>
           <v-row class="ma-2">
-            <v-col cols="3">
+            <v-col cols="3" v-show="searchTypeName === '自制件'">
               <v-text-field
                 label="零件名查询"
                 variant="outlined"
@@ -1156,7 +1229,7 @@ function buildTree(parents: any, children: any) {
               ></v-text-field>
             </v-col>
 
-            <v-col cols="3">
+            <v-col cols="3" v-show="searchTypeName === '自制件'">
               <v-text-field
                 label="项目号查询"
                 variant="outlined"
@@ -1166,7 +1239,7 @@ function buildTree(parents: any, children: any) {
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>
             </v-col>
-            <v-col cols="3">
+            <v-col cols="3" v-show="searchTypeName === '自制件'">
               <v-text-field
                 label="设备号"
                 variant="outlined"
@@ -1176,13 +1249,23 @@ function buildTree(parents: any, children: any) {
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>
             </v-col>
-
+            <v-col cols="9" v-show="searchTypeName !== '自制件'">
+              <v-text-field
+                label="外购件搜索"
+                variant="outlined"
+                density="compact"
+                v-model="searchProduct"
+                hide-details
+                @keydown.enter="filterNameProduct()"
+              ></v-text-field>
+            </v-col>
             <v-col cols="3">
               <v-select
                 variant="outlined"
                 density="compact"
                 label="当前产品类别"
                 :items="['自制件', '标准外购件']"
+                v-model="searchTypeName"
               >
               </v-select>
             </v-col>
@@ -1253,60 +1336,148 @@ function buildTree(parents: any, children: any) {
           <v-row v-for="(item, index) in addDetailList">
             <v-col cols="2">
               <v-text-field
+                :ref="`input${index}1`"
                 label="产品"
                 readonly
                 variant="outlined"
                 density="compact"
+                autofocus
                 v-model="item.production"
                 hide-details
+                @keydown.up.prevent="
+                  focusInput(
+                    `input${
+                      index === 0 ? addDetailList.length - 1 : index - 1
+                    }1`
+                  )
+                "
+                @keydown.down.prevent="
+                  focusInput(
+                    `input${
+                      index === addDetailList.length - 1 ? 0 : index + 1
+                    }1`
+                  )
+                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
               <v-text-field
+                :ref="`input${index}2`"
                 label="规格"
                 variant="outlined"
                 density="compact"
+                autofocus
                 v-model="item.model"
                 hide-details
+                @keydown.up.prevent="
+                  focusInput(
+                    `input${
+                      index === 0 ? addDetailList.length - 1 : index - 1
+                    }2`
+                  )
+                "
+                @keydown.down.prevent="
+                  focusInput(
+                    `input${
+                      index === addDetailList.length - 1 ? 0 : index + 1
+                    }2`
+                  )
+                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
               <v-text-field
+                :ref="`input${index}3`"
                 label="数量"
+                autofocus
                 variant="outlined"
                 density="compact"
                 v-model="item.qty"
                 hide-details
+                @keydown.up.prevent="
+                  focusInput(
+                    `input${
+                      index === 0 ? addDetailList.length - 1 : index - 1
+                    }3`
+                  )
+                "
+                @keydown.down.prevent="
+                  focusInput(
+                    `input${
+                      index === addDetailList.length - 1 ? 0 : index + 1
+                    }3`
+                  )
+                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
               <v-text-field
+                :ref="`input${index}4`"
                 label="单位"
-                readonly
+                autofocus
                 variant="outlined"
                 density="compact"
                 v-model="item.unit"
                 hide-details
+                @keydown.up.prevent="
+                  focusInput(
+                    `input${
+                      index === 0 ? addDetailList.length - 1 : index - 1
+                    }4`
+                  )
+                "
+                @keydown.down.prevent="
+                  focusInput(
+                    `input${
+                      index === addDetailList.length - 1 ? 0 : index + 1
+                    }4`
+                  )
+                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
               <v-text-field
+                :ref="`input${index}5`"
                 label="备注"
                 readonly
+                autofocus
                 variant="outlined"
                 density="compact"
                 v-model="item.rmks"
                 hide-details
+                @keydown.up.prevent="
+                  focusInput(
+                    `input${
+                      index === 0 ? addDetailList.length - 1 : index - 1
+                    }5`
+                  )
+                "
+                @keydown.down.prevent="
+                  focusInput(
+                    `input${
+                      index === addDetailList.length - 1 ? 0 : index + 1
+                    }5`
+                  )
+                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
-              <v-icon
-                class="align-self-center"
-                color="blue"
-                @click="addRow(item, index)"
-              >
-                fa-solid fa-plus
-              </v-icon>
+              <div class="d-flex">
+                <v-icon
+                  class="align-self-center"
+                  color="blue"
+                  @click="addRow(item, index)"
+                >
+                  fa-solid fa-plus
+                </v-icon>
+                <v-icon
+                  class="align-self-center ml-5"
+                  color="blue"
+                  @click="minusRow(item, index)"
+                >
+                  fa-solid fa-minus
+                </v-icon>
+              </div>
             </v-col>
           </v-row>
         </v-card-text>

@@ -593,9 +593,9 @@ async function getWorkOrder() {
     tableDataLength.value = data.data.totalCount;
     if (tableData.value.length) {
       detailName.value = tableData.value[0].workorder_hid;
-      detailStatus.value =  tableData.value[0].status;
-  searchProject.value =  tableData.value[0].product_id.slice(-9);
-  searchMac.value =  tableData.value[0].product_id.substring(2, 7);
+      detailStatus.value = tableData.value[0].status;
+      searchProject.value = tableData.value[0].product_id.slice(-9);
+      searchMac.value = tableData.value[0].product_id.substring(2, 7);
     }
   } catch (error) {
     setSnackbar("black", "获取数据失败");
@@ -1189,13 +1189,15 @@ async function filterProduct() {
 }
 //重置搜素
 function resetFilterProduct() {
-  searchProduct.value = "00.00.00.00";
-  searchProjectCode.value = "";
-  productTablePage.value = 1;
   if (productTypeName.value === "自制件") {
+    searchProduct.value = "00.00.00.00";
+    searchProjectCode.value = "";
+    productTablePage.value = 1;
     getHomeData();
   }
   if (productTypeName.value === "标准外购件") {
+    searchProduct.value = "";
+    productTablePage.value = 1;
     getMaterialData();
   }
 }
@@ -1262,6 +1264,8 @@ async function saveMcodeProduct() {
     return setSnackbar("black", "请选择产出料，创建工单明细");
   }
   addDetailList.value = [];
+  let date2: any = new Date();
+  date2.setDate(date2.getDate() + 10);
   selectedRows.value.forEach((item: any) => {
     addDetailList.value.push({
       partName: item.partName,
@@ -1269,7 +1273,7 @@ async function saveMcodeProduct() {
       unitName: item.unitName,
       projectCode: item.projectCode,
       num: "",
-      date: new Date().toISOString().substring(0, 10),
+      date: date2.toISOString().substring(0, 10),
       hour: 24,
     });
   });
@@ -2760,20 +2764,20 @@ const rules = [
             </v-col>
             <v-col cols="2">
               <v-text-field
-                label="项目号"
+                label="数量"
                 readonly
                 variant="outlined"
                 density="compact"
-                v-model="item.projectCode"
+                v-model="item.num"
                 hide-details
               ></v-text-field>
             </v-col>
             <v-col cols="2">
               <v-text-field
-                label="数量"
+                label="单位"
                 variant="outlined"
                 density="compact"
-                v-model="item.num"
+                v-model="item.unitName"
                 hide-details
               ></v-text-field>
             </v-col>
