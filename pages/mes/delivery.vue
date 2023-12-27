@@ -962,7 +962,9 @@ function focusInput(inputRef: any) {
                     </div>
                   </div>
                   <div class="d-flex justify-end">
-                    {{ item.num }}-{{ page }}
+                    {{ item.num }}-({{ page }}/{{
+                      Math.ceil(item.children.length / 15)
+                    }})
                   </div>
                 </div>
               </div>
