@@ -17,7 +17,7 @@ useSeoMeta({
 });
 // 页面缓存
 definePageMeta({
-  keepalive: true,
+  keepalive: false,
 });
 const router = useRouter();
 // 获取消息条对象
@@ -235,8 +235,8 @@ async function getDetailData() {
     return 1;
   });
 }
-let packCode = ref<any>(null);
-let projectCode = ref<any>(null);
+let packCode = ref<any>("");
+let projectCode = ref<any>("");
 // 点击显示装箱单明细
 function showDetail(item: any, obj: any) {
   packCode.value = obj.item.raw.packcode;
@@ -322,26 +322,26 @@ let productHeaders = ref<any[]>([]);
 let productTableData = ref<any>([]);
 let selected = ref<any[]>([]);
 //产品信息的搜索
-let searchProject = ref<any>("");
+
 let searchName = ref<any>("");
 let searchMac = ref<any>("");
 //外购件搜素
 let searchProduct = ref<any>("");
 let searchTypeName = ref<any>("");
-watch(searchTypeName, function () {
+watch(searchTypeName, async function () {
   if (searchTypeName.value === "自制件") {
     selected.value = [];
-    productList();
+    await productList();
   } else {
     selected.value = [];
-    getMaterialData();
+    await getMaterialData();
   }
 });
 
 //新增装箱单明细信息
 function showAddDetail() {
-  selected.value = [];
   searchTypeName.value = "自制件";
+  productList();
   addDetailDialog.value = true;
 }
 //根据项目号和零件名查询产料
@@ -361,9 +361,13 @@ async function productList() {
         totalCode: searchMac.value,
       }
     );
-
-    productTableData.value = data.data.pageList; //赋值
-    productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
+    if (!data.data.totalCount) {
+      productTableData.value = [];
+      productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
+    } else {
+      productTableData.value = data.data.pageList; //赋值
+      productHeaders.value = homemadeHeaders.value; //给数据表头赋值相对应的值
+    }
   } catch (error) {
     console.log(error);
   }
@@ -383,8 +387,13 @@ async function getMaterialData() {
       queryname: searchProduct.value,
     }
   );
-  productTableData.value = outData.data.pageList;
-  productHeaders.value = materialHeaders.value;
+  if (!outData.data.totalCount) {
+    productTableData.value = [];
+    productHeaders.value = materialHeaders.value;
+  } else {
+    productTableData.value = outData.data.pageList;
+    productHeaders.value = materialHeaders.value;
+  }
 }
 
 //产品搜素
@@ -400,7 +409,7 @@ function filterNameProduct() {
 function resetFilterNameProduct() {
   if (searchTypeName.value === "自制件") {
     searchName.value = "";
-    searchProject.value = "";
+    projectCode.value = "";
     searchMac.value = "";
     productList();
   } else {
@@ -1149,8 +1158,8 @@ function focusInput(inputRef: any) {
             </v-col>
             <v-col cols="12">
               <v-text-field
-                label="数量"
-                v-model="orderInfo.num"
+                label="装箱员"
+                v-model="orderInfo.packer"
                 hide-details
               ></v-text-field>
             </v-col>
