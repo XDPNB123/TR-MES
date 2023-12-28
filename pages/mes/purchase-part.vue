@@ -334,7 +334,7 @@ async function confirmData() {
     .filter((item: any) =>
       Object.values(item).some((item_: any) => (item_ || "").trim() !== "")
     );
-s
+
   const tabArr: any = [];
   for (const [index, item] of exportedData.entries()) {
     if (item.inventory_code === "" || item.inventory_code === null) {
