@@ -95,7 +95,7 @@ let searchTicketNumber = ref<string>("");
 let nowDate = new Date();
 nowDate.setFullYear(nowDate.getFullYear() - 1);
 let oldDate = new Date();
-oldDate.setMonth(oldDate.getMonth() + 1);
+oldDate.setMonth(oldDate.getMonth() + 2);
 let startDate = ref<any>(null);
 let endDate = ref<any>(null);
 
