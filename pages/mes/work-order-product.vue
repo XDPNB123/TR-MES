@@ -715,7 +715,7 @@ let date = new Date();
 // 新增工单前重置新增对话框
 function resetAddDialog() {
   operatingTicket.value = {
-    workorder_type: ["机加"],
+    workorder_type: "",
     product_id: "",
     planned_quantity: 1,
     product_description: "",
@@ -728,7 +728,7 @@ function resetAddDialog() {
 }
 //存储新增工单信息
 let tabArr1 = ref<any[]>([]);
-
+let workOrderType = ref<any[]>(["机加"]);
 // 新增工单
 async function addTicket() {
   try {
@@ -738,8 +738,8 @@ async function addTicket() {
     if (!operatingTicket.value.planned_completion_time) {
       return setSnackbar("black", "请您选择计划完成时间");
     }
-    let workOrderType = operatingTicket.value.workorder_type;
-    workOrderType.forEach((item: any) => {
+
+    workOrderType.value.forEach((item: any) => {
       tabArr1.value.push({
         workorder_type: item,
         product_id: operatingTicket.value.product_id,
@@ -760,6 +760,7 @@ async function addTicket() {
       setSnackbar("green", "新增成功");
       addDialog.value = false;
       await getWorkOrder();
+      tabArr1.value = [];
       detailName.value = tableData.value[0].workorder_hid;
       detailStatus.value = tableData.value[0].status;
     } else {
@@ -2092,7 +2093,7 @@ const rules = [
             label="工单类型"
             :items="workType"
             multiple
-            v-model="operatingTicket.workorder_type"
+            v-model="workOrderType"
           ></v-select>
           <v-text-field
             v-model="operatingTicket.planned_quantity"
