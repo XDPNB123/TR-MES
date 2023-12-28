@@ -334,7 +334,7 @@ async function confirmData() {
     .filter((item: any) =>
       Object.values(item).some((item_: any) => (item_ || "").trim() !== "")
     );
-  console.log(exportedData);
+s
   const tabArr: any = [];
   for (const [index, item] of exportedData.entries()) {
     if (item.inventory_code === "" || item.inventory_code === null) {
@@ -373,17 +373,17 @@ async function confirmData() {
     });
   }
 
-  // const newData: any = await useHttp(
-  //   "/PackingList/M103AddProcuredOrder",
-  //   "post",
-  //   tabArr
-  // );
-  // if (newData.code === 200) {
-  //   getProduce();
-  //   setSnackbar("green", "新增成功");
-  // } else {
-  //   setSnackbar("black", "新增失败");
-  // }
+  const newData: any = await useHttp(
+    "/PackingList/M103AddProcuredOrder",
+    "post",
+    tabArr
+  );
+  if (newData.code === 200) {
+    getProduce();
+    setSnackbar("green", "新增成功");
+  } else {
+    setSnackbar("black", "新增失败");
+  }
 }
 function clear() {
   data.value = Array(5)
