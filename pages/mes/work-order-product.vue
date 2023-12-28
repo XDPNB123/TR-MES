@@ -2730,7 +2730,7 @@ const rules = [
         </div>
       </v-card>
     </v-dialog>
-    <!-- 经常新建明细 -->
+    <!-- 检查新建明细 -->
     <v-dialog v-model="addDetailDialog2" min-width="1400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
@@ -2765,7 +2765,6 @@ const rules = [
             <v-col cols="2">
               <v-text-field
                 label="数量"
-                readonly
                 variant="outlined"
                 density="compact"
                 v-model="item.num"
