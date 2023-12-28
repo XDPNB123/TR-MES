@@ -323,14 +323,18 @@ async function confirmData() {
     return setSnackbar("black", "请您输入设备编码,若设备编码为空请你输入T0000");
   }
 
-  const exportedData = data.value.map((row) => {
-    let obj: any = {};
-    headers.value.forEach((header, index) => {
-      obj[header] = row[index] === "　" ? "" : row[index];
-    });
-    return obj;
-  });
-  exportedData.splice(-5);
+  const exportedData = data.value
+    .map((row) => {
+      let obj: any = {};
+      headers.value.forEach((header, index) => {
+        obj[header] = row[index] === "　" ? "" : row[index];
+      });
+      return obj;
+    })
+    .filter((item: any) =>
+      Object.values(item).some((item_: any) => (item_ || "").trim() !== "")
+    );
+  console.log(exportedData);
   const tabArr: any = [];
   for (const [index, item] of exportedData.entries()) {
     if (item.inventory_code === "" || item.inventory_code === null) {
@@ -369,17 +373,17 @@ async function confirmData() {
     });
   }
 
-  const newData: any = await useHttp(
-    "/PackingList/M103AddProcuredOrder",
-    "post",
-    tabArr
-  );
-  if (newData.code === 200) {
-    getProduce();
-    setSnackbar("green", "新增成功");
-  } else {
-    setSnackbar("black", "新增失败");
-  }
+  // const newData: any = await useHttp(
+  //   "/PackingList/M103AddProcuredOrder",
+  //   "post",
+  //   tabArr
+  // );
+  // if (newData.code === 200) {
+  //   getProduce();
+  //   setSnackbar("green", "新增成功");
+  // } else {
+  //   setSnackbar("black", "新增失败");
+  // }
 }
 function clear() {
   data.value = Array(5)
