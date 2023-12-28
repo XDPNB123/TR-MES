@@ -19,9 +19,11 @@
     "vue-tsc": "^1.8.11"
   },
   "dependencies": {
+    "@handsontable/vue3": "^14.0.0",
     "@pinia/nuxt": "^0.4.11",
     "@wsfe/vue-tree": "^3.2.0",
     "echarts": "^5.4.3",
+    "handsontable": "^14.0.0",
     "jsbarcode": "^3.11.6",
     "pinia": "^2.1.6",
     "print-js": "^1.6.0",

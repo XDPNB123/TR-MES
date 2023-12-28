@@ -124,11 +124,62 @@ let homemadeHeaders = ref<any[]>([
 ]);
 //外购件表头
 let materialHeaders = ref<any[]>([
-  { title: "型号描述", align: "start", key: "xhms" },
-  { title: "规格描述", align: "center", key: "ggms" },
-  { title: "物料编码", align: "start", key: "resultCode" },
-  { title: "种类描述", align: "start", key: "middleName" },
-  { title: "单位名", align: "start", key: "unitName" },
+  {
+    title: "项目号",
+    align: "center",
+    key: "project_code",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "设备名称",
+    align: "center",
+    key: "devicename",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "设备编号",
+    align: "center",
+    key: "devicecode",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "存货编码",
+    align: "center",
+    key: "inventory_code",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "名称",
+    align: "center",
+    key: "product_name",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "规格/图号",
+    align: "center",
+    key: "specification_drawing_number",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "总数量",
+    align: "center",
+    key: "total_quantity",
+    sortable: false,
+    filterable: true,
+  },
+  {
+    title: "单位",
+    align: "center",
+    key: "unit",
+    sortable: false,
+    filterable: true,
+  },
 ]);
 //存储装箱单数据
 let orderList = ref<any[]>([]);
@@ -142,7 +193,7 @@ let searchRmks = ref<any>("");
 //装箱单搜素
 async function filter() {
   const data: any = await useHttp(
-    "/PackingList/G94GetPackingList",
+    "/PackingList/M94GetPackingList",
     "get",
     undefined,
     {
@@ -190,7 +241,7 @@ function resetDetail() {
 //获取数据库的装箱单数据
 async function getOrderData() {
   const data: any = await useHttp(
-    "/PackingList/G94GetPackingList",
+    "/PackingList/M94GetPackingList",
     "get",
     undefined,
     {
@@ -219,7 +270,7 @@ async function getOrderData() {
 //获取数据库的装箱单明细数据
 async function getDetailData() {
   const data: any = await useHttp(
-    "/PackingList/G97GetPackingListDetial",
+    "/PackingList/M97GetPackingListDetial",
     "get",
     undefined,
     {
@@ -266,7 +317,7 @@ function showAddDialog() {
 //确认新增
 async function addSucces() {
   const data: any = await useHttp(
-    "/PackingList/G95AddPackingList",
+    "/PackingList/M95AddPackingList",
     "post",
     orderInfo.value
   );
@@ -285,7 +336,7 @@ function showEditDialog(item: any) {
   editDialog.value = true;
 }
 async function editSucces() {
-  const data: any = await useHttp("/PackingList/G96UptPackingList", "put", [
+  const data: any = await useHttp("/PackingList/M96UptPackingList", "put", [
     orderInfo.value,
   ]);
   if (data.code === 200) {
@@ -303,7 +354,7 @@ function showDelDialog(item: any) {
 }
 async function delSucces() {
   const data: any = await useHttp(
-    "/PackingList/G97DelPackingList",
+    "/PackingList/M97DelPackingList",
     "delete",
     undefined,
     { id: orderInfo.value.id, packcode: orderInfo.value.packcode }
@@ -373,27 +424,24 @@ async function productList() {
   }
 }
 
+let searchAll = ref<any>("");
+
 //获取到标准外购件的数据
 async function getMaterialData() {
   const outData: any = await useHttp(
-    "/MaterialForm/M51GetMaterialForm",
+    "/PackingList/M102GetProcuredOrder",
     "get",
     undefined,
     {
-      PageIndex: 1,
-      PageSize: 10000,
-      SortType: 1,
-      SortedBy: "_id",
-      queryname: searchProduct.value,
+      project_code: projectCode.value,
+      devicename: searchName.value,
+      devicecode: searchMac.value,
+      query_parameter: searchAll.value,
     }
   );
-  if (!outData.data.totalCount) {
-    productTableData.value = [];
-    productHeaders.value = materialHeaders.value;
-  } else {
-    productTableData.value = outData.data.pageList;
-    productHeaders.value = materialHeaders.value;
-  }
+
+  productTableData.value = outData.data;
+  productHeaders.value = materialHeaders.value;
 }
 
 //产品搜素
@@ -409,11 +457,12 @@ function filterNameProduct() {
 function resetFilterNameProduct() {
   if (searchTypeName.value === "自制件") {
     searchName.value = "";
-    projectCode.value = "";
     searchMac.value = "";
     productList();
   } else {
-    searchProduct.value = "";
+    searchName.value = "";
+    searchMac.value = "";
+    searchAll.value = "";
     getMaterialData();
   }
 }
@@ -438,11 +487,11 @@ function saveMcodeProduct() {
     selected.value.forEach((item: any) => {
       addDetailList.value.push({
         packcode: packCode.value,
-        production: item.xhms,
-        model: item.ggms,
-        qty: "",
-        unit: item.unitName,
-        rmks: item.resultCode,
+        production: item.product_name,
+        model: item.specification_drawing_number,
+        qty: item.total_quantity,
+        unit: item.unit,
+        rmks: item.inventory_code,
       });
     });
   }
@@ -458,7 +507,7 @@ function minusRow(item: any, index: number) {
 }
 async function addDetailSucces() {
   const data: any = await useHttp(
-    "/PackingList/G98AddPackingListDetial",
+    "/PackingList/M98AddPackingListDetial",
     "post",
     addDetailList.value
   );
@@ -481,7 +530,7 @@ function showDelDetailDialog(item: any) {
 //确认删除
 async function delDetailSucces() {
   const data: any = await useHttp(
-    "/PackingList/G100DelPackingListDetial",
+    "/PackingList/M100DelPackingListDetial",
     "delete",
     undefined,
     {
@@ -523,7 +572,7 @@ async function print() {
 async function fetchDetailData() {
   for (const item of code.value) {
     const data: any = await useHttp(
-      "/PackingList/G97GetPackingListDetial",
+      "/PackingList/M97GetPackingListDetial",
       "get",
       undefined,
       {
@@ -1218,7 +1267,7 @@ function focusInput(inputRef: any) {
     </v-dialog>
 
     <!-- 新增装箱单明细 -->
-    <v-dialog v-model="addDetailDialog" min-width="1400px" width="560px">
+    <v-dialog v-model="addDetailDialog" min-width="1800px" width="560px">
       <v-card>
         <v-toolbar color="blue">
           <v-toolbar-title> 可以批量选择产品，批量增加产出料 </v-toolbar-title>
@@ -1229,7 +1278,7 @@ function focusInput(inputRef: any) {
         </v-toolbar>
         <v-card>
           <v-row class="ma-2">
-            <v-col cols="3" v-show="searchTypeName === '自制件'">
+            <v-col cols="3">
               <v-text-field
                 label="零件名查询"
                 variant="outlined"
@@ -1240,7 +1289,7 @@ function focusInput(inputRef: any) {
               ></v-text-field>
             </v-col>
 
-            <v-col cols="3" v-show="searchTypeName === '自制件'">
+            <v-col cols="3">
               <v-text-field
                 label="项目号查询"
                 variant="outlined"
@@ -1250,7 +1299,7 @@ function focusInput(inputRef: any) {
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>
             </v-col>
-            <v-col cols="3" v-show="searchTypeName === '自制件'">
+            <v-col cols="3">
               <v-text-field
                 label="设备号"
                 variant="outlined"
@@ -1260,12 +1309,12 @@ function focusInput(inputRef: any) {
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>
             </v-col>
-            <v-col cols="9" v-show="searchTypeName !== '自制件'">
+            <v-col cols="3" v-show="searchTypeName !== '自制件'">
               <v-text-field
-                label="外购件搜索"
+                label="外购件信息"
                 variant="outlined"
                 density="compact"
-                v-model="searchProduct"
+                v-model="searchAll"
                 hide-details
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>

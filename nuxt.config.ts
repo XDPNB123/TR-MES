@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   routeRules: {
     "/mes/work-produce-recode": { ssr: false },
     "/mes/delivery": { ssr: false },
+    "/mes/purchase-part": { ssr: false },
     "/work-basic/work-class": { ssr: false },
     "/test": { ssr: false },
     "/wms/outbound-shipment": { ssr: false },
