@@ -84,6 +84,9 @@ let Headers = ref<any[]>([
 ]);
 //存储数据库数据
 let billList = ref<any[]>([]);
+let inLength = ref<number>(0);
+let outLength = ref<number>(0);
+let remainder = ref<number>(0);
 //获取数据库数据
 async function getBillData() {
   billList.value = [];
@@ -104,6 +107,7 @@ async function getBillData() {
       date_puton_to: searchDateEnd,
     }
   );
+  inLength.value = data1.data.length;
   await data1.data.forEach((item: any) => {
     billList.value.push({
       type: "in",
@@ -137,6 +141,7 @@ async function getBillData() {
   data2.data = data2.data.filter(
     (item: any) => item.place_code.charAt(0) === searchWareHouse.value
   );
+  outLength.value = data2.data.length;
   data2.data.forEach((item_: any) => {
     billList.value.push({
       type: "out",
@@ -156,6 +161,7 @@ async function getBillData() {
     }
     return 0;
   });
+  remainder.value = inLength.value - outLength.value;
 }
 onMounted(() => {
   getBillData();
@@ -277,7 +283,7 @@ function resetFilter() {
     </v-col>
     <v-col cols="12">
       <v-row>
-        <v-col cols="9">
+        <v-col cols="2">
           <v-btn
             color="blue-darken-2"
             class="mr-2 mt-2"
@@ -293,7 +299,41 @@ function resetFilter() {
             >重置查询</v-btn
           >
         </v-col>
-        <v-col cols="3">
+        <v-col cols="2">
+          <v-text-field
+            label="总入库数"
+            v-model="inLength"
+            readonly
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="mt-2"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="2">
+          <v-text-field
+            label="总出库数"
+            v-model="outLength"
+            readonly
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="mt-2"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="2">
+          <v-text-field
+            label="剩余库存"
+            v-model="remainder"
+            readonly
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="mt-2"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="2"></v-col>
+        <v-col cols="2">
           <v-select
             label="仓库"
             v-model="searchWareHouse"
