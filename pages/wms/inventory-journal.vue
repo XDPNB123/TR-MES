@@ -74,11 +74,19 @@ let Headers = ref<any[]>([
     sortable: false,
     filterable: true,
   },
+  {
+    title: "操作时间",
+    align: "center",
+    key: "date",
+    sortable: false,
+    filterable: true,
+  },
 ]);
 //存储数据库数据
 let billList = ref<any[]>([]);
 //获取数据库数据
 async function getBillData() {
+  billList.value = [];
   const data1: any = await useHttp(
     "/wmsPalletize/G148condition",
     "get",
@@ -91,9 +99,24 @@ async function getBillData() {
       sku_name: searchName.value,
       sku_spec: searchGg.value,
       flag_sync: "Y",
+      target_warehouse: "A",
+      date_puton_from: searchDateStart,
+      date_puton_to: searchDateEnd,
     }
   );
-  console.log(data1.data);
+  await data1.data.forEach((item: any) => {
+    billList.value.push({
+      type: "in",
+      place_code: item.target_place,
+      container_code: item.container_code,
+      sku_name: item.sku_name,
+      sku_code: item.sku,
+      sku_spec: item.sku_spec,
+      batch_lot: item.sku_batch_lot,
+      sku_qty: item.sku_qty,
+      date: item.time_put_on,
+    });
+  });
 
   const data2: any = await useHttp(
     "/WmsOutOrder/G170GetOutDetialList",
@@ -106,10 +129,30 @@ async function getBillData() {
       sku_name: searchName.value,
       batch_lot: searchLot.value,
       sku_spec: searchGg.value,
+      createdate_from: searchDateStart,
+      createdate_to: searchDateEnd,
       flag_done: "Y",
     }
   );
-  console.log(data2.data);
+  await data2.data.forEach((item_: any) => {
+    billList.value.push({
+      type: "out",
+      place_code: item_.place_code,
+      container_code: item_.container_code,
+      sku_name: item_.sku_name,
+      sku_code: item_.sku_code,
+      sku_spec: item_.sku_spec,
+      batch_lot: item_.batch_lot,
+      sku_qty: item_.sku_qty,
+      date: item_.reserved10,
+    });
+  });
+  billList.value.sort((a: any, b: any) => {
+    if (a.date > b.date) {
+      return -1;
+    }
+    return 0;
+  });
 }
 onMounted(() => {
   getBillData();
@@ -121,13 +164,29 @@ let searchName = ref<any>("");
 let searchGg = ref<any>("");
 let searchCode = ref<any>("");
 let searchLot = ref<any>("");
+let date = new Date();
+date.setMonth(date.getMonth() - 6);
+let searchDateStart = date.toISOString().substring(0, 10);
+let searchDateEnd = new Date().toISOString().substring(0, 10);
 
-function filter() {}
-function resetFilter() {}
+function filter() {
+  getBillData();
+}
+function resetFilter() {
+  searchArea.value = "";
+  searchContainer.value = "";
+  searchLot.value = "";
+  searchCode.value = "";
+  searchGg.value = "";
+  searchName.value = "";
+  searchDateStart = date.toISOString().substring(0, 10);
+  searchDateEnd = new Date().toISOString().substring(0, 10);
+  getBillData();
+}
 </script>
 <template>
   <v-row class="ma-2">
-    <v-col cols="2">
+    <v-col cols="3">
       <v-text-field
         label="库位"
         v-model="searchArea"
@@ -137,18 +196,17 @@ function resetFilter() {}
         class="mt-2"
       ></v-text-field>
     </v-col>
-    <v-col cols="2">
-      <v-select
-        label="容器"
+    <v-col cols="3">
+      <v-text-field
+        label="容器号"
         v-model="searchContainer"
-        :items="['A', 'B', 'C', 'D', 'E', 'F', 'Z']"
         variant="outlined"
         density="compact"
         hide-details
         class="mt-2"
-      ></v-select>
+      ></v-text-field>
     </v-col>
-    <v-col cols="2">
+    <v-col cols="3">
       <v-text-field
         label="物料名称"
         v-model="searchName"
@@ -158,7 +216,7 @@ function resetFilter() {}
         class="mt-2"
       ></v-text-field>
     </v-col>
-    <v-col cols="2">
+    <v-col cols="3">
       <v-text-field
         label="物料规格"
         v-model="searchGg"
@@ -168,7 +226,7 @@ function resetFilter() {}
         class="mt-2"
       ></v-text-field>
     </v-col>
-    <v-col cols="2">
+    <v-col cols="3">
       <v-text-field
         label="物料编码"
         v-model="searchCode"
@@ -178,10 +236,32 @@ function resetFilter() {}
         class="mt-2"
       ></v-text-field>
     </v-col>
-    <v-col cols="2">
+    <v-col cols="3">
       <v-text-field
         label="批次"
         v-model="searchLot"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="最早创建时间"
+        v-model="searchDateStart"
+        type="date"
+        variant="outlined"
+        density="compact"
+        hide-details
+        class="mt-2"
+      ></v-text-field>
+    </v-col>
+    <v-col cols="3">
+      <v-text-field
+        label="最晚创建时间"
+        v-model="searchDateEnd"
+        type="date"
         variant="outlined"
         density="compact"
         hide-details
