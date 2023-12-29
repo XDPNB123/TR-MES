@@ -99,7 +99,7 @@ async function getBillData() {
       sku_name: searchName.value,
       sku_spec: searchGg.value,
       flag_sync: "Y",
-      target_warehouse: "A",
+      target_warehouse: searchWareHouse.value,
       date_puton_from: searchDateStart,
       date_puton_to: searchDateEnd,
     }
@@ -134,7 +134,10 @@ async function getBillData() {
       flag_done: "Y",
     }
   );
-  await data2.data.forEach((item_: any) => {
+  data2.data = data2.data.filter(
+    (item: any) => item.place_code.charAt(0) === searchWareHouse.value
+  );
+  data2.data.forEach((item_: any) => {
     billList.value.push({
       type: "out",
       place_code: item_.place_code,
@@ -159,6 +162,10 @@ onMounted(() => {
 });
 //搜索名称
 let searchArea = ref<any>("");
+let searchWareHouse = ref<any>("A");
+watch(searchWareHouse, function () {
+  getBillData();
+});
 let searchContainer = ref<any>("");
 let searchName = ref<any>("");
 let searchGg = ref<any>("");
@@ -269,16 +276,35 @@ function resetFilter() {
       ></v-text-field>
     </v-col>
     <v-col cols="12">
-      <v-btn
-        color="blue-darken-2"
-        class="mr-2 mt-2"
-        size="default"
-        @click="filter"
-        >查询</v-btn
-      >
-      <v-btn color="red" class="mr-2 mt-2" size="default" @click="resetFilter"
-        >重置查询</v-btn
-      >
+      <v-row>
+        <v-col cols="9">
+          <v-btn
+            color="blue-darken-2"
+            class="mr-2 mt-2"
+            size="default"
+            @click="filter"
+            >查询</v-btn
+          >
+          <v-btn
+            color="red"
+            class="mr-2 mt-2"
+            size="default"
+            @click="resetFilter"
+            >重置查询</v-btn
+          >
+        </v-col>
+        <v-col cols="3">
+          <v-select
+            label="仓库"
+            v-model="searchWareHouse"
+            :items="['A', 'B', 'C', 'D', 'E', 'F', 'G']"
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="mt-2"
+          ></v-select>
+        </v-col>
+      </v-row>
     </v-col>
     <v-col cols="12">
       <v-data-table
