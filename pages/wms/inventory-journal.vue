@@ -78,7 +78,7 @@ let Headers = ref<any[]>([
     title: "操作时间",
     align: "center",
     key: "date",
-    sortable: false,
+    sortable: true,
     filterable: true,
   },
 ]);

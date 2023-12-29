@@ -132,6 +132,11 @@ function addHour() {
   });
   hour.value /= 100;
 }
+let expanded = ref<any[]>([]);
+function show(columns: any, item: any) {
+  console.log(columns);
+  console.log(item.raw);
+}
 </script>
 <template>
   <v-row class="ma-2">
@@ -246,7 +251,16 @@ function addHour() {
         fixed-header
         height="610"
         no-data-text="没有找到符合的数据"
-      ></v-data-table>
+        show-expand
+        v-model:expanded="expanded"
+        item-value="project_code"
+      >
+        <template v-slot:expanded-row="{ columns, item }">
+         <div class="d-flex justify-space-around">
+
+         </div>
+        </template>
+      </v-data-table>
     </v-col>
     <v-dialog v-model="showDialog" min-width="400px" width="560px">
       <v-card>
