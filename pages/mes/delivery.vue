@@ -1404,20 +1404,6 @@ function focusInput(inputRef: any) {
                 autofocus
                 v-model="item.production"
                 hide-details
-                @keydown.up.prevent="
-                  focusInput(
-                    `input${
-                      index === 0 ? addDetailList.length - 1 : index - 1
-                    }1`
-                  )
-                "
-                @keydown.down.prevent="
-                  focusInput(
-                    `input${
-                      index === addDetailList.length - 1 ? 0 : index + 1
-                    }1`
-                  )
-                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
@@ -1429,20 +1415,6 @@ function focusInput(inputRef: any) {
                 autofocus
                 v-model="item.model"
                 hide-details
-                @keydown.up.prevent="
-                  focusInput(
-                    `input${
-                      index === 0 ? addDetailList.length - 1 : index - 1
-                    }2`
-                  )
-                "
-                @keydown.down.prevent="
-                  focusInput(
-                    `input${
-                      index === addDetailList.length - 1 ? 0 : index + 1
-                    }2`
-                  )
-                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
@@ -1454,20 +1426,6 @@ function focusInput(inputRef: any) {
                 density="compact"
                 v-model="item.qty"
                 hide-details
-                @keydown.up.prevent="
-                  focusInput(
-                    `input${
-                      index === 0 ? addDetailList.length - 1 : index - 1
-                    }3`
-                  )
-                "
-                @keydown.down.prevent="
-                  focusInput(
-                    `input${
-                      index === addDetailList.length - 1 ? 0 : index + 1
-                    }3`
-                  )
-                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
@@ -1479,20 +1437,6 @@ function focusInput(inputRef: any) {
                 density="compact"
                 v-model="item.unit"
                 hide-details
-                @keydown.up.prevent="
-                  focusInput(
-                    `input${
-                      index === 0 ? addDetailList.length - 1 : index - 1
-                    }4`
-                  )
-                "
-                @keydown.down.prevent="
-                  focusInput(
-                    `input${
-                      index === addDetailList.length - 1 ? 0 : index + 1
-                    }4`
-                  )
-                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
@@ -1505,20 +1449,6 @@ function focusInput(inputRef: any) {
                 density="compact"
                 v-model="item.rmks"
                 hide-details
-                @keydown.up.prevent="
-                  focusInput(
-                    `input${
-                      index === 0 ? addDetailList.length - 1 : index - 1
-                    }5`
-                  )
-                "
-                @keydown.down.prevent="
-                  focusInput(
-                    `input${
-                      index === addDetailList.length - 1 ? 0 : index + 1
-                    }5`
-                  )
-                "
               ></v-text-field>
             </v-col>
             <v-col cols="2">
