@@ -1,39 +1,41 @@
 <script setup lang="ts"></script>
 
 <template>
-  <v-row>
-    <v-col cols="6">
+  <v-carousel class="h-100" touch>
+    <v-carousel-item cover>
       <iframe
         class="box"
         src="http://10.0.20.61:8051/ji-jia-gong"
         width="100%"
-        style="aspect-ratio: 16/9"
-      ></iframe
-    ></v-col>
-    <v-col cols="6"
-      ><iframe
+        height="100%"
+      ></iframe>
+    </v-carousel-item>
+
+    <v-carousel-item cover>
+      <iframe
         class="box"
         src="http://10.0.20.61:8051/ban-jin"
         width="100%"
-        style="aspect-ratio: 16/9"
-      ></iframe
-    ></v-col>
-    <v-col cols="6">
+        height="100%"
+      ></iframe>
+    </v-carousel-item>
+
+    <v-carousel-item cover>
       <iframe
         class="box"
         src="http://10.0.20.61:8051/zhuang-pei"
         width="100%"
-        style="aspect-ratio: 16/9"
-      ></iframe
-    ></v-col>
-    <v-col cols="6">
+        height="100%"
+      ></iframe>
+    </v-carousel-item>
+    <v-carousel-item cover>
       <iframe
         class="box"
         src="http://10.0.20.61:8051/qi-ta"
         width="100%"
-        style="aspect-ratio: 16/9"
-      ></iframe
-    ></v-col>
-  </v-row>
+        height="100%"
+      ></iframe>
+    </v-carousel-item>
+  </v-carousel>
 </template>
 <style scoped></style>
