@@ -19,6 +19,7 @@ definePageMeta({
 let editDialog = ref<boolean>(false);
 let addDialog = ref<boolean>(false);
 let delDialog = ref<boolean>(false);
+let addShowDialog = ref<boolean>(false);
 let headers = ref<any[]>([
   {
     title: "派工单号",
@@ -193,27 +194,9 @@ async function delInfo() {
 }
 //新增委外工序
 function showAdd() {
-  outSourceInfo.value = {
-    dispatch_order: "",
-    supplier_id: "",
-    material_id: "",
-    acceptance_criteria: "",
-    outsourced_quantity: "",
-    unit: "",
-    outsourced_start_date: "",
-    outsourced_finish_date: "",
-    outsourced_status: "新建",
-  };
+  selectedRows.value = [];
+  getDispatch();
   addDialog.value = true;
-}
-async function addInfo() {
-  const data: any = await useHttp(
-    "/QaOrder/M82AddQaOrder",
-    "post",
-    outSourceInfo.value
-  );
-  getOutSourceData();
-  addDialog.value = false;
 }
 
 //派工单表头
@@ -240,6 +223,13 @@ let orderHeader = ref<any[]>([
     filterable: true,
   },
   {
+    title: "工序",
+    align: "center",
+    key: "procedure_description",
+    sortable: false,
+    filterable: true,
+  },
+  {
     title: "计划数量",
     align: "center",
     key: "planned_quantity",
@@ -258,11 +248,74 @@ let orderHeader = ref<any[]>([
 let selectedRows = ref<any[]>([]);
 //存储派工单数据
 let tableData = ref<any[]>([]);
+//搜索条件
+let searchDo = ref<any>("");
+let searchName2 = ref<any>("");
+let searchCode = ref<any>("");
 //获取数据库数据
-async function getDispatch() {}
+async function getDispatch() {
+  const data: any = await useHttp(
+    "/ProductionRecode/M21ProductionRecodeList",
+    "get",
+    undefined,
+    {
+      PageIndex: 1,
+      PageSize: 100000,
+      SortedBy: "id",
+      SortType: "1",
+      status: "已执行在生产",
+      dispatch_order: searchDo.value,
+      material_name: searchName2.value,
+      material_id: searchCode.value,
+      defaul_outsource: "Y",
+    }
+  );
+  tableData.value = data.data.pageList;
+}
 
-function filter2() {}
-function resetFilter2() {}
+function filter2() {
+  getDispatch();
+}
+function resetFilter2() {
+  searchDo.value = "";
+  searchName2.value = "";
+  searchCode.value = "";
+  getDispatch();
+}
+let tabArr = ref<any[]>([]);
+function addInfo() {
+  tabArr.value = [];
+  selectedRows.value.forEach((item: any) => {
+    tabArr.value.push({
+      supplier_id: "",
+      procedure_id: item.procedure_id,
+      workorder_hid: item.workorder_hid,
+      workorder_did: item.workorder_did,
+      dispatch_order: item.dispatch_order,
+      material_id: item.material_id,
+      material_name: item.material_name,
+      material_spec: "",
+      acceptance_criteria: "",
+      outsourced_quantity: "0",
+      received_quantity: "0",
+      unit: item.unit,
+      outsourced_status: "新建",
+      outsourced_start_date: new Date().toISOString().substring(0, 10),
+      outsourced_finish_date: null,
+    });
+  });
+  addShowDialog.value = true;
+}
+async function addDetailSucces() {
+  const data: any = await useHttp(
+    "/QaOrder/M82AddQaOrder",
+    "post",
+    tabArr.value
+  );
+  getOutSourceData();
+  addShowDialog.value = false;
+  addDialog.value = false;
+}
 </script>
 <template>
   <v-row class="ma-2">
@@ -395,11 +448,13 @@ function resetFilter2() {}
                 variant="outlined"
                 density="compact"
                 hide-details
+                v-model="searchDo"
               ></v-text-field>
             </v-col>
             <v-col cols="4">
               <v-text-field
                 label="物料名称"
+                v-model="searchName2"
                 variant="outlined"
                 density="compact"
                 hide-details
@@ -408,6 +463,7 @@ function resetFilter2() {}
             <v-col cols="4">
               <v-text-field
                 label="物料编码"
+                v-model="searchCode"
                 variant="outlined"
                 density="compact"
                 hide-details
@@ -581,6 +637,97 @@ function resetFilter2() {}
             确认
           </v-btn>
           <v-btn color="grey" size="large" @click="delDialog = false">
+            取消
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+    <!-- 检查新增委外工序信息 -->
+    <v-dialog v-model="addShowDialog" min-width="1400px" width="560px">
+      <v-card>
+        <v-toolbar color="blue">
+          <v-toolbar-title> 检查新增委外工序信息 </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="addShowDialog = false">
+            <v-icon>fa-solid fa-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-4">
+          <v-row v-for="(item, index) in tabArr">
+            <v-col cols="2">
+              <v-text-field
+                label="物料名称"
+                readonly
+                variant="outlined"
+                density="compact"
+                autofocus
+                v-model="item.material_name"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="供应商"
+                variant="outlined"
+                density="compact"
+                autofocus
+                v-model="item.supplier_id"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="验收标准"
+                autofocus
+                variant="outlined"
+                density="compact"
+                v-model="item.acceptance_criteria"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="数量"
+                autofocus
+                variant="outlined"
+                density="compact"
+                v-model="item.outsourced_quantity"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="单位"
+                autofocus
+                variant="outlined"
+                density="compact"
+                v-model="item.unit"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                label="日期"
+                type="date"
+                autofocus
+                variant="outlined"
+                density="compact"
+                v-model="item.outsourced_start_date"
+                hide-details
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <div class="d-flex justify-end mr-6 mb-4">
+          <v-btn
+            color="blue-darken-2"
+            size="large"
+            class="mr-2"
+            @click="addDetailSucces()"
+          >
+            确认
+          </v-btn>
+          <v-btn color="grey" size="large" @click="addShowDialog = false">
             取消
           </v-btn>
         </div>
