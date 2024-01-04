@@ -18,6 +18,9 @@ useSeoMeta({
 definePageMeta({
   keepalive: true,
 });
+// 获取消息条对象
+const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
+  useSnackbar();
 const router = useRouter();
 //弹框
 let addDialog = ref<boolean>(false);
@@ -274,7 +277,9 @@ async function getDate() {
   );
   orderList.value = data.data.map((item: any) => {
     item.order_date = item.order_date.substring(0, 10);
-    item.reserved10 = item.reserved10.substring(0, 10);
+    if (!item.reserved10) {
+      item.reserved10 = null;
+    }
     return item;
   });
   orderCode.value = orderList.value[0].out_order_num;
@@ -308,7 +313,7 @@ onMounted(() => {
   getDate();
 });
 //清单对象
-let orderInfo = ref<any>("");
+let orderInfo = ref<any>(null);
 //打开清单添加弹框
 function showAddDialog() {
   orderInfo.value = {
@@ -336,8 +341,13 @@ async function addSucces() {
   const data: any = await useHttp("/WmsOutOrder/G167AddOutOrder", "post", [
     orderInfo.value,
   ]);
-  getDate();
-  addDialog.value = false;
+  if (data.code === 200) {
+    setSnackbar("green", "新增成功");
+    getDate();
+    addDialog.value = false;
+  } else {
+    setSnackbar("black", "新增失败");
+  }
 }
 //清单修改
 function showEditDialog(item: any) {
@@ -350,8 +360,13 @@ async function editSucces() {
     "put",
     orderInfo.value
   );
-  getDate();
-  editDialog.value = false;
+  if (data.code === 200) {
+    setSnackbar("green", "修改成功");
+    getDate();
+    editDialog.value = false;
+  } else {
+    setSnackbar("black", "修改失败");
+  }
 }
 //清单删除
 function showDelDialog(item: any) {
@@ -368,9 +383,14 @@ async function delSucces() {
       out_order_num: orderInfo.value.out_order_num,
     }
   );
-  getDate();
-  getDateDetail();
-  deleteDialog.value = false;
+  if (data.code === 200) {
+    setSnackbar("green", "删除成功");
+    getDate();
+    getDateDetail();
+    deleteDialog.value = false;
+  } else {
+    setSnackbar("black", "删除失败");
+  }
 }
 //清单审核
 function showAuditDialog(item: any) {
@@ -393,9 +413,14 @@ async function auditSucces() {
     return item;
   });
   await useHttp("/WmsOutOrder/G172UptOutDetial", "put", detailList.value);
-  getDate();
-  getDateDetail();
-  auditDialog.value = false;
+  if (data.code === 200) {
+    setSnackbar("green", "审核通过");
+    getDate();
+    getDateDetail();
+    auditDialog.value = false;
+  } else {
+    setSnackbar("black", "审核失败,可能是网络原因");
+  }
 }
 
 //清单明细对象
@@ -429,8 +454,21 @@ async function addDetailSucces() {
     "post",
     tabArr
   );
-  getDateDetail();
-  addDetailDialog.value = false;
+
+  if (data.code === 200) {
+    setSnackbar("green", "新增成功");
+    selected.value = selected.value.map((item: any) => {
+      item.flag_occupy = "Y";
+      return item;
+    });
+
+    await useHttp("/wmsInventory/G113update", "put", selected.value);
+
+    getDateDetail();
+    addDetailDialog.value = false;
+  } else {
+    setSnackbar("black", "新增失败");
+  }
 }
 //清单明细修改
 function showEditDetailDialog(item: any) {
@@ -475,6 +513,7 @@ async function getInventoryData() {
     lot: searchLot.value,
     reserved01: "",
     sku_spec: searchSkuSpec.value,
+    flag_occupy: "N",
   });
   inventoryList.value = data.data.map((item: any) => {
     item.time_in = item.time_in.substring(0, 10);
@@ -681,6 +720,7 @@ function buildTree(parents: any, children: any) {
                   size="small"
                   class="mr-3"
                   @click.stop="showEditDialog(item.raw)"
+                  v-if="item.raw.order_status === '新建'"
                   v-permission="
                     `${router.currentRoute.value.fullPath}->updateOrder`
                   "
@@ -692,6 +732,7 @@ function buildTree(parents: any, children: any) {
                   color="red"
                   size="small"
                   @click.stop="showDelDialog(item.raw)"
+                  v-if="item.raw.order_status === '新建'"
                   v-permission="
                     `${router.currentRoute.value.fullPath}->deleteOrder`
                   "
@@ -1092,6 +1133,7 @@ function buildTree(parents: any, children: any) {
                   color="red"
                   size="small"
                   @click="showDelDetailDialog(item.raw)"
+                  v-if="item.raw.detail_status === '新建'"
                   v-permission="
                     `${router.currentRoute.value.fullPath}->deleteDetail`
                   "
@@ -1554,4 +1596,10 @@ function buildTree(parents: any, children: any) {
       </v-card>
     </v-dialog>
   </v-row>
+  <v-snackbar location="top" v-model="snackbarShow" :color="snackbarColor">
+    {{ snackbarText }}
+    <template v-slot:actions>
+      <v-btn variant="tonal" @click="snackbarShow = false">关闭</v-btn>
+    </template>
+  </v-snackbar>
 </template>
