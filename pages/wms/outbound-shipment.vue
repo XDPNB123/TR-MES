@@ -459,10 +459,11 @@ async function addDetailSucces() {
     setSnackbar("green", "新增成功");
     selected.value = selected.value.map((item: any) => {
       item.flag_occupy = "Y";
+      item.qty = item.qty.toString();
       return item;
     });
 
-    await useHttp("/wmsInventory/G113update", "put", selected.value);
+    await useHttp("/wmsInventory/G113update", "post", selected.value);
 
     getDateDetail();
     addDetailDialog.value = false;
