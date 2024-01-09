@@ -407,6 +407,7 @@ let selected = ref<any[]>([]);
 
 let searchName = ref<any>("");
 let searchMac = ref<any>("");
+let searchTotalName = ref<any>("");
 //外购件搜素
 let searchProduct = ref<any>("");
 let searchTypeName = ref<any>("");
@@ -469,6 +470,7 @@ async function productList() {
         projectCode: projectCode.value,
         partName: searchName.value,
         totalCode: searchMac.value,
+        totalName: searchTotalName.value,
       }
     );
     if (!data.data.totalCount) {
@@ -517,6 +519,7 @@ function resetFilterNameProduct() {
   if (searchTypeName.value === "自制件") {
     searchName.value = "";
     searchMac.value = "";
+    searchTotalName.value = "";
     productList();
   } else {
     searchName.value = "";
@@ -1431,6 +1434,16 @@ function focusInput(inputRef: any) {
                 variant="outlined"
                 density="compact"
                 v-model="projectCode"
+                hide-details
+                @keydown.enter="filterNameProduct()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="3" v-show="searchTypeName === '自制件'">
+              <v-text-field
+                label="总装物料名"
+                variant="outlined"
+                density="compact"
+                v-model="searchTotalName"
                 hide-details
                 @keydown.enter="filterNameProduct()"
               ></v-text-field>
