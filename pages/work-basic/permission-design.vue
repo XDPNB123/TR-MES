@@ -233,7 +233,7 @@ function showAddBtn(item: any) {
     <v-dialog v-model="addFolderDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 新增零部件 </v-toolbar-title>
+          <v-toolbar-title> 新增文件权限 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="addFolderDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -300,7 +300,7 @@ function showAddBtn(item: any) {
     <v-dialog v-model="addPageDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 新增零部件 </v-toolbar-title>
+          <v-toolbar-title> 新增页面权限 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="addPageDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -367,7 +367,7 @@ function showAddBtn(item: any) {
     <v-dialog v-model="addBtnDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 新增零部件 </v-toolbar-title>
+          <v-toolbar-title> 新增按钮权限 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="addBtnDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
