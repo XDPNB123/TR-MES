@@ -421,33 +421,6 @@ watch(searchTypeName, async function () {
   }
 });
 
-//新增单个明细
-function showAdd() {
-  addDetailDialog3.value = true;
-  detailInfo.value = {
-    packcode: packCode.value,
-    production: "",
-    qty: "",
-    unit: "件",
-    rmks: "",
-    model: "",
-  };
-}
-async function addDetailSucces2() {
-  const data: any = await useHttp(
-    "/PackingList/M98AddPackingListDetial",
-    "post",
-    [detailInfo.value]
-  );
-  if (data.code === 200) {
-    addDetailDialog3.value = false;
-    getDetailData();
-    setSnackbar("green", "新增成功");
-  } else {
-    setSnackbar("black", "新增失败");
-  }
-}
-
 //新增装箱单明细信息
 function showAddDetail() {
   selected.value = [];
@@ -1145,15 +1118,6 @@ function focusInput(inputRef: any) {
               v-show="packCode"
               @click="showAddDetail"
               v-permission="`${router.currentRoute.value.fullPath}->addDetail`"
-              >批量新增</v-btn
-            >
-            <v-btn
-              color="blue-darken-2"
-              class="mr-2 mt-2"
-              size="default"
-              v-show="packCode"
-              @click="showAdd"
-              v-permission="`${router.currentRoute.value.fullPath}->addDetail2`"
               >新增明细</v-btn
             >
           </v-col>
@@ -1339,73 +1303,6 @@ function focusInput(inputRef: any) {
     </v-dialog>
 
     <!-- 新增装箱单明细 -->
-    <v-dialog v-model="addDetailDialog3" min-width="400px" width="560px">
-      <v-card>
-        <v-toolbar color="blue">
-          <v-toolbar-title> 新增装箱单明细</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="addDetailDialog3 = false">
-            <v-icon>fa-solid fa-close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-card-text class="mt-4">
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                label="产品名称"
-                v-model="detailInfo.production"
-                clearable
-                hide-details
-              ></v-text-field>
-            </v-col>
-
-            <v-col cols="12">
-              <v-text-field
-                label="产品规格"
-                v-model="detailInfo.model"
-                hide-details
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="数量"
-                v-model="detailInfo.qty"
-                hide-details
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-select
-                label="单位"
-                v-model="detailInfo.unit"
-                :items="units"
-                hide-details
-              ></v-select>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="备注"
-                v-model="detailInfo.rmks"
-                hide-details
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <div class="d-flex justify-end mr-6 mb-4">
-          <v-btn
-            color="blue-darken-2"
-            size="large"
-            class="mr-2"
-            @click="addDetailSucces2()"
-          >
-            确认
-          </v-btn>
-          <v-btn color="grey" size="large" @click="addDetailDialog3 = false">
-            取消
-          </v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
-    <!-- 新增装箱单明细 -->
     <v-dialog v-model="addDetailDialog" min-width="1800px" width="560px">
       <v-card>
         <v-toolbar color="blue">
@@ -1547,7 +1444,6 @@ function focusInput(inputRef: any) {
               <v-text-field
                 :ref="`input${index}1`"
                 label="产品"
-                readonly
                 variant="outlined"
                 density="compact"
                 autofocus
@@ -1592,7 +1488,6 @@ function focusInput(inputRef: any) {
               <v-text-field
                 :ref="`input${index}5`"
                 label="备注"
-                readonly
                 autofocus
                 variant="outlined"
                 density="compact"
