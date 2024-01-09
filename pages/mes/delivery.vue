@@ -1150,6 +1150,7 @@ function focusInput(inputRef: any) {
               size="default"
               v-show="packCode"
               @click="showAdd"
+              v-permission="`${router.currentRoute.value.fullPath}->addDetail2`"
               >新增明细</v-btn
             >
           </v-col>
