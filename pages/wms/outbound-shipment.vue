@@ -490,7 +490,7 @@ async function delDetailSucces() {
     "delete",
     undefined,
     {
-      id: detailInfo.value.id,
+      id: detailInfo.value.id, 
     }
   );
   getDateDetail();
@@ -501,7 +501,7 @@ let inventoryList = ref<any[]>([]);
 //多选
 let selected = ref<any[]>([]);
 //获取数据库数据
-async function getInventoryData() {
+async function getInventoryData() { 
   const data: any = await useHttp("/wmsInventory/G115condition_query", "post", {
     container_id: searchCtnId.value,
     place_code: searchPlaceId.value,
