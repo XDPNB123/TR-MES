@@ -85,7 +85,7 @@ async function passwordLogin() {
   // useCookie("refreshToken").value = data.refresh_token;
 
   // 登陆成功的提示
-  const data2: any = await useHttp("/wms-permissions", "get", undefined);
+  const data2: any = await useHttp("/wms-permissions", "get");
   const menuList: any = [];
   data2.data.forEach((item: any) => {
     menuList.push({
@@ -94,10 +94,11 @@ async function passwordLogin() {
       name: item.attributes.permission_title,
       path: item.attributes.page_url,
       pid: item.attributes.parent_id,
+      sort_node: item.attributes.sort_node,
       show: true,
     });
   });
-
+  menuList.sort((a: any, b: any) => a.sort_node - b.sort_node);
   useCookieSplit("menuList", 5, menuList);
   // useCookieSplit("btnList", 10, data.data.btnList);
   setSnackbar("green", "登陆成功，正在跳转...");

@@ -14,7 +14,9 @@ useSeoMeta({
 });
 // 不采用布局
 definePageMeta({
-  layout: false,
+  layout: "default",
 });
 </script>
-<template></template>
+<template>
+  <div>类别管理</div>
+</template>
