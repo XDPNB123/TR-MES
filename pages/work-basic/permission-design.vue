@@ -18,15 +18,14 @@ let pageUrlList = ref<any[]>([]);
 let btnList = ref<any[]>([]);
 //获取文件夹数据
 async function getFolderData() {
-  const data: any = await useHttp(
-    "/Permissions/A16GetPermissionsList",
-    "get",
-    undefined,
-    {
-      pid: 0,
-      platform: searchType.value,
-    }
-  );
+  // 使用 Strapi 的过滤语法构建查询参数
+  const queryParams = new URLSearchParams({
+    "filters[parent_id][$eq]": "0",
+  }).toString();
+
+  // 将查询参数附加到 URL
+  const data: any = await useHttp(`/wms-permissions?${queryParams}`, "get");
+
   folderList.value = data.data;
 }
 //暂存文件夹对象
@@ -39,15 +38,12 @@ function showPageUrlData(item: any) {
   getPageUrlData();
 }
 async function getPageUrlData() {
-  const data: any = await useHttp(
-    "/Permissions/A16GetPermissionsList",
-    "get",
-    undefined,
-    {
-      pid: folderInfo.value.permission_id,
-      platform: folderInfo.value.platform,
-    }
-  );
+  // 使用 Strapi 的过滤语法构建查询参数
+  const queryParams = new URLSearchParams({
+    "filters[parent_id][$eq]": folderInfo.value.id,
+  }).toString();
+
+  const data: any = await useHttp(`/wms-permissions?${queryParams}`, "get");
   pageUrlList.value = data.data;
 }
 //点击查看当前页面下的按钮权限
@@ -57,15 +53,12 @@ function showBtnData(item: any) {
 }
 //点击查看当前页面下的按钮权限
 async function getBtnData() {
-  const data: any = await useHttp(
-    "/Permissions/A16GetPermissionsList",
-    "get",
-    undefined,
-    {
-      pid: pageInfo.value.permission_id,
-      platform: pageInfo.value.platform,
-    }
-  );
+  // 使用 Strapi 的过滤语法构建查询参数
+  const queryParams = new URLSearchParams({
+    "filters[parent_id][$eq]": pageInfo.value.id,
+  }).toString();
+
+  const data: any = await useHttp(`/wms-permissions?${queryParams}`, "get");
   btnList.value = data.data;
 }
 //新增权限
@@ -76,18 +69,18 @@ function showAdd() {
   permissionInfo.value = {
     permission_title: "",
     parent_id: 0,
+    sort_node: 0,
     permission_api_url: "",
     page_url: "",
     is_menu: true,
     icon_name: "",
     action_name: "",
-    platform: "PC",
   };
   addFolderDialog.value = true;
 }
 //确认新增
 async function addPermission() {
-  await useHttp("/Permissions/A17AddPermissions", "post", permissionInfo.value);
+  await useHttp("/wms-permissions", "post", { data: permissionInfo.value });
   addFolderDialog.value = false;
   addPageDialog.value = false;
   addBtnDialog.value = false;
@@ -99,13 +92,13 @@ async function addPermission() {
 function showAddPage() {
   permissionInfo.value = {
     permission_title: "",
-    parent_id: folderInfo.value.permission_id,
+    sort_node: 0,
+    parent_id: folderInfo.value.id,
     permission_api_url: "",
-    page_url: "",
+    page_url: folderInfo.value.attributes.page_url,
     is_menu: true,
     icon_name: "",
     action_name: "",
-    platform: "PC",
   };
   addPageDialog.value = true;
 }
@@ -113,13 +106,13 @@ function showAddPage() {
 function showAddBtn(item: any) {
   permissionInfo.value = {
     permission_title: "",
-    parent_id: item.permission_id,
+    sort_node: 0,
+    parent_id: item.id,
     permission_api_url: "",
-    page_url: item.page_url,
+    page_url: item.attributes.page_url,
     is_menu: false,
     icon_name: "",
     action_name: "",
-    platform: "PC",
   };
   addBtnDialog.value = true;
 }
@@ -164,7 +157,8 @@ function showAddBtn(item: any) {
               :key="index"
               @click="showPageUrlData(item)"
             >
-              <v-list-item :title="item.permission_title"> </v-list-item>
+              <v-list-item :title="item.attributes.permission_title">
+              </v-list-item>
             </v-list>
           </v-col>
         </v-row>
@@ -195,7 +189,7 @@ function showAddBtn(item: any) {
               <v-expansion-panel
                 v-for="(item, index) in pageUrlList"
                 :key="index"
-                :title="item.permission_title"
+                :title="item.attributes.permission_title"
                 @click="showBtnData(item)"
               >
                 <v-expansion-panel-text>
@@ -217,7 +211,7 @@ function showAddBtn(item: any) {
                         v-for="(item_, index_) in btnList"
                         :key="index_"
                       >
-                        <v-list-item :title="item_.permission_title">
+                        <v-list-item :title="item_.attributes.permission_title">
                         </v-list-item>
                       </v-list>
                     </v-col>
@@ -233,7 +227,7 @@ function showAddBtn(item: any) {
     <v-dialog v-model="addFolderDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 新增零部件 </v-toolbar-title>
+          <v-toolbar-title> 新增文件权限 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="addFolderDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -271,13 +265,6 @@ function showAddBtn(item: any) {
                 hide-details
               ></v-text-field>
             </v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="客户端"
-                v-model="permissionInfo.platform"
-                hide-details
-              ></v-text-field>
-            </v-col>
           </v-row>
         </v-card-text>
 
@@ -300,7 +287,7 @@ function showAddBtn(item: any) {
     <v-dialog v-model="addPageDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 新增零部件 </v-toolbar-title>
+          <v-toolbar-title> 新增页面权限 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="addPageDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -338,13 +325,6 @@ function showAddBtn(item: any) {
                 hide-details
               ></v-text-field>
             </v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="客户端"
-                v-model="permissionInfo.platform"
-                hide-details
-              ></v-text-field>
-            </v-col>
           </v-row>
         </v-card-text>
 
@@ -367,7 +347,7 @@ function showAddBtn(item: any) {
     <v-dialog v-model="addBtnDialog" min-width="400px" width="560px">
       <v-card>
         <v-toolbar color="blue">
-          <v-toolbar-title> 新增零部件 </v-toolbar-title>
+          <v-toolbar-title> 新增按钮权限 </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="addBtnDialog = false">
             <v-icon>fa-solid fa-close</v-icon>
@@ -408,13 +388,6 @@ function showAddBtn(item: any) {
               <v-text-field
                 label="按钮名"
                 v-model="permissionInfo.action_name"
-                hide-details
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="客户端"
-                v-model="permissionInfo.platform"
                 hide-details
               ></v-text-field>
             </v-col>

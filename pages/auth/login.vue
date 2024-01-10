@@ -17,6 +17,7 @@ definePageMeta({
   layout: false,
 });
 onMounted(() => {
+  useCookie("token").value = null;
   // 页面初始动画
   useGsap.from(".initial-animation", {
     y: 100,
@@ -55,23 +56,9 @@ let passwordFormValid = ref<boolean>(false);
 
 // 验证码
 let captcha = ref<string>("");
-// 手机号登陆的表单校验
-let captchaFormValid = ref<boolean>(false);
-
-// 下拉框选中时的返回结果（需要设置选中项）
-let selectedCompany = ref<any>({
-  companyName: "同日自动化",
-  companyCode: "001",
-});
-// 下拉框绑定的所有公司帐套
-let allCompany = ref<any>([{ companyName: "同日自动化", companyCode: "001" }]);
 
 // 手机号校验规则
-const telRule = ref<any[]>([
-  (v: any) => !!v || "手机号不能为空",
-  (v: any) =>
-    /^(?:(?:\+|00)86)?1[3-9]\d{9}$/.test(v) || "请输入满足规则的手机号",
-]);
+const telRule = ref<any[]>([(v: any) => !!v || "不能为空"]);
 
 // 密码校验规则
 const passwordRule = ref<any[]>([
@@ -89,82 +76,31 @@ async function passwordLogin() {
   const md5Password = useMd5(password.value as string);
 
   // 发送登陆请求
-  const data: any = await useHttp("/Account/A01LoginV1", "post", {
-    login_name: tel.value,
-    password_md5: md5Password,
-    platform: "PC",
-    select_company_id: "000",
-    platform_version: "网页1.00",
+  const data: any = await useHttp("/auth/local", "post", {
+    identifier: tel.value,
+    password: md5Password,
   });
 
-  // 登陆失败出现提示，并则直接返回;
-  if (data.code === 201) return setSnackbar("black", "账号不存在或密码错误");
+  useCookie("token").value = data.jwt;
+  // useCookie("refreshToken").value = data.refresh_token;
 
-  // 登陆成功，则储存 Cookie
-  console.log(data.data.menuList.length);
-  useCookie("tel").value = tel.value;
-  useCookie("password").value = password.value;
-  useCookie("name").value = data.data.userClaims.name;
-  useCookie("token").value = data.token;
-  useCookie("refreshToken").value = data.refresh_token;
-  useCookieSplit("menuList", 5, data.data.menuList);
-  useCookieSplit("btnList", 10, data.data.btnList);
   // 登陆成功的提示
-  setSnackbar("green", "登陆成功，正在跳转...");
-
-  setTimeout(function () {
-    router.push({ path: "/home" });
-  }, 1000);
-}
-
-// 获取验证码
-async function getCaptcha() {
-  // 表单校验不成功则直接返回
-  if (!captchaFormValid.value)
-    return setSnackbar("black", "请确认手机号无误，再点击获取验证码");
-
-  // 验证码倒计时
-  setCountDown(300);
-
-  // 发送获取验证码请求
-  const data: any = await useHttp("/Account/A02GenerateSMSCode", "post", {
-    phone: tel.value,
-    platform: "PC",
-    template: "1890788",
-    platform_version: "magna Excepteur",
+  const data2: any = await useHttp("/wms-permissions", "get");
+  const menuList: any = [];
+  data2.data.forEach((item: any) => {
+    menuList.push({
+      icon: item.attributes.icon_name,
+      id: item.id,
+      name: item.attributes.permission_title,
+      path: item.attributes.page_url,
+      pid: item.attributes.parent_id,
+      sort_node: item.attributes.sort_node,
+      show: true,
+    });
   });
-
-  if (data.code === 404)
-    setSnackbar("black", "同一账号五分钟内请勿重复发送短信");
-}
-
-// 验证码登陆
-async function captchaLogin() {
-  // 表单校验不成功则直接返回
-  if (!captchaFormValid.value) return;
-
-  // 发送登陆请求
-  const data: any = await useHttp("/Account/A03SignInSms", "post", {
-    login_name: tel.value,
-    platform: "PC",
-    sns_code: captcha.value,
-    select_company_id: "96",
-    platform_version: "magna consectetur",
-  });
-
-  // 登陆失败则直接返回
-  if (data.code !== 200) return setSnackbar("black", "验证码错误");
-
-  // 登陆成功，则储存 Cookie
-  useCookie("tel").value = tel.value;
-  useCookie("password").value = password.value;
-  useCookie("name").value = data.data.name;
-  useCookie("token").value = data.token;
-  useCookie("refreshToken").value = data.refresh_token;
-  useCookieSplit("menuList", 5, data.data.menuList);
-  useCookieSplit("btnList", 10, data.data.btnList);
-
-  // 登陆成功提示
+  menuList.sort((a: any, b: any) => a.sort_node - b.sort_node);
+  useCookieSplit("menuList", 5, menuList);
+  // useCookieSplit("btnList", 10, data.data.btnList);
   setSnackbar("green", "登陆成功，正在跳转...");
 
   setTimeout(function () {
@@ -174,7 +110,6 @@ async function captchaLogin() {
 
 // 函数防抖，防止连续点击登陆按钮时，多次调用后台接口，提升性能
 const debouncePasswordLogin = useDebounce(passwordLogin, 1000);
-const debounceCaptchaLogin = useDebounce(captchaLogin, 1000);
 </script>
 
 <template>
@@ -201,134 +136,55 @@ const debounceCaptchaLogin = useDebounce(captchaLogin, 1000);
         align-self="center"
       >
         <v-card flat max-width="560" min-width="400" class="mx-auto">
-          <v-tabs v-model="tab" color="blue" align-tabs="center">
-            <v-tab class="text-h6" value="密码登陆">密码登陆</v-tab>
-            <v-tab class="text-h6" value="验证码登陆">验证码登陆</v-tab>
-          </v-tabs>
-
           <v-card-text>
-            <v-window v-model="tab">
-              <v-window-item value="密码登陆">
-                <v-form v-model="passwordFormValid" class="mt-6">
-                  <v-text-field
-                    color="blue"
-                    density="comfortable"
-                    variant="outlined"
-                    label="手机号"
-                    :rules="telRule"
-                    v-model="tel"
-                  ></v-text-field>
+            <v-form v-model="passwordFormValid" class="mt-6">
+              <div class="text-h5 mb-6 text-blue text-center">登陆</div>
+              <v-text-field
+                color="blue"
+                density="comfortable"
+                variant="outlined"
+                label="账号"
+                :rules="telRule"
+                v-model="tel"
+              ></v-text-field>
 
-                  <v-text-field
-                    class="mt-3"
-                    color="blue"
-                    density="comfortable"
-                    variant="outlined"
-                    label="密码"
-                    :append-inner-icon="
-                      showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'
-                    "
-                    :type="showPassword ? 'text' : 'password'"
-                    @click:append-inner="showPassword = !showPassword"
-                    :rules="passwordRule"
-                    v-model="password"
-                  ></v-text-field>
+              <v-text-field
+                class="mt-3"
+                color="blue"
+                density="comfortable"
+                variant="outlined"
+                label="密码"
+                :append-inner-icon="
+                  showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'
+                "
+                :type="showPassword ? 'text' : 'password'"
+                @click:append-inner="showPassword = !showPassword"
+                :rules="passwordRule"
+                v-model="password"
+              ></v-text-field>
 
-                  <v-select
-                    class="mt-3"
-                    color="blue"
-                    density="comfortable"
-                    variant="outlined"
-                    label="帐套"
-                    return-object
-                    item-title="companyName"
-                    item-value="companyCode"
-                    :items="allCompany"
-                    v-model="selectedCompany"
-                  ></v-select>
+              <v-btn
+                class="mt-3"
+                color="blue"
+                size="large"
+                rounded="lg"
+                block
+                @click="debouncePasswordLogin()"
+              >
+                登陆
+              </v-btn>
 
-                  <v-btn
-                    class="mt-3"
-                    color="blue"
-                    size="large"
-                    rounded="lg"
-                    block
-                    @click="debouncePasswordLogin()"
-                  >
-                    登陆
-                  </v-btn>
-
-                  <div
-                    class="d-flex justify-space-between mt-6 font-weight-medium text-subtitle-1 text-grey"
-                  >
-                    <div @click="router.push({ path: '/auth/register' })">
-                      没有账号？去注册
-                    </div>
-                    <div
-                      @click="router.push({ path: '/auth/forget-password' })"
-                    >
-                      忘记密码
-                    </div>
-                  </div>
-                </v-form>
-              </v-window-item>
-
-              <v-window-item value="验证码登陆">
-                <v-form v-model="captchaFormValid" class="mt-6">
-                  <v-text-field
-                    color="blue"
-                    density="comfortable"
-                    variant="outlined"
-                    label="手机号"
-                    :rules="telRule"
-                    v-model="tel"
-                  ></v-text-field>
-
-                  <v-text-field
-                    class="mt-3"
-                    color="blue"
-                    density="comfortable"
-                    variant="outlined"
-                    label="验证码"
-                    v-model="captcha"
-                  >
-                    <template v-slot:append-inner>
-                      <v-btn
-                        variant="text"
-                        @click="getCaptcha()"
-                        :disabled="captchaDisable"
-                      >
-                        {{ captchaCountDown }}
-                      </v-btn>
-                    </template>
-                  </v-text-field>
-
-                  <v-select
-                    class="mt-3"
-                    color="blue"
-                    density="comfortable"
-                    variant="outlined"
-                    label="帐套"
-                    return-object
-                    item-title="companyName"
-                    item-value="companyCode"
-                    :items="allCompany"
-                    v-model="selectedCompany"
-                  ></v-select>
-
-                  <v-btn
-                    class="mt-3"
-                    color="blue"
-                    size="large"
-                    rounded="lg"
-                    block
-                    @click="debounceCaptchaLogin()"
-                  >
-                    登陆
-                  </v-btn>
-                </v-form>
-              </v-window-item>
-            </v-window>
+              <div
+                class="d-flex justify-space-between mt-6 font-weight-medium text-subtitle-1 text-grey"
+              >
+                <div @click="router.push({ path: '/auth/register' })">
+                  没有账号？去注册
+                </div>
+                <div @click="router.push({ path: '/auth/forget-password' })">
+                  忘记密码
+                </div>
+              </div>
+            </v-form>
           </v-card-text>
         </v-card>
       </v-col>
