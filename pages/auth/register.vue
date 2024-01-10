@@ -17,6 +17,8 @@ definePageMeta({
   layout: false,
 });
 onMounted(() => {
+  //
+  useCookie("token").value = null;
   // 页面初始动画
   useGsap.from(".initial-animation", {
     x: -100,
@@ -30,9 +32,6 @@ const router = useRouter();
 // 获取消息条对象
 const { snackbarShow, snackbarColor, snackbarText, setSnackbar } =
   useSnackbar();
-// 获取验证码倒计时对象
-const { captchaCountDown, captchaDisable, setCountDown } =
-  useCaptchaCountDown();
 
 // 姓名
 let name = ref<string>("");
@@ -45,7 +44,7 @@ let password = ref<string>("");
 // 是否显示密码
 let showPassword = ref<boolean>(false);
 // 验证码
-let captcha = ref<string>("");
+let captcha = ref<boolean>(false);
 // 手机号登陆的表单校验
 let registerFormValid = ref<boolean>(false);
 
@@ -55,21 +54,10 @@ const nameRule = ref<any[]>([
   (v: any) => v.length < 16 || "姓名长度过长",
 ]);
 
-// 手机号校验规则
-const telRule = ref<any[]>([
-  (v: any) => !!v || "手机号不能为空",
-  (v: any) =>
-    /^(?:(?:\+|00)86)?1[3-9]\d{9}$/.test(v) || "请输入满足规则的手机号",
-]);
-
 // 邮箱校验规则
 const emailRule = ref<any[]>([
-  (v: any) => !!v || "邮箱不能为空",
-
-  (v: any) =>
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-      v
-    ) || "邮箱不合法",
+  (v: string) => !!v || "邮箱不能为空",
+  (v: string) => /.+@.+\..+/.test(v) || "请输入有效的邮箱地址",
 ]);
 
 // 密码校验规则
@@ -79,29 +67,11 @@ const passwordRule = ref<any[]>([
   (v: any) => (v && v.length <= 20) || "密码长度不能超过20位",
 ]);
 
-// 获取验证码
-async function getCaptcha() {
-  // 表单校验不成功则直接返回
-  if (!registerFormValid.value)
-    return setSnackbar("black", "请先完成表单，再点击获取验证码");
-
-  // 验证码倒计时
-  setCountDown(300);
-
-  // 发送获取验证码请求
-  const data: any = await useHttp("/Account/A02GenerateSMSCode", "post", {
-    phone: tel.value,
-    platform: "sit occaecat",
-    template: "1890788",
-    platform_version: "magna Excepteur",
-  });
-
-  if (data.code === 404)
-    return setSnackbar("black", "同一账号五分钟内请勿重复发送短信");
-}
-
 // 注册
 async function registerSubmit() {
+  // 如果验证码校验失败，则直接返回
+  if (!captcha.value) return setSnackbar("black", "请先完成验证码校验");
+
   // 如果注册表单校验失败，则直接返回
   if (!registerFormValid.value) return;
 
@@ -109,25 +79,16 @@ async function registerSubmit() {
   const md5Password = useMd5(password.value);
 
   // 发送注册请求
-  const data: any = await useHttp("/Account/A05UserRegister", "post", {
-    user_name: name.value,
-    phone_num: tel.value,
-    email_address: email.value,
-    verify_code: captcha.value,
-    platform: "PC",
+  const data: any = await useHttp("/auth/local/register", "post", {
+    email: tel.value,
     password: md5Password,
+    username: name.value,
   });
-
-  // 如果账号已存在
-  if (data.code === 1005) return setSnackbar("black", "验证码错误");
 
   // 储存 Cookie
   useCookie("tel").value = tel.value;
   useCookie("password").value = password.value;
   useCookie("name").value = data.user_name;
-  useCookie("token").value = data.token;
-  useCookie("refreshToken").value = data.refresh_token;
-
   // 注册成功
   setSnackbar("green", "注册成功，正在跳转...");
 
@@ -138,6 +99,31 @@ async function registerSubmit() {
 
 // 函数防抖
 const debounceRegisterSubmit = useDebounce(registerSubmit, 1000);
+
+const isShowSelf = ref(true);
+const width = 300;
+const height = 180;
+const imgUrl = "/头像.jpg"; // 这里应该是你的图片地址
+const sText = "向右滑动";
+const eText = "验证通过";
+const isBorder = true;
+const isCloseBtn = true;
+const isReloadBtn = true;
+const isParentNode = false;
+const isShowTip = true;
+
+function emitChange(type: string) {
+  console.log(type);
+  // 根据type的不同，你可以处理不同的事件，例如验证成功或失败
+}
+function succesChange() {
+  captcha.value = true;
+  isShowSelf.value = false;
+  setSnackbar("green", "验证通过");
+}
+function failChange() {
+  setSnackbar("black", "验证失败");
+}
 </script>
 
 <template>
@@ -183,19 +169,9 @@ const debounceRegisterSubmit = useDebounce(registerSubmit, 1000);
                 color="blue"
                 density="comfortable"
                 variant="outlined"
-                label="手机号"
-                :rules="telRule"
-                v-model="tel"
-              ></v-text-field>
-
-              <v-text-field
-                class="mt-3"
-                color="blue"
-                density="comfortable"
-                variant="outlined"
                 label="邮箱"
                 :rules="emailRule"
-                v-model="email"
+                v-model="tel"
               ></v-text-field>
 
               <v-text-field
@@ -212,26 +188,25 @@ const debounceRegisterSubmit = useDebounce(registerSubmit, 1000);
                 :rules="passwordRule"
                 v-model="password"
               ></v-text-field>
-
-              <v-text-field
-                class="mt-3"
-                color="blue"
-                density="comfortable"
-                variant="outlined"
-                label="验证码"
-                v-model="captcha"
-              >
-                <template v-slot:append-inner>
-                  <v-btn
-                    variant="text"
-                    @click="getCaptcha()"
-                    :disabled="captchaDisable"
-                  >
-                    {{ captchaCountDown }}
-                  </v-btn>
-                </template>
-              </v-text-field>
-
+              <slider-verify
+                v-model:is-show-self="isShowSelf"
+                :width="width"
+                :height="height"
+                :img-url="imgUrl"
+                :s-text="sText"
+                :e-text="eText"
+                :is-border="isBorder"
+                :is-close-btn="isCloseBtn"
+                :is-reload-btn="isReloadBtn"
+                :is-parent-node="isParentNode"
+                :is-show-tip="isShowTip"
+                @reload="emitChange('reload')"
+                @show="emitChange('show')"
+                @hide="emitChange('hide')"
+                @close="emitChange('close')"
+                @success="succesChange"
+                @fail="failChange"
+              ></slider-verify>
               <v-btn
                 class="mt-3"
                 color="blue"

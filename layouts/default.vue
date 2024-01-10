@@ -118,8 +118,8 @@ onMounted(() => {
   <v-app>
     <v-app-bar color="blue-darken-2" density="compact" extension-height="44">
       <template v-slot:prepend>
-        <v-img src="/同日图标.jpg" width="160px" alt="同日图标" />
-        <div class="font-weight-bold text-h5 ml-1">数字化工厂系统</div>
+        <v-img src="云联图标.png" width="60px" alt="同日WMS图标" />
+        <div class="font-weight-bold text-h5 ml-1">云联 WMS 系统</div>
       </template>
 
       <template v-slot:default>
@@ -270,7 +270,7 @@ onMounted(() => {
     </v-app-bar>
 
     <v-main>
-    <slot></slot>
+      <slot></slot>
     </v-main>
   </v-app>
 </template>

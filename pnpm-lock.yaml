@@ -35,6 +35,9 @@ dependencies:
   qrcode.vue:
     specifier: ^3.4.1
     version: 3.4.1(vue@3.3.4)
+  slider-verify-v3:
+    specifier: ^1.1.12
+    version: 1.1.12
   ts-md5:
     specifier: ^1.3.1
     version: 1.3.1
@@ -1680,6 +1683,22 @@ packages:
       unhead: 1.7.4
       vue: 3.3.4
     dev: true
+
+  /@vant/icons@1.8.0:
+    resolution: {integrity: sha512-sKfEUo2/CkQFuERxvkuF6mGQZDKu3IQdj5rV9Fm0weJXtchDSSQ+zt8qPCNUEhh9Y8shy5PzxbvAfOOkCwlCXg==}
+    dev: false
+
+  /@vant/popperjs@1.3.0:
+    resolution: {integrity: sha512-hB+czUG+aHtjhaEmCJDuXOep0YTZjdlRR+4MSmIFnkCQIxJaXLQdSsR90XWvAI2yvKUI7TCGqR8pQg2RtvkMHw==}
+    dev: false
+
+  /@vant/use@1.6.0(vue@3.3.4):
+    resolution: {integrity: sha512-PHHxeAASgiOpSmMjceweIrv2AxDZIkWXyaczksMoWvKV2YAYEhoizRuk/xFnKF+emUIi46TsQ+rvlm/t2BBCfA==}
+    peerDependencies:
+      vue: ^3.0.0
+    dependencies:
+      vue: 3.3.4
+    dev: false
 
   /@vercel/nft@0.23.1:
     resolution: {integrity: sha512-NE0xSmGWVhgHF1OIoir71XAd0W0C1UE3nzFyhpFiMr3rVhetww7NvM1kc41trBsPG37Bh+dE5FYCTMzM/gBu0w==}
@@ -5407,6 +5426,16 @@ packages:
     resolution: {integrity: sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==}
     engines: {node: '>=12'}
 
+  /slider-verify-v3@1.1.12:
+    resolution: {integrity: sha512-ujOvje4gZiNo+38OdygFvssIYWcV3IY9P00GbJB7jBY0d+VBgq0zFlp8KAeXkWfFJM3YcHt8C1HS0e1fY641oA==}
+    dependencies:
+      core-js: 3.33.2
+      vant: 3.6.12(vue@3.3.4)
+      vue: 3.3.4
+      vue-router: 4.2.5(vue@3.3.4)
+      vuex: 4.1.0(vue@3.3.4)
+    dev: false
+
   /smart-buffer@4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
     engines: {node: '>= 6.0.0', npm: '>= 3.0.0'}
@@ -5976,6 +6005,17 @@ packages:
       builtins: 5.0.1
     dev: true
 
+  /vant@3.6.12(vue@3.3.4):
+    resolution: {integrity: sha512-fLzwhpV0ZPQqxrTx6RU8mJVUqP7DSkpdXNeByKubp+O9vKYGcWRX9wFdEwApyy7qLZLLu+rU1Jw52d6lktPL4w==}
+    peerDependencies:
+      vue: ^3.0.0
+    dependencies:
+      '@vant/icons': 1.8.0
+      '@vant/popperjs': 1.3.0
+      '@vant/use': 1.6.0(vue@3.3.4)
+      vue: 3.3.4
+    dev: false
+
   /vite-node@0.33.0:
     resolution: {integrity: sha512-19FpHYbwWWxDr73ruNahC+vtEdza52kA90Qb3La98yZ0xULqV8A5JLNPUff0f5zID4984tW7l3DH2przTJUZSw==}
     engines: {node: '>=v14.18.0'}
@@ -6211,7 +6251,6 @@ packages:
     dependencies:
       '@vue/devtools-api': 6.5.0
       vue: 3.3.4
-    dev: true
 
   /vue-template-compiler@2.7.14:
     resolution: {integrity: sha512-zyA5Y3ArvVG0NacJDkkzJuPQDF8RFeRlzV2vLeSnhSpieO6LK2OVbdLPi5MPPs09Ii+gMO8nY4S3iKQxBxDmWQ==}
@@ -6281,6 +6320,15 @@ packages:
         optional: true
     dependencies:
       typescript: 5.2.2
+      vue: 3.3.4
+    dev: false
+
+  /vuex@4.1.0(vue@3.3.4):
+    resolution: {integrity: sha512-hmV6UerDrPcgbSy9ORAtNXDr9M4wlNP4pEFKye4ujJF8oqgFFuxDCdOLS3eNoRTtq5O3hoBDh9Doj1bQMYHRbQ==}
+    peerDependencies:
+      vue: ^3.2.0
+    dependencies:
+      '@vue/devtools-api': 6.5.0
       vue: 3.3.4
     dev: false
 

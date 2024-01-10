@@ -18,15 +18,10 @@ let pageUrlList = ref<any[]>([]);
 let btnList = ref<any[]>([]);
 //获取文件夹数据
 async function getFolderData() {
-  const data: any = await useHttp(
-    "/Permissions/A16GetPermissionsList",
-    "get",
-    undefined,
-    {
-      pid: 0,
-      platform: searchType.value,
-    }
-  );
+  const data: any = await useHttp("/wms-permissions", "get", undefined, {
+    pid: 0,
+    platform: searchType.value,
+  });
   folderList.value = data.data;
 }
 //暂存文件夹对象
