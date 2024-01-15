@@ -790,7 +790,7 @@ function focusInput(inputRef: any) {
                     margin-top: 20px;
                   "
                   class="d-flex flex-column"
-                  v-for="page in Math.ceil(item.children.length / 15)"
+                  v-for="page in Math.ceil(item.children.length / 10)"
                   :key="`page-${page}`"
                 >
                   <div class="d-flex justify-space-between">
@@ -930,42 +930,42 @@ function focusInput(inputRef: any) {
                   <div style="white-space: nowrap" class="mt-4">
                     <table border="1" style="border-collapse: collapse">
                       <tr>
-                        <th style="text-align: center; height: 32px">No</th>
-                        <th style="text-align: center; height: 32px">
+                        <th style="text-align: center; height: 44px">No</th>
+                        <th style="text-align: center; height: 44px">
                           Production
                         </th>
-                        <th style="text-align: center; height: 32px">
+                        <th style="text-align: center; height: 44px">
                           Model No/Item No
                         </th>
-                        <th style="text-align: center; height: 32px">QTY</th>
-                        <th style="text-align: center; height: 32px">Rmks</th>
+                        <th style="text-align: center; height: 44px">QTY</th>
+                        <th style="text-align: center; height: 44px">Rmks</th>
                       </tr>
                       <tr>
-                        <th style="text-align: center; height: 32px">序号</th>
-                        <th style="text-align: center; height: 32px">产品</th>
-                        <th style="text-align: center; height: 32px">
+                        <th style="text-align: center; height: 44px">序号</th>
+                        <th style="text-align: center; height: 44px">产品</th>
+                        <th style="text-align: center; height: 44px">
                           产品规格及型号
                         </th>
-                        <th style="text-align: center; height: 32px">数量</th>
-                        <th style="text-align: center; height: 32px">备注</th>
+                        <th style="text-align: center; height: 44px">数量</th>
+                        <th style="text-align: center; height: 44px">备注</th>
                       </tr>
 
                       <tr
                         v-for="(item_, index_) in item.children.slice(
-                          (page - 1) * 15,
-                          page * 15
+                          (page - 1) * 10,
+                          page * 10
                         )"
                         :key="index_"
                       >
                         <td
-                          style="text-align: center; height: 32px; width: 80px"
+                          style="text-align: center; height: 44px; width: 80px"
                         >
-                          {{ index_ + (page - 1) * 15 + 1 }}
+                          {{ index_ + (page - 1) * 10 + 1 }}
                         </td>
                         <td
                           style="
                             text-align: center;
-                            height: 32px;
+                            height: 44px;
                             width: 230px;
                             max-width: 230px;
                             word-wrap: break-word;
@@ -977,47 +977,47 @@ function focusInput(inputRef: any) {
                         <td
                           style="
                             text-align: center;
-                            height: 32px;
+                            height: 44px;
                             width: 180px;
                             max-width: 180px;
                             word-wrap: break-word;
                             white-space: normal;
                           "
                         >
-                          {{ item_.model }}
+                          {{ item_.model.length > 15 ? "/" : item_.model }}
                         </td>
                         <td
-                          style="text-align: center; height: 32px; width: 80px"
+                          style="text-align: center; height: 44px; width: 80px"
                         >
                           {{ item_.qty }}{{ item_.unit }}
                         </td>
                         <td
-                          style="text-align: center; height: 32px; width: 230px"
+                          style="text-align: center; height: 44px; width: 230px"
                         >
                           {{ item_.rmks }}
                         </td>
                       </tr>
-                      <!--  -->
+                      <!-- 空白行 -->
                       <tr
-                        v-for="(item__, index__) in 15 -
-                        item.children.slice((page - 1) * 15, page * 15).length"
+                        v-for="(item__, index__) in 10 -
+                        item.children.slice((page - 1) * 10, page * 10).length"
                         :key="index__"
                       >
                         <td
-                          style="text-align: center; height: 32px; width: 80px"
+                          style="text-align: center; height: 44px; width: 80px"
                         ></td>
                         <td
-                          style="text-align: center; height: 32px; width: 230px"
+                          style="text-align: center; height: 44px; width: 230px"
                         ></td>
 
                         <td
-                          style="text-align: center; height: 32px; width: 180px"
+                          style="text-align: center; height: 44px; width: 180px"
                         ></td>
                         <td
-                          style="text-align: center; height: 32px; width: 80px"
+                          style="text-align: center; height: 44px; width: 80px"
                         ></td>
                         <td
-                          style="text-align: center; height: 32px; width: 230px"
+                          style="text-align: center; height: 44px; width: 230px"
                         ></td>
                       </tr>
                     </table>
@@ -1056,7 +1056,7 @@ function focusInput(inputRef: any) {
                   </div>
                   <div class="d-flex justify-end">
                     {{ item.num }}-({{ page }}/{{
-                      Math.ceil(item.children.length / 15)
+                      Math.ceil(item.children.length / 10)
                     }})
                   </div>
                 </div>
