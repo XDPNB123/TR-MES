@@ -10,7 +10,6 @@ export default defineNuxtConfig({
     "/work-basic/work-class": { ssr: false },
     "/test": { ssr: false },
     "/wms/outbound-shipment": { ssr: false },
-    "/auth/register": { ssr: false },
   },
   // 启用了哪些模块
   modules: ["@pinia/nuxt", "nuxt-lodash", "@hypernym/nuxt-gsap"],
@@ -27,8 +26,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       // apiBase: "http://10.0.20.250:5009",
-      // apiBase: "http://10.0.20.61:8068",
-      apiBase: "http://10.0.20.250:1337/api",
+      apiBase: "http://10.0.20.61:8068",
     },
   },
   // 类型检查、严格模式是否启用
